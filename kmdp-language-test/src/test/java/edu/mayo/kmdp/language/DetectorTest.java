@@ -1,0 +1,125 @@
+/**
+ * Copyright © 2018 Mayo Clinic (RSTKNOWLEDGEMGMT@mayo.edu)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package edu.mayo.kmdp.language;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import edu.mayo.kmdp.language.config.LocalTestConfig;
+import edu.mayo.kmdp.terms.krformat._2018._08.KRFormat;
+import edu.mayo.kmdp.terms.krlanguage._2018._08.KRLanguage;
+import edu.mayo.kmdp.util.FileUtil;
+import java.util.Optional;
+import javax.inject.Inject;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.omg.spec.api4kp.KnowledgeCarrierHelper;
+import org.omg.spec.api4kp._1_0.services.KPComponent;
+import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
+import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
+
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = LocalTestConfig.class)
+@ActiveProfiles(profiles = "test")
+@WebAppConfiguration
+public class DetectorTest {
+
+  @Inject
+  @KPComponent
+  DetectApi detector;
+
+  @Test
+  public void testDMNDetector() {
+    assertNotNull(detector);
+
+    Optional<String> dmn = FileUtil.read(DetectorTest.class.getResource("/artifacts/sample.dmn"));
+    assertTrue(dmn.isPresent());
+    KnowledgeCarrier carrier = KnowledgeCarrierHelper.of(dmn.get());
+
+    SyntacticRepresentation rep = detector.getDetectedRepresentation(carrier);
+
+    assertNotNull(rep);
+    assertEquals(KRLanguage.DMN_1_1, rep.getLanguage());
+    assertEquals(KRFormat.XML_1_1, rep.getFormat());
+  }
+
+
+  @Test
+  public void testDMNDetectorAnnotate() {
+    assertNotNull(detector);
+
+    Optional<String> dmn = FileUtil.read(DetectorTest.class.getResource("/artifacts/sample.dmn"));
+    assertTrue(dmn.isPresent());
+    KnowledgeCarrier carrier = KnowledgeCarrierHelper.of(dmn.get());
+
+    SyntacticRepresentation rep = detector.getDetectedRepresentation(carrier);
+
+    assertNotNull(rep);
+    assertEquals(KRLanguage.DMN_1_1, rep.getLanguage());
+    assertEquals(KRFormat.XML_1_1, rep.getFormat());
+  }
+
+
+  @Test
+  public void testCMMNDetector() {
+    assertNotNull(detector);
+
+    Optional<String> cmmn = FileUtil.read(DetectorTest.class.getResource("/artifacts/sample.cmmn"));
+    assertTrue(cmmn.isPresent());
+    KnowledgeCarrier carrier = KnowledgeCarrierHelper.of(cmmn.get());
+
+    SyntacticRepresentation rep = detector.getDetectedRepresentation(carrier);
+
+    assertNotNull(rep);
+    assertEquals(KRLanguage.CMMN_1_1, rep.getLanguage());
+    assertEquals(KRFormat.XML_1_1, rep.getFormat());
+  }
+
+
+  @Test
+  public void testSurrogateDetector() {
+    assertNotNull(detector);
+
+    Optional<String> surr = FileUtil
+        .read(DetectorTest.class.getResource("/artifacts/sample.surr.xml"));
+    assertTrue(surr.isPresent());
+    KnowledgeCarrier carrier = KnowledgeCarrierHelper.of(surr.get());
+
+    SyntacticRepresentation rep = detector.getDetectedRepresentation(carrier);
+
+    assertNotNull(rep);
+    assertEquals(KRLanguage.Asset_Surrogate, rep.getLanguage());
+    assertEquals(KRFormat.XML_1_1, rep.getFormat());
+
+    Optional<String> jsonSurr = FileUtil
+        .read(DetectorTest.class.getResource("/artifacts/sample.surr.json"));
+    assertTrue(jsonSurr.isPresent());
+    KnowledgeCarrier carrier2 = KnowledgeCarrierHelper.of(jsonSurr.get());
+
+    SyntacticRepresentation rep2 = detector.getDetectedRepresentation(carrier2);
+
+    assertNotNull(rep2);
+    assertEquals(KRLanguage.Asset_Surrogate, rep2.getLanguage());
+    assertEquals(KRFormat.JSON, rep2.getFormat());
+  }
+
+
+}

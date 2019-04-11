@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<cmmn:definitions id="_ca088576-3bf8-48f1-96cc-ac71a2e4e213"
+  targetNamespace="http://foo.bar/cmmn"
+  xmlns:cmmndi="http://www.omg.org/spec/CMMN/20151109/CMMNDI"
+  xmlns:cmmn="http://www.omg.org/spec/CMMN/20151109/MODEL"
+>
+  <cmmn:case name="Simple">
+
+    <cmmn:casePlanModel autoComplete="false" name="Test">
+
+      <cmmn:planItem definitionRef="aaa"/>
+      <cmmn:planItem definitionRef="bbb"/>
+
+      <cmmn:task name="A" id="aaa"/>
+      <cmmn:task name="B" id="bbb"/>
+
+    </cmmn:casePlanModel>
+
+    <cmmn:input/>
+
+  </cmmn:case>
+
+  <cmmndi:CMMNDI>
+    <cmmndi:CMMNDiagram/>
+  </cmmndi:CMMNDI>
+
+</cmmn:definitions>

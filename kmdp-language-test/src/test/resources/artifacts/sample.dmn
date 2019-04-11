@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<definitions namespace="http://foo.test"
+  name="SimpleDecision"
+  id="id-ebe56316acc24720bcd51095b0404626"
+  xmlns="http://www.omg.org/spec/DMN/20151101/dmn.xsd"
+  xmlns:feel="http://www.omg.org/spec/FEEL/20140401">
+
+  <itemDefinition isCollection="false" name="b" id="id-a8a218fb396f736d59a1a4158f0cbc68" label="B">
+    <typeRef>feel:string</typeRef>
+  </itemDefinition>
+
+  <itemDefinition isCollection="false" name="a" id="id-b0a1284112fff8d127c9541f2ff08c9e" label="A">
+    <typeRef>feel:string</typeRef>
+  </itemDefinition>
+
+  <inputData name="b" id="id-5723c07cd14fab874fa48b50f380e22c" label="B">
+    <variable typeRef="sig:b" name="b" id="id-5723c07cd14fab874fa48b50f380e22c_variable"/>
+  </inputData>
+
+  <decision name="a" id="id-e39fd03a08dbb2b19fe0d86ea6cd711a" label="A">
+    <variable typeRef="a" name="a" id="id-e39fd03a08dbb2b19fe0d86ea6cd711a_variable"/>
+    <informationRequirement>
+      <requiredInput href="#id-5723c07cd14fab874fa48b50f380e22c"/>
+    </informationRequirement>
+    <literalExpression expressionLanguage="free_text">
+      <text></text>
+    </literalExpression>
+  </decision>
+</definitions>

@@ -1,0 +1,24 @@
+{
+  "_class": "KnowledgeAsset",
+  "resourceId": {
+    "_class": "URIIdentifier",
+    "uri": "2c6572ea-867d-4863-963a-b4bc5357429b",
+    "versionId": "1",
+    "tag": "2c6572ea-867d-4863-963a-b4bc5357429b"
+  },
+  "type": [
+    {
+      "_class": "ConceptIdentifier",
+      "@id": "http://terms.kmdp.mayo.edu/KAO/KnowledgeAssetType#682f2a3c7c7e41fbe98c494b58e75c59",
+      "namespace": {
+        "_class": "NamespaceIdentifier",
+        "@id": "http://terms.kmdp.mayo.edu/KAO/KnowledgeAssetType#KnowledgeAssetType_Scheme",
+        "label": "KnowledgeAssetType_Scheme",
+        "tag": "KnowledgeAssetType_Scheme"
+      },
+      "label": "Cognitive Process Model",
+      "tag": "682f2a3c7c7e41fbe98c494b58e75c59",
+      "ref": "http://ckm.ontology.mayo.edu/ontology/KAO#CognitiveProcessModel"
+    }
+  ]
+}
