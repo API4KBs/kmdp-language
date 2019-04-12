@@ -36,7 +36,7 @@
     <dependency>
       <groupId>edu.mayo.kmdp</groupId>
       <artifactId>kmdp-language-service-api-client</artifactId>
-      <version>1.0</version>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
@@ -48,7 +48,6 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.12</version>
       <scope>test</scope>
     </dependency>
 
@@ -61,6 +60,7 @@
       <artifactId>omg-cmmn</artifactId>
       <groupId>edu.mayo.kmdp</groupId>
     </dependency>
+
     <dependency>
       <groupId>edu.mayo.kmdp</groupId>
       <artifactId>kmdp-asset-metadata</artifactId>
@@ -69,6 +69,11 @@
     <dependency>
       <artifactId>omg-dmn</artifactId>
       <groupId>edu.mayo.kmdp</groupId>
+    </dependency>
+
+    <dependency>
+      <groupId>net.sourceforge.owlapi</groupId>
+      <artifactId>owlapi-apibinding</artifactId>
     </dependency>
 
     <dependency>

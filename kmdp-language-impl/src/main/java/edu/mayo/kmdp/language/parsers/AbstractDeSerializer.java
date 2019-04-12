@@ -24,7 +24,6 @@ import edu.mayo.kmdp.terms.krformat._2018._08.KRFormat;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Optional;
-import org.omg.spec.api4kp._1_0.identifiers.ConceptIdentifier;
 import org.omg.spec.api4kp._1_0.services.ASTCarrier;
 import org.omg.spec.api4kp._1_0.services.BinaryCarrier;
 import org.omg.spec.api4kp._1_0.services.DocumentCarrier;
@@ -228,8 +227,8 @@ public abstract class AbstractDeSerializer implements DeserializeApi, Lifter, Lo
     return getSupportedRepresentations();
   }
 
-  protected ConceptIdentifier getDefaultCharset() {
-    return new ConceptIdentifier().withTag(charset);
+  protected String getDefaultCharset() {
+    return charset;
   }
 
   protected abstract KRFormat getDefaultFormat();

@@ -16,6 +16,7 @@
 package edu.mayo.kmdp.language.parsers;
 
 import static edu.mayo.kmdp.terms.api4kp.knowledgeoperations._2018._06.KnowledgeOperations.Lifting_Task;
+import static edu.mayo.kmdp.terms.api4kp.knowledgeoperations._2018._06.KnowledgeOperations.Lowering_Task;
 import static edu.mayo.kmdp.terms.api4kp.knowledgeoperations._2018._06.KnowledgeOperations.Parsing_Task;
 import static org.omg.spec.api4kp.KnowledgeCarrierHelper.rep;
 
@@ -32,6 +33,7 @@ import org.omg.spec.cmmn._20151109.model.TDefinitions;
 
 @Named
 @KPOperation(Lifting_Task)
+@KPOperation(Lowering_Task)
 public class CMMNParser extends XMLBasedLanguageParser<TDefinitions> implements DeserializeApi {
 
   public CMMNParser() {
@@ -42,7 +44,7 @@ public class CMMNParser extends XMLBasedLanguageParser<TDefinitions> implements 
   public List<SyntacticRepresentation> getSupportedRepresentations() {
     return
         Collections.singletonList(
-            rep(KRLanguage.CMMN_1_1, KRFormat.XML_1_1, getDefaultCharset().getTag()));
+            rep(KRLanguage.CMMN_1_1, KRFormat.XML_1_1, getDefaultCharset()));
   }
 
 }

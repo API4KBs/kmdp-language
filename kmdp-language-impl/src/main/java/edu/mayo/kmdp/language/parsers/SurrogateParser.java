@@ -36,14 +36,15 @@ import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 
 @Named
 @KPOperation(KnowledgeOperations.Lowering_Task)
+@KPOperation(KnowledgeOperations.Lifting_Task)
 public class SurrogateParser extends AbstractDeSerializer implements DeserializeApi {
 
   private XMLSurrogateParser xmlParser = new XMLSurrogateParser();
   private JSONSurrogateParser jsonParser = new JSONSurrogateParser();
 
   private final List<SyntacticRepresentation> supportedRepresentations = Arrays.asList(
-      rep(KRLanguage.Asset_Surrogate, KRFormat.XML_1_1, getDefaultCharset().getTag()),
-      rep(KRLanguage.Asset_Surrogate, KRFormat.JSON, getDefaultCharset().getTag()));
+      rep(KRLanguage.Asset_Surrogate, KRFormat.XML_1_1, getDefaultCharset()),
+      rep(KRLanguage.Asset_Surrogate, KRFormat.JSON, getDefaultCharset()));
 
 
   @Override
@@ -113,7 +114,7 @@ public class SurrogateParser extends AbstractDeSerializer implements Deserialize
 
     @Override
     protected List<SyntacticRepresentation> getSupportedRepresentations() {
-      return Collections.singletonList(rep(KRLanguage.Asset_Surrogate, KRFormat.XML_1_1, getDefaultCharset().getTag()));
+      return Collections.singletonList(rep(KRLanguage.Asset_Surrogate, KRFormat.XML_1_1, getDefaultCharset()));
     }
   }
 
@@ -126,7 +127,7 @@ public class SurrogateParser extends AbstractDeSerializer implements Deserialize
 
     @Override
     protected List<SyntacticRepresentation> getSupportedRepresentations() {
-      return Collections.singletonList(rep(KRLanguage.Asset_Surrogate, KRFormat.JSON, getDefaultCharset().getTag()));
+      return Collections.singletonList(rep(KRLanguage.Asset_Surrogate, KRFormat.JSON, getDefaultCharset()));
     }
   }
 

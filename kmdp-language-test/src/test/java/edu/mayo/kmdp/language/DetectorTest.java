@@ -17,12 +17,16 @@ package edu.mayo.kmdp.language;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import edu.mayo.kmdp.language.config.LocalTestConfig;
 import edu.mayo.kmdp.terms.krformat._2018._08.KRFormat;
 import edu.mayo.kmdp.terms.krlanguage._2018._08.KRLanguage;
+import edu.mayo.kmdp.terms.krprofile._2018._08.KRProfile;
+import edu.mayo.kmdp.terms.krserialization._2018._08.KRSerialization;
 import edu.mayo.kmdp.util.FileUtil;
+import java.io.InputStream;
 import java.util.Optional;
 import javax.inject.Inject;
 import org.junit.Test;
@@ -31,6 +35,8 @@ import org.omg.spec.api4kp.KnowledgeCarrierHelper;
 import org.omg.spec.api4kp._1_0.services.KPComponent;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
+import org.semanticweb.owlapi.formats.FunctionalSyntaxDocumentFormat;
+import org.semanticweb.owlapi.model.OWLDocumentFormat;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -119,6 +125,19 @@ public class DetectorTest {
     assertNotNull(rep2);
     assertEquals(KRLanguage.Asset_Surrogate, rep2.getLanguage());
     assertEquals(KRFormat.JSON, rep2.getFormat());
+  }
+
+  @Test
+  public void testOWLDetector() {
+    InputStream is = DetectorTest.class.getResourceAsStream( "/artifacts/test.ofn" );
+    KnowledgeCarrier carrier = KnowledgeCarrierHelper.of(is);
+
+    SyntacticRepresentation rep = detector.getDetectedRepresentation(carrier);
+    assertEquals(KRLanguage.OWL_2,rep.getLanguage());
+    assertEquals(KRProfile.OWL_2_RL,rep.getProfile());
+    assertEquals(KRFormat.TXT,rep.getFormat());
+    assertEquals(KRSerialization.OWL_Functional_Syntax,rep.getSerialization());
+    assertTrue(rep.getLexicon().isEmpty());
   }
 
 

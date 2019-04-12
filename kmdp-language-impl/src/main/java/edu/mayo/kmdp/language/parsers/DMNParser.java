@@ -42,7 +42,7 @@ public class DMNParser extends XMLBasedLanguageParser<TDefinitions> implements D
   public List<SyntacticRepresentation> getSupportedRepresentations() {
     return
         Collections
-            .singletonList(rep(KRLanguage.DMN_1_1, KRFormat.XML_1_1, getDefaultCharset().getTag()));
+            .singletonList(rep(KRLanguage.DMN_1_1, KRFormat.XML_1_1, getDefaultCharset()));
   }
 
 }
