@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.mayo.kmdp.language.server;
+package edu.mayo.kmdp.language;
 
 import edu.mayo.kmdp.language.DeserializeApi;
+import edu.mayo.kmdp.language.server.DeserializeApiDelegate;
 import edu.mayo.kmdp.terms.api4kp.knowledgeoperations._2018._06.KnowledgeOperations;
 import edu.mayo.kmdp.terms.api4kp.parsinglevel._20190801.ParsingLevel;
 import java.util.Collection;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Named;
+import org.omg.spec.api4kp._1_0.services.KPComponent;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
@@ -65,7 +67,7 @@ public class LanguageDeSerializer implements DeserializeApiDelegate {
   }
 
   @Override
-  public ResponseEntity<KnowledgeCarrier> parse(KnowledgeCarrier sourceArtifact,
+  public ResponseEntity<KnowledgeCarrier> lift(KnowledgeCarrier sourceArtifact,
       ParsingLevel level) {
     if (sourceArtifact.getRepresentation() == null) {
       return err();
@@ -73,13 +75,13 @@ public class LanguageDeSerializer implements DeserializeApiDelegate {
     return parsers.stream()
         .filter((p) -> supportsLifting(p,sourceArtifact.getRepresentation()))
         .findAny()
-        .map((parser)->parser.parse(sourceArtifact,level))
+        .map((parser)->parser.lift(sourceArtifact,level))
         .map(this::ok)
         .orElse(err());
   }
 
   @Override
-  public ResponseEntity<KnowledgeCarrier> serialize(KnowledgeCarrier sourceArtifact,
+  public ResponseEntity<KnowledgeCarrier> lower(KnowledgeCarrier sourceArtifact,
       ParsingLevel level) {
     if (sourceArtifact.getRepresentation() == null) {
       return err();
@@ -87,7 +89,21 @@ public class LanguageDeSerializer implements DeserializeApiDelegate {
     return parsers.stream()
         .filter((p) -> supportsLowering(p,sourceArtifact.getRepresentation()))
         .findAny()
-        .map((parser)->parser.serialize(sourceArtifact,level))
+        .map((parser)->parser.lower(sourceArtifact,level))
+        .map(this::ok)
+        .orElse(err());
+  }
+
+  @Override
+  public ResponseEntity<KnowledgeCarrier> ensureRepresentation(KnowledgeCarrier sourceArtifact,
+      SyntacticRepresentation into) {
+    if (sourceArtifact.getRepresentation() == null) {
+      return err();
+    }
+    return parsers.stream()
+        .filter((p) -> supportsLowering(p,sourceArtifact.getRepresentation()))
+        .findAny()
+        .map((parser)->parser.ensureRepresentation(sourceArtifact,into))
         .map(this::ok)
         .orElse(err());
   }

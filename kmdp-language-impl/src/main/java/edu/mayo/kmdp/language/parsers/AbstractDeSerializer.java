@@ -37,7 +37,7 @@ public abstract class AbstractDeSerializer implements DeserializeApi, Lifter, Lo
 
 
   @Override
-  public KnowledgeCarrier parse(KnowledgeCarrier sourceArtifact,
+  public KnowledgeCarrier lift(KnowledgeCarrier sourceArtifact,
       ParsingLevel into) {
 
     if (getParsableLanguages().stream()
@@ -99,7 +99,7 @@ public abstract class AbstractDeSerializer implements DeserializeApi, Lifter, Lo
 
 
   @Override
-  public KnowledgeCarrier serialize(KnowledgeCarrier sourceArtifact,
+  public KnowledgeCarrier lower(KnowledgeCarrier sourceArtifact,
       ParsingLevel into) {
 
     if (getSerializableLanguages().stream()
@@ -159,6 +159,11 @@ public abstract class AbstractDeSerializer implements DeserializeApi, Lifter, Lo
     return null;
   }
 
+  @Override
+  public KnowledgeCarrier ensureRepresentation(KnowledgeCarrier sourceArtifact,
+      SyntacticRepresentation into) {
+    return null;
+  }
 
   protected SyntacticRepresentation getParseResultRepresentation(
       KnowledgeCarrier sourceArtifact,

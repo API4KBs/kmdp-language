@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.mayo.kmdp.language.server;
+package edu.mayo.kmdp.language;
 
 import edu.mayo.kmdp.language.DetectApi;
+import edu.mayo.kmdp.language.server.DetectApiDelegate;
 import edu.mayo.kmdp.terms.api4kp.knowledgeoperations._2018._06.KnowledgeOperations;
 import java.util.LinkedList;
 import java.util.List;

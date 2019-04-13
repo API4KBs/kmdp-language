@@ -98,8 +98,8 @@ public class OWLParser extends AbstractDeSerializer implements DeserializeApi {
       return Optional
           .of(new ExpressionCarrier().withLevel(ParsingLevel.Concrete_Knowledge_Expression)
               .withSerializedExpression(new String(baos.toByteArray()))
-              .withRepresentation(rep(KRLanguage.OWL_2, KRFormat.XML_1_1)
-                  .withSerialization(KRSerialization.RDF_XML_Syntax)));
+              .withRepresentation(
+                  rep(KRLanguage.OWL_2, KRSerialization.RDF_XML_Syntax, KRFormat.XML_1_1)));
     } catch (OWLOntologyStorageException e) {
       return Optional.empty();
     }
@@ -114,20 +114,17 @@ public class OWLParser extends AbstractDeSerializer implements DeserializeApi {
   @Override
   protected List<SyntacticRepresentation> getSupportedRepresentations() {
     return Arrays.asList(
-        rep(KRLanguage.OWL_2, KRFormat.XML_1_1).withSerialization(KRSerialization.RDF_XML_Syntax));
+        rep(KRLanguage.OWL_2, KRSerialization.RDF_XML_Syntax, KRFormat.XML_1_1));
   }
 
   @Override
   public List<SyntacticRepresentation> getParsableLanguages() {
     return Arrays.asList(
-        rep(KRLanguage.OWL_2, KRFormat.XML_1_1).withSerialization(KRSerialization.RDF_XML_Syntax),
-        rep(KRLanguage.OWL_2, KRFormat.TXT)
-            .withSerialization(KRSerialization.OWL_Functional_Syntax),
-        rep(KRLanguage.OWL_2, KRFormat.TXT)
-            .withSerialization(KRSerialization.OWL_Manchester_Syntax),
-        rep(KRLanguage.OWL_2, KRFormat.XML_1_1)
-            .withSerialization(KRSerialization.OWL_XML_Serialization),
-        rep(KRLanguage.OWL_2, KRFormat.TXT).withSerialization(KRSerialization.Turtle));
+        rep(KRLanguage.OWL_2, KRSerialization.RDF_XML_Syntax, KRFormat.XML_1_1),
+        rep(KRLanguage.OWL_2, KRSerialization.OWL_Functional_Syntax, KRFormat.TXT),
+        rep(KRLanguage.OWL_2, KRSerialization.OWL_Manchester_Syntax, KRFormat.TXT),
+        rep(KRLanguage.OWL_2, KRSerialization.OWL_XML_Serialization, KRFormat.XML_1_1),
+        rep(KRLanguage.OWL_2, KRSerialization.Turtle, KRFormat.TXT));
   }
 
   @Override

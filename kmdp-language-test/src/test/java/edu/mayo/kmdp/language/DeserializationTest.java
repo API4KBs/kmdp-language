@@ -1,15 +1,17 @@
 /**
  * Copyright © 2018 Mayo Clinic (RSTKNOWLEDGEMGMT@mayo.edu)
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- * in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed under the License
- * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing permissions and limitations under
- * the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package edu.mayo.kmdp.language;
 
@@ -32,7 +34,6 @@ import java.util.Optional;
 import javax.inject.Inject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.omg.spec.api4kp.KnowledgeCarrierHelper;
 import org.omg.spec.api4kp._1_0.services.ASTCarrier;
 import org.omg.spec.api4kp._1_0.services.DocumentCarrier;
 import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
@@ -63,29 +64,29 @@ public class DeserializationTest {
         .readBytes(DetectorTest.class.getResource("/artifacts/sample.dmn"));
     assertTrue(dmn.isPresent());
 
-    KnowledgeCarrier bin = KnowledgeCarrierHelper.of(dmn.get())
+    KnowledgeCarrier bin = KnowledgeCarrier.of(dmn.get())
         .withRepresentation(
             rep(KRLanguage.DMN_1_1, KRFormat.XML_1_1, Charset.defaultCharset().name(), "TODO"));
 
     ExpressionCarrier expr = (ExpressionCarrier) parser
-        .parse(bin, ParsingLevel.Concrete_Knowledge_Expression);
+        .lift(bin, ParsingLevel.Concrete_Knowledge_Expression);
     assertTrue(expr.getSerializedExpression().contains("decision name=\"a\""));
 
     DocumentCarrier dox = (DocumentCarrier) parser
-        .parse(bin, ParsingLevel.Parsed_Knowedge_Expression);
+        .lift(bin, ParsingLevel.Parsed_Knowedge_Expression);
     assertTrue(dox.getStructuredExpression() instanceof Document);
 
     DocumentCarrier dox2 = (DocumentCarrier) parser
-        .parse(expr, ParsingLevel.Parsed_Knowedge_Expression);
+        .lift(expr, ParsingLevel.Parsed_Knowedge_Expression);
     assertTrue(dox2.getStructuredExpression() instanceof Document);
     assertTrue(Arrays.equals(XMLUtil.toByteArray((Document) dox.getStructuredExpression()),
         XMLUtil.toByteArray((Document) dox2.getStructuredExpression())));
 
-    ASTCarrier ast = (ASTCarrier) parser.parse(dox, ParsingLevel.Abstract_Knowledge_Expression);
+    ASTCarrier ast = (ASTCarrier) parser.lift(dox, ParsingLevel.Abstract_Knowledge_Expression);
     assertTrue(ast.getParsedExpression() instanceof TDefinitions);
-    ASTCarrier ast2 = (ASTCarrier) parser.parse(expr, ParsingLevel.Abstract_Knowledge_Expression);
+    ASTCarrier ast2 = (ASTCarrier) parser.lift(expr, ParsingLevel.Abstract_Knowledge_Expression);
     assertTrue(ast2.getParsedExpression() instanceof TDefinitions);
-    ASTCarrier ast3 = (ASTCarrier) parser.parse(bin, ParsingLevel.Abstract_Knowledge_Expression);
+    ASTCarrier ast3 = (ASTCarrier) parser.lift(bin, ParsingLevel.Abstract_Knowledge_Expression);
     assertTrue(ast3.getParsedExpression() instanceof TDefinitions);
   }
 
@@ -96,20 +97,20 @@ public class DeserializationTest {
         .readBytes(DetectorTest.class.getResource("/artifacts/sample.dmn"));
     assertTrue(dmn.isPresent());
 
-    KnowledgeCarrier bin = KnowledgeCarrierHelper.of(dmn.get())
+    KnowledgeCarrier bin = KnowledgeCarrier.of(dmn.get())
         .withRepresentation(rep(KRLanguage.DMN_1_1,
             KRFormat.XML_1_1,
             Charset.defaultCharset().name(),
             "TODO"));
 
-    ASTCarrier ast = (ASTCarrier) parser.parse(bin, ParsingLevel.Abstract_Knowledge_Expression);
+    ASTCarrier ast = (ASTCarrier) parser.lift(bin, ParsingLevel.Abstract_Knowledge_Expression);
 
     DocumentCarrier dox = (DocumentCarrier) parser
-        .serialize(ast, ParsingLevel.Parsed_Knowedge_Expression);
+        .lower(ast, ParsingLevel.Parsed_Knowedge_Expression);
     assertTrue(dox.getStructuredExpression() instanceof Document);
 
     ExpressionCarrier expr = (ExpressionCarrier) parser
-        .serialize(ast, ParsingLevel.Concrete_Knowledge_Expression);
+        .lower(ast, ParsingLevel.Concrete_Knowledge_Expression);
     assertNotNull(expr.getSerializedExpression());
     assertTrue(expr.getSerializedExpression().contains("decision"));
 
@@ -122,16 +123,16 @@ public class DeserializationTest {
         .readBytes(DetectorTest.class.getResource("/artifacts/test.ofn"));
     assertTrue(owl.isPresent());
 
-    KnowledgeCarrier bin = KnowledgeCarrierHelper.of(owl.get())
+    KnowledgeCarrier bin = KnowledgeCarrier.of(owl.get())
         .withRepresentation(rep(KRLanguage.OWL_2));
 
-    ASTCarrier ast = (ASTCarrier) parser.parse(bin, ParsingLevel.Abstract_Knowledge_Expression);
+    ASTCarrier ast = (ASTCarrier) parser.lift(bin, ParsingLevel.Abstract_Knowledge_Expression);
     assertTrue(ast.getParsedExpression() instanceof OWLOntology);
     assertEquals(KRLanguage.OWL_2, ast.getRepresentation().getLanguage());
     assertNull(ast.getRepresentation().getSerialization());
 
     SyntacticRepresentation rep = parser
-        .serialize(ast, ParsingLevel.Concrete_Knowledge_Expression).getRepresentation();
+        .lower(ast, ParsingLevel.Concrete_Knowledge_Expression).getRepresentation();
     assertEquals(KRLanguage.OWL_2,rep.getLanguage());
     assertEquals(KRSerialization.RDF_XML_Syntax,rep.getSerialization());
     assertEquals(KRFormat.XML_1_1,rep.getFormat());

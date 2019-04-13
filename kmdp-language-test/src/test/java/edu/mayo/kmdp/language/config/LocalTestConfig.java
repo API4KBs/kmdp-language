@@ -33,7 +33,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 @Configuration
-@ComponentScan(basePackages = {"edu.mayo.kmdp.language.server"})
+@ComponentScan(basePackages = {"edu.mayo.kmdp.language"})
 @PropertySource(value={"classpath:application.test.properties"})
 @Profile("test")
 public class LocalTestConfig {

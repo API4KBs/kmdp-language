@@ -13,24 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.mayo.kmdp.language.server;
+package edu.mayo.kmdp.language;
 
-import java.util.List;
-import javax.inject.Inject;
+import edu.mayo.kmdp.language.server.ValidateApiDelegate;
+import edu.mayo.kmdp.terms.api4kp.parsinglevel._20190801.ParsingLevel;
 import javax.inject.Named;
-import org.omg.spec.api4kp._1_0.identifiers.Pointer;
+import org.omg.spec.api4kp._1_0.services.KPComponent;
+import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
+import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 import org.springframework.http.ResponseEntity;
 
 @Named
-public class LanguageServiceManager implements DiscoveryApiDelegate {
+public class LanguageValidator implements ValidateApiDelegate {
 
-  @Inject
-  LanguageDetector detector;
 
   @Override
-  public ResponseEntity<List<Pointer>> listOperators() {
+  public ResponseEntity<Void> validate(KnowledgeCarrier sourceArtifact, SyntacticRepresentation into) {
     return null;
   }
-
 
 }

@@ -58,7 +58,7 @@ public class DetectorTest {
 
     Optional<String> dmn = FileUtil.read(DetectorTest.class.getResource("/artifacts/sample.dmn"));
     assertTrue(dmn.isPresent());
-    KnowledgeCarrier carrier = KnowledgeCarrierHelper.of(dmn.get());
+    KnowledgeCarrier carrier = KnowledgeCarrier.of(dmn.get());
 
     SyntacticRepresentation rep = detector.getDetectedRepresentation(carrier);
 
@@ -74,7 +74,7 @@ public class DetectorTest {
 
     Optional<String> dmn = FileUtil.read(DetectorTest.class.getResource("/artifacts/sample.dmn"));
     assertTrue(dmn.isPresent());
-    KnowledgeCarrier carrier = KnowledgeCarrierHelper.of(dmn.get());
+    KnowledgeCarrier carrier = KnowledgeCarrier.of(dmn.get());
 
     SyntacticRepresentation rep = detector.getDetectedRepresentation(carrier);
 
@@ -90,7 +90,7 @@ public class DetectorTest {
 
     Optional<String> cmmn = FileUtil.read(DetectorTest.class.getResource("/artifacts/sample.cmmn"));
     assertTrue(cmmn.isPresent());
-    KnowledgeCarrier carrier = KnowledgeCarrierHelper.of(cmmn.get());
+    KnowledgeCarrier carrier = KnowledgeCarrier.of(cmmn.get());
 
     SyntacticRepresentation rep = detector.getDetectedRepresentation(carrier);
 
@@ -107,7 +107,7 @@ public class DetectorTest {
     Optional<String> surr = FileUtil
         .read(DetectorTest.class.getResource("/artifacts/sample.surr.xml"));
     assertTrue(surr.isPresent());
-    KnowledgeCarrier carrier = KnowledgeCarrierHelper.of(surr.get());
+    KnowledgeCarrier carrier = KnowledgeCarrier.of(surr.get());
 
     SyntacticRepresentation rep = detector.getDetectedRepresentation(carrier);
 
@@ -118,7 +118,7 @@ public class DetectorTest {
     Optional<String> jsonSurr = FileUtil
         .read(DetectorTest.class.getResource("/artifacts/sample.surr.json"));
     assertTrue(jsonSurr.isPresent());
-    KnowledgeCarrier carrier2 = KnowledgeCarrierHelper.of(jsonSurr.get());
+    KnowledgeCarrier carrier2 = KnowledgeCarrier.of(jsonSurr.get());
 
     SyntacticRepresentation rep2 = detector.getDetectedRepresentation(carrier2);
 
@@ -130,7 +130,7 @@ public class DetectorTest {
   @Test
   public void testOWLDetector() {
     InputStream is = DetectorTest.class.getResourceAsStream( "/artifacts/test.ofn" );
-    KnowledgeCarrier carrier = KnowledgeCarrierHelper.of(is);
+    KnowledgeCarrier carrier = KnowledgeCarrier.of(is);
 
     SyntacticRepresentation rep = detector.getDetectedRepresentation(carrier);
     assertEquals(KRLanguage.OWL_2,rep.getLanguage());

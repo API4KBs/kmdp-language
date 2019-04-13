@@ -91,6 +91,11 @@
       <artifactId>javax.inject</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>edu.mayo.kmdp</groupId>
+      <artifactId>terms-owl-to-skos</artifactId>
+    </dependency>
+
   </dependencies>
 
 
