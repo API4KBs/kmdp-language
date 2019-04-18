@@ -37,13 +37,13 @@ public abstract class JSONBasedLanguageDetector<T> implements DetectApi {
     try {
       if (sourceArtifact instanceof BinaryCarrier) {
         byte[] data = ((BinaryCarrier) sourceArtifact).getEncodedExpression();
-        isLang = JSonUtil.parseJson(new String(data), root).isPresent();
+        isLang = JSonUtil.tryParseJson(new String(data), root).isPresent();
       } else if (sourceArtifact instanceof ExpressionCarrier) {
         String str = ((ExpressionCarrier) sourceArtifact).getSerializedExpression();
-        isLang = JSonUtil.parseJson(str, root).isPresent();
+        isLang = JSonUtil.tryParseJson(str, root).isPresent();
       } else if (sourceArtifact instanceof DocumentCarrier) {
         JsonNode node = (JsonNode) ((DocumentCarrier) sourceArtifact).getStructuredExpression();
-        isLang = JSonUtil.parseJson(node, root).isPresent();
+        isLang = JSonUtil.tryParseJson(node, root).isPresent();
       } else if (sourceArtifact instanceof ASTCarrier) {
         isLang = root.isInstance(((ASTCarrier) sourceArtifact).getParsedExpression());
       }

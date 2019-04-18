@@ -15,10 +15,11 @@
  */
 package edu.mayo.kmdp.language;
 
+import static edu.mayo.kmdp.comparator.Contrastor.isBroaderOrEqual;
+import static org.omg.spec.api4kp._1_0.contrastors.SyntacticRepresentationContrastor.repContrastor;
 import static org.springframework.http.ResponseEntity.notFound;
 import static org.springframework.http.ResponseEntity.ok;
 
-import com.sun.xml.internal.ws.client.sei.ResponseBuilder;
 import edu.mayo.kmdp.language.server.TransxionApiDelegate;
 import edu.mayo.kmdp.terms.api4kp.knowledgeoperations._2018._06.KnowledgeOperations;
 import java.util.Collections;
@@ -28,10 +29,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.stream.Collectors;
 import javax.inject.Named;
-import org.omg.spec.api4kp._1_0.identifiers.Pointer;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
+import org.omg.spec.api4kp._1_0.services.KnowledgeProcessingOperator;
+import org.omg.spec.api4kp._1_0.services.ParameterDefinitions;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 import org.omg.spec.api4kp._1_0.services.language.TransrepresentationOperator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +45,7 @@ public class TransrepresentationExecutor implements TransxionApiDelegate {
 
 
   private Map<SourceToTarget, edu.mayo.kmdp.language.TransxionApi> translatorBySourceTarget;
+
   private Map<String, edu.mayo.kmdp.language.TransxionApi> translatorById;
 
 
@@ -49,10 +53,11 @@ public class TransrepresentationExecutor implements TransxionApiDelegate {
   @KPOperation(KnowledgeOperations.Transcreation_Task)
       List<TransxionApi> translators) {
     super();
+
     if (translators != null) {
       translatorById = new HashMap<>();
       translators.forEach((t) ->
-          translatorById.put("TODO", t));
+          translatorById.put(t.getTransrepresentation(null).getOperatorId(), t));
     } else {
       this.translatorBySourceTarget = Collections.emptyMap();
       this.translatorById = Collections.emptyMap();
@@ -77,13 +82,12 @@ public class TransrepresentationExecutor implements TransxionApiDelegate {
   }
 
   @Override
-  public ResponseEntity<Properties> getTransrepresentationAcceptedParameters(String txionId) {
-//    return getTxOperator(txionId)
-//        .map((t) -> t.getTransrepresentation(txionId))
-//        .map((x) -> x.getAcceptedParams())
-//        .map(ResponseEntity::ok)
-//        .orElse(ResponseEntity.notFound().build());
-    return null;
+  public ResponseEntity<ParameterDefinitions> getTransrepresentationAcceptedParameters(String txionId) {
+    return getTxOperator(txionId)
+        .map((t) -> t.getTransrepresentation(txionId))
+        .map(KnowledgeProcessingOperator::getAcceptedParams)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
   }
 
   @Override
@@ -96,16 +100,18 @@ public class TransrepresentationExecutor implements TransxionApiDelegate {
   }
 
   @Override
-  public ResponseEntity<List<Pointer>> listOperators(SyntacticRepresentation from,
+  public ResponseEntity<List<TransrepresentationOperator>> listOperators(
+      SyntacticRepresentation from,
       SyntacticRepresentation into, String method) {
-    return null;
+    return ok(translatorById.values().stream()
+        .map((tx) -> tx.getTransrepresentation(null))
+        .filter((op) -> from == null
+            || isBroaderOrEqual(repContrastor.contrast(from, op.getFrom())))
+        .filter((op) -> from == null
+            || isBroaderOrEqual(repContrastor.contrast(into, op.getInto())))
+        .collect(Collectors.toList()));
   }
 
-  @Override
-  public ResponseEntity<KnowledgeCarrier> transrepresent(KnowledgeCarrier sourceArtifact,
-      SyntacticRepresentation from, SyntacticRepresentation into, String method) {
-    return null;
-  }
 
   private Optional<TransxionApi> getTxOperator(String txId) {
     return Optional.ofNullable(translatorById.get(txId));

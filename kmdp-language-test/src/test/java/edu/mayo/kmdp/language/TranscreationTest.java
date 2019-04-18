@@ -15,32 +15,38 @@
  */
 package edu.mayo.kmdp.language;
 
+import static edu.mayo.kmdp.terms.krlanguage._2018._08.KRLanguage.DMN_1_1;
 import static edu.mayo.kmdp.terms.krlanguage._2018._08.KRLanguage.OWL_2;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.omg.spec.api4kp.KnowledgeCarrierHelper.rep;
+import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.config.LocalTestConfig;
+import edu.mayo.kmdp.language.translators.OWLtoSKOSTranscreator;
 import edu.mayo.kmdp.language.translators.OWLtoSKOSTxConfig;
 import edu.mayo.kmdp.language.translators.OWLtoSKOSTxConfig.OWLtoSKOSTxParams;
 import edu.mayo.kmdp.terms.api4kp.parsinglevel._20190801.ParsingLevel;
+import edu.mayo.kmdp.terms.lexicon._2018._08.Lexicon;
 import edu.mayo.kmdp.util.FileUtil;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.eclipse.rdf4j.model.vocabulary.SKOS;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.omg.spec.api4kp._1_0.PlatformComponentHelper;
 import org.omg.spec.api4kp._1_0.services.ASTCarrier;
 import org.omg.spec.api4kp._1_0.services.KPComponent;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
+import org.omg.spec.api4kp._1_0.services.KnowledgeProcessingOperator;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLIndividual;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.search.EntitySearcher;
@@ -70,29 +76,77 @@ public class TranscreationTest {
     assertTrue(owl.isPresent());
 
     OWLtoSKOSTxConfig p = new OWLtoSKOSTxConfig()
-        .with(OWLtoSKOSTxParams.TGT_NAMESPACE,"http://bar/skos-example");
+        .with(OWLtoSKOSTxParams.TGT_NAMESPACE, "http://bar/skos-example");
 
     ASTCarrier ac = KnowledgeCarrier.of(owl.get(), rep(OWL_2))
-        .flatMap((kc) -> transtor.applyTransrepresentation("TODO", kc, p))
+        .flatMap((kc) -> transtor.applyTransrepresentation(OWLtoSKOSTranscreator.operatorId, kc, p))
         .flatMap((kc) -> parser.lift(kc, ParsingLevel.Abstract_Knowledge_Expression))
         .flatMap(ASTCarrier.class::cast);
 
+    checkSKOS(ac);
+  }
+
+  private void checkSKOS(ASTCarrier ac) {
     assertNotNull(ac);
     OWLOntology onto = (OWLOntology) ac.getParsedExpression();
 
     assertNotNull(onto);
 
     OWLDataFactory f = onto.getOWLOntologyManager().getOWLDataFactory();
-    List<String> names = EntitySearcher.getIndividuals(f.getOWLClass(SKOS.CONCEPT.toString()),onto)
+    List<String> names = EntitySearcher.getIndividuals(f.getOWLClass(SKOS.CONCEPT.toString()), onto)
         .filter(OWLNamedIndividual.class::isInstance)
         .map(OWLNamedIndividual.class::cast)
         .map(OWLNamedIndividual::getIRI)
         .map(IRI::getFragment)
         .collect(Collectors.toList());
-    assertEquals(new HashSet<>(Arrays.asList("A","B","C","skos-example_Scheme_Top")),
+    assertEquals(new HashSet<>(Arrays.asList("A", "B", "C", "skos-example_Scheme_Top")),
         new HashSet<>(names));
   }
 
+
+  @Test
+  public void testTransrepresentationFilter() {
+
+    Set<String> ops = transtor.listOperators(null, null, null).stream()
+        .map(KnowledgeProcessingOperator::getOperatorId).collect(
+            Collectors.toSet());
+    assertTrue(ops.contains(OWLtoSKOSTranscreator.operatorId));
+
+    Set<String> ops2 = transtor.listOperators(rep(OWL_2), rep(OWL_2).withLexicon(Lexicon.SKOS), null).stream()
+        .map(KnowledgeProcessingOperator::getOperatorId).collect(
+            Collectors.toSet());
+    assertTrue(ops2.contains(OWLtoSKOSTranscreator.operatorId));
+
+    Set<String> ops3 = transtor.listOperators(rep(OWL_2), rep(DMN_1_1), null).stream()
+        .map(KnowledgeProcessingOperator::getOperatorId).collect(
+            Collectors.toSet());
+    assertFalse(ops3.contains(OWLtoSKOSTranscreator.operatorId));
+
+
+  }
+
+  @Test
+  public void testTransrepresentationDiscovery() {
+    Optional<byte[]> owl = FileUtil
+        .readBytes(DetectorTest.class.getResource("/artifacts/exampleHierarchy.rdf"));
+    assertTrue(owl.isPresent());
+
+    KnowledgeCarrier kc = KnowledgeCarrier.of(owl.get(), rep(OWL_2));
+
+    ASTCarrier ac = transtor
+        .listOperators(kc.getRepresentation(), rep(OWL_2).withLexicon(Lexicon.SKOS), null).stream()
+        .findAny()
+        .map((op) -> transtor.applyTransrepresentation(
+            op.getOperatorId(),
+            kc,
+            new OWLtoSKOSTxConfig(PlatformComponentHelper.defaults(op.getAcceptedParams()))
+                .with(OWLtoSKOSTxParams.TGT_NAMESPACE, "http://bar/skos-example")))
+        .map((out) -> parser.lift(out, ParsingLevel.Abstract_Knowledge_Expression))
+        .map(ASTCarrier.class::cast)
+        .get();
+
+    checkSKOS(ac);
+  }
 
 
 }

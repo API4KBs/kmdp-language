@@ -15,7 +15,7 @@
  */
 package edu.mayo.kmdp.language.parsers;
 
-import static org.omg.spec.api4kp.KnowledgeCarrierHelper.rep;
+import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.DeserializeApi;
 import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;

@@ -23,32 +23,37 @@ import java.util.Properties;
 
 public class OWLDetectorConfig extends ConfigProperties<OWLDetectorConfig, DetectorParams> {
 
-	private static final Properties defaults = defaulted( DetectorParams.class );
+  private static final Properties defaults = defaulted(DetectorParams.class);
 
-	public OWLDetectorConfig() {
-		super( defaults );
-	}
+  public OWLDetectorConfig() {
+    super(defaults);
+  }
 
-	@Override
-	protected DetectorParams[] properties() {
-		return DetectorParams.values();
-	}
+  @Override
+  public DetectorParams[] properties() {
+    return DetectorParams.values();
+  }
 
 
-	public enum DetectorParams implements Option<DetectorParams> {
+  public enum DetectorParams implements Option<DetectorParams> {
 
-		CATALOG( Opt.of( "catalog", "", String.class ) );
+    CATALOG(Opt.of(
+        "catalog",
+        null,
+        "URL of an XML Catalog to resolve ontology IRIs",
+        String.class,
+        false));
 
-		private Opt opt;
+    private Opt opt;
 
-		DetectorParams( Opt opt ) {
-			this.opt = opt;
-		}
+    DetectorParams(Opt opt) {
+      this.opt = opt;
+    }
 
-		@Override
-		public Opt getOption() {
-			return opt;
-		}
+    @Override
+    public Opt getOption() {
+      return opt;
+    }
 
-	}
+  }
 }

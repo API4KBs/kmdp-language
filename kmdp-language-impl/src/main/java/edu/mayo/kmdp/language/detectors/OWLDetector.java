@@ -16,7 +16,7 @@
 package edu.mayo.kmdp.language.detectors;
 
 import static edu.mayo.kmdp.util.XMLUtil.catalogResolver;
-import static org.omg.spec.api4kp.KnowledgeCarrierHelper.rep;
+import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.DetectApi;
 import edu.mayo.kmdp.language.detectors.OWLDetectorConfig.DetectorParams;

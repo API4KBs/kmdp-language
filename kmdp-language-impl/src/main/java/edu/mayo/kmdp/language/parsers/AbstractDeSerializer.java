@@ -15,9 +15,10 @@
  */
 package edu.mayo.kmdp.language.parsers;
 
-import static org.omg.spec.api4kp.KnowledgeCarrierHelper.compare;
-import static org.omg.spec.api4kp.KnowledgeCarrierHelper.detectLevel;
+import static org.omg.spec.api4kp._1_0.contrastors.ParsingLevelContrastor.detectLevel;
+import static org.omg.spec.api4kp._1_0.contrastors.ParsingLevelContrastor.parsingLevelContrastor;
 
+import edu.mayo.kmdp.comparator.Contrastor.Comparison;
 import edu.mayo.kmdp.language.DeserializeApi;
 import edu.mayo.kmdp.terms.api4kp.parsinglevel._20190801.ParsingLevel;
 import edu.mayo.kmdp.terms.krformat._2018._08.KRFormat;
@@ -47,7 +48,7 @@ public abstract class AbstractDeSerializer implements DeserializeApi, Lifter, Lo
     }
 
     ParsingLevel sourceLevel = detectLevel(sourceArtifact);
-    if (compare(sourceLevel, into) > 0) {
+    if (parsingLevelContrastor.contrast(sourceLevel, into) == Comparison.BROADER) {
       // parsing must lift to a higher level <=> sourceLevel must be lower
       return null;
     }
@@ -109,7 +110,7 @@ public abstract class AbstractDeSerializer implements DeserializeApi, Lifter, Lo
     }
 
     ParsingLevel sourceLevel = detectLevel(sourceArtifact);
-    if (compare(sourceLevel, into) < 0) {
+    if (parsingLevelContrastor.contrast(sourceLevel, into) == Comparison.NARROWER) {
       // serialization must lower to a lower level <=> sourceLevel must be higher
       return null;
     }

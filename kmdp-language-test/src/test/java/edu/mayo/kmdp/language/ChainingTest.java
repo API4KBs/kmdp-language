@@ -19,7 +19,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.omg.spec.api4kp.KnowledgeCarrierHelper.rep;
+import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.config.LocalTestConfig;
 import edu.mayo.kmdp.terms.api4kp.parsinglevel._20190801.ParsingLevel;
@@ -173,8 +173,6 @@ public class ChainingTest {
         .map((c2) -> deserializeApi.lower(c2, ParsingLevel.Concrete_Knowledge_Expression));
     assertTrue(c3.isPresent());
     assertTrue(c3.get() instanceof ExpressionCarrier);
-
-    System.out.println(((ExpressionCarrier) c3.get()).getSerializedExpression());
   }
 
 

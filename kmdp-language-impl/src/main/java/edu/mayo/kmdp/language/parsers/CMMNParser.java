@@ -17,8 +17,7 @@ package edu.mayo.kmdp.language.parsers;
 
 import static edu.mayo.kmdp.terms.api4kp.knowledgeoperations._2018._06.KnowledgeOperations.Lifting_Task;
 import static edu.mayo.kmdp.terms.api4kp.knowledgeoperations._2018._06.KnowledgeOperations.Lowering_Task;
-import static edu.mayo.kmdp.terms.api4kp.knowledgeoperations._2018._06.KnowledgeOperations.Parsing_Task;
-import static org.omg.spec.api4kp.KnowledgeCarrierHelper.rep;
+import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.DeserializeApi;
 import edu.mayo.kmdp.terms.krformat._2018._08.KRFormat;
