@@ -15,10 +15,10 @@
  */
 package edu.mayo.kmdp.language;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import edu.mayo.kmdp.language.config.LocalTestConfig;
 import edu.mayo.kmdp.terms.krformat._2018._08.KRFormat;
@@ -29,20 +29,16 @@ import edu.mayo.kmdp.util.FileUtil;
 import java.io.InputStream;
 import java.util.Optional;
 import javax.inject.Inject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.omg.spec.api4kp._1_0.services.KPComponent;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = LocalTestConfig.class)
-@ActiveProfiles(profiles = "test")
-@WebAppConfiguration
 public class DetectorTest {
 
   @Inject

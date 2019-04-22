@@ -15,10 +15,10 @@
  */
 package edu.mayo.kmdp.language;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.config.LocalTestConfig;
@@ -32,8 +32,8 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Optional;
 import javax.inject.Inject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.omg.spec.api4kp._1_0.services.ASTCarrier;
 import org.omg.spec.api4kp._1_0.services.DocumentCarrier;
 import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
@@ -44,11 +44,11 @@ import org.omg.spec.dmn._20151101.dmn.TDefinitions;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.w3c.dom.Document;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = LocalTestConfig.class)
 @ActiveProfiles(profiles = "test")
 @WebAppConfiguration

@@ -17,10 +17,10 @@ package edu.mayo.kmdp.language;
 
 import static edu.mayo.kmdp.terms.krlanguage._2018._08.KRLanguage.DMN_1_1;
 import static edu.mayo.kmdp.terms.krlanguage._2018._08.KRLanguage.OWL_2;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.config.LocalTestConfig;
@@ -38,8 +38,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.eclipse.rdf4j.model.vocabulary.SKOS;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.omg.spec.api4kp._1_0.PlatformComponentHelper;
 import org.omg.spec.api4kp._1_0.services.ASTCarrier;
 import org.omg.spec.api4kp._1_0.services.KPComponent;
@@ -52,10 +52,10 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.search.EntitySearcher;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = LocalTestConfig.class)
 @ActiveProfiles(profiles = "test")
 @WebAppConfiguration

@@ -15,9 +15,9 @@
  */
 package edu.mayo.kmdp.language;
 
-import static junit.framework.TestCase.fail;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.config.LocalTestConfig;
@@ -27,9 +27,9 @@ import edu.mayo.kmdp.terms.krserialization._2018._08.KRSerialization;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import javax.inject.Inject;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
 import org.omg.spec.api4kp._1_0.services.KPComponent;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
@@ -39,10 +39,10 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = LocalTestConfig.class)
 @ActiveProfiles(profiles = "test")
 @WebAppConfiguration
@@ -53,7 +53,7 @@ public class FormatTest {
   DeserializeApi parser;
 
   @Test
-  @Ignore
+  @Disabled
   public void testOWL2() {
     InputStream is = FormatTest.class.getResourceAsStream("/artifacts/test.ofn");
 

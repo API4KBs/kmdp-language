@@ -27,15 +27,12 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 @Configuration
 @ComponentScan(basePackages = {"edu.mayo.kmdp.language"})
 @PropertySource(value={"classpath:application.test.properties"})
-@Profile("test")
 public class LocalTestConfig {
 
   @Inject

@@ -15,10 +15,10 @@
  */
 package edu.mayo.kmdp.language;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.config.LocalTestConfig;
@@ -29,8 +29,8 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import javax.inject.Inject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.omg.spec.api4kp._1_0.services.ASTCarrier;
 import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
 import org.omg.spec.api4kp._1_0.services.KPComponent;
@@ -38,13 +38,11 @@ import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = LocalTestConfig.class)
 @ActiveProfiles("test")
-@WebAppConfiguration
 public class ChainingTest {
 
   @Inject
