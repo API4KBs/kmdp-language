@@ -19,7 +19,8 @@ import static edu.mayo.kmdp.terms.api4kp.knowledgeoperations._2018._06.Knowledge
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.TransxionApi;
-import edu.mayo.kmdp.language.translators.OWLtoSKOSTxConfig.OWLtoSKOSTxParams;
+import edu.mayo.kmdp.terms.skosifier.Owl2SkosConfig;
+import edu.mayo.kmdp.terms.skosifier.Owl2SkosConfig.OWLtoSKOSTxParams;
 import edu.mayo.kmdp.terms.krformat._2018._08.KRFormat;
 import edu.mayo.kmdp.terms.krlanguage._2018._08.KRLanguage;
 import edu.mayo.kmdp.terms.krserialization._2018._08.KRSerialization;
@@ -56,7 +57,7 @@ public class OWLtoSKOSTranscreator implements TransxionApi {
   public KnowledgeCarrier applyTransrepresentation(String txionId, KnowledgeCarrier sourceArtifact,
       Properties params) {
 
-    OWLtoSKOSTxConfig config = new OWLtoSKOSTxConfig(params);
+    Owl2SkosConfig config = new Owl2SkosConfig(params);
 
     InputStream is;
     switch (sourceArtifact.getLevel()) {
@@ -77,8 +78,8 @@ public class OWLtoSKOSTranscreator implements TransxionApi {
     model = model.read(is, null);
 
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    new Owl2SkosConverter(config.getTyped(OWLtoSKOSTxParams.TGT_NAMESPACE), Modes.SKOS)
-        .run(model, false, false)
+    new Owl2SkosConverter()
+        .apply(model, config)
         .ifPresent((m) -> m.write(baos));
 
     String skos = new String(baos.toByteArray());
@@ -99,7 +100,7 @@ public class OWLtoSKOSTranscreator implements TransxionApi {
 
   @Override
   public ParameterDefinitions getTransrepresentationAcceptedParameters(String txionId) {
-    return PlatformComponentHelper.asParamDefinitions(new OWLtoSKOSTxConfig());
+    return PlatformComponentHelper.asParamDefinitions(new Owl2SkosConfig());
   }
 
   @Override

@@ -25,16 +25,18 @@ import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.config.LocalTestConfig;
 import edu.mayo.kmdp.language.translators.OWLtoSKOSTranscreator;
-import edu.mayo.kmdp.language.translators.OWLtoSKOSTxConfig;
-import edu.mayo.kmdp.language.translators.OWLtoSKOSTxConfig.OWLtoSKOSTxParams;
 import edu.mayo.kmdp.terms.api4kp.parsinglevel._20190801.ParsingLevel;
 import edu.mayo.kmdp.terms.lexicon._2018._08.Lexicon;
+import edu.mayo.kmdp.terms.skosifier.Owl2SkosConfig;
+import edu.mayo.kmdp.terms.skosifier.Owl2SkosConfig.OWLtoSKOSTxParams;
 import edu.mayo.kmdp.util.FileUtil;
+import edu.mayo.kmdp.util.NameUtils;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.eclipse.rdf4j.model.vocabulary.SKOS;
@@ -75,7 +77,7 @@ public class TranscreationTest {
         .readBytes(DetectorTest.class.getResource("/artifacts/exampleHierarchy.rdf"));
     assertTrue(owl.isPresent());
 
-    OWLtoSKOSTxConfig p = new OWLtoSKOSTxConfig()
+    Owl2SkosConfig p = new Owl2SkosConfig()
         .with(OWLtoSKOSTxParams.TGT_NAMESPACE, "http://bar/skos-example");
 
     ASTCarrier ac = KnowledgeCarrier.of(owl.get(), rep(OWL_2))
@@ -97,9 +99,14 @@ public class TranscreationTest {
         .filter(OWLNamedIndividual.class::isInstance)
         .map(OWLNamedIndividual.class::cast)
         .map(OWLNamedIndividual::getIRI)
-        .map(IRI::getFragment)
+        .map(IRI::toString)
+        .map(NameUtils::getTrailingPart)
         .collect(Collectors.toList());
-    assertEquals(new HashSet<>(Arrays.asList("A", "B", "C", "skos-example_Scheme_Top")),
+    assertEquals(new HashSet<>(Arrays.asList(
+        UUID.nameUUIDFromBytes("A".getBytes()).toString(),
+        UUID.nameUUIDFromBytes("B".getBytes()).toString(),
+        UUID.nameUUIDFromBytes("C".getBytes()).toString(),
+        "skos-example_Scheme_Top")),
         new HashSet<>(names));
   }
 
@@ -139,7 +146,7 @@ public class TranscreationTest {
         .map((op) -> transtor.applyTransrepresentation(
             op.getOperatorId(),
             kc,
-            new OWLtoSKOSTxConfig(PlatformComponentHelper.defaults(op.getAcceptedParams()))
+            new Owl2SkosConfig(PlatformComponentHelper.defaults(op.getAcceptedParams()))
                 .with(OWLtoSKOSTxParams.TGT_NAMESPACE, "http://bar/skos-example")))
         .map((out) -> parser.lift(out, ParsingLevel.Abstract_Knowledge_Expression))
         .map(ASTCarrier.class::cast)
