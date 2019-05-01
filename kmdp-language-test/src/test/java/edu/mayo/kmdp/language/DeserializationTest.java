@@ -22,18 +22,26 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.config.LocalTestConfig;
+import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
+import edu.mayo.kmdp.registry.Registry;
 import edu.mayo.kmdp.terms.api4kp.parsinglevel._20190801.ParsingLevel;
+import edu.mayo.kmdp.terms.kao.knowledgeassettype._1_0.KnowledgeAssetType;
 import edu.mayo.kmdp.terms.krformat._2018._08.KRFormat;
 import edu.mayo.kmdp.terms.krlanguage._2018._08.KRLanguage;
 import edu.mayo.kmdp.terms.krserialization._2018._08.KRSerialization;
 import edu.mayo.kmdp.util.FileUtil;
+import edu.mayo.kmdp.util.JSonUtil;
+import edu.mayo.kmdp.util.JaxbUtil;
 import edu.mayo.kmdp.util.XMLUtil;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 import javax.inject.Inject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.omg.spec.api4kp._1_0.identifiers.URIIdentifier;
 import org.omg.spec.api4kp._1_0.services.ASTCarrier;
 import org.omg.spec.api4kp._1_0.services.DocumentCarrier;
 import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
@@ -136,6 +144,68 @@ public class DeserializationTest {
     assertEquals(KRLanguage.OWL_2,rep.getLanguage());
     assertEquals(KRSerialization.RDF_XML_Syntax,rep.getSerialization());
     assertEquals(KRFormat.XML_1_1,rep.getFormat());
+
+  }
+
+
+  @Test
+  public void testSerializeSurrogate() {
+
+    KnowledgeAsset asset = new edu.mayo.kmdp.metadata.surrogate.resources.KnowledgeAsset()
+        .withResourceId(new URIIdentifier().withUri(
+            URI.create(Registry.MAYO_ASSETS_BASE_URI + "2c6572ea-867d-4863-963a-b4bc5357429b")))
+        .withType(KnowledgeAssetType.Cognitive_Process_Model);
+    String serializedAsset = JaxbUtil.marshallToString(Collections.singleton(asset.getClass()),asset, JaxbUtil.defaultProperties());
+
+    KnowledgeCarrier ast = KnowledgeCarrier.ofAst(asset)
+        .withRepresentation(rep(KRLanguage.Asset_Surrogate))
+        .withLevel(ParsingLevel.Abstract_Knowledge_Expression);
+
+//    ExpressionCarrier ser = (ExpressionCarrier) parser.ensureRepresentation(ast,
+//        ((SyntacticRepresentation) ast.getRepresentation().clone())
+//            .withFormat(KRFormat.XML_1_1));
+    ExpressionCarrier ser = (ExpressionCarrier) parser.lower(ast,ParsingLevel.Concrete_Knowledge_Expression);
+
+    assertEquals(serializedAsset, ser.getSerializedExpression());
+
+    System.out.println(ser.getSerializedExpression());
+
+  }
+
+
+  @Test
+  public void testSerializeSurrogateJson() {
+
+    KnowledgeAsset asset = new edu.mayo.kmdp.metadata.surrogate.resources.KnowledgeAsset()
+        .withResourceId(new URIIdentifier().withUri(
+            URI.create(Registry.MAYO_ASSETS_BASE_URI + "2c6572ea-867d-4863-963a-b4bc5357429b")))
+        .withType(KnowledgeAssetType.Cognitive_Process_Model);
+
+    String serializedAsset = JSonUtil.printJson(asset).orElse("");
+
+    KnowledgeCarrier ast = KnowledgeCarrier.ofAst(asset)
+        .withRepresentation(rep(KRLanguage.Asset_Surrogate))
+        .withLevel(ParsingLevel.Abstract_Knowledge_Expression);
+
+
+    ExpressionCarrier ser = (ExpressionCarrier) parser.serialize(
+        ast,
+        rep(ast.getRepresentation())
+            .withFormat(KRFormat.JSON)
+            .withCharset(Charset.defaultCharset().name()));
+
+    assertEquals(serializedAsset, ser.getSerializedExpression());
+
+
+    ExpressionCarrier ser2 = (ExpressionCarrier) parser.ensureRepresentation(
+        ast,
+        rep(ast.getRepresentation())
+            .withFormat(KRFormat.JSON)
+            .withCharset(Charset.defaultCharset().name()));
+
+    assertEquals(serializedAsset, ser2.getSerializedExpression());
+
+    System.out.println(ser2.getSerializedExpression());
 
   }
 

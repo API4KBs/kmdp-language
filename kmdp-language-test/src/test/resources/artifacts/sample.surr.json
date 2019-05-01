@@ -1,24 +1,20 @@
 {
-  "_class": "KnowledgeAsset",
-  "resourceId": {
-    "_class": "URIIdentifier",
-    "uri": "2c6572ea-867d-4863-963a-b4bc5357429b",
-    "versionId": "1",
-    "tag": "2c6572ea-867d-4863-963a-b4bc5357429b"
+  "_class" : "KnowledgeAsset",
+  "resourceId" : {
+    "_class" : "URIIdentifier",
+    "uri" : "https://clinicalknowledgemanagement.mayo.edu/assets/2c6572ea-867d-4863-963a-b4bc5357429b"
   },
-  "type": [
-    {
-      "_class": "ConceptIdentifier",
-      "@id": "http://terms.kmdp.mayo.edu/KAO/KnowledgeAssetType#682f2a3c7c7e41fbe98c494b58e75c59",
-      "namespace": {
-        "_class": "NamespaceIdentifier",
-        "@id": "http://terms.kmdp.mayo.edu/KAO/KnowledgeAssetType#KnowledgeAssetType_Scheme",
-        "label": "KnowledgeAssetType_Scheme",
-        "tag": "KnowledgeAssetType_Scheme"
-      },
-      "label": "Cognitive Process Model",
-      "tag": "682f2a3c7c7e41fbe98c494b58e75c59",
-      "ref": "http://ckm.ontology.mayo.edu/ontology/KAO#CognitiveProcessModel"
-    }
-  ]
+  "type" : [ {
+    "_class" : "ConceptIdentifier",
+    "@id" : "http://terms.kmdp.mayo.edu/KAO/KnowledgeAssetType#e12dcd92-f8de-3115-b8ca-4480cfc44d77",
+    "namespace" : {
+      "_class" : "NamespaceIdentifier",
+      "@id" : "http://terms.kmdp.mayo.edu/KAO/KnowledgeAssetType#1a9d306c-b968-3b8a-a1e5-e0517d571143",
+      "label" : "KnowledgeAssetType_Scheme",
+      "tag" : "1a9d306c-b968-3b8a-a1e5-e0517d571143"
+    },
+    "label" : "Cognitive Process Model",
+    "tag" : "CognitiveProcessModel",
+    "ref" : "http://ckm.ontology.mayo.edu/ontology/KAO#CognitiveProcessModel"
+  } ]
 }

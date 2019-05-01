@@ -26,6 +26,7 @@ import edu.mayo.kmdp.terms.krlanguage._2018._08.KRLanguage;
 import edu.mayo.kmdp.terms.krserialization._2018._08.KRSerialization;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import javax.inject.Inject;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -53,14 +54,14 @@ public class FormatTest {
   DeserializeApi parser;
 
   @Test
-  @Disabled
   public void testOWL2() {
     InputStream is = FormatTest.class.getResourceAsStream("/artifacts/test.ofn");
 
     KnowledgeCarrier kc = KnowledgeCarrier.of(is, rep(KRLanguage.OWL_2))
         .flatMap((c) -> parser
             .ensureRepresentation(c,
-                rep(KRLanguage.OWL_2, KRSerialization.RDF_XML_Syntax, KRFormat.XML_1_1)));
+                rep(KRLanguage.OWL_2, KRSerialization.RDF_XML_Syntax,
+                    KRFormat.XML_1_1, Charset.defaultCharset().name())));
 
     assertTrue(kc instanceof ExpressionCarrier);
     try {

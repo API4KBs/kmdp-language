@@ -17,6 +17,7 @@ package edu.mayo.kmdp.language;
 
 import static edu.mayo.kmdp.terms.krlanguage._2018._08.KRLanguage.DMN_1_1;
 import static edu.mayo.kmdp.terms.krlanguage._2018._08.KRLanguage.OWL_2;
+import static edu.mayo.kmdp.util.Util.uuid;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -31,6 +32,7 @@ import edu.mayo.kmdp.terms.skosifier.Owl2SkosConfig;
 import edu.mayo.kmdp.terms.skosifier.Owl2SkosConfig.OWLtoSKOSTxParams;
 import edu.mayo.kmdp.util.FileUtil;
 import edu.mayo.kmdp.util.NameUtils;
+import edu.mayo.kmdp.util.Util;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -95,18 +97,21 @@ public class TranscreationTest {
     assertNotNull(onto);
 
     OWLDataFactory f = onto.getOWLOntologyManager().getOWLDataFactory();
-    List<String> names = EntitySearcher.getIndividuals(f.getOWLClass(SKOS.CONCEPT.toString()), onto)
+    List<UUID> names = EntitySearcher.getIndividuals(f.getOWLClass(SKOS.CONCEPT.toString()), onto)
         .filter(OWLNamedIndividual.class::isInstance)
         .map(OWLNamedIndividual.class::cast)
         .map(OWLNamedIndividual::getIRI)
         .map(IRI::toString)
         .map(NameUtils::getTrailingPart)
+        .map(Util::ensureUUID)
+        .filter(Optional::isPresent)
+        .map(Optional::get)
         .collect(Collectors.toList());
     assertEquals(new HashSet<>(Arrays.asList(
-        UUID.nameUUIDFromBytes("A".getBytes()).toString(),
-        UUID.nameUUIDFromBytes("B".getBytes()).toString(),
-        UUID.nameUUIDFromBytes("C".getBytes()).toString(),
-        "skos-example_Scheme_Top")),
+        uuid("A"),
+        uuid("B"),
+        uuid("C"),
+        uuid("skos-example_Scheme_Top"))),
         new HashSet<>(names));
   }
 
