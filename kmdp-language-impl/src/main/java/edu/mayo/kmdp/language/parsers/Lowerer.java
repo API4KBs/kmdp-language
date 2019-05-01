@@ -20,14 +20,32 @@ import org.omg.spec.api4kp._1_0.services.ASTCarrier;
 import org.omg.spec.api4kp._1_0.services.BinaryCarrier;
 import org.omg.spec.api4kp._1_0.services.DocumentCarrier;
 import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
+import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 
 public interface Lowerer {
 
-  Optional<BinaryCarrier> encode(ExpressionCarrier carrier);
 
-  Optional<ExpressionCarrier> externalize(ASTCarrier carrier);
+  default Optional<BinaryCarrier> encode(ExpressionCarrier carrier) {
+    return encode(carrier,null);
+  }
 
-  Optional<ExpressionCarrier> serialize(DocumentCarrier carrier);
+  default Optional<ExpressionCarrier> externalize(ASTCarrier carrier) {
+    return externalize(carrier,null);
+  }
 
-  Optional<DocumentCarrier> concretize(ASTCarrier carrier);
+  default Optional<ExpressionCarrier> serialize(DocumentCarrier carrier) {
+    return serialize(carrier,null);
+  }
+
+  default Optional<DocumentCarrier> concretize(ASTCarrier carrier) {
+    return concretize(carrier,null);
+  }
+
+  Optional<BinaryCarrier> encode(ExpressionCarrier carrier, SyntacticRepresentation into);
+
+  Optional<ExpressionCarrier> externalize(ASTCarrier carrier, SyntacticRepresentation into);
+
+  Optional<ExpressionCarrier> serialize(DocumentCarrier carrier, SyntacticRepresentation into);
+
+  Optional<DocumentCarrier> concretize(ASTCarrier carrier, SyntacticRepresentation into);
 }

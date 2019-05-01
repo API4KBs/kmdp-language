@@ -26,6 +26,7 @@ import org.omg.spec.api4kp._1_0.services.ASTCarrier;
 import org.omg.spec.api4kp._1_0.services.BinaryCarrier;
 import org.omg.spec.api4kp._1_0.services.DocumentCarrier;
 import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
+import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 
 public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializer implements
     DeserializeApi {
@@ -73,7 +74,7 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializer im
 
 
   @Override
-  public Optional<BinaryCarrier> encode(ExpressionCarrier carrier) {
+  public Optional<BinaryCarrier> encode(ExpressionCarrier carrier, SyntacticRepresentation into) {
     return Optional.of(new BinaryCarrier()
         .withEncodedExpression(carrier.getSerializedExpression().getBytes())
         .withRepresentation(
@@ -81,7 +82,7 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializer im
   }
 
   @Override
-  public Optional<ExpressionCarrier> externalize(ASTCarrier carrier) {
+  public Optional<ExpressionCarrier> externalize(ASTCarrier carrier, SyntacticRepresentation into) {
     T obj = (T) carrier.getParsedExpression();
     return Optional.of(new ExpressionCarrier().withSerializedExpression(JSonUtil.writeJson(obj)
         .flatMap(Util::asString)
@@ -91,7 +92,7 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializer im
   }
 
   @Override
-  public Optional<ExpressionCarrier> serialize(DocumentCarrier carrier) {
+  public Optional<ExpressionCarrier> serialize(DocumentCarrier carrier, SyntacticRepresentation into) {
     JsonNode jNode = (JsonNode) carrier.getStructuredExpression();
     return Optional.of(new ExpressionCarrier().withSerializedExpression(jNode.toString())
         .withRepresentation(getSerializeResultRepresentation(carrier,
@@ -99,7 +100,7 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializer im
   }
 
   @Override
-  public Optional<DocumentCarrier> concretize(ASTCarrier carrier) {
+  public Optional<DocumentCarrier> concretize(ASTCarrier carrier, SyntacticRepresentation into) {
     T obj = (T) carrier.getParsedExpression();
     return Optional.of(new DocumentCarrier().withStructuredExpression(JSonUtil.toJsonNode(obj)
         .get()

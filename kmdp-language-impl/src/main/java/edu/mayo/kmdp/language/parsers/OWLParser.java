@@ -79,12 +79,12 @@ public class OWLParser extends AbstractDeSerializer implements DeserializeApi {
   }
 
   @Override
-  public Optional<DocumentCarrier> concretize(ASTCarrier carrier) {
+  public Optional<DocumentCarrier> concretize(ASTCarrier carrier, SyntacticRepresentation into) {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public Optional<BinaryCarrier> encode(ExpressionCarrier carrier) {
+  public Optional<BinaryCarrier> encode(ExpressionCarrier carrier, SyntacticRepresentation into) {
     return Optional.of(new BinaryCarrier()
         .withEncodedExpression(carrier.getSerializedExpression().getBytes())
         .withRepresentation(
@@ -92,7 +92,7 @@ public class OWLParser extends AbstractDeSerializer implements DeserializeApi {
   }
 
   @Override
-  public Optional<ExpressionCarrier> externalize(ASTCarrier carrier) {
+  public Optional<ExpressionCarrier> externalize(ASTCarrier carrier, SyntacticRepresentation into) {
     try {
       OWLOntology onto = (OWLOntology) carrier.getParsedExpression();
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -108,7 +108,7 @@ public class OWLParser extends AbstractDeSerializer implements DeserializeApi {
   }
 
   @Override
-  public Optional<ExpressionCarrier> serialize(DocumentCarrier carrier) {
+  public Optional<ExpressionCarrier> serialize(DocumentCarrier carrier, SyntacticRepresentation into) {
     throw new UnsupportedOperationException();
   }
 

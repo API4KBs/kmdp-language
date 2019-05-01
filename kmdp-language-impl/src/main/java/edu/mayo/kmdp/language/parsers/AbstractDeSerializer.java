@@ -1,20 +1,19 @@
 /**
  * Copyright © 2018 Mayo Clinic (RSTKNOWLEDGEMGMT@mayo.edu)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package edu.mayo.kmdp.language.parsers;
 
+import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 import static org.omg.spec.api4kp._1_0.contrastors.ParsingLevelContrastor.detectLevel;
 import static org.omg.spec.api4kp._1_0.contrastors.ParsingLevelContrastor.parsingLevelContrastor;
 
@@ -102,6 +101,11 @@ public abstract class AbstractDeSerializer implements DeserializeApi, Lifter, Lo
   @Override
   public KnowledgeCarrier lower(KnowledgeCarrier sourceArtifact,
       ParsingLevel into) {
+    return lower(sourceArtifact,into,null);
+  }
+
+  protected KnowledgeCarrier lower(KnowledgeCarrier sourceArtifact,
+      ParsingLevel toLevel, SyntacticRepresentation into) {
 
     if (getSerializableLanguages().stream()
         .map(SyntacticRepresentation::getLanguage)
@@ -110,49 +114,20 @@ public abstract class AbstractDeSerializer implements DeserializeApi, Lifter, Lo
     }
 
     ParsingLevel sourceLevel = detectLevel(sourceArtifact);
-    if (parsingLevelContrastor.contrast(sourceLevel, into) == Comparison.NARROWER) {
+    if (parsingLevelContrastor.contrast(sourceLevel, toLevel) == Comparison.NARROWER) {
       // serialization must lower to a lower level <=> sourceLevel must be higher
       return null;
     }
 
     if (sourceArtifact instanceof ASTCarrier) {
       ASTCarrier ast = (ASTCarrier) sourceArtifact;
-      switch (into) {
-        case Abstract_Knowledge_Expression:
-          return ast;
-        case Parsed_Knowedge_Expression:
-          Optional<DocumentCarrier> concretizedAST = this.concretize(ast);
-          return concretizedAST.orElse(null);
-        case Concrete_Knowledge_Expression:
-          Optional<ExpressionCarrier> serializedAST = this.externalize(ast);
-          return serializedAST.orElse(null);
-        case Encoded_Knowledge_Expression:
-          Optional<BinaryCarrier> encodedAST = this.externalize(ast)
-              .flatMap(this::encode);
-          return encodedAST.orElse(null);
-      }
+      return serializeAST(ast, toLevel, into);
     } else if (sourceArtifact instanceof DocumentCarrier) {
       DocumentCarrier doc = (DocumentCarrier) sourceArtifact;
-      switch (into) {
-        case Parsed_Knowedge_Expression:
-          return doc;
-        case Concrete_Knowledge_Expression:
-          Optional<ExpressionCarrier> serializedDoc = this.serialize(doc);
-          return serializedDoc.orElse(null);
-        case Encoded_Knowledge_Expression:
-          Optional<BinaryCarrier> encodedDoc = this.serialize(doc)
-              .flatMap(this::encode);
-          return encodedDoc.orElse(null);
-      }
+      return serializeDoc(doc, toLevel, into);
     } else if (sourceArtifact instanceof ExpressionCarrier) {
       ExpressionCarrier expr = (ExpressionCarrier) sourceArtifact;
-      switch (into) {
-        case Concrete_Knowledge_Expression:
-          return expr;
-        case Encoded_Knowledge_Expression:
-          Optional<BinaryCarrier> encodedExpr = this.encode(expr);
-          return encodedExpr.orElse(null);
-      }
+      return serializeExpression(expr, toLevel, into);
     } else if (sourceArtifact instanceof BinaryCarrier) {
       return sourceArtifact;
     }
@@ -160,11 +135,78 @@ public abstract class AbstractDeSerializer implements DeserializeApi, Lifter, Lo
     return null;
   }
 
+  private KnowledgeCarrier serializeExpression(ExpressionCarrier expr, ParsingLevel toLevel,
+      SyntacticRepresentation into) {
+    switch (toLevel) {
+      case Concrete_Knowledge_Expression:
+        return expr;
+      case Encoded_Knowledge_Expression:
+      default:
+        Optional<BinaryCarrier> encodedExpr = this.encode(expr, into);
+        return encodedExpr.orElse(null);
+    }
+  }
+
+  private KnowledgeCarrier serializeDoc(DocumentCarrier doc, ParsingLevel toLevel,
+      SyntacticRepresentation into) {
+    switch (toLevel) {
+      case Parsed_Knowedge_Expression:
+        return doc;
+      case Concrete_Knowledge_Expression:
+        Optional<ExpressionCarrier> serializedDoc = this.serialize(doc, into);
+        return serializedDoc.orElse(null);
+      case Encoded_Knowledge_Expression:
+      default:
+        Optional<BinaryCarrier> encodedDoc = this.serialize(doc, into)
+            .flatMap(this::encode);
+        return encodedDoc.orElse(null);
+    }
+  }
+
+  protected KnowledgeCarrier serializeAST(ASTCarrier ast, ParsingLevel toLevel,
+      SyntacticRepresentation into) {
+    switch (toLevel) {
+      case Abstract_Knowledge_Expression:
+        return ast;
+      case Parsed_Knowedge_Expression:
+        Optional<DocumentCarrier> concretizedAST = this.concretize(ast, into);
+        return concretizedAST.orElse(null);
+      case Concrete_Knowledge_Expression:
+        Optional<ExpressionCarrier> serializedAST = this.externalize(ast, into);
+        return serializedAST.orElse(null);
+      case Encoded_Knowledge_Expression:
+      default:
+        Optional<BinaryCarrier> encodedAST = this.externalize(ast, into)
+            .flatMap(this::encode);
+        return encodedAST.orElse(null);
+    }
+  }
+
   @Override
   public KnowledgeCarrier ensureRepresentation(KnowledgeCarrier sourceArtifact,
       SyntacticRepresentation into) {
-    return null;
+    ParsingLevel tgtLevel = detectLevel(into);
+    ParsingLevel srcLevel = sourceArtifact.getLevel();
+
+    if (srcLevel == tgtLevel && sourceArtifact.getRepresentation().equals(into)) {
+        return sourceArtifact;
+    }
+    return serialize(lift(sourceArtifact, ParsingLevel.Abstract_Knowledge_Expression), into);
   }
+
+
+  @Override
+  public KnowledgeCarrier deserialize(KnowledgeCarrier sourceArtifact,
+      SyntacticRepresentation into) {
+    return lift(sourceArtifact, detectLevel(into));
+  }
+
+  @Override
+  public KnowledgeCarrier serialize(KnowledgeCarrier sourceArtifact,
+      SyntacticRepresentation into) {
+    return lower(sourceArtifact, detectLevel(into),into);
+  }
+
 
   protected SyntacticRepresentation getParseResultRepresentation(
       KnowledgeCarrier sourceArtifact,

@@ -16,6 +16,7 @@
 package edu.mayo.kmdp.language.parsers;
 
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
+import static org.omg.spec.api4kp._1_0.contrastors.ParsingLevelContrastor.detectLevel;
 
 import edu.mayo.kmdp.language.DeserializeApi;
 import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
@@ -27,11 +28,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import javax.inject.Named;
-import org.omg.spec.api4kp._1_0.services.KPOperation;
+import javax.validation.constraints.NotNull;
 import org.omg.spec.api4kp._1_0.services.ASTCarrier;
 import org.omg.spec.api4kp._1_0.services.BinaryCarrier;
 import org.omg.spec.api4kp._1_0.services.DocumentCarrier;
 import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
+import org.omg.spec.api4kp._1_0.services.KPOperation;
+import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 
 @Named
@@ -71,29 +74,68 @@ public class SurrogateParser extends AbstractDeSerializer implements Deserialize
     return parsed.isPresent() ? parsed : jsonParser.parse(carrier);
   }
 
+
   @Override
-  public Optional<DocumentCarrier> concretize(ASTCarrier carrier) {
-    Optional<DocumentCarrier> concretized = xmlParser.concretize(carrier);
-    return concretized.isPresent() ? concretized : jsonParser.concretize(carrier);
+  public Optional<DocumentCarrier> concretize(ASTCarrier carrier, SyntacticRepresentation into) {
+    if (into == null) {
+      return xmlParser.concretize(carrier);
+    }
+    switch (into.getFormat()) {
+      case XML_1_1:
+        return xmlParser.concretize(carrier);
+      case JSON:
+        return jsonParser.concretize(carrier);
+      default:
+        throw new UnsupportedOperationException();
+    }
   }
 
   @Override
-  public Optional<BinaryCarrier> encode(ExpressionCarrier carrier) {
-    Optional<BinaryCarrier> encoded = xmlParser.encode(carrier);
-    return encoded.isPresent() ? encoded : jsonParser.encode(carrier);
+  public Optional<BinaryCarrier> encode(ExpressionCarrier carrier, SyntacticRepresentation into) {
+    if (into == null) {
+      return xmlParser.encode(carrier);
+    }
+    switch (into.getFormat()) {
+      case XML_1_1:
+        return xmlParser.encode(carrier);
+      case JSON:
+        return jsonParser.encode(carrier);
+      default:
+        throw new UnsupportedOperationException();
+    }
   }
 
   @Override
-  public Optional<ExpressionCarrier> externalize(ASTCarrier carrier) {
-    Optional<ExpressionCarrier> externalized = xmlParser.externalize(carrier);
-    return externalized.isPresent() ? externalized : jsonParser.externalize(carrier);
+  public Optional<ExpressionCarrier> externalize(ASTCarrier carrier, SyntacticRepresentation into) {
+    if (into == null) {
+      return xmlParser.externalize(carrier);
+    }
+    switch (into.getFormat()) {
+      case XML_1_1:
+        return xmlParser.externalize(carrier);
+      case JSON:
+        return jsonParser.externalize(carrier);
+      default:
+        throw new UnsupportedOperationException();
+    }
   }
 
   @Override
-  public Optional<ExpressionCarrier> serialize(DocumentCarrier carrier) {
-    Optional<ExpressionCarrier> serialized = xmlParser.serialize(carrier);
-    return serialized.isPresent() ? serialized : jsonParser.serialize(carrier);
+  public Optional<ExpressionCarrier> serialize(DocumentCarrier carrier,
+      SyntacticRepresentation into) {
+    if (into == null) {
+      return xmlParser.serialize(carrier);
+    }
+    switch (into.getFormat()) {
+      case XML_1_1:
+        return xmlParser.serialize(carrier);
+      case JSON:
+        return jsonParser.serialize(carrier);
+      default:
+        throw new UnsupportedOperationException();
+    }
   }
+
 
   @Override
   protected List<SyntacticRepresentation> getSupportedRepresentations() {
@@ -114,7 +156,8 @@ public class SurrogateParser extends AbstractDeSerializer implements Deserialize
 
     @Override
     protected List<SyntacticRepresentation> getSupportedRepresentations() {
-      return Collections.singletonList(rep(KRLanguage.Asset_Surrogate, KRFormat.XML_1_1, getDefaultCharset()));
+      return Collections
+          .singletonList(rep(KRLanguage.Asset_Surrogate, KRFormat.XML_1_1, getDefaultCharset()));
     }
   }
 
@@ -127,7 +170,8 @@ public class SurrogateParser extends AbstractDeSerializer implements Deserialize
 
     @Override
     protected List<SyntacticRepresentation> getSupportedRepresentations() {
-      return Collections.singletonList(rep(KRLanguage.Asset_Surrogate, KRFormat.JSON, getDefaultCharset()));
+      return Collections
+          .singletonList(rep(KRLanguage.Asset_Surrogate, KRFormat.JSON, getDefaultCharset()));
     }
   }
 

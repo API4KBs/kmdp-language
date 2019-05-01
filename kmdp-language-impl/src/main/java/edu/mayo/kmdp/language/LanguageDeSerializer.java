@@ -108,6 +108,28 @@ public class LanguageDeSerializer implements DeserializeApiDelegate {
         .orElse(err());
   }
 
+  @Override
+  public ResponseEntity<KnowledgeCarrier> deserialize(KnowledgeCarrier sourceArtifact,
+      SyntacticRepresentation into) {
+    return parsers.stream()
+        .filter((p) -> supportsLifting(p,sourceArtifact.getRepresentation()))
+        .findAny()
+        .map((parser)->parser.deserialize(sourceArtifact,into))
+        .map(this::ok)
+        .orElse(err());
+  }
+
+  @Override
+  public ResponseEntity<KnowledgeCarrier> serialize(KnowledgeCarrier sourceArtifact,
+      SyntacticRepresentation into) {
+    return parsers.stream()
+        .filter((p) -> supportsLowering(p,sourceArtifact.getRepresentation()))
+        .findAny()
+        .map((parser)->parser.serialize(sourceArtifact,into))
+        .map(this::ok)
+        .orElse(err());
+  }
+
   private boolean supportsLifting(edu.mayo.kmdp.language.DeserializeApi parser, SyntacticRepresentation representation) {
     return parser.getParsableLanguages().stream().anyMatch((r)-> r.getLanguage() == representation.getLanguage());
   }
