@@ -16,9 +16,9 @@
 package edu.mayo.kmdp.language.detectors;
 
 import edu.mayo.kmdp.language.DetectApi;
-import edu.mayo.kmdp.terms.api4kp.knowledgeoperations._2018._06.KnowledgeOperations;
-import edu.mayo.kmdp.terms.krformat._2018._08.KRFormat;
-import edu.mayo.kmdp.terms.krlanguage._2018._08.KRLanguage;
+import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._2018._06.KnowledgeOperations;
+import edu.mayo.ontology.taxonomies.krformat._2018._08.KRFormat;
+import edu.mayo.ontology.taxonomies.krlanguage._2018._08.KRLanguage;
 import java.util.Collections;
 import java.util.List;
 import javax.inject.Named;

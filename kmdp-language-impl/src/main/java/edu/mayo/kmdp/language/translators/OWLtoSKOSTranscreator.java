@@ -15,19 +15,17 @@
  */
 package edu.mayo.kmdp.language.translators;
 
-import static edu.mayo.kmdp.terms.api4kp.knowledgeoperations._2018._06.KnowledgeOperations.Transcreation_Task;
+import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._2018._06.KnowledgeOperations.Transcreation_Task;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.TransxionApi;
 import edu.mayo.kmdp.terms.skosifier.Owl2SkosConfig;
-import edu.mayo.kmdp.terms.skosifier.Owl2SkosConfig.OWLtoSKOSTxParams;
-import edu.mayo.kmdp.terms.krformat._2018._08.KRFormat;
-import edu.mayo.kmdp.terms.krlanguage._2018._08.KRLanguage;
-import edu.mayo.kmdp.terms.krserialization._2018._08.KRSerialization;
-import edu.mayo.kmdp.terms.lexicon._2018._08.Lexicon;
-import edu.mayo.kmdp.terms.skosifier.Modes;
 import edu.mayo.kmdp.terms.skosifier.Owl2SkosConverter;
 import edu.mayo.kmdp.util.Util;
+import edu.mayo.ontology.taxonomies.krformat._2018._08.KRFormat;
+import edu.mayo.ontology.taxonomies.krlanguage._2018._08.KRLanguage;
+import edu.mayo.ontology.taxonomies.krserialization._2018._08.KRSerialization;
+import edu.mayo.ontology.taxonomies.lexicon._2018._08.Lexicon;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;

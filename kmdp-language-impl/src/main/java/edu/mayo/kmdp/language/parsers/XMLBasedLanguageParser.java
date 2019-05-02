@@ -16,11 +16,11 @@
 package edu.mayo.kmdp.language.parsers;
 
 import edu.mayo.kmdp.language.DeserializeApi;
-import edu.mayo.kmdp.terms.api4kp.parsinglevel._20190801.ParsingLevel;
-import edu.mayo.kmdp.terms.krformat._2018._08.KRFormat;
 import edu.mayo.kmdp.util.JaxbUtil;
 import edu.mayo.kmdp.util.Util;
 import edu.mayo.kmdp.util.XMLUtil;
+import edu.mayo.ontology.taxonomies.api4kp.parsinglevel._20190801.ParsingLevel;
+import edu.mayo.ontology.taxonomies.krformat._2018._08.KRFormat;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Function;

@@ -16,9 +16,7 @@
 package edu.mayo.kmdp.language;
 
 import edu.mayo.kmdp.language.server.ValidateApiDelegate;
-import edu.mayo.kmdp.terms.api4kp.parsinglevel._20190801.ParsingLevel;
 import javax.inject.Named;
-import org.omg.spec.api4kp._1_0.services.KPComponent;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 import org.springframework.http.ResponseEntity;

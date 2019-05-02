@@ -24,15 +24,15 @@ import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 import edu.mayo.kmdp.language.config.LocalTestConfig;
 import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
 import edu.mayo.kmdp.registry.Registry;
-import edu.mayo.kmdp.terms.api4kp.parsinglevel._20190801.ParsingLevel;
-import edu.mayo.kmdp.terms.kao.knowledgeassettype._1_0.KnowledgeAssetType;
-import edu.mayo.kmdp.terms.krformat._2018._08.KRFormat;
-import edu.mayo.kmdp.terms.krlanguage._2018._08.KRLanguage;
-import edu.mayo.kmdp.terms.krserialization._2018._08.KRSerialization;
 import edu.mayo.kmdp.util.FileUtil;
 import edu.mayo.kmdp.util.JSonUtil;
 import edu.mayo.kmdp.util.JaxbUtil;
 import edu.mayo.kmdp.util.XMLUtil;
+import edu.mayo.ontology.taxonomies.api4kp.parsinglevel._20190801.ParsingLevel;
+import edu.mayo.ontology.taxonomies.kao.knowledgeassettype._1_0.KnowledgeAssetType;
+import edu.mayo.ontology.taxonomies.krformat._2018._08.KRFormat;
+import edu.mayo.ontology.taxonomies.krlanguage._2018._08.KRLanguage;
+import edu.mayo.ontology.taxonomies.krserialization._2018._08.KRSerialization;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -161,15 +161,9 @@ public class DeserializationTest {
         .withRepresentation(rep(KRLanguage.Asset_Surrogate))
         .withLevel(ParsingLevel.Abstract_Knowledge_Expression);
 
-//    ExpressionCarrier ser = (ExpressionCarrier) parser.ensureRepresentation(ast,
-//        ((SyntacticRepresentation) ast.getRepresentation().clone())
-//            .withFormat(KRFormat.XML_1_1));
     ExpressionCarrier ser = (ExpressionCarrier) parser.lower(ast,ParsingLevel.Concrete_Knowledge_Expression);
 
     assertEquals(serializedAsset, ser.getSerializedExpression());
-
-    System.out.println(ser.getSerializedExpression());
-
   }
 
 
@@ -205,7 +199,6 @@ public class DeserializationTest {
 
     assertEquals(serializedAsset, ser2.getSerializedExpression());
 
-    System.out.println(ser2.getSerializedExpression());
 
   }
 

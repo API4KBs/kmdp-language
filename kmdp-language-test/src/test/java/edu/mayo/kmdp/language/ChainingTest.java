@@ -22,9 +22,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.config.LocalTestConfig;
-import edu.mayo.kmdp.terms.api4kp.parsinglevel._20190801.ParsingLevel;
-import edu.mayo.kmdp.terms.krlanguage._2018._08.KRLanguage;
 import edu.mayo.kmdp.util.FileUtil;
+import edu.mayo.ontology.taxonomies.api4kp.parsinglevel._20190801.ParsingLevel;
+import edu.mayo.ontology.taxonomies.krlanguage._2018._08.KRLanguage;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;

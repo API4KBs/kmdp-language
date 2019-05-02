@@ -6,10 +6,10 @@
   },
   "type" : [ {
     "_class" : "ConceptIdentifier",
-    "@id" : "http://terms.kmdp.mayo.edu/KAO/KnowledgeAssetType#e12dcd92-f8de-3115-b8ca-4480cfc44d77",
+    "@id" : "https://ontology.mayo.edu/taxonomies/KAO/KnowledgeAssetType#e12dcd92-f8de-3115-b8ca-4480cfc44d77",
     "namespace" : {
       "_class" : "NamespaceIdentifier",
-      "@id" : "http://terms.kmdp.mayo.edu/KAO/KnowledgeAssetType#1a9d306c-b968-3b8a-a1e5-e0517d571143",
+      "@id" : "https://ontology.mayo.edu/taxonomies/KAO/KnowledgeAssetType#1a9d306c-b968-3b8a-a1e5-e0517d571143",
       "label" : "KnowledgeAssetType_Scheme",
       "tag" : "1a9d306c-b968-3b8a-a1e5-e0517d571143"
     },
