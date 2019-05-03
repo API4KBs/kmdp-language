@@ -15,11 +15,14 @@
  */
 package edu.mayo.kmdp.language.detectors;
 
+import static edu.mayo.ontology.taxonomies.krformat._2018._08.SerializationFormat.JSON;
+import static edu.mayo.ontology.taxonomies.krformat._2018._08.SerializationFormat.XML_1_1;
+import static edu.mayo.ontology.taxonomies.krlanguage._2018._08.KnowledgeRepresentationLanguage.Asset_Surrogate;
+
 import edu.mayo.kmdp.language.DetectApi;
 import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
-import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._2018._06.KnowledgeOperations;
-import edu.mayo.ontology.taxonomies.krformat._2018._08.KRFormat;
-import edu.mayo.ontology.taxonomies.krlanguage._2018._08.KRLanguage;
+import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._2018._06.KnowledgeProcessingOperation;
+import edu.mayo.ontology.taxonomies.krlanguage._2018._08.KnowledgeRepresentationLanguage;
 import edu.mayo.ontology.taxonomies.lexicon._2018._08.Lexicon;
 import java.util.Collections;
 import java.util.List;
@@ -31,13 +34,13 @@ import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 
 @Named
-@KPOperation(KnowledgeOperations.Detect_Language_Information_Task)
+@KPOperation(KnowledgeProcessingOperation.Detect_Language_Information_Task)
 public class SurrogateDetector implements DetectApi {
 
   private XMLSurrogateDetector xmlDetector = new XMLSurrogateDetector();
   private JSNSurrogateDetector jsnDetector = new JSNSurrogateDetector();
 
-  protected static final KRLanguage theLanguage = KRLanguage.Asset_Surrogate;
+  protected static final KnowledgeRepresentationLanguage theLanguage = Asset_Surrogate;
 
 
   @Override
@@ -70,7 +73,7 @@ public class SurrogateDetector implements DetectApi {
       return Collections
           .singletonList(new org.omg.spec.api4kp._1_0.services.SyntacticRepresentation()
               .withLanguage(theLanguage)
-              .withFormat(KRFormat.XML_1_1)
+              .withFormat(XML_1_1)
               .withLexicon(Lexicon.API4KP_Rel_Jun18));
     }
   }
@@ -87,7 +90,7 @@ public class SurrogateDetector implements DetectApi {
       return Collections
           .singletonList(new org.omg.spec.api4kp._1_0.services.SyntacticRepresentation()
               .withLanguage(theLanguage)
-              .withFormat(KRFormat.JSON)
+              .withFormat(JSON)
               .withLexicon(Lexicon.API4KP_Rel_Jun18));
     }
   }

@@ -18,9 +18,9 @@ package edu.mayo.kmdp.language.parsers;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.DeserializeApi;
-import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._2018._06.KnowledgeOperations;
-import edu.mayo.ontology.taxonomies.krformat._2018._08.KRFormat;
-import edu.mayo.ontology.taxonomies.krlanguage._2018._08.KRLanguage;
+import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._2018._06.KnowledgeProcessingOperation;
+import edu.mayo.ontology.taxonomies.krformat._2018._08.SerializationFormat;
+import edu.mayo.ontology.taxonomies.krlanguage._2018._08.KnowledgeRepresentationLanguage;
 import java.util.Collections;
 import java.util.List;
 import javax.inject.Named;
@@ -30,8 +30,8 @@ import org.omg.spec.dmn._20151101.dmn.ObjectFactory;
 import org.omg.spec.dmn._20151101.dmn.TDefinitions;
 
 @Named
-@KPOperation(KnowledgeOperations.Lifting_Task)
-@KPOperation(KnowledgeOperations.Lowering_Task)
+@KPOperation(KnowledgeProcessingOperation.Lifting_Task)
+@KPOperation(KnowledgeProcessingOperation.Lowering_Task)
 public class DMNParser extends XMLBasedLanguageParser<TDefinitions> implements DeserializeApi {
 
   public DMNParser() {
@@ -42,7 +42,7 @@ public class DMNParser extends XMLBasedLanguageParser<TDefinitions> implements D
   public List<SyntacticRepresentation> getSupportedRepresentations() {
     return
         Collections
-            .singletonList(rep(KRLanguage.DMN_1_1, KRFormat.XML_1_1, getDefaultCharset()));
+            .singletonList(rep(KnowledgeRepresentationLanguage.DMN_1_1, SerializationFormat.XML_1_1, getDefaultCharset()));
   }
 
 }

@@ -21,7 +21,7 @@ import static org.springframework.http.ResponseEntity.notFound;
 import static org.springframework.http.ResponseEntity.ok;
 
 import edu.mayo.kmdp.language.server.TransxionApiDelegate;
-import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._2018._06.KnowledgeOperations;
+import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._2018._06.KnowledgeProcessingOperation;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -50,7 +50,7 @@ public class TransrepresentationExecutor implements TransxionApiDelegate {
 
 
   public TransrepresentationExecutor(@Autowired(required = false)
-  @KPOperation(KnowledgeOperations.Transcreation_Task)
+  @KPOperation(KnowledgeProcessingOperation.Transcreation_Task)
       List<TransxionApi> translators) {
     super();
 

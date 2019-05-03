@@ -15,10 +15,11 @@
  */
 package edu.mayo.kmdp.language.detectors;
 
+import static edu.mayo.ontology.taxonomies.krformat._2018._08.SerializationFormat.XML_1_1;
+import static edu.mayo.ontology.taxonomies.krlanguage._2018._08.KnowledgeRepresentationLanguage.DMN_1_1;
+
 import edu.mayo.kmdp.language.DetectApi;
-import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._2018._06.KnowledgeOperations;
-import edu.mayo.ontology.taxonomies.krformat._2018._08.KRFormat;
-import edu.mayo.ontology.taxonomies.krlanguage._2018._08.KRLanguage;
+import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._2018._06.KnowledgeProcessingOperation;
 import java.util.Collections;
 import java.util.List;
 import javax.inject.Named;
@@ -27,7 +28,7 @@ import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 import org.omg.spec.dmn._20151101.dmn.TDefinitions;
 
 @Named
-@KPOperation(KnowledgeOperations.Detect_Language_Information_Task)
+@KPOperation(KnowledgeProcessingOperation.Detect_Language_Information_Task)
 public class DMNDetector extends XMLBasedLanguageDetector<TDefinitions> implements DetectApi {
 
   public DMNDetector() {
@@ -38,7 +39,7 @@ public class DMNDetector extends XMLBasedLanguageDetector<TDefinitions> implemen
   public List<SyntacticRepresentation> getDetectableLanguages() {
     return Collections
         .singletonList(new org.omg.spec.api4kp._1_0.services.resources.SyntacticRepresentation()
-            .withLanguage(KRLanguage.DMN_1_1)
-            .withFormat(KRFormat.XML_1_1));
+            .withLanguage(DMN_1_1)
+            .withFormat(XML_1_1));
   }
 }

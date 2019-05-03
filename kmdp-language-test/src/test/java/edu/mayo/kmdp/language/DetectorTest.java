@@ -16,16 +16,21 @@
 package edu.mayo.kmdp.language;
 
 
+import static edu.mayo.ontology.taxonomies.krformat._2018._08.SerializationFormat.JSON;
+import static edu.mayo.ontology.taxonomies.krformat._2018._08.SerializationFormat.TXT;
+import static edu.mayo.ontology.taxonomies.krformat._2018._08.SerializationFormat.XML_1_1;
+import static edu.mayo.ontology.taxonomies.krlanguage._2018._08.KnowledgeRepresentationLanguage.Asset_Surrogate;
+import static edu.mayo.ontology.taxonomies.krlanguage._2018._08.KnowledgeRepresentationLanguage.CMMN_1_1;
+import static edu.mayo.ontology.taxonomies.krlanguage._2018._08.KnowledgeRepresentationLanguage.DMN_1_1;
+import static edu.mayo.ontology.taxonomies.krlanguage._2018._08.KnowledgeRepresentationLanguage.OWL_2;
+import static edu.mayo.ontology.taxonomies.krprofile._2018._08.KnowledgeRepresentationLanguageProfile.OWL_2_RL;
+import static edu.mayo.ontology.taxonomies.krserialization._2018._08.KnowledgeRepresentationLanguageSerialization.OWL_Functional_Syntax;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import edu.mayo.kmdp.language.config.LocalTestConfig;
 import edu.mayo.kmdp.util.FileUtil;
-import edu.mayo.ontology.taxonomies.krformat._2018._08.KRFormat;
-import edu.mayo.ontology.taxonomies.krlanguage._2018._08.KRLanguage;
-import edu.mayo.ontology.taxonomies.krprofile._2018._08.KRProfile;
-import edu.mayo.ontology.taxonomies.krserialization._2018._08.KRSerialization;
 import java.io.InputStream;
 import java.util.Optional;
 import javax.inject.Inject;
@@ -56,8 +61,8 @@ public class DetectorTest {
     SyntacticRepresentation rep = detector.getDetectedRepresentation(carrier);
 
     assertNotNull(rep);
-    assertEquals(KRLanguage.DMN_1_1, rep.getLanguage());
-    assertEquals(KRFormat.XML_1_1, rep.getFormat());
+    assertEquals(DMN_1_1, rep.getLanguage());
+    assertEquals(XML_1_1, rep.getFormat());
   }
 
 
@@ -72,8 +77,8 @@ public class DetectorTest {
     SyntacticRepresentation rep = detector.getDetectedRepresentation(carrier);
 
     assertNotNull(rep);
-    assertEquals(KRLanguage.DMN_1_1, rep.getLanguage());
-    assertEquals(KRFormat.XML_1_1, rep.getFormat());
+    assertEquals(DMN_1_1, rep.getLanguage());
+    assertEquals(XML_1_1, rep.getFormat());
   }
 
 
@@ -88,8 +93,8 @@ public class DetectorTest {
     SyntacticRepresentation rep = detector.getDetectedRepresentation(carrier);
 
     assertNotNull(rep);
-    assertEquals(KRLanguage.CMMN_1_1, rep.getLanguage());
-    assertEquals(KRFormat.XML_1_1, rep.getFormat());
+    assertEquals(CMMN_1_1, rep.getLanguage());
+    assertEquals(XML_1_1, rep.getFormat());
   }
 
 
@@ -105,8 +110,8 @@ public class DetectorTest {
     SyntacticRepresentation rep = detector.getDetectedRepresentation(carrier);
 
     assertNotNull(rep);
-    assertEquals(KRLanguage.Asset_Surrogate, rep.getLanguage());
-    assertEquals(KRFormat.XML_1_1, rep.getFormat());
+    assertEquals(Asset_Surrogate, rep.getLanguage());
+    assertEquals(XML_1_1, rep.getFormat());
 
     Optional<String> jsonSurr = FileUtil
         .read(DetectorTest.class.getResource("/artifacts/sample.surr.json"));
@@ -116,8 +121,8 @@ public class DetectorTest {
     SyntacticRepresentation rep2 = detector.getDetectedRepresentation(carrier2);
 
     assertNotNull(rep2);
-    assertEquals(KRLanguage.Asset_Surrogate, rep2.getLanguage());
-    assertEquals(KRFormat.JSON, rep2.getFormat());
+    assertEquals(Asset_Surrogate, rep2.getLanguage());
+    assertEquals(JSON, rep2.getFormat());
   }
 
   @Test
@@ -126,10 +131,10 @@ public class DetectorTest {
     KnowledgeCarrier carrier = KnowledgeCarrier.of(is);
 
     SyntacticRepresentation rep = detector.getDetectedRepresentation(carrier);
-    assertEquals(KRLanguage.OWL_2,rep.getLanguage());
-    assertEquals(KRProfile.OWL_2_RL,rep.getProfile());
-    assertEquals(KRFormat.TXT,rep.getFormat());
-    assertEquals(KRSerialization.OWL_Functional_Syntax,rep.getSerialization());
+    assertEquals(OWL_2,rep.getLanguage());
+    assertEquals(OWL_2_RL,rep.getProfile());
+    assertEquals(TXT,rep.getFormat());
+    assertEquals(OWL_Functional_Syntax,rep.getSerialization());
     assertTrue(rep.getLexicon().isEmpty());
   }
 

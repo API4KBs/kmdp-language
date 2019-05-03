@@ -15,14 +15,20 @@
  */
 package edu.mayo.kmdp.language.parsers;
 
+import static edu.mayo.ontology.taxonomies.krformat._2018._08.SerializationFormat.TXT;
+import static edu.mayo.ontology.taxonomies.krformat._2018._08.SerializationFormat.XML_1_1;
+import static edu.mayo.ontology.taxonomies.krlanguage._2018._08.KnowledgeRepresentationLanguage.OWL_2;
+import static edu.mayo.ontology.taxonomies.krserialization._2018._08.KnowledgeRepresentationLanguageSerialization.OWL_Functional_Syntax;
+import static edu.mayo.ontology.taxonomies.krserialization._2018._08.KnowledgeRepresentationLanguageSerialization.OWL_Manchester_Syntax;
+import static edu.mayo.ontology.taxonomies.krserialization._2018._08.KnowledgeRepresentationLanguageSerialization.OWL_XML_Serialization;
+import static edu.mayo.ontology.taxonomies.krserialization._2018._08.KnowledgeRepresentationLanguageSerialization.RDF_XML_Syntax;
+import static edu.mayo.ontology.taxonomies.krserialization._2018._08.KnowledgeRepresentationLanguageSerialization.Turtle;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.DeserializeApi;
-import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._2018._06.KnowledgeOperations;
+import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._2018._06.KnowledgeProcessingOperation;
 import edu.mayo.ontology.taxonomies.api4kp.parsinglevel._20190801.ParsingLevel;
-import edu.mayo.ontology.taxonomies.krformat._2018._08.KRFormat;
-import edu.mayo.ontology.taxonomies.krlanguage._2018._08.KRLanguage;
-import edu.mayo.ontology.taxonomies.krserialization._2018._08.KRSerialization;
+import edu.mayo.ontology.taxonomies.krformat._2018._08.SerializationFormat;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
@@ -42,8 +48,8 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
 @Named
-@KPOperation(KnowledgeOperations.Lowering_Task)
-@KPOperation(KnowledgeOperations.Lifting_Task)
+@KPOperation(KnowledgeProcessingOperation.Lowering_Task)
+@KPOperation(KnowledgeProcessingOperation.Lifting_Task)
 public class OWLParser extends AbstractDeSerializer implements DeserializeApi {
 
 
@@ -72,7 +78,7 @@ public class OWLParser extends AbstractDeSerializer implements DeserializeApi {
           new ByteArrayInputStream(carrier.getSerializedExpression().getBytes()));
       return Optional.of(new ASTCarrier().withParsedExpression(onto)
           .withLevel(ParsingLevel.Abstract_Knowledge_Expression)
-          .withRepresentation(rep(KRLanguage.OWL_2)));
+          .withRepresentation(rep(OWL_2)));
     } catch (OWLOntologyCreationException e) {
       return Optional.empty();
     }
@@ -101,7 +107,7 @@ public class OWLParser extends AbstractDeSerializer implements DeserializeApi {
           .of(new ExpressionCarrier().withLevel(ParsingLevel.Concrete_Knowledge_Expression)
               .withSerializedExpression(new String(baos.toByteArray()))
               .withRepresentation(
-                  rep(KRLanguage.OWL_2, KRSerialization.RDF_XML_Syntax, KRFormat.XML_1_1)));
+                  rep(OWL_2, RDF_XML_Syntax, XML_1_1)));
     } catch (OWLOntologyStorageException e) {
       return Optional.empty();
     }
@@ -116,22 +122,22 @@ public class OWLParser extends AbstractDeSerializer implements DeserializeApi {
   @Override
   protected List<SyntacticRepresentation> getSupportedRepresentations() {
     return Arrays.asList(
-        rep(KRLanguage.OWL_2, KRSerialization.RDF_XML_Syntax, KRFormat.XML_1_1));
+        rep(OWL_2, RDF_XML_Syntax, XML_1_1));
   }
 
   @Override
   public List<SyntacticRepresentation> getParsableLanguages() {
     return Arrays.asList(
-        rep(KRLanguage.OWL_2, KRSerialization.RDF_XML_Syntax, KRFormat.XML_1_1),
-        rep(KRLanguage.OWL_2, KRSerialization.OWL_Functional_Syntax, KRFormat.TXT),
-        rep(KRLanguage.OWL_2, KRSerialization.OWL_Manchester_Syntax, KRFormat.TXT),
-        rep(KRLanguage.OWL_2, KRSerialization.OWL_XML_Serialization, KRFormat.XML_1_1),
-        rep(KRLanguage.OWL_2, KRSerialization.Turtle, KRFormat.TXT));
+        rep(OWL_2, RDF_XML_Syntax, XML_1_1),
+        rep(OWL_2, OWL_Functional_Syntax, TXT),
+        rep(OWL_2, OWL_Manchester_Syntax, TXT),
+        rep(OWL_2, OWL_XML_Serialization, XML_1_1),
+        rep(OWL_2, Turtle, TXT));
   }
 
   @Override
-  protected KRFormat getDefaultFormat() {
-    return KRFormat.XML_1_1;
+  protected SerializationFormat getDefaultFormat() {
+    return XML_1_1;
   }
 
 

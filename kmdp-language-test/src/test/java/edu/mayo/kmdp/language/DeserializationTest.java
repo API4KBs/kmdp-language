@@ -30,9 +30,9 @@ import edu.mayo.kmdp.util.JaxbUtil;
 import edu.mayo.kmdp.util.XMLUtil;
 import edu.mayo.ontology.taxonomies.api4kp.parsinglevel._20190801.ParsingLevel;
 import edu.mayo.ontology.taxonomies.kao.knowledgeassettype._1_0.KnowledgeAssetType;
-import edu.mayo.ontology.taxonomies.krformat._2018._08.KRFormat;
-import edu.mayo.ontology.taxonomies.krlanguage._2018._08.KRLanguage;
-import edu.mayo.ontology.taxonomies.krserialization._2018._08.KRSerialization;
+import edu.mayo.ontology.taxonomies.krformat._2018._08.SerializationFormat;
+import edu.mayo.ontology.taxonomies.krlanguage._2018._08.KnowledgeRepresentationLanguage;
+import edu.mayo.ontology.taxonomies.krserialization._2018._08.KnowledgeRepresentationLanguageSerialization;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -74,7 +74,7 @@ public class DeserializationTest {
 
     KnowledgeCarrier bin = KnowledgeCarrier.of(dmn.get())
         .withRepresentation(
-            rep(KRLanguage.DMN_1_1, KRFormat.XML_1_1, Charset.defaultCharset().name(), "TODO"));
+            rep(KnowledgeRepresentationLanguage.DMN_1_1, SerializationFormat.XML_1_1, Charset.defaultCharset().name(), "TODO"));
 
     ExpressionCarrier expr = (ExpressionCarrier) parser
         .lift(bin, ParsingLevel.Concrete_Knowledge_Expression);
@@ -106,8 +106,8 @@ public class DeserializationTest {
     assertTrue(dmn.isPresent());
 
     KnowledgeCarrier bin = KnowledgeCarrier.of(dmn.get())
-        .withRepresentation(rep(KRLanguage.DMN_1_1,
-            KRFormat.XML_1_1,
+        .withRepresentation(rep(KnowledgeRepresentationLanguage.DMN_1_1,
+            SerializationFormat.XML_1_1,
             Charset.defaultCharset().name(),
             "TODO"));
 
@@ -132,18 +132,18 @@ public class DeserializationTest {
     assertTrue(owl.isPresent());
 
     KnowledgeCarrier bin = KnowledgeCarrier.of(owl.get())
-        .withRepresentation(rep(KRLanguage.OWL_2));
+        .withRepresentation(rep(KnowledgeRepresentationLanguage.OWL_2));
 
     ASTCarrier ast = (ASTCarrier) parser.lift(bin, ParsingLevel.Abstract_Knowledge_Expression);
     assertTrue(ast.getParsedExpression() instanceof OWLOntology);
-    assertEquals(KRLanguage.OWL_2, ast.getRepresentation().getLanguage());
+    assertEquals(KnowledgeRepresentationLanguage.OWL_2, ast.getRepresentation().getLanguage());
     assertNull(ast.getRepresentation().getSerialization());
 
     SyntacticRepresentation rep = parser
         .lower(ast, ParsingLevel.Concrete_Knowledge_Expression).getRepresentation();
-    assertEquals(KRLanguage.OWL_2,rep.getLanguage());
-    assertEquals(KRSerialization.RDF_XML_Syntax,rep.getSerialization());
-    assertEquals(KRFormat.XML_1_1,rep.getFormat());
+    assertEquals(KnowledgeRepresentationLanguage.OWL_2,rep.getLanguage());
+    assertEquals(KnowledgeRepresentationLanguageSerialization.RDF_XML_Syntax,rep.getSerialization());
+    assertEquals(SerializationFormat.XML_1_1,rep.getFormat());
 
   }
 
@@ -158,7 +158,7 @@ public class DeserializationTest {
     String serializedAsset = JaxbUtil.marshallToString(Collections.singleton(asset.getClass()),asset, JaxbUtil.defaultProperties());
 
     KnowledgeCarrier ast = KnowledgeCarrier.ofAst(asset)
-        .withRepresentation(rep(KRLanguage.Asset_Surrogate))
+        .withRepresentation(rep(KnowledgeRepresentationLanguage.Asset_Surrogate))
         .withLevel(ParsingLevel.Abstract_Knowledge_Expression);
 
     ExpressionCarrier ser = (ExpressionCarrier) parser.lower(ast,ParsingLevel.Concrete_Knowledge_Expression);
@@ -178,14 +178,14 @@ public class DeserializationTest {
     String serializedAsset = JSonUtil.printJson(asset).orElse("");
 
     KnowledgeCarrier ast = KnowledgeCarrier.ofAst(asset)
-        .withRepresentation(rep(KRLanguage.Asset_Surrogate))
+        .withRepresentation(rep(KnowledgeRepresentationLanguage.Asset_Surrogate))
         .withLevel(ParsingLevel.Abstract_Knowledge_Expression);
 
 
     ExpressionCarrier ser = (ExpressionCarrier) parser.serialize(
         ast,
         rep(ast.getRepresentation())
-            .withFormat(KRFormat.JSON)
+            .withFormat(SerializationFormat.JSON)
             .withCharset(Charset.defaultCharset().name()));
 
     assertEquals(serializedAsset, ser.getSerializedExpression());
@@ -194,7 +194,7 @@ public class DeserializationTest {
     ExpressionCarrier ser2 = (ExpressionCarrier) parser.ensureRepresentation(
         ast,
         rep(ast.getRepresentation())
-            .withFormat(KRFormat.JSON)
+            .withFormat(SerializationFormat.JSON)
             .withCharset(Charset.defaultCharset().name()));
 
     assertEquals(serializedAsset, ser2.getSerializedExpression());

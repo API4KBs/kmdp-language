@@ -16,16 +16,16 @@
 package edu.mayo.kmdp.language.detectors;
 
 import static edu.mayo.kmdp.util.XMLUtil.catalogResolver;
+import static edu.mayo.ontology.taxonomies.krlanguage._2018._08.KnowledgeRepresentationLanguage.OWL_2;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.DetectApi;
 import edu.mayo.kmdp.language.detectors.OWLDetectorConfig.DetectorParams;
 import edu.mayo.kmdp.util.Util;
-import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._2018._06.KnowledgeOperations;
-import edu.mayo.ontology.taxonomies.krformat._2018._08.KRFormat;
-import edu.mayo.ontology.taxonomies.krlanguage._2018._08.KRLanguage;
-import edu.mayo.ontology.taxonomies.krprofile._2018._08.KRProfile;
-import edu.mayo.ontology.taxonomies.krserialization._2018._08.KRSerialization;
+import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._2018._06.KnowledgeProcessingOperation;
+import edu.mayo.ontology.taxonomies.krformat._2018._08.SerializationFormat;
+import edu.mayo.ontology.taxonomies.krprofile._2018._08.KnowledgeRepresentationLanguageProfile;
+import edu.mayo.ontology.taxonomies.krserialization._2018._08.KnowledgeRepresentationLanguageSerialization;
 import edu.mayo.ontology.taxonomies.lexicon._2018._08.Lexicon;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -63,12 +63,12 @@ import org.semanticweb.owlapi.profiles.OWL2QLProfile;
 import org.semanticweb.owlapi.profiles.OWL2RLProfile;
 
 @Named
-@KPOperation(KnowledgeOperations.Detect_Language_Information_Task)
+@KPOperation(KnowledgeProcessingOperation.Detect_Language_Information_Task)
 public class OWLDetector implements DetectApi {
 
   @Override
   public List<SyntacticRepresentation> getDetectableLanguages() {
-    return Collections.singletonList(rep(KRLanguage.OWL_2));
+    return Collections.singletonList(rep(OWL_2));
   }
 
   @Override
@@ -76,7 +76,7 @@ public class OWLDetector implements DetectApi {
     Optional<OWLOntology> owl = asOWL(sourceArtifact);
     if (owl.isPresent() && !owl.get().isEmpty()) {
       return owl.map((o) -> new SyntacticRepresentation()
-          .withLanguage(KRLanguage.OWL_2)
+          .withLanguage(OWL_2)
           .withProfile(detectProfile(o))
           .withSerialization(detectSerialization(o))
           .withFormat(detectFormat(o))
@@ -87,34 +87,34 @@ public class OWLDetector implements DetectApi {
     }
   }
 
-  private KRFormat detectFormat(OWLOntology o) {
+  private SerializationFormat detectFormat(OWLOntology o) {
     OWLDocumentFormat format = o.getFormat();
     if (format instanceof RDFXMLDocumentFormat) {
-      return KRFormat.XML_1_1;
+      return SerializationFormat.XML_1_1;
     } else if (format instanceof ManchesterSyntaxDocumentFormat) {
-      return KRFormat.TXT;
+      return SerializationFormat.TXT;
     } else if (format instanceof OWLXMLDocumentFormat) {
-      return KRFormat.XML_1_1;
+      return SerializationFormat.XML_1_1;
     } else if (format instanceof TurtleDocumentFormat) {
-      return KRFormat.TXT;
+      return SerializationFormat.TXT;
     } else if (format instanceof FunctionalSyntaxDocumentFormat) {
-      return KRFormat.TXT;
+      return SerializationFormat.TXT;
     }
     return null;
   }
 
-  private KRSerialization detectSerialization(OWLOntology o) {
+  private KnowledgeRepresentationLanguageSerialization detectSerialization(OWLOntology o) {
     OWLDocumentFormat format = o.getFormat();
     if (format instanceof RDFXMLDocumentFormat) {
-      return KRSerialization.RDF_XML_Syntax;
+      return KnowledgeRepresentationLanguageSerialization.RDF_XML_Syntax;
     } else if (format instanceof ManchesterSyntaxDocumentFormat) {
-      return KRSerialization.OWL_Manchester_Syntax;
+      return KnowledgeRepresentationLanguageSerialization.OWL_Manchester_Syntax;
     } else if (format instanceof OWLXMLDocumentFormat) {
-      return KRSerialization.OWL_XML_Serialization;
+      return KnowledgeRepresentationLanguageSerialization.OWL_XML_Serialization;
     } else if (format instanceof TurtleDocumentFormat) {
-      return KRSerialization.Turtle;
+      return KnowledgeRepresentationLanguageSerialization.Turtle;
     } else if (format instanceof FunctionalSyntaxDocumentFormat) {
-      return KRSerialization.OWL_Functional_Syntax;
+      return KnowledgeRepresentationLanguageSerialization.OWL_Functional_Syntax;
     }
     return null;
   }
@@ -128,20 +128,20 @@ public class OWLDetector implements DetectApi {
     return lexica;
   }
 
-  protected KRProfile detectProfile(OWLOntology o) {
+  protected KnowledgeRepresentationLanguageProfile detectProfile(OWLOntology o) {
     if (new OWL2RLProfile().checkOntology(o).isInProfile()) {
-      return KRProfile.OWL_2_RL;
+      return KnowledgeRepresentationLanguageProfile.OWL_2_RL;
     }
     if (new OWL2QLProfile().checkOntology(o).isInProfile()) {
-      return KRProfile.OWL_2_QL;
+      return KnowledgeRepresentationLanguageProfile.OWL_2_QL;
     }
     if (new OWL2ELProfile().checkOntology(o).isInProfile()) {
-      return KRProfile.OWL_2_EL;
+      return KnowledgeRepresentationLanguageProfile.OWL_2_EL;
     }
     if (new OWL2DLProfile().checkOntology(o).isInProfile()) {
-      return KRProfile.OWL_2_DL;
+      return KnowledgeRepresentationLanguageProfile.OWL_2_DL;
     }
-    return KRProfile.OWL_2_Full;
+    return KnowledgeRepresentationLanguageProfile.OWL_2_Full;
   }
 
   @Override

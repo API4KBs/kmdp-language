@@ -16,8 +16,8 @@
 package edu.mayo.kmdp.language;
 
 import static edu.mayo.kmdp.util.Util.uuid;
-import static edu.mayo.ontology.taxonomies.krlanguage._2018._08.KRLanguage.DMN_1_1;
-import static edu.mayo.ontology.taxonomies.krlanguage._2018._08.KRLanguage.OWL_2;
+import static edu.mayo.ontology.taxonomies.krlanguage._2018._08.KnowledgeRepresentationLanguage.DMN_1_1;
+import static edu.mayo.ontology.taxonomies.krlanguage._2018._08.KnowledgeRepresentationLanguage.OWL_2;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -111,7 +111,7 @@ public class TranscreationTest {
         uuid("A"),
         uuid("B"),
         uuid("C"),
-        uuid("skos-example_Scheme_Top"))),
+        uuid("skos-example_Top"))),
         new HashSet<>(names));
   }
 

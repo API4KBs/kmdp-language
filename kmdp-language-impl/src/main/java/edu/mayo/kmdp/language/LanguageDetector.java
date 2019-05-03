@@ -16,7 +16,7 @@
 package edu.mayo.kmdp.language;
 
 import edu.mayo.kmdp.language.server.DetectApiDelegate;
-import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._2018._06.KnowledgeOperations;
+import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._2018._06.KnowledgeProcessingOperation;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -36,7 +36,7 @@ public class LanguageDetector implements DetectApiDelegate {
 
   @Named
   public LanguageDetector(@Autowired(required = false)
-  @KPOperation( KnowledgeOperations.Detect_Language_Information_Task )
+  @KPOperation( KnowledgeProcessingOperation.Detect_Language_Information_Task )
       List<edu.mayo.kmdp.language.DetectApi> detectors) {
     this.detectors = detectors;
   }

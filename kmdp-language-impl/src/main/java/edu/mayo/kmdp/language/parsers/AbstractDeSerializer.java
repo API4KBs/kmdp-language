@@ -21,7 +21,7 @@ import static org.omg.spec.api4kp._1_0.contrastors.ParsingLevelContrastor.parsin
 import edu.mayo.kmdp.comparator.Contrastor.Comparison;
 import edu.mayo.kmdp.language.DeserializeApi;
 import edu.mayo.ontology.taxonomies.api4kp.parsinglevel._20190801.ParsingLevel;
-import edu.mayo.ontology.taxonomies.krformat._2018._08.KRFormat;
+import edu.mayo.ontology.taxonomies.krformat._2018._08.SerializationFormat;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Optional;
@@ -280,7 +280,7 @@ public abstract class AbstractDeSerializer implements DeserializeApi, Lifter, Lo
     return charset;
   }
 
-  protected abstract KRFormat getDefaultFormat();
+  protected abstract SerializationFormat getDefaultFormat();
 
 
 }

@@ -20,7 +20,7 @@ import edu.mayo.kmdp.language.DeserializeApi;
 import edu.mayo.kmdp.util.JSonUtil;
 import edu.mayo.kmdp.util.Util;
 import edu.mayo.ontology.taxonomies.api4kp.parsinglevel._20190801.ParsingLevel;
-import edu.mayo.ontology.taxonomies.krformat._2018._08.KRFormat;
+import edu.mayo.ontology.taxonomies.krformat._2018._08.SerializationFormat;
 import java.util.Optional;
 import org.omg.spec.api4kp._1_0.services.ASTCarrier;
 import org.omg.spec.api4kp._1_0.services.BinaryCarrier;
@@ -109,8 +109,8 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializer im
   }
 
   @Override
-  public KRFormat getDefaultFormat() {
-    return KRFormat.JSON;
+  public SerializationFormat getDefaultFormat() {
+    return SerializationFormat.JSON;
   }
 
 }

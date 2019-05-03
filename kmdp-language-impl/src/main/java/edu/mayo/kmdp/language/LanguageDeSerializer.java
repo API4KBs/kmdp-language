@@ -16,7 +16,7 @@
 package edu.mayo.kmdp.language;
 
 import edu.mayo.kmdp.language.server.DeserializeApiDelegate;
-import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._2018._06.KnowledgeOperations;
+import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._2018._06.KnowledgeProcessingOperation;
 import edu.mayo.ontology.taxonomies.api4kp.parsinglevel._20190801.ParsingLevel;
 import java.util.Collection;
 import java.util.HashSet;
@@ -39,8 +39,8 @@ public class LanguageDeSerializer implements DeserializeApiDelegate {
 
   @Named
   public LanguageDeSerializer(@Autowired(required = false)
-  @KPOperation(KnowledgeOperations.Lifting_Task)
-  @KPOperation(KnowledgeOperations.Lowering_Task)
+  @KPOperation(KnowledgeProcessingOperation.Lifting_Task)
+  @KPOperation(KnowledgeProcessingOperation.Lowering_Task)
 
       List<edu.mayo.kmdp.language.DeserializeApi> parsers) {
     this.parsers.addAll(parsers);

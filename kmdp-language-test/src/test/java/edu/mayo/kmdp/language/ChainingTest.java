@@ -24,7 +24,7 @@ import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 import edu.mayo.kmdp.language.config.LocalTestConfig;
 import edu.mayo.kmdp.util.FileUtil;
 import edu.mayo.ontology.taxonomies.api4kp.parsinglevel._20190801.ParsingLevel;
-import edu.mayo.ontology.taxonomies.krlanguage._2018._08.KRLanguage;
+import edu.mayo.ontology.taxonomies.krlanguage._2018._08.KnowledgeRepresentationLanguage;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -67,7 +67,7 @@ public class ChainingTest {
     KnowledgeCarrier carrier1 = KnowledgeCarrier.of(dmn.get());
     SyntacticRepresentation rep = detectApi.getDetectedRepresentation(carrier1);
 
-    assertSame(KRLanguage.DMN_1_1, rep.getLanguage());
+    assertSame(KnowledgeRepresentationLanguage.DMN_1_1, rep.getLanguage());
 
     carrier1.withRepresentation(rep);
 
@@ -75,7 +75,7 @@ public class ChainingTest {
         .lift(carrier1, ParsingLevel.Abstract_Knowledge_Expression);
 
     assertTrue(carrier2 instanceof ASTCarrier);
-    assertSame(carrier2.getRepresentation().getLanguage(), KRLanguage.DMN_1_1);
+    assertSame(carrier2.getRepresentation().getLanguage(), KnowledgeRepresentationLanguage.DMN_1_1);
     assertNull(carrier2.getRepresentation().getFormat());
     assertNull(carrier2.getRepresentation().getEncoding());
     assertNull(carrier2.getRepresentation().getCharset());
@@ -90,13 +90,13 @@ public class ChainingTest {
     assertTrue(dmn.isPresent());
 
     KnowledgeCarrier carrier1 = KnowledgeCarrier.of(dmn.get())
-        .withRepresentation(rep(KRLanguage.DMN_1_1));
+        .withRepresentation(rep(KnowledgeRepresentationLanguage.DMN_1_1));
 
     KnowledgeCarrier carrier2 = deserializeApi
         .lift(carrier1, ParsingLevel.Abstract_Knowledge_Expression);
 
     assertTrue(carrier2 instanceof ASTCarrier);
-    assertSame(carrier2.getRepresentation().getLanguage(), KRLanguage.DMN_1_1);
+    assertSame(carrier2.getRepresentation().getLanguage(), KnowledgeRepresentationLanguage.DMN_1_1);
     assertNull(carrier2.getRepresentation().getFormat());
     assertNull(carrier2.getRepresentation().getEncoding());
     assertNull(carrier2.getRepresentation().getCharset());
@@ -118,7 +118,7 @@ public class ChainingTest {
         .apply(carrier1);
 
     assertTrue(carrier2 instanceof ASTCarrier);
-    assertSame(carrier2.getRepresentation().getLanguage(), KRLanguage.DMN_1_1);
+    assertSame(carrier2.getRepresentation().getLanguage(), KnowledgeRepresentationLanguage.DMN_1_1);
     assertNull(carrier2.getRepresentation().getFormat());
     assertNull(carrier2.getRepresentation().getEncoding());
     assertNull(carrier2.getRepresentation().getCharset());
@@ -140,7 +140,7 @@ public class ChainingTest {
     KnowledgeCarrier carrier2 = out.get();
 
     assertTrue(carrier2 instanceof ASTCarrier);
-    assertSame(carrier2.getRepresentation().getLanguage(), KRLanguage.DMN_1_1);
+    assertSame(carrier2.getRepresentation().getLanguage(), KnowledgeRepresentationLanguage.DMN_1_1);
     assertNull(carrier2.getRepresentation().getFormat());
     assertNull(carrier2.getRepresentation().getEncoding());
     assertNull(carrier2.getRepresentation().getCharset());
@@ -162,7 +162,7 @@ public class ChainingTest {
     KnowledgeCarrier carrier2 = out.get();
 
     assertTrue(carrier2 instanceof ASTCarrier);
-    assertSame(carrier2.getRepresentation().getLanguage(), KRLanguage.DMN_1_1);
+    assertSame(carrier2.getRepresentation().getLanguage(), KnowledgeRepresentationLanguage.DMN_1_1);
     assertNull(carrier2.getRepresentation().getFormat());
     assertNull(carrier2.getRepresentation().getEncoding());
     assertNull(carrier2.getRepresentation().getCharset());

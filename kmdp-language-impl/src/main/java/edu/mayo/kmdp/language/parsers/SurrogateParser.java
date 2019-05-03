@@ -20,9 +20,9 @@ import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.DeserializeApi;
 import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
-import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._2018._06.KnowledgeOperations;
-import edu.mayo.ontology.taxonomies.krformat._2018._08.KRFormat;
-import edu.mayo.ontology.taxonomies.krlanguage._2018._08.KRLanguage;
+import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._2018._06.KnowledgeProcessingOperation;
+import edu.mayo.ontology.taxonomies.krformat._2018._08.SerializationFormat;
+import edu.mayo.ontology.taxonomies.krlanguage._2018._08.KnowledgeRepresentationLanguage;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -33,20 +33,19 @@ import org.omg.spec.api4kp._1_0.services.BinaryCarrier;
 import org.omg.spec.api4kp._1_0.services.DocumentCarrier;
 import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
-import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 
 @Named
-@KPOperation(KnowledgeOperations.Lowering_Task)
-@KPOperation(KnowledgeOperations.Lifting_Task)
+@KPOperation(KnowledgeProcessingOperation.Lowering_Task)
+@KPOperation(KnowledgeProcessingOperation.Lifting_Task)
 public class SurrogateParser extends AbstractDeSerializer implements DeserializeApi {
 
   private XMLSurrogateParser xmlParser = new XMLSurrogateParser();
   private JSONSurrogateParser jsonParser = new JSONSurrogateParser();
 
   private final List<SyntacticRepresentation> supportedRepresentations = Arrays.asList(
-      rep(KRLanguage.Asset_Surrogate, KRFormat.XML_1_1, getDefaultCharset()),
-      rep(KRLanguage.Asset_Surrogate, KRFormat.JSON, getDefaultCharset()));
+      rep(KnowledgeRepresentationLanguage.Asset_Surrogate, SerializationFormat.XML_1_1, getDefaultCharset()),
+      rep(KnowledgeRepresentationLanguage.Asset_Surrogate, SerializationFormat.JSON, getDefaultCharset()));
 
 
   @Override
@@ -142,7 +141,7 @@ public class SurrogateParser extends AbstractDeSerializer implements Deserialize
   }
 
   @Override
-  protected KRFormat getDefaultFormat() {
+  protected SerializationFormat getDefaultFormat() {
     return null;
   }
 
@@ -156,7 +155,7 @@ public class SurrogateParser extends AbstractDeSerializer implements Deserialize
     @Override
     protected List<SyntacticRepresentation> getSupportedRepresentations() {
       return Collections
-          .singletonList(rep(KRLanguage.Asset_Surrogate, KRFormat.XML_1_1, getDefaultCharset()));
+          .singletonList(rep(KnowledgeRepresentationLanguage.Asset_Surrogate, SerializationFormat.XML_1_1, getDefaultCharset()));
     }
   }
 
@@ -170,7 +169,7 @@ public class SurrogateParser extends AbstractDeSerializer implements Deserialize
     @Override
     protected List<SyntacticRepresentation> getSupportedRepresentations() {
       return Collections
-          .singletonList(rep(KRLanguage.Asset_Surrogate, KRFormat.JSON, getDefaultCharset()));
+          .singletonList(rep(KnowledgeRepresentationLanguage.Asset_Surrogate, SerializationFormat.JSON, getDefaultCharset()));
     }
   }
 

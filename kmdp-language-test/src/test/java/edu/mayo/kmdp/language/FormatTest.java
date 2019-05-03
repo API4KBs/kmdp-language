@@ -21,9 +21,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.config.LocalTestConfig;
-import edu.mayo.ontology.taxonomies.krformat._2018._08.KRFormat;
-import edu.mayo.ontology.taxonomies.krlanguage._2018._08.KRLanguage;
-import edu.mayo.ontology.taxonomies.krserialization._2018._08.KRSerialization;
+import edu.mayo.ontology.taxonomies.krformat._2018._08.SerializationFormat;
+import edu.mayo.ontology.taxonomies.krlanguage._2018._08.KnowledgeRepresentationLanguage;
+import edu.mayo.ontology.taxonomies.krserialization._2018._08.KnowledgeRepresentationLanguageSerialization;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -56,11 +56,11 @@ public class FormatTest {
   public void testOWL2() {
     InputStream is = FormatTest.class.getResourceAsStream("/artifacts/test.ofn");
 
-    KnowledgeCarrier kc = KnowledgeCarrier.of(is, rep(KRLanguage.OWL_2))
+    KnowledgeCarrier kc = KnowledgeCarrier.of(is, rep(KnowledgeRepresentationLanguage.OWL_2))
         .flatMap((c) -> parser
             .ensureRepresentation(c,
-                rep(KRLanguage.OWL_2, KRSerialization.RDF_XML_Syntax,
-                    KRFormat.XML_1_1, Charset.defaultCharset().name())));
+                rep(KnowledgeRepresentationLanguage.OWL_2, KnowledgeRepresentationLanguageSerialization.RDF_XML_Syntax,
+                    SerializationFormat.XML_1_1, Charset.defaultCharset().name())));
 
     assertTrue(kc instanceof ExpressionCarrier);
     try {

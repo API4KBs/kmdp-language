@@ -15,16 +15,16 @@
  */
 package edu.mayo.kmdp.language.translators;
 
-import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._2018._06.KnowledgeOperations.Transcreation_Task;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.TransxionApi;
 import edu.mayo.kmdp.terms.skosifier.Owl2SkosConfig;
 import edu.mayo.kmdp.terms.skosifier.Owl2SkosConverter;
 import edu.mayo.kmdp.util.Util;
-import edu.mayo.ontology.taxonomies.krformat._2018._08.KRFormat;
-import edu.mayo.ontology.taxonomies.krlanguage._2018._08.KRLanguage;
-import edu.mayo.ontology.taxonomies.krserialization._2018._08.KRSerialization;
+import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._2018._06.KnowledgeProcessingOperation;
+import edu.mayo.ontology.taxonomies.krformat._2018._08.SerializationFormat;
+import edu.mayo.ontology.taxonomies.krlanguage._2018._08.KnowledgeRepresentationLanguage;
+import edu.mayo.ontology.taxonomies.krserialization._2018._08.KnowledgeRepresentationLanguageSerialization;
 import edu.mayo.ontology.taxonomies.lexicon._2018._08.Lexicon;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -46,7 +46,7 @@ import org.omg.spec.api4kp._1_0.services.language.TransrepresentationOperator;
 import org.omg.spec.api4kp._1_0.services.resources.ParameterDefinitions;
 
 @Named
-@KPOperation(Transcreation_Task)
+@KPOperation(KnowledgeProcessingOperation.Transcreation_Task)
 public class OWLtoSKOSTranscreator implements TransxionApi {
 
   public final static String operatorId = "57869ee0-304c-40a4-8759-40ea667c328d";
@@ -103,12 +103,12 @@ public class OWLtoSKOSTranscreator implements TransxionApi {
 
   @Override
   public SyntacticRepresentation getTransrepresentationOutput(String txionId) {
-    return rep(KRLanguage.OWL_2, KRSerialization.RDF_XML_Syntax, KRFormat.XML_1_1)
+    return rep(KnowledgeRepresentationLanguage.OWL_2, KnowledgeRepresentationLanguageSerialization.RDF_XML_Syntax, SerializationFormat.XML_1_1)
         .withLexicon(Lexicon.SKOS);
   }
 
   public SyntacticRepresentation getTransrepresentationInput(String txionId) {
-    return rep(KRLanguage.OWL_2, KRSerialization.RDF_XML_Syntax, KRFormat.XML_1_1);
+    return rep(KnowledgeRepresentationLanguage.OWL_2, KnowledgeRepresentationLanguageSerialization.RDF_XML_Syntax, SerializationFormat.XML_1_1);
   }
 
   @Override

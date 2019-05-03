@@ -20,7 +20,7 @@ import edu.mayo.kmdp.util.JaxbUtil;
 import edu.mayo.kmdp.util.Util;
 import edu.mayo.kmdp.util.XMLUtil;
 import edu.mayo.ontology.taxonomies.api4kp.parsinglevel._20190801.ParsingLevel;
-import edu.mayo.ontology.taxonomies.krformat._2018._08.KRFormat;
+import edu.mayo.ontology.taxonomies.krformat._2018._08.SerializationFormat;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Function;
@@ -131,7 +131,7 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializer imp
 
 
   @Override
-  protected KRFormat getDefaultFormat() {
-    return KRFormat.XML_1_1;
+  protected SerializationFormat getDefaultFormat() {
+    return SerializationFormat.XML_1_1;
   }
 }
