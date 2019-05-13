@@ -17,7 +17,7 @@ package edu.mayo.kmdp.language.detectors;
 
 import static edu.mayo.ontology.taxonomies.krformat._2018._08.SerializationFormat.JSON;
 import static edu.mayo.ontology.taxonomies.krformat._2018._08.SerializationFormat.XML_1_1;
-import static edu.mayo.ontology.taxonomies.krlanguage._2018._08.KnowledgeRepresentationLanguage.Asset_Surrogate;
+import static edu.mayo.ontology.taxonomies.krlanguage._2018._08.KnowledgeRepresentationLanguage.Knowledge_Asset_Surrogate;
 
 import edu.mayo.kmdp.language.DetectApi;
 import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
@@ -40,7 +40,7 @@ public class SurrogateDetector implements DetectApi {
   private XMLSurrogateDetector xmlDetector = new XMLSurrogateDetector();
   private JSNSurrogateDetector jsnDetector = new JSNSurrogateDetector();
 
-  protected static final KnowledgeRepresentationLanguage theLanguage = Asset_Surrogate;
+  protected static final KnowledgeRepresentationLanguage theLanguage = Knowledge_Asset_Surrogate;
 
 
   @Override
@@ -74,7 +74,9 @@ public class SurrogateDetector implements DetectApi {
           .singletonList(new org.omg.spec.api4kp._1_0.services.SyntacticRepresentation()
               .withLanguage(theLanguage)
               .withFormat(XML_1_1)
-              .withLexicon(Lexicon.API4KP_Rel_Jun18));
+              .withLexicon(Lexicon.Asset_Relationships_Dependencies,
+                  Lexicon.Asset_Relationships_Derivations, Lexicon.Asset_Relationships_Structural,
+                  Lexicon.Asset_Relationships_Variants));
     }
   }
 
@@ -91,7 +93,9 @@ public class SurrogateDetector implements DetectApi {
           .singletonList(new org.omg.spec.api4kp._1_0.services.SyntacticRepresentation()
               .withLanguage(theLanguage)
               .withFormat(JSON)
-              .withLexicon(Lexicon.API4KP_Rel_Jun18));
+              .withLexicon(Lexicon.Asset_Relationships_Dependencies,
+                  Lexicon.Asset_Relationships_Derivations, Lexicon.Asset_Relationships_Structural,
+                  Lexicon.Asset_Relationships_Variants));
     }
   }
 

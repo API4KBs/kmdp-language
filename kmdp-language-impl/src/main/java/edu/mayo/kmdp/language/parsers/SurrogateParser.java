@@ -44,8 +44,8 @@ public class SurrogateParser extends AbstractDeSerializer implements Deserialize
   private JSONSurrogateParser jsonParser = new JSONSurrogateParser();
 
   private final List<SyntacticRepresentation> supportedRepresentations = Arrays.asList(
-      rep(KnowledgeRepresentationLanguage.Asset_Surrogate, SerializationFormat.XML_1_1, getDefaultCharset()),
-      rep(KnowledgeRepresentationLanguage.Asset_Surrogate, SerializationFormat.JSON, getDefaultCharset()));
+      rep(KnowledgeRepresentationLanguage.Knowledge_Asset_Surrogate, SerializationFormat.XML_1_1, getDefaultCharset()),
+      rep(KnowledgeRepresentationLanguage.Knowledge_Asset_Surrogate, SerializationFormat.JSON, getDefaultCharset()));
 
 
   @Override
@@ -155,7 +155,7 @@ public class SurrogateParser extends AbstractDeSerializer implements Deserialize
     @Override
     protected List<SyntacticRepresentation> getSupportedRepresentations() {
       return Collections
-          .singletonList(rep(KnowledgeRepresentationLanguage.Asset_Surrogate, SerializationFormat.XML_1_1, getDefaultCharset()));
+          .singletonList(rep(KnowledgeRepresentationLanguage.Knowledge_Asset_Surrogate, SerializationFormat.XML_1_1, getDefaultCharset()));
     }
   }
 
@@ -169,7 +169,7 @@ public class SurrogateParser extends AbstractDeSerializer implements Deserialize
     @Override
     protected List<SyntacticRepresentation> getSupportedRepresentations() {
       return Collections
-          .singletonList(rep(KnowledgeRepresentationLanguage.Asset_Surrogate, SerializationFormat.JSON, getDefaultCharset()));
+          .singletonList(rep(KnowledgeRepresentationLanguage.Knowledge_Asset_Surrogate, SerializationFormat.JSON, getDefaultCharset()));
     }
   }
 

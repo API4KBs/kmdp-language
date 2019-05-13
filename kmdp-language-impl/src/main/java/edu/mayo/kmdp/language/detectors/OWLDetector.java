@@ -130,18 +130,18 @@ public class OWLDetector implements DetectApi {
 
   protected KnowledgeRepresentationLanguageProfile detectProfile(OWLOntology o) {
     if (new OWL2RLProfile().checkOntology(o).isInProfile()) {
-      return KnowledgeRepresentationLanguageProfile.OWL_2_RL;
+      return KnowledgeRepresentationLanguageProfile.OWL2_RL;
     }
     if (new OWL2QLProfile().checkOntology(o).isInProfile()) {
-      return KnowledgeRepresentationLanguageProfile.OWL_2_QL;
+      return KnowledgeRepresentationLanguageProfile.OWL2_QL;
     }
     if (new OWL2ELProfile().checkOntology(o).isInProfile()) {
-      return KnowledgeRepresentationLanguageProfile.OWL_2_EL;
+      return KnowledgeRepresentationLanguageProfile.OWL2_EL;
     }
     if (new OWL2DLProfile().checkOntology(o).isInProfile()) {
-      return KnowledgeRepresentationLanguageProfile.OWL_2_DL;
+      return KnowledgeRepresentationLanguageProfile.OWL2_DL;
     }
-    return KnowledgeRepresentationLanguageProfile.OWL_2_Full;
+    return KnowledgeRepresentationLanguageProfile.OWL2_Full;
   }
 
   @Override

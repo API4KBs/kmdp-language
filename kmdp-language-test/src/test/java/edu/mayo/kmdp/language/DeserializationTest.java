@@ -158,7 +158,7 @@ public class DeserializationTest {
     String serializedAsset = JaxbUtil.marshallToString(Collections.singleton(asset.getClass()),asset, JaxbUtil.defaultProperties());
 
     KnowledgeCarrier ast = KnowledgeCarrier.ofAst(asset)
-        .withRepresentation(rep(KnowledgeRepresentationLanguage.Asset_Surrogate))
+        .withRepresentation(rep(KnowledgeRepresentationLanguage.Knowledge_Asset_Surrogate))
         .withLevel(ParsingLevel.Abstract_Knowledge_Expression);
 
     ExpressionCarrier ser = (ExpressionCarrier) parser.lower(ast,ParsingLevel.Concrete_Knowledge_Expression);
@@ -178,7 +178,7 @@ public class DeserializationTest {
     String serializedAsset = JSonUtil.printJson(asset).orElse("");
 
     KnowledgeCarrier ast = KnowledgeCarrier.ofAst(asset)
-        .withRepresentation(rep(KnowledgeRepresentationLanguage.Asset_Surrogate))
+        .withRepresentation(rep(KnowledgeRepresentationLanguage.Knowledge_Asset_Surrogate))
         .withLevel(ParsingLevel.Abstract_Knowledge_Expression);
 
 
