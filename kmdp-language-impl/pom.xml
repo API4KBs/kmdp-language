@@ -22,7 +22,6 @@
 
       <plugin>
         <artifactId>maven-war-plugin</artifactId>
-        <version>3.2.2</version>
         <configuration>
           <attachClasses>true</attachClasses>
         </configuration>

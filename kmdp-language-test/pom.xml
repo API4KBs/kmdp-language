@@ -16,14 +16,14 @@
     <dependency>
       <groupId>edu.mayo.kmdp</groupId>
       <artifactId>kmdp-language-service-server</artifactId>
-      <version>1.0</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>edu.mayo.kmdp</groupId>
       <artifactId>kmdp-language-service-api-client</artifactId>
-      <version>1.0</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
 
@@ -47,7 +47,7 @@
     <dependency>
       <groupId>edu.mayo.kmdp</groupId>
       <artifactId>kmdp-language-impl</artifactId>
-      <version>1.0.1</version>
+      <version>${project.version}</version>
       <classifier>classes</classifier>
       <scope>test</scope>
     </dependency>
