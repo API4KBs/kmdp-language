@@ -7,7 +7,7 @@
   <parent>
     <artifactId>kmdp-language</artifactId>
     <groupId>edu.mayo.kmdp</groupId>
-    <version>1.0</version>
+    <version>1.0.1</version>
   </parent>
 
   <artifactId>kmdp-language-test</artifactId>
@@ -47,7 +47,7 @@
     <dependency>
       <groupId>edu.mayo.kmdp</groupId>
       <artifactId>kmdp-language-impl</artifactId>
-      <version>1.0</version>
+      <version>1.0.1</version>
       <classifier>classes</classifier>
       <scope>test</scope>
     </dependency>
