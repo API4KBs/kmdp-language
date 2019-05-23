@@ -1,20 +1,20 @@
 {
   "_class" : "KnowledgeAsset",
-  "resourceId" : {
-    "_class" : "URIIdentifier",
-    "uri" : "https://clinicalknowledgemanagement.mayo.edu/assets/2c6572ea-867d-4863-963a-b4bc5357429b"
-  },
-  "type" : [ {
+  "formalType" : [ {
     "_class" : "ConceptIdentifier",
     "@id" : "https://ontology.mayo.edu/taxonomies/KAO/KnowledgeAssetType#e12dcd92-f8de-3115-b8ca-4480cfc44d77",
     "namespace" : {
       "_class" : "NamespaceIdentifier",
       "@id" : "https://ontology.mayo.edu/taxonomies/KAO/KnowledgeAssetType#243089c1-b6ab-318f-bec9-e1cfaf410992",
-      "label" : "KnowledgeAssetType",
+      "label" : "KnowledgeAssetTypes",
       "tag" : "243089c1-b6ab-318f-bec9-e1cfaf410992"
     },
     "label" : "Cognitive Process Model",
     "tag" : "CognitiveProcessModel",
-    "ref" : "http://ckm.ontology.mayo.edu/ontology/KAO#CognitiveProcessModel"
-  } ]
+    "ref" : "http://ontology.mayo.edu/ontology/KAO/CognitiveProcessModel"
+  } ],
+  "assetId" : {
+    "_class" : "URIIdentifier",
+    "uri" : "https://clinicalknowledgemanagement.mayo.edu/assets/2c6572ea-867d-4863-963a-b4bc5357429b"
+  }
 }

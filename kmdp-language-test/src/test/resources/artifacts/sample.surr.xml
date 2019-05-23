@@ -1,14 +1,14 @@
 <surr:knowledgeAsset xmlns:ann="http://kmdp.mayo.edu/metadata/annotations" xmlns:surr="http://kmdp.mayo.edu/metadata/surrogate" xmlns:id="http://www.omg.org/spec/API4KP/1.0/identifiers">
-  <surr:resourceId
+  <surr:assetId
     uri="https://clinicalknowledgemanagement.mayo.edu/assets/2c6572ea-867d-4863-963a-b4bc5357429b" />
-  <surr:type
+  <surr:formalType
     label="Cognitive Process Model"
     tag="CognitiveProcessModel"
-    ref="http://ckm.ontology.mayo.edu/ontology/KAO#CognitiveProcessModel"
+    ref="http://ontology.mayo.edu/ontology/KAO/CognitiveProcessModel"
     conceptId="https://ontology.mayo.edu/taxonomies/KAO/KnowledgeAssetType#e12dcd92-f8de-3115-b8ca-4480cfc44d77">
     <id:namespace
       label="KnowledgeAssetType_Scheme"
       tag="1a9d306c-b968-3b8a-a1e5-e0517d571143"
       id="https://ontology.mayo.edu/taxonomies/KAO/KnowledgeAssetType#1a9d306c-b968-3b8a-a1e5-e0517d571143" />
-  </surr:type>
+  </surr:formalType>
 </surr:knowledgeAsset>

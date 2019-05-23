@@ -152,9 +152,9 @@ public class DeserializationTest {
   public void testSerializeSurrogate() {
 
     KnowledgeAsset asset = new edu.mayo.kmdp.metadata.surrogate.resources.KnowledgeAsset()
-        .withResourceId(new URIIdentifier().withUri(
+        .withAssetId(new URIIdentifier().withUri(
             URI.create(Registry.MAYO_ASSETS_BASE_URI + "2c6572ea-867d-4863-963a-b4bc5357429b")))
-        .withType(KnowledgeAssetType.Cognitive_Process_Model);
+        .withFormalType(KnowledgeAssetType.Cognitive_Process_Model);
     String serializedAsset = JaxbUtil.marshallToString(Collections.singleton(asset.getClass()),asset, JaxbUtil.defaultProperties());
 
     KnowledgeCarrier ast = KnowledgeCarrier.ofAst(asset)
@@ -171,9 +171,9 @@ public class DeserializationTest {
   public void testSerializeSurrogateJson() {
 
     KnowledgeAsset asset = new edu.mayo.kmdp.metadata.surrogate.resources.KnowledgeAsset()
-        .withResourceId(new URIIdentifier().withUri(
+        .withAssetId(new URIIdentifier().withUri(
             URI.create(Registry.MAYO_ASSETS_BASE_URI + "2c6572ea-867d-4863-963a-b4bc5357429b")))
-        .withType(KnowledgeAssetType.Cognitive_Process_Model);
+        .withFormalType(KnowledgeAssetType.Cognitive_Process_Model);
 
     String serializedAsset = JSonUtil.printJson(asset).orElse("");
 
