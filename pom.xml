@@ -6,38 +6,142 @@
 
   <parent>
     <groupId>edu.mayo.kmdp</groupId>
-    <artifactId>kmdp-language-service-base</artifactId>
-    <version>1.0.2</version>
+    <artifactId>kmdp-artifact-transrepresentation-service-base</artifactId>
+    <version>(2.0.1,2.0.3)</version>
   </parent>
 
-  <artifactId>kmdp-language</artifactId>
-  <version>1.0.2</version>
+  <artifactId>kmdp-knowledge-transrepresentation-impl</artifactId>
+  <version>2.0.0</version>
 
-  <packaging>pom</packaging>
+  <packaging>war</packaging>
 
-  <modules>
-    <module>kmdp-language-impl</module>
-    <module>kmdp-language-test</module>
-  </modules>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
 
-  <repositories>
-    <repository>
-      <id>bintray-api4kbs-API4KP-Mvn-Repo</id>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <name>bintray</name>
-      <url>https://dl.bintray.com/api4kbs/API4KP-Mvn-Repo</url>
-    </repository>
-  </repositories>
+      <plugin>
+        <artifactId>maven-war-plugin</artifactId>
+        <configuration>
+          <attachClasses>true</attachClasses>
+        </configuration>
+      </plugin>
+
+    </plugins>
+  </build>
 
 
-  <distributionManagement>
-    <repository>
-      <id>bintray-api4kbs-API4KP-Mvn-Repo</id>
-      <name>api4kbs-API4KP-Mvn-Repo</name>
-      <url>https://api.bintray.com/maven/api4kbs/API4KP-Mvn-Repo/kmdp-language/;override=1;publish=1</url>
-    </repository>
-  </distributionManagement>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>edu.mayo.kmdp</groupId>
+      <artifactId>kmdp-artifact-transrepresentation-service-client</artifactId>
+      <version>${kmdp.impl.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>edu.mayo.kmdp</groupId>
+      <artifactId>kmdp-service-descr</artifactId>
+    </dependency>
+
+    <dependency>
+      <artifactId>omg-cmmn-11</artifactId>
+      <groupId>edu.mayo.kmdp</groupId>
+    </dependency>
+
+    <dependency>
+      <groupId>edu.mayo.kmdp</groupId>
+      <artifactId>kmdp-asset-metadata</artifactId>
+    </dependency>
+
+    <dependency>
+      <artifactId>omg-dmn-11</artifactId>
+      <groupId>edu.mayo.kmdp</groupId>
+    </dependency>
+    <dependency>
+      <groupId>edu.mayo.kmdp</groupId>
+      <artifactId>omg-dmn-12</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>net.sourceforge.owlapi</groupId>
+      <artifactId>owlapi-apibinding</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.inject</groupId>
+      <artifactId>javax.inject</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>edu.mayo.kmdp</groupId>
+      <artifactId>terms-owl-to-skos</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>edu.mayo.kmdp</groupId>
+      <artifactId>kmdp-artifact-transrepresentation-service-server</artifactId>
+      <version>${kmdp.impl.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>edu.mayo.kmdp</groupId>
+      <artifactId>kmdp-utils</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+    </dependency>
+
+  </dependencies>
+
+
+  <profiles>
+    <profile>
+      <id>public</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <repositories>
+        <repository>
+          <id>bintray-api4kbs-API4KP-Mvn-Repo</id>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+          <name>bintray</name>
+          <url>https://dl.bintray.com/api4kbs/API4KP-Mvn-Repo</url>
+        </repository>
+      </repositories>
+
+
+      <distributionManagement>
+        <repository>
+          <id>bintray-api4kbs-API4KP-Mvn-Repo</id>
+          <name>api4kbs-API4KP-Mvn-Repo</name>
+          <url>https://api.bintray.com/maven/api4kbs/API4KP-Mvn-Repo/kmdp-language/;override=1;publish=1</url>
+        </repository>
+      </distributionManagement>
+    </profile>
+  </profiles>
+
+
 
 </project>
