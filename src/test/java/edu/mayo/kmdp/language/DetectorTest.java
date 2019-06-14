@@ -29,7 +29,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-
 import edu.mayo.kmdp.language.config.LocalTestConfig;
 import edu.mayo.kmdp.tranx.DetectApi;
 import edu.mayo.kmdp.util.FileUtil;
@@ -60,11 +59,11 @@ public class DetectorTest {
     assertTrue(dmn.isPresent());
     KnowledgeCarrier carrier = KnowledgeCarrier.of(dmn.get());
 
-    SyntacticRepresentation rep = detector.getDetectedRepresentation(carrier);
+    Optional<SyntacticRepresentation> rep = detector.getDetectedRepresentation(carrier).getOptionalValue();
 
-    assertNotNull(rep);
-    assertEquals(DMN_1_1, rep.getLanguage());
-    assertEquals(XML_1_1, rep.getFormat());
+    assertTrue(rep.isPresent());
+    assertEquals(DMN_1_1, rep.get().getLanguage());
+    assertEquals(XML_1_1, rep.get().getFormat());
   }
 
 
@@ -76,11 +75,11 @@ public class DetectorTest {
     assertTrue(dmn.isPresent());
     KnowledgeCarrier carrier = KnowledgeCarrier.of(dmn.get());
 
-    SyntacticRepresentation rep = detector.getDetectedRepresentation(carrier);
+    Optional<SyntacticRepresentation> rep = detector.getDetectedRepresentation(carrier).getOptionalValue();
 
-    assertNotNull(rep);
-    assertEquals(DMN_1_1, rep.getLanguage());
-    assertEquals(XML_1_1, rep.getFormat());
+    assertTrue(rep.isPresent());
+    assertEquals(DMN_1_1, rep.get().getLanguage());
+    assertEquals(XML_1_1, rep.get().getFormat());
   }
 
 
@@ -92,11 +91,11 @@ public class DetectorTest {
     assertTrue(cmmn.isPresent());
     KnowledgeCarrier carrier = KnowledgeCarrier.of(cmmn.get());
 
-    SyntacticRepresentation rep = detector.getDetectedRepresentation(carrier);
+    Optional<SyntacticRepresentation> rep = detector.getDetectedRepresentation(carrier).getOptionalValue();
 
-    assertNotNull(rep);
-    assertEquals(CMMN_1_1, rep.getLanguage());
-    assertEquals(XML_1_1, rep.getFormat());
+    assertTrue(rep.isPresent());
+    assertEquals(CMMN_1_1, rep.get().getLanguage());
+    assertEquals(XML_1_1, rep.get().getFormat());
   }
 
 
@@ -109,22 +108,22 @@ public class DetectorTest {
     assertTrue(surr.isPresent());
     KnowledgeCarrier carrier = KnowledgeCarrier.of(surr.get());
 
-    SyntacticRepresentation rep = detector.getDetectedRepresentation(carrier);
+    Optional<SyntacticRepresentation> rep = detector.getDetectedRepresentation(carrier).getOptionalValue();
 
-    assertNotNull(rep);
-    assertEquals(Knowledge_Asset_Surrogate, rep.getLanguage());
-    assertEquals(XML_1_1, rep.getFormat());
+    assertTrue(rep.isPresent());
+    assertEquals(Knowledge_Asset_Surrogate, rep.get().getLanguage());
+    assertEquals(XML_1_1, rep.get().getFormat());
 
     Optional<String> jsonSurr = FileUtil
         .read(DetectorTest.class.getResource("/artifacts/sample.surr.json"));
     assertTrue(jsonSurr.isPresent());
     KnowledgeCarrier carrier2 = KnowledgeCarrier.of(jsonSurr.get());
 
-    SyntacticRepresentation rep2 = detector.getDetectedRepresentation(carrier2);
+    Optional<SyntacticRepresentation> rep2 = detector.getDetectedRepresentation(carrier2).getOptionalValue();
 
-    assertNotNull(rep2);
-    assertEquals(Knowledge_Asset_Surrogate, rep2.getLanguage());
-    assertEquals(JSON, rep2.getFormat());
+    assertTrue(rep2.isPresent());
+    assertEquals(Knowledge_Asset_Surrogate, rep2.get().getLanguage());
+    assertEquals(JSON, rep2.get().getFormat());
   }
 
   @Test
@@ -132,7 +131,10 @@ public class DetectorTest {
     InputStream is = DetectorTest.class.getResourceAsStream("/artifacts/test.ofn");
     KnowledgeCarrier carrier = KnowledgeCarrier.of(is);
 
-    SyntacticRepresentation rep = detector.getDetectedRepresentation(carrier);
+    Optional<SyntacticRepresentation> orep = detector.getDetectedRepresentation(carrier).getOptionalValue();
+    assertTrue(orep.isPresent());
+    SyntacticRepresentation rep = orep.get();
+
     assertEquals(OWL_2, rep.getLanguage());
     assertEquals(OWL2_RL, rep.getProfile());
     assertEquals(TXT, rep.getFormat());

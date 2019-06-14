@@ -46,6 +46,7 @@ import javax.inject.Inject;
 import org.eclipse.rdf4j.model.vocabulary.SKOS;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.omg.spec.api4kp._1_0.Answer;
 import org.omg.spec.api4kp._1_0.PlatformComponentHelper;
 import org.omg.spec.api4kp._1_0.services.ASTCarrier;
 import org.omg.spec.api4kp._1_0.services.KPComponent;
@@ -84,12 +85,15 @@ public class TranscreationTest {
     Owl2SkosConfig p = new Owl2SkosConfig()
         .with(OWLtoSKOSTxParams.TGT_NAMESPACE, "http://bar/skos-example");
 
-    ASTCarrier ac = KnowledgeCarrier.of(owl.get(), rep(OWL_2))
+    Optional<ASTCarrier> ac = KnowledgeCarrier.of(owl.get(), rep(OWL_2))
         .flatMap((kc) -> transtor.applyTransrepresentation(OWLtoSKOSTranscreator.operatorId, kc, p))
         .flatMap((kc) -> parser.lift(kc, ParsingLevel.Abstract_Knowledge_Expression))
-        .flatMap(ASTCarrier.class::cast);
+        .filter(ASTCarrier.class::isInstance)
+        .map(ASTCarrier.class::cast)
+        .getOptionalValue();
 
-    checkSKOS(ac);
+    assertTrue(ac.isPresent());
+    checkSKOS(ac.get());
   }
 
   private void checkSKOS(ASTCarrier ac) {
@@ -121,20 +125,35 @@ public class TranscreationTest {
   @Test
   public void testTransrepresentationFilter() {
 
-    Set<String> ops = transtor.listOperators(null, null, null).stream()
-        .map(KnowledgeProcessingOperator::getOperatorId).collect(
-            Collectors.toSet());
-    assertTrue(ops.contains(OWLtoSKOSTranscreator.operatorId));
+    Optional<Set<String>> ops = transtor
+        .listOperators(null, null, null)
+        .map((l) -> l.stream()
+            .map(KnowledgeProcessingOperator::getOperatorId)
+            .collect(Collectors.toSet()))
+        .getOptionalValue();
 
-    Set<String> ops2 = transtor.listOperators(rep(OWL_2), rep(OWL_2).withLexicon(Lexicon.SKOS), null).stream()
-        .map(KnowledgeProcessingOperator::getOperatorId).collect(
-            Collectors.toSet());
-    assertTrue(ops2.contains(OWLtoSKOSTranscreator.operatorId));
+    assertTrue(ops.isPresent()
+        && ops.get().contains(OWLtoSKOSTranscreator.operatorId));
 
-    Set<String> ops3 = transtor.listOperators(rep(OWL_2), rep(DMN_1_1), null).stream()
-        .map(KnowledgeProcessingOperator::getOperatorId).collect(
-            Collectors.toSet());
-    assertFalse(ops3.contains(OWLtoSKOSTranscreator.operatorId));
+    Optional<Set<String>> ops2 = transtor
+        .listOperators(rep(OWL_2), rep(OWL_2).withLexicon(Lexicon.SKOS), null)
+        .map((l) -> l.stream()
+            .map(KnowledgeProcessingOperator::getOperatorId)
+            .collect(Collectors.toSet()))
+        .getOptionalValue();
+
+    assertTrue(ops2.isPresent()
+        && ops2.get().contains(OWLtoSKOSTranscreator.operatorId));
+
+    Optional<Set<String>> ops3 = transtor
+        .listOperators(rep(OWL_2), rep(DMN_1_1), null)
+        .map((l) -> l.stream()
+            .map(KnowledgeProcessingOperator::getOperatorId)
+            .collect(Collectors.toSet()))
+        .getOptionalValue();
+
+    assertFalse(ops3.isPresent()
+        && ops3.get().contains(OWLtoSKOSTranscreator.operatorId));
 
 
   }
@@ -147,19 +166,20 @@ public class TranscreationTest {
 
     KnowledgeCarrier kc = KnowledgeCarrier.of(owl.get(), rep(OWL_2));
 
-    ASTCarrier ac = transtor
-        .listOperators(kc.getRepresentation(), rep(OWL_2).withLexicon(Lexicon.SKOS), null).stream()
-        .findAny()
-        .map((op) -> transtor.applyTransrepresentation(
-            op.getOperatorId(),
-            kc,
-            new Owl2SkosConfig(PlatformComponentHelper.defaults(op.getAcceptedParams()))
-                .with(OWLtoSKOSTxParams.TGT_NAMESPACE, "http://bar/skos-example")))
-        .map((out) -> parser.lift(out, ParsingLevel.Abstract_Knowledge_Expression))
+    Optional<ASTCarrier> ac = transtor
+        .listOperators(kc.getRepresentation(), rep(OWL_2).withLexicon(Lexicon.SKOS), null)
+        .flatMap(Answer::first)
+        .flatMap((op) -> transtor.applyTransrepresentation(
+                op.getOperatorId(),
+                kc,
+                new Owl2SkosConfig(PlatformComponentHelper.defaults(op.getAcceptedParams()))
+                    .with(OWLtoSKOSTxParams.TGT_NAMESPACE, "http://bar/skos-example")))
+        .flatMap((out) -> parser.lift(out, ParsingLevel.Abstract_Knowledge_Expression))
         .map(ASTCarrier.class::cast)
-        .get();
+        .getOptionalValue();
 
-    checkSKOS(ac);
+    assertTrue(ac.isPresent());
+    checkSKOS(ac.get());
   }
 
 

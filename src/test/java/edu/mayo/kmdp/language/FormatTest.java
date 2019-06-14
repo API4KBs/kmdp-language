@@ -28,6 +28,7 @@ import edu.mayo.ontology.taxonomies.krserialization._2018._08.KnowledgeRepresent
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.Optional;
 import javax.inject.Inject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -57,17 +58,19 @@ public class FormatTest {
   public void testOWL2() {
     InputStream is = FormatTest.class.getResourceAsStream("/artifacts/test.ofn");
 
-    KnowledgeCarrier kc = KnowledgeCarrier.of(is, rep(KnowledgeRepresentationLanguage.OWL_2))
+    Optional<KnowledgeCarrier> kc = KnowledgeCarrier.of(is, rep(KnowledgeRepresentationLanguage.OWL_2))
         .flatMap((c) -> parser
             .ensureRepresentation(c,
                 rep(KnowledgeRepresentationLanguage.OWL_2, KnowledgeRepresentationLanguageSerialization.RDF_XML_Syntax,
-                    SerializationFormat.XML_1_1, Charset.defaultCharset().name())));
+                    SerializationFormat.XML_1_1, Charset.defaultCharset().name())))
+        .getOptionalValue();
 
-    assertTrue(kc instanceof ExpressionCarrier);
+    assertTrue(kc.isPresent());
+    assertTrue(kc.get() instanceof ExpressionCarrier);
     try {
       OWLOntology o = OWLManager.createOWLOntologyManager()
           .loadOntologyFromOntologyDocument(new ByteArrayInputStream(
-              ((ExpressionCarrier) kc).getSerializedExpression().getBytes()));
+              ((ExpressionCarrier) kc.get()).getSerializedExpression().getBytes()));
       assertEquals(new RDFXMLDocumentFormat(), o.getFormat());
     } catch (OWLOntologyCreationException e) {
       fail(e.getMessage());
