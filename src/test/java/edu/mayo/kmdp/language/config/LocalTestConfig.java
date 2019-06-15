@@ -23,6 +23,7 @@ import edu.mayo.kmdp.tranx.server.DetectApiDelegate;
 import edu.mayo.kmdp.tranx.server.TransxionApiDelegate;
 import javax.inject.Inject;
 import org.omg.spec.api4kp._1_0.services.KPComponent;
+import org.omg.spec.api4kp._1_0.services.KPServer;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -36,6 +37,7 @@ import org.springframework.web.client.RestTemplate;
 public class LocalTestConfig {
 
   @Inject
+  @KPServer
   DetectApiDelegate detector;
 
   @Bean
@@ -46,6 +48,7 @@ public class LocalTestConfig {
 
 
   @Inject
+  @KPServer
   TransxionApiDelegate txor;
 
   @Bean
@@ -56,6 +59,7 @@ public class LocalTestConfig {
 
 
   @Inject
+  @KPServer
   DeserializeApiDelegate deser;
 
   @Bean
@@ -65,9 +69,8 @@ public class LocalTestConfig {
   }
 
   @Bean
-  public RestTemplate restTemplate(RestTemplateBuilder builder) {
-    return builder.build();
+  public RestTemplate restTemplate() {
+    return new RestTemplate();
   }
-
 
 }

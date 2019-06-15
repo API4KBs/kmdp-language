@@ -20,6 +20,7 @@ import static edu.mayo.kmdp.util.ws.ResponseHelper.map;
 
 import edu.mayo.kmdp.tranx.server.DetectApiDelegate;
 import edu.mayo.kmdp.util.JaxbUtil;
+import edu.mayo.kmdp.util.ws.ResponseHelper;
 import java.io.ByteArrayInputStream;
 import java.util.Arrays;
 import org.omg.spec.api4kp._1_0.services.ASTCarrier;
@@ -65,13 +66,13 @@ public abstract class XMLBasedLanguageDetector<T> implements DetectApiDelegate {
         isLang = root.isInstance(((ASTCarrier) sourceArtifact).getParsedExpression());
       }
     } catch (Exception e) {
-      return null;
+      return ResponseHelper.fail();
     }
 
     if (isLang && !getAll(getDetectableLanguages()).isEmpty()) {
       return map(getDetectableLanguages(), (l) -> l.get(0));
     }
-    return null;
+    return ResponseHelper.fail();
   }
 
   @Override
