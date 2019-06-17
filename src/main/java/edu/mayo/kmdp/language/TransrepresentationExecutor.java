@@ -54,6 +54,7 @@ public class TransrepresentationExecutor implements TransxionApiDelegate {
 
   public TransrepresentationExecutor(@Autowired(required = false)
   @KPOperation(KnowledgeProcessingOperation.Transcreation_Task)
+  @KPOperation(KnowledgeProcessingOperation.Translation_Task)
       List<TransxionApiDelegate> translators) {
     super();
 
