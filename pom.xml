@@ -7,11 +7,11 @@
   <parent>
     <groupId>edu.mayo.kmdp</groupId>
     <artifactId>kmdp-artifact-transrepresentation-service-base</artifactId>
-    <version>(2.0.2-b20190608000000,2.0.3)</version>
+    <version>(2.4.0,2.5.1]</version>
   </parent>
 
   <artifactId>kmdp-knowledge-transrepresentation-impl</artifactId>
-  <version>2.0.2</version>
+  <version>2.0.5</version>
 
   <packaging>war</packaging>
 
@@ -37,14 +37,13 @@
   <dependencies>
 
     <dependency>
-      <groupId>edu.mayo.kmdp</groupId>
-      <artifactId>kmdp-artifact-transrepresentation-service-client</artifactId>
-      <version>(2.0.2-b20190608000000,2.0.3)</version>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
     </dependency>
 
     <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
+      <groupId>edu.mayo.kmdp</groupId>
+      <artifactId>kmdp-rest-ws-utils</artifactId>
     </dependency>
 
     <dependency>
@@ -108,6 +107,13 @@
     <dependency>
       <groupId>com.fasterxml.jackson.dataformat</groupId>
       <artifactId>jackson-dataformat-xml</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>edu.mayo.kmdp</groupId>
+      <artifactId>kmdp-artifact-transrepresentation-service-client</artifactId>
+      <version>${kmdp.impl.version}</version>
+      <scope>test</scope>
     </dependency>
 
   </dependencies>
