@@ -15,13 +15,13 @@
  */
 package edu.mayo.kmdp.language.detectors;
 
-import static edu.mayo.ontology.taxonomies.krformat._2018._08.SerializationFormat.XML_1_1;
-import static edu.mayo.ontology.taxonomies.krlanguage._2018._08.KnowledgeRepresentationLanguage.DMN_1_1;
+import static edu.mayo.ontology.taxonomies.krformat._20190801.SerializationFormat.XML_1_1;
+import static edu.mayo.ontology.taxonomies.krlanguage._20190801.KnowledgeRepresentationLanguage.DMN_1_1;
 import static java.util.Collections.singletonList;
 
 import edu.mayo.kmdp.tranx.server.DetectApiDelegate;
 import edu.mayo.kmdp.util.ws.ResponseHelper;
-import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._2018._06.KnowledgeProcessingOperation;
+import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._20190801.KnowledgeProcessingOperation;
 import java.util.List;
 import javax.inject.Named;
 import org.omg.spec.api4kp._1_0.services.KPOperation;

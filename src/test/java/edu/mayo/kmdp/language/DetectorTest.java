@@ -16,15 +16,15 @@
 package edu.mayo.kmdp.language;
 
 
-import static edu.mayo.ontology.taxonomies.krformat._2018._08.SerializationFormat.JSON;
-import static edu.mayo.ontology.taxonomies.krformat._2018._08.SerializationFormat.TXT;
-import static edu.mayo.ontology.taxonomies.krformat._2018._08.SerializationFormat.XML_1_1;
-import static edu.mayo.ontology.taxonomies.krlanguage._2018._08.KnowledgeRepresentationLanguage.CMMN_1_1;
-import static edu.mayo.ontology.taxonomies.krlanguage._2018._08.KnowledgeRepresentationLanguage.DMN_1_1;
-import static edu.mayo.ontology.taxonomies.krlanguage._2018._08.KnowledgeRepresentationLanguage.Knowledge_Asset_Surrogate;
-import static edu.mayo.ontology.taxonomies.krlanguage._2018._08.KnowledgeRepresentationLanguage.OWL_2;
-import static edu.mayo.ontology.taxonomies.krprofile._2018._08.KnowledgeRepresentationLanguageProfile.OWL2_RL;
-import static edu.mayo.ontology.taxonomies.krserialization._2018._08.KnowledgeRepresentationLanguageSerialization.OWL_Functional_Syntax;
+import static edu.mayo.ontology.taxonomies.krformat._20190801.SerializationFormat.JSON;
+import static edu.mayo.ontology.taxonomies.krformat._20190801.SerializationFormat.TXT;
+import static edu.mayo.ontology.taxonomies.krformat._20190801.SerializationFormat.XML_1_1;
+import static edu.mayo.ontology.taxonomies.krlanguage._20190801.KnowledgeRepresentationLanguage.CMMN_1_1;
+import static edu.mayo.ontology.taxonomies.krlanguage._20190801.KnowledgeRepresentationLanguage.DMN_1_1;
+import static edu.mayo.ontology.taxonomies.krlanguage._20190801.KnowledgeRepresentationLanguage.Knowledge_Asset_Surrogate;
+import static edu.mayo.ontology.taxonomies.krlanguage._20190801.KnowledgeRepresentationLanguage.OWL_2;
+import static edu.mayo.ontology.taxonomies.krprofile._20190801.KnowledgeRepresentationLanguageProfile.OWL2_RL;
+import static edu.mayo.ontology.taxonomies.krserialization._20190801.KnowledgeRepresentationLanguageSerialization.OWL_Functional_Syntax;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
