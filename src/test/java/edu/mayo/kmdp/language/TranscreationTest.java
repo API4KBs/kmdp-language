@@ -16,8 +16,8 @@
 package edu.mayo.kmdp.language;
 
 import static edu.mayo.kmdp.util.Util.uuid;
-import static edu.mayo.ontology.taxonomies.krlanguage._2018._08.KnowledgeRepresentationLanguage.DMN_1_1;
-import static edu.mayo.ontology.taxonomies.krlanguage._2018._08.KnowledgeRepresentationLanguage.OWL_2;
+import static edu.mayo.ontology.taxonomies.krlanguage._20190801.KnowledgeRepresentationLanguage.DMN_1_1;
+import static edu.mayo.ontology.taxonomies.krlanguage._20190801.KnowledgeRepresentationLanguage.OWL_2;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -34,7 +34,7 @@ import edu.mayo.kmdp.util.FileUtil;
 import edu.mayo.kmdp.util.NameUtils;
 import edu.mayo.kmdp.util.Util;
 import edu.mayo.ontology.taxonomies.api4kp.parsinglevel._20190801.ParsingLevel;
-import edu.mayo.ontology.taxonomies.lexicon._2018._08.Lexicon;
+import edu.mayo.ontology.taxonomies.lexicon._20190801.Lexicon;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;

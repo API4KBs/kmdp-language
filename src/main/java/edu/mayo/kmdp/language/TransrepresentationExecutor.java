@@ -24,7 +24,7 @@ import static edu.mayo.kmdp.util.ws.ResponseHelper.matches;
 import static org.omg.spec.api4kp._1_0.contrastors.SyntacticRepresentationContrastor.repContrastor;
 
 import edu.mayo.kmdp.tranx.server.TransxionApiDelegate;
-import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._2018._06.KnowledgeProcessingOperation;
+import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._20190801.KnowledgeProcessingOperation;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;

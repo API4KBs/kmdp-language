@@ -21,7 +21,7 @@ import static edu.mayo.kmdp.util.ws.ResponseHelper.attempt;
 import static edu.mayo.kmdp.util.ws.ResponseHelper.succeed;
 
 import edu.mayo.kmdp.tranx.server.DetectApiDelegate;
-import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._2018._06.KnowledgeProcessingOperation;
+import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._20190801.KnowledgeProcessingOperation;
 import java.util.List;
 import javax.inject.Named;
 import org.omg.spec.api4kp._1_0.services.KPComponent;
