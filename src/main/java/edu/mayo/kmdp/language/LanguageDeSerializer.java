@@ -21,7 +21,7 @@ import static edu.mayo.kmdp.util.ws.ResponseHelper.delegate;
 
 import edu.mayo.kmdp.tranx.server.DeserializeApiDelegate;
 import edu.mayo.kmdp.util.ws.ResponseHelper;
-import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._2018._06.KnowledgeProcessingOperation;
+import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._20190801.KnowledgeProcessingOperation;
 import edu.mayo.ontology.taxonomies.api4kp.parsinglevel._20190801.ParsingLevel;
 import java.util.HashSet;
 import java.util.List;

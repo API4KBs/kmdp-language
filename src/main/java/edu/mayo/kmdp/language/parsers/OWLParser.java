@@ -15,21 +15,21 @@
  */
 package edu.mayo.kmdp.language.parsers;
 
-import static edu.mayo.ontology.taxonomies.krformat._2018._08.SerializationFormat.TXT;
-import static edu.mayo.ontology.taxonomies.krformat._2018._08.SerializationFormat.XML_1_1;
-import static edu.mayo.ontology.taxonomies.krlanguage._2018._08.KnowledgeRepresentationLanguage.OWL_2;
-import static edu.mayo.ontology.taxonomies.krserialization._2018._08.KnowledgeRepresentationLanguageSerialization.OWL_Functional_Syntax;
-import static edu.mayo.ontology.taxonomies.krserialization._2018._08.KnowledgeRepresentationLanguageSerialization.OWL_Manchester_Syntax;
-import static edu.mayo.ontology.taxonomies.krserialization._2018._08.KnowledgeRepresentationLanguageSerialization.OWL_XML_Serialization;
-import static edu.mayo.ontology.taxonomies.krserialization._2018._08.KnowledgeRepresentationLanguageSerialization.RDF_XML_Syntax;
-import static edu.mayo.ontology.taxonomies.krserialization._2018._08.KnowledgeRepresentationLanguageSerialization.Turtle;
+import static edu.mayo.ontology.taxonomies.krformat._20190801.SerializationFormat.TXT;
+import static edu.mayo.ontology.taxonomies.krformat._20190801.SerializationFormat.XML_1_1;
+import static edu.mayo.ontology.taxonomies.krlanguage._20190801.KnowledgeRepresentationLanguage.OWL_2;
+import static edu.mayo.ontology.taxonomies.krserialization._20190801.KnowledgeRepresentationLanguageSerialization.OWL_Functional_Syntax;
+import static edu.mayo.ontology.taxonomies.krserialization._20190801.KnowledgeRepresentationLanguageSerialization.OWL_Manchester_Syntax;
+import static edu.mayo.ontology.taxonomies.krserialization._20190801.KnowledgeRepresentationLanguageSerialization.OWL_XML_Serialization;
+import static edu.mayo.ontology.taxonomies.krserialization._20190801.KnowledgeRepresentationLanguageSerialization.RDF_XML_Syntax;
+import static edu.mayo.ontology.taxonomies.krserialization._20190801.KnowledgeRepresentationLanguageSerialization.Turtle;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.tranx.server.DeserializeApiDelegate;
 import edu.mayo.kmdp.util.ws.ResponseHelper;
-import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._2018._06.KnowledgeProcessingOperation;
+import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._20190801.KnowledgeProcessingOperation;
 import edu.mayo.ontology.taxonomies.api4kp.parsinglevel._20190801.ParsingLevel;
-import edu.mayo.ontology.taxonomies.krformat._2018._08.SerializationFormat;
+import edu.mayo.ontology.taxonomies.krformat._20190801.SerializationFormat;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;

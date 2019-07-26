@@ -24,7 +24,7 @@ import edu.mayo.kmdp.comparator.Contrastor.Comparison;
 import edu.mayo.kmdp.tranx.server.DeserializeApiDelegate;
 import edu.mayo.kmdp.util.ws.ResponseHelper;
 import edu.mayo.ontology.taxonomies.api4kp.parsinglevel._20190801.ParsingLevel;
-import edu.mayo.ontology.taxonomies.krformat._2018._08.SerializationFormat;
+import edu.mayo.ontology.taxonomies.krformat._20190801.SerializationFormat;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Optional;

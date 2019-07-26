@@ -47,3 +47,6 @@ nbbuild/
 dist/
 nbdist/
 .nb-gradle/
+
+
+**/*.xml.versionsBackup
