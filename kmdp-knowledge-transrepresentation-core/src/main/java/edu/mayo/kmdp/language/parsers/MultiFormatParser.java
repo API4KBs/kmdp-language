@@ -16,16 +16,9 @@
 package edu.mayo.kmdp.language.parsers;
 
 
-import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
-
-import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
 import edu.mayo.kmdp.tranx.server.DeserializeApiDelegate;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._20190801.KnowledgeProcessingOperation;
 import edu.mayo.ontology.taxonomies.krformat._20190801.SerializationFormat;
-import edu.mayo.ontology.taxonomies.krlanguage._20190801.KnowledgeRepresentationLanguage;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import javax.inject.Named;
 import org.omg.spec.api4kp._1_0.services.ASTCarrier;
@@ -38,15 +31,17 @@ import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 @Named
 @KPOperation(KnowledgeProcessingOperation.Lowering_Task)
 @KPOperation(KnowledgeProcessingOperation.Lifting_Task)
-public class SurrogateParser extends AbstractDeSerializer implements DeserializeApiDelegate {
+public abstract class MultiFormatParser<T> extends AbstractDeSerializer implements
+    DeserializeApiDelegate {
 
-  private XMLSurrogateParser xmlParser = new XMLSurrogateParser();
-  private JSONSurrogateParser jsonParser = new JSONSurrogateParser();
+  protected XMLBasedLanguageParser<T> xmlParser;
+  protected JSONBasedLanguageParser<T> jsonParser;
 
-  private final List<SyntacticRepresentation> supportedRepresentations = Arrays.asList(
-      rep(KnowledgeRepresentationLanguage.Knowledge_Asset_Surrogate, SerializationFormat.XML_1_1, getDefaultCharset()),
-      rep(KnowledgeRepresentationLanguage.Knowledge_Asset_Surrogate, SerializationFormat.JSON, getDefaultCharset()));
-
+  protected MultiFormatParser(XMLBasedLanguageParser<T> xmlParser,
+      JSONBasedLanguageParser<T> jsonParser) {
+    this.xmlParser = xmlParser;
+    this.jsonParser = jsonParser;
+  }
 
   @Override
   public Optional<ASTCarrier> abstrakt(DocumentCarrier carrier) {
@@ -134,43 +129,9 @@ public class SurrogateParser extends AbstractDeSerializer implements Deserialize
     }
   }
 
-
-  @Override
-  protected List<SyntacticRepresentation> getSupportedRepresentations() {
-    return supportedRepresentations;
-  }
-
   @Override
   protected SerializationFormat getDefaultFormat() {
     return null;
-  }
-
-
-  private static class XMLSurrogateParser extends XMLBasedLanguageParser<KnowledgeAsset> {
-
-    public XMLSurrogateParser() {
-      this.root = KnowledgeAsset.class;
-    }
-
-    @Override
-    protected List<SyntacticRepresentation> getSupportedRepresentations() {
-      return Collections
-          .singletonList(rep(KnowledgeRepresentationLanguage.Knowledge_Asset_Surrogate, SerializationFormat.XML_1_1, getDefaultCharset()));
-    }
-  }
-
-  private static class JSONSurrogateParser extends
-      JSONBasedLanguageParser<KnowledgeAsset> {
-
-    public JSONSurrogateParser() {
-      this.root = KnowledgeAsset.class;
-    }
-
-    @Override
-    protected List<SyntacticRepresentation> getSupportedRepresentations() {
-      return Collections
-          .singletonList(rep(KnowledgeRepresentationLanguage.Knowledge_Asset_Surrogate, SerializationFormat.JSON, getDefaultCharset()));
-    }
   }
 
 

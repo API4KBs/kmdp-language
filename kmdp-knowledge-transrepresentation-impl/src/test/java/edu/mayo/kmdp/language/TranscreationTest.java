@@ -111,8 +111,7 @@ public class TranscreationTest {
         .map(IRI::toString)
         .map(NameUtils::getTrailingPart)
         .map(Util::ensureUUID)
-        .filter(Optional::isPresent)
-        .map(Optional::get)
+        .flatMap(Util::trimStream)
         .collect(Collectors.toList());
     assertEquals(new HashSet<>(Arrays.asList(
         uuid("A"),

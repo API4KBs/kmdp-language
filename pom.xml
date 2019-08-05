@@ -10,114 +10,15 @@
     <version>[3.0.0,3.0.1]</version>
   </parent>
 
-  <artifactId>kmdp-knowledge-transrepresentation-impl</artifactId>
+  <artifactId>kmdp-knowledge-transrepresentation</artifactId>
   <version>2.3.1</version>
 
-  <packaging>war</packaging>
+  <packaging>pom</packaging>
 
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-maven-plugin</artifactId>
-      </plugin>
-
-      <plugin>
-        <artifactId>maven-war-plugin</artifactId>
-        <configuration>
-          <attachClasses>true</attachClasses>
-        </configuration>
-      </plugin>
-
-    </plugins>
-  </build>
-
-
-
-  <dependencies>
-
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>edu.mayo.kmdp</groupId>
-      <artifactId>kmdp-rest-ws-utils</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>edu.mayo.kmdp</groupId>
-      <artifactId>kmdp-service-descr</artifactId>
-    </dependency>
-
-    <dependency>
-      <artifactId>omg-cmmn-11</artifactId>
-      <groupId>edu.mayo.kmdp</groupId>
-    </dependency>
-
-    <dependency>
-      <groupId>edu.mayo.kmdp</groupId>
-      <artifactId>kmdp-asset-metadata</artifactId>
-    </dependency>
-
-    <dependency>
-      <artifactId>omg-dmn-11</artifactId>
-      <groupId>edu.mayo.kmdp</groupId>
-    </dependency>
-    <dependency>
-      <groupId>edu.mayo.kmdp</groupId>
-      <artifactId>omg-dmn-12</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>net.sourceforge.owlapi</groupId>
-      <artifactId>owlapi-apibinding</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>javax.inject</groupId>
-      <artifactId>javax.inject</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>edu.mayo.kmdp</groupId>
-      <artifactId>terms-owl-to-skos</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>edu.mayo.kmdp</groupId>
-      <artifactId>kmdp-utils</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>com.fasterxml.jackson.dataformat</groupId>
-      <artifactId>jackson-dataformat-xml</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>edu.mayo.kmdp</groupId>
-      <artifactId>kmdp-artifact-transrepresentation-service-client</artifactId>
-      <version>${kmdp.impl.version}</version>
-      <scope>test</scope>
-    </dependency>
-
-  </dependencies>
-
+  <modules>
+    <module>kmdp-knowledge-transrepresentation-impl</module>
+    <module>kmdp-knowledge-transrepresentation-core</module>
+  </modules>
 
   <profiles>
     <profile>
@@ -136,7 +37,6 @@
         </repository>
       </repositories>
 
-
       <distributionManagement>
         <repository>
           <id>bintray-api4kbs-API4KP-Mvn-Repo</id>
@@ -146,7 +46,5 @@
       </distributionManagement>
     </profile>
   </profiles>
-
-
 
 </project>
