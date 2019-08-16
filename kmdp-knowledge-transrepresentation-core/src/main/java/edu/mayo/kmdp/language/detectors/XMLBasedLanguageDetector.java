@@ -47,21 +47,18 @@ public abstract class XMLBasedLanguageDetector<T> implements DetectApiDelegate {
         isLang = Arrays.equals("<".getBytes(), Arrays.copyOfRange(data, 0, 1))
             && JaxbUtil.unmarshall(root,
             root,
-            new ByteArrayInputStream(data),
-            JaxbUtil.defaultProperties()).isPresent();
+            new ByteArrayInputStream(data)).isPresent();
       } else if (sourceArtifact instanceof ExpressionCarrier) {
         String str = ((ExpressionCarrier) sourceArtifact).getSerializedExpression();
 
         isLang = str.startsWith("<") && JaxbUtil.unmarshall(root,
             root,
-            str,
-            JaxbUtil.defaultProperties()).isPresent();
+            str).isPresent();
       } else if (sourceArtifact instanceof DocumentCarrier) {
         Object dox = ((DocumentCarrier) sourceArtifact).getStructuredExpression();
         isLang = dox instanceof Document && JaxbUtil.unmarshall(root,
             root,
-            (Document) dox,
-            JaxbUtil.defaultProperties()).isPresent();
+            (Document) dox).isPresent();
       } else if (sourceArtifact instanceof ASTCarrier) {
         isLang = root.isInstance(((ASTCarrier) sourceArtifact).getParsedExpression());
       }
@@ -70,7 +67,7 @@ public abstract class XMLBasedLanguageDetector<T> implements DetectApiDelegate {
     }
 
     if (isLang && !getAll(getDetectableLanguages()).isEmpty()) {
-      return map(getDetectableLanguages(), (l) -> l.get(0));
+      return map(getDetectableLanguages(), l -> l.get(0));
     }
     return ResponseHelper.fail();
   }

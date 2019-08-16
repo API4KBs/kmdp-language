@@ -21,7 +21,7 @@ import static edu.mayo.kmdp.util.ws.ResponseHelper.delegate;
 import static edu.mayo.kmdp.util.ws.ResponseHelper.get;
 import static edu.mayo.kmdp.util.ws.ResponseHelper.map;
 import static edu.mayo.kmdp.util.ws.ResponseHelper.matches;
-import static org.omg.spec.api4kp._1_0.contrastors.SyntacticRepresentationContrastor.repContrastor;
+import static org.omg.spec.api4kp._1_0.contrastors.SyntacticRepresentationContrastor.theRepContrastor;
 
 import edu.mayo.kmdp.tranx.server.TransxionApiDelegate;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._20190801.KnowledgeProcessingOperation;
@@ -117,9 +117,9 @@ public class TransrepresentationExecutor implements TransxionApiDelegate {
 
   private boolean canTransform(TransrepresentationOperator op, SyntacticRepresentation into,
       SyntacticRepresentation from) {
-    return (from == null || isBroaderOrEqual(repContrastor.contrast(from, op.getFrom())))
+    return (from == null || isBroaderOrEqual(theRepContrastor.contrast(from, op.getFrom())))
         &&
-        (into == null || isBroaderOrEqual(repContrastor.contrast(into, op.getInto())));
+        (into == null || isBroaderOrEqual(theRepContrastor.contrast(into, op.getInto())));
   }
 
 
