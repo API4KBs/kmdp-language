@@ -52,7 +52,6 @@ import org.omg.spec.api4kp._1_0.services.ASTCarrier;
 import org.omg.spec.api4kp._1_0.services.KPComponent;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.KnowledgeProcessingOperator;
-import org.omg.spec.api4kp._1_0.services.tranx.TransrepresentationOperator;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
@@ -87,7 +86,7 @@ public class TranscreationTest {
         .with(OWLtoSKOSTxParams.TGT_NAMESPACE, "http://bar/skos-example");
 
     Optional<ASTCarrier> ac = KnowledgeCarrier.of(owl.get(), rep(OWL_2))
-        .flatMap((kc) -> transtor.applyTransrepresentation(OWLtoSKOSTranscreator.operatorId, kc, p))
+        .flatMap((kc) -> transtor.applyTransrepresentation(OWLtoSKOSTranscreator.OPERATOR_ID, kc, p))
         .flatMap((kc) -> parser.lift(kc, ParsingLevel.Abstract_Knowledge_Expression))
         .filter(ASTCarrier.class::isInstance)
         .map(ASTCarrier.class::cast)
@@ -133,7 +132,7 @@ public class TranscreationTest {
         .getOptionalValue();
 
     assertTrue(ops.isPresent()
-        && ops.get().contains(OWLtoSKOSTranscreator.operatorId));
+        && ops.get().contains(OWLtoSKOSTranscreator.OPERATOR_ID));
 
     Optional<Set<String>> ops2 = transtor
         .listOperators(rep(OWL_2), rep(OWL_2).withLexicon(Lexicon.SKOS), null)
@@ -143,7 +142,7 @@ public class TranscreationTest {
         .getOptionalValue();
 
     assertTrue(ops2.isPresent()
-        && ops2.get().contains(OWLtoSKOSTranscreator.operatorId));
+        && ops2.get().contains(OWLtoSKOSTranscreator.OPERATOR_ID));
 
     Optional<Set<String>> ops3 = transtor
         .listOperators(rep(OWL_2), rep(DMN_1_1), null)
@@ -153,7 +152,7 @@ public class TranscreationTest {
         .getOptionalValue();
 
     assertFalse(ops3.isPresent()
-        && ops3.get().contains(OWLtoSKOSTranscreator.operatorId));
+        && ops3.get().contains(OWLtoSKOSTranscreator.OPERATOR_ID));
 
 
   }

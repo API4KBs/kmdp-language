@@ -75,8 +75,8 @@ public class LanguageDeSerializer implements DeserializeApiDelegate {
       ParsingLevel level) {
     return delegate(
         anyAble(parsers,
-            (p) -> supportsLifting(p, sourceArtifact.getRepresentation())),
-        (parser) -> parser.lift(sourceArtifact, level));
+            p -> supportsLifting(p, sourceArtifact.getRepresentation())),
+        parser -> parser.lift(sourceArtifact, level));
   }
 
   @Override
@@ -84,8 +84,8 @@ public class LanguageDeSerializer implements DeserializeApiDelegate {
       ParsingLevel level) {
     return delegate(
         anyAble(parsers,
-            (p) -> supportsLowering(p, sourceArtifact.getRepresentation())),
-        (parser) -> parser.lower(sourceArtifact, level));
+            p -> supportsLowering(p, sourceArtifact.getRepresentation())),
+        parser -> parser.lower(sourceArtifact, level));
   }
 
   @Override
@@ -93,9 +93,9 @@ public class LanguageDeSerializer implements DeserializeApiDelegate {
       SyntacticRepresentation into) {
     return delegate(
         anyAble(parsers,
-            (p) -> supportsLowering(p, sourceArtifact.getRepresentation())
+            p -> supportsLowering(p, sourceArtifact.getRepresentation())
                 && supportsLifting(p, sourceArtifact.getRepresentation())),
-        (parser) -> parser.ensureRepresentation(sourceArtifact, into));
+        parser -> parser.ensureRepresentation(sourceArtifact, into));
   }
 
   @Override
@@ -103,8 +103,8 @@ public class LanguageDeSerializer implements DeserializeApiDelegate {
       SyntacticRepresentation into) {
     return delegate(
         anyAble(parsers,
-            (p) -> supportsLifting(p, sourceArtifact.getRepresentation())),
-        (parser) -> parser.deserialize(sourceArtifact, into));
+            p -> supportsLifting(p, sourceArtifact.getRepresentation())),
+        parser -> parser.deserialize(sourceArtifact, into));
   }
 
   @Override
@@ -112,22 +112,22 @@ public class LanguageDeSerializer implements DeserializeApiDelegate {
       SyntacticRepresentation into) {
     return delegate(
         anyAble(parsers,
-            (p) -> supportsLowering(p, sourceArtifact.getRepresentation())),
-        (parser) -> parser.serialize(sourceArtifact, into));
+            p -> supportsLowering(p, sourceArtifact.getRepresentation())),
+        parser -> parser.serialize(sourceArtifact, into));
   }
 
   private boolean supportsLifting(DeserializeApiDelegate parser,
       SyntacticRepresentation representation) {
     return parser.getParsableLanguages().getBody() != null
         && parser.getParsableLanguages().getBody().stream()
-        .anyMatch((r) -> r.getLanguage() == representation.getLanguage());
+        .anyMatch(r -> r.getLanguage() == representation.getLanguage());
   }
 
   private boolean supportsLowering(DeserializeApiDelegate parser,
       SyntacticRepresentation representation) {
     return parser.getSerializableLanguages().getBody() != null
         && parser.getSerializableLanguages().getBody().stream()
-        .anyMatch((r) -> r.getLanguage() == representation.getLanguage());
+        .anyMatch(r -> r.getLanguage() == representation.getLanguage());
   }
 
 

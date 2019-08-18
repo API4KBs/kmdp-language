@@ -59,7 +59,7 @@ public abstract class JSONBasedLanguageDetector<T> implements DetectApiDelegate 
 
     if (isLang && !getAll(getDetectableLanguages()).isEmpty()) {
       return map(getDetectableLanguages(),
-          (l) -> l.get(0));
+          l -> l.get(0));
     }
     return ResponseHelper.fail();
   }

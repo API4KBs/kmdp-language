@@ -39,7 +39,7 @@ import org.springframework.http.ResponseEntity;
 
 public abstract class AbstractDeSerializer implements DeserializeApiDelegate, Lifter, Lowerer {
 
-  private final static String charset = Charset.defaultCharset().name();
+  private static final String CHARSET = Charset.defaultCharset().name();
 
 
   @Override
@@ -48,7 +48,7 @@ public abstract class AbstractDeSerializer implements DeserializeApiDelegate, Li
 
     if (getAll(getParsableLanguages()).stream()
         .map(SyntacticRepresentation::getLanguage)
-        .noneMatch((lang) -> lang == sourceArtifact.getRepresentation().getLanguage())) {
+        .noneMatch(lang -> lang == sourceArtifact.getRepresentation().getLanguage())) {
       return null;
     }
 
@@ -80,7 +80,7 @@ public abstract class AbstractDeSerializer implements DeserializeApiDelegate, Li
         case Encoded_Knowledge_Expression:
           result = binary;
           break;
-        default:  
+        default:
       }
     } else if (sourceArtifact instanceof ExpressionCarrier) {
       ExpressionCarrier expr = (ExpressionCarrier) sourceArtifact;
@@ -96,7 +96,7 @@ public abstract class AbstractDeSerializer implements DeserializeApiDelegate, Li
         case Concrete_Knowledge_Expression:
           result = expr;
           break;
-        default:  
+        default:
       }
     } else if (sourceArtifact instanceof DocumentCarrier) {
       DocumentCarrier doc = (DocumentCarrier) sourceArtifact;
@@ -121,7 +121,7 @@ public abstract class AbstractDeSerializer implements DeserializeApiDelegate, Li
   @Override
   public ResponseEntity<KnowledgeCarrier> lower(KnowledgeCarrier sourceArtifact,
       ParsingLevel into) {
-    return lower(sourceArtifact,into,null);
+    return lower(sourceArtifact, into, null);
   }
 
   protected ResponseEntity<KnowledgeCarrier> lower(KnowledgeCarrier sourceArtifact,
@@ -129,7 +129,7 @@ public abstract class AbstractDeSerializer implements DeserializeApiDelegate, Li
 
     if (getAll(getSerializableLanguages()).stream()
         .map(SyntacticRepresentation::getLanguage)
-        .noneMatch((lang) -> lang == sourceArtifact.getRepresentation().getLanguage())) {
+        .noneMatch(lang -> lang == sourceArtifact.getRepresentation().getLanguage())) {
       return null;
     }
 
@@ -209,10 +209,10 @@ public abstract class AbstractDeSerializer implements DeserializeApiDelegate, Li
     ParsingLevel srcLevel = sourceArtifact.getLevel();
 
     if (srcLevel == tgtLevel && sourceArtifact.getRepresentation().equals(into)) {
-        return succeed(sourceArtifact);
+      return succeed(sourceArtifact);
     }
-    return ResponseHelper.flatMap( lift(sourceArtifact, Abstract_Knowledge_Expression),
-        (kc) -> serialize(kc,into));
+    return ResponseHelper.flatMap(lift(sourceArtifact, Abstract_Knowledge_Expression),
+        kc -> serialize(kc, into));
   }
 
 
@@ -225,7 +225,7 @@ public abstract class AbstractDeSerializer implements DeserializeApiDelegate, Li
   @Override
   public ResponseEntity<KnowledgeCarrier> serialize(KnowledgeCarrier sourceArtifact,
       SyntacticRepresentation into) {
-    return lower(sourceArtifact, detectLevel(into),into);
+    return lower(sourceArtifact, detectLevel(into), into);
   }
 
 
@@ -248,6 +248,7 @@ public abstract class AbstractDeSerializer implements DeserializeApiDelegate, Li
         rep.setEncoding(null);
         break;
       case Encoded_Knowledge_Expression:
+      default:
         break;
     }
     return rep;
@@ -280,6 +281,8 @@ public abstract class AbstractDeSerializer implements DeserializeApiDelegate, Li
         rep.setCharset(null);
         rep.setEncoding(null);
         break;
+      default:
+        break;
     }
     return rep;
   }
@@ -297,7 +300,7 @@ public abstract class AbstractDeSerializer implements DeserializeApiDelegate, Li
   }
 
   protected String getDefaultCharset() {
-    return charset;
+    return CHARSET;
   }
 
   protected abstract SerializationFormat getDefaultFormat();

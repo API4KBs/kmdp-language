@@ -15,6 +15,7 @@
  */
 package edu.mayo.kmdp.language.translators;
 
+import static edu.mayo.kmdp.util.ws.ResponseHelper.fail;
 import static edu.mayo.kmdp.util.ws.ResponseHelper.get;
 import static edu.mayo.kmdp.util.ws.ResponseHelper.succeed;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
@@ -40,6 +41,7 @@ import javax.inject.Named;
 import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.omg.spec.api4kp._1_0.AbstractCarrier;
 import org.omg.spec.api4kp._1_0.services.BinaryCarrier;
 import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
@@ -53,7 +55,7 @@ import org.springframework.http.ResponseEntity;
 @KPOperation(KnowledgeProcessingOperation.Transcreation_Task)
 public class OWLtoSKOSTranscreator implements TransxionApiDelegate {
 
-  public final static String operatorId = "57869ee0-304c-40a4-8759-40ea667c328d";
+  public static final String OPERATOR_ID = "57869ee0-304c-40a4-8759-40ea667c328d";
 
   @Override
   public ResponseEntity<KnowledgeCarrier> applyTransrepresentation(String txionId,
@@ -83,12 +85,12 @@ public class OWLtoSKOSTranscreator implements TransxionApiDelegate {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     new Owl2SkosConverter()
         .apply(model, config)
-        .ifPresent((m) -> m.write(baos));
+        .ifPresent(m -> m.write(baos));
 
     String skos = new String(baos.toByteArray());
     return Util.isEmpty(skos)
         ? ResponseHelper.fail()
-        : succeed(KnowledgeCarrier.of(skos)
+        : succeed(AbstractCarrier.of(skos)
             .withRepresentation(
                 ResponseHelper.get(getTransrepresentationOutput(txionId)).orElse(null)));
   }
@@ -97,7 +99,7 @@ public class OWLtoSKOSTranscreator implements TransxionApiDelegate {
   public ResponseEntity<TransrepresentationOperator> getTransrepresentation(String txionId) {
     return succeed(
         new org.omg.spec.api4kp._1_0.services.tranx.resources.TransrepresentationOperator()
-            .withOperatorId(operatorId)
+            .withOperatorId(OPERATOR_ID)
             .withAcceptedParams(get(getTransrepresentationAcceptedParameters(txionId)).orElse(null))
             .withFrom(get(getTransrepresentationInput(txionId)).orElse(null))
             .withInto(get(getTransrepresentationOutput(txionId)).orElse(null)));
@@ -119,6 +121,9 @@ public class OWLtoSKOSTranscreator implements TransxionApiDelegate {
   }
 
   public ResponseEntity<SyntacticRepresentation> getTransrepresentationInput(String txionId) {
+    if (txionId != null && ! OPERATOR_ID.equals(txionId)) {
+      return fail();
+    }
     return succeed(
         rep(KnowledgeRepresentationLanguage.OWL_2,
             KnowledgeRepresentationLanguageSerialization.RDF_XML_Syntax,
@@ -130,7 +135,7 @@ public class OWLtoSKOSTranscreator implements TransxionApiDelegate {
       SyntacticRepresentation from,
       SyntacticRepresentation into,
       String method) {
-    return ResponseHelper.map(getTransrepresentation(operatorId),
+    return ResponseHelper.map(getTransrepresentation(OPERATOR_ID),
         Collections::singletonList);
   }
 

@@ -16,6 +16,7 @@
 package edu.mayo.kmdp.language.detectors;
 
 import static edu.mayo.kmdp.util.XMLUtil.catalogResolver;
+import static edu.mayo.kmdp.util.ws.ResponseHelper.attempt;
 import static edu.mayo.kmdp.util.ws.ResponseHelper.map;
 import static edu.mayo.kmdp.util.ws.ResponseHelper.succeed;
 import static edu.mayo.ontology.taxonomies.krlanguage._20190801.KnowledgeRepresentationLanguage.OWL_2;
@@ -24,7 +25,6 @@ import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 import edu.mayo.kmdp.language.detectors.OWLDetectorConfig.DetectorParams;
 import edu.mayo.kmdp.tranx.server.DetectApiDelegate;
 import edu.mayo.kmdp.util.Util;
-import edu.mayo.kmdp.util.ws.ResponseHelper;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._20190801.KnowledgeProcessingOperation;
 import edu.mayo.ontology.taxonomies.krformat._20190801.SerializationFormat;
 import edu.mayo.ontology.taxonomies.krprofile._20190801.KnowledgeRepresentationLanguageProfile;
@@ -39,9 +39,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import javax.annotation.Nullable;
 import javax.inject.Named;
 import org.apache.jena.vocabulary.SKOS;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.xerces.util.XMLCatalogResolver;
 import org.omg.spec.api4kp._1_0.services.ASTCarrier;
 import org.omg.spec.api4kp._1_0.services.BinaryCarrier;
@@ -70,6 +71,8 @@ import org.springframework.http.ResponseEntity;
 @KPOperation(KnowledgeProcessingOperation.Detect_Language_Information_Task)
 public class OWLDetector implements DetectApiDelegate {
 
+  protected static final Logger logger = LogManager.getLogger(OWLDetector.class);
+
   @Override
   public ResponseEntity<List<SyntacticRepresentation>> getDetectableLanguages() {
     return succeed(Collections.singletonList(rep(OWL_2)));
@@ -79,18 +82,13 @@ public class OWLDetector implements DetectApiDelegate {
   public ResponseEntity<SyntacticRepresentation> getDetectedRepresentation(
       KnowledgeCarrier sourceArtifact) {
     Optional<OWLOntology> owl = asOWL(sourceArtifact);
-    if (owl.isPresent() && !owl.get().isEmpty()) {
-      return succeed(
-          owl.map((o) -> new SyntacticRepresentation()
-          .withLanguage(OWL_2)
-          .withProfile(detectProfile(o))
-          .withSerialization(detectSerialization(o))
-          .withFormat(detectFormat(o))
-          .withLexicon(detectLexicon(o)))
-          .get());
-    } else {
-      return ResponseHelper.fail();
-    }
+    return attempt(
+        owl.map(o -> new SyntacticRepresentation()
+            .withLanguage(OWL_2)
+            .withProfile(detectProfile(o))
+            .withSerialization(detectSerialization(o))
+            .withFormat(detectFormat(o))
+            .withLexicon(detectLexicon(o))));
   }
 
   private SerializationFormat detectFormat(OWLOntology o) {
@@ -127,7 +125,7 @@ public class OWLDetector implements DetectApiDelegate {
 
   private Collection<Lexicon> detectLexicon(OWLOntology o) {
     Set<Lexicon> lexica = new HashSet<>();
-    if (o.importsDeclarations().anyMatch((decl) -> decl.getIRI().equals(IRI.create(SKOS.uri)))) {
+    if (o.importsDeclarations().anyMatch(decl -> decl.getIRI().equals(IRI.create(SKOS.uri)))) {
       lexica.add(Lexicon.SKOS);
     }
     // eventually check for more...
@@ -210,18 +208,14 @@ public class OWLDetector implements DetectApiDelegate {
     if (!Util.isEmpty(catalog)) {
       XMLCatalogResolver resolver = catalogResolver(catalog);
       manager.setIRIMappers(Collections.singleton(
-          new OWLOntologyIRIMapper() {
-            @Nullable
-            @Override
-            public IRI getDocumentIRI(IRI iri) {
-              try {
-                String resolved = resolver.resolveURI(iri.toURI().toString());
-                return IRI.create(resolved);
-              } catch (IOException e) {
-                e.printStackTrace();
-              }
-              return null;
+          (OWLOntologyIRIMapper) iri -> {
+            try {
+              String resolved = resolver.resolveURI(iri.toURI().toString());
+              return IRI.create(resolved);
+            } catch (IOException e) {
+              logger.error(e.getMessage(), e);
             }
+            return null;
           }
       ));
     }
