@@ -21,7 +21,7 @@ import static edu.mayo.kmdp.util.ws.ResponseHelper.delegate;
 import static edu.mayo.kmdp.util.ws.ResponseHelper.get;
 import static edu.mayo.kmdp.util.ws.ResponseHelper.map;
 import static edu.mayo.kmdp.util.ws.ResponseHelper.matches;
-import static org.omg.spec.api4kp._1_0.contrastors.SyntacticRepresentationContrastor.repContrastor;
+import static org.omg.spec.api4kp._1_0.contrastors.SyntacticRepresentationContrastor.theRepContrastor;
 
 import edu.mayo.kmdp.tranx.server.TransxionApiDelegate;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._20190801.KnowledgeProcessingOperation;
@@ -46,9 +46,7 @@ import org.springframework.http.ResponseEntity;
 @Named
 @KPServer
 public class TransrepresentationExecutor implements TransxionApiDelegate {
-
-  private Map<SourceToTarget, TransxionApiDelegate> translatorBySourceTarget;
-
+  
   private Map<String, TransxionApiDelegate> translatorById;
 
 
@@ -61,12 +59,11 @@ public class TransrepresentationExecutor implements TransxionApiDelegate {
     if (translators != null) {
       translatorById = new HashMap<>();
 
-      translators.forEach((t) ->
+      translators.forEach(t -> 
           get(map(t.getTransrepresentation(null),
               KnowledgeProcessingOperator::getOperatorId))
-              .ifPresent((id) -> translatorById.put(id, t)));
+              .ifPresent(id -> translatorById.put(id, t)));
     } else {
-      this.translatorBySourceTarget = Collections.emptyMap();
       this.translatorById = Collections.emptyMap();
     }
 
@@ -76,13 +73,13 @@ public class TransrepresentationExecutor implements TransxionApiDelegate {
   public ResponseEntity<KnowledgeCarrier> applyTransrepresentation(String txionId,
       final KnowledgeCarrier sourceArtifact, Properties config) {
     return delegate(getTxOperator(txionId),
-        (txion) -> txion.applyTransrepresentation(txionId, sourceArtifact, config));
+        txion -> txion.applyTransrepresentation(txionId, sourceArtifact, config));
   }
 
   @Override
   public ResponseEntity<TransrepresentationOperator> getTransrepresentation(String txionId) {
     return delegate(getTxOperator(txionId),
-        (t) -> t.getTransrepresentation(txionId));
+        t ->  t.getTransrepresentation(txionId));
   }
 
   @Override
@@ -90,7 +87,7 @@ public class TransrepresentationExecutor implements TransxionApiDelegate {
       String txionId) {
     return map(
         delegate(getTxOperator(txionId),
-            (t) -> t.getTransrepresentation(txionId)),
+            t ->  t.getTransrepresentation(txionId)),
         KnowledgeProcessingOperator::getAcceptedParams);
   }
 
@@ -98,7 +95,7 @@ public class TransrepresentationExecutor implements TransxionApiDelegate {
   public ResponseEntity<SyntacticRepresentation> getTransrepresentationOutput(String txionId) {
     return map(
         delegate(getTxOperator(txionId),
-            (t) -> t.getTransrepresentation(txionId)),
+            t ->  t.getTransrepresentation(txionId)),
         TransrepresentationOperator::getInto);
   }
 
@@ -110,16 +107,16 @@ public class TransrepresentationExecutor implements TransxionApiDelegate {
 
     return collect(
         translatorById.values().stream()
-        .map((tx) -> tx.getTransrepresentation(null))
-        .filter((r) -> matches(r, (txOperator) -> canTransform(txOperator,into,from))));
+        .map(tx ->  tx.getTransrepresentation(null))
+        .filter(r ->  matches(r, txOperator -> canTransform(txOperator,into,from))));
 
   }
 
   private boolean canTransform(TransrepresentationOperator op, SyntacticRepresentation into,
       SyntacticRepresentation from) {
-    return (from == null || isBroaderOrEqual(repContrastor.contrast(from, op.getFrom())))
+    return (from == null || isBroaderOrEqual(theRepContrastor.contrast(from, op.getFrom())))
         &&
-        (into == null || isBroaderOrEqual(repContrastor.contrast(into, op.getInto())));
+        (into == null || isBroaderOrEqual(theRepContrastor.contrast(into, op.getInto())));
   }
 
 
@@ -127,7 +124,7 @@ public class TransrepresentationExecutor implements TransxionApiDelegate {
     return Optional.ofNullable(translatorById.get(txId));
   }
 
-
+  /**
   private static class SourceToTarget {
 
     public SyntacticRepresentation from;
@@ -157,4 +154,5 @@ public class TransrepresentationExecutor implements TransxionApiDelegate {
       return Objects.hash(from, to);
     }
   }
+    */
 }

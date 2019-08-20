@@ -31,8 +31,6 @@ import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializer implements
     DeserializeApiDelegate {
 
-  protected final String encoding = "TODO";
-
   protected Class<T> root;
 
   @Override
@@ -45,31 +43,31 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializer im
 
   @Override
   public Optional<DocumentCarrier> deserialize(ExpressionCarrier carrier) {
-    return Optional.of(new DocumentCarrier()
-        .withStructuredExpression(JSonUtil.readJson(carrier.getSerializedExpression().getBytes())
-            .get())
-        .withRepresentation(
-            getParseResultRepresentation(carrier, ParsingLevel.Parsed_Knowedge_Expression)));
+    return JSonUtil.readJson(carrier.getSerializedExpression().getBytes())
+        .map(json -> new DocumentCarrier()
+            .withStructuredExpression(json)
+            .withRepresentation(
+                getParseResultRepresentation(carrier, ParsingLevel.Parsed_Knowedge_Expression)));
   }
 
   @Override
   public Optional<ASTCarrier> parse(ExpressionCarrier carrier) {
-    return Optional.of(new ASTCarrier()
-        .withParsedExpression(JSonUtil.parseJson(carrier.getSerializedExpression(), root)
-            .get())
-        .withRepresentation(
-            getParseResultRepresentation(carrier, ParsingLevel.Abstract_Knowledge_Expression)));
-
+    return JSonUtil.parseJson(carrier.getSerializedExpression(), root)
+        .map(ast -> new ASTCarrier()
+            .withParsedExpression(ast)
+            .withRepresentation(
+                getParseResultRepresentation(carrier, ParsingLevel.Abstract_Knowledge_Expression)));
   }
 
 
   @Override
   public Optional<ASTCarrier> abstrakt(DocumentCarrier carrier) {
     JsonNode jNode = (JsonNode) carrier.getStructuredExpression();
-    return Optional.of(new ASTCarrier().withParsedExpression(JSonUtil.parseJson(jNode, root)
-        .get())
-        .withRepresentation(
-            getParseResultRepresentation(carrier, ParsingLevel.Abstract_Knowledge_Expression)));
+    return JSonUtil.parseJson(jNode, root)
+        .map(ast -> new ASTCarrier()
+            .withParsedExpression(ast)
+            .withRepresentation(
+                getParseResultRepresentation(carrier, ParsingLevel.Abstract_Knowledge_Expression)));
   }
 
 
@@ -84,29 +82,36 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializer im
   @Override
   public Optional<ExpressionCarrier> externalize(ASTCarrier carrier, SyntacticRepresentation into) {
     T obj = (T) carrier.getParsedExpression();
-    return Optional.of(new ExpressionCarrier().withSerializedExpression(JSonUtil.writeJson(obj)
+    return JSonUtil.writeJson(obj)
         .flatMap(Util::asString)
-        .get()
-    ).withRepresentation(
-        getSerializeResultRepresentation(carrier, ParsingLevel.Concrete_Knowledge_Expression)));
+        .map(str -> new ExpressionCarrier()
+            .withSerializedExpression(str)
+            .withRepresentation(
+                getSerializeResultRepresentation(
+                    carrier, ParsingLevel.Concrete_Knowledge_Expression)));
   }
 
   @Override
   public Optional<ExpressionCarrier> serialize(DocumentCarrier carrier,
       SyntacticRepresentation into) {
     JsonNode jNode = (JsonNode) carrier.getStructuredExpression();
-    return Optional.of(new ExpressionCarrier().withSerializedExpression(jNode.toString())
-        .withRepresentation(getSerializeResultRepresentation(carrier,
+    return Optional.of(new ExpressionCarrier()
+        .withSerializedExpression(jNode.toString())
+        .withRepresentation(getSerializeResultRepresentation(
+            carrier,
             ParsingLevel.Concrete_Knowledge_Expression)));
   }
 
   @Override
   public Optional<DocumentCarrier> concretize(ASTCarrier carrier, SyntacticRepresentation into) {
     T obj = (T) carrier.getParsedExpression();
-    return Optional.of(new DocumentCarrier().withStructuredExpression(JSonUtil.toJsonNode(obj)
-        .get()
-    ).withRepresentation(
-        getSerializeResultRepresentation(carrier, ParsingLevel.Parsed_Knowedge_Expression)));
+    return JSonUtil.toJsonNode(obj)
+        .map(json -> new DocumentCarrier()
+            .withStructuredExpression(json)
+            .withRepresentation(
+                getSerializeResultRepresentation(
+                    carrier,
+                    ParsingLevel.Parsed_Knowedge_Expression)));
   }
 
   @Override

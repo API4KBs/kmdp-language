@@ -23,10 +23,10 @@ import java.util.Properties;
 
 public class OWLDetectorConfig extends ConfigProperties<OWLDetectorConfig, DetectorParams> {
 
-  private static final Properties defaults = defaulted(DetectorParams.class);
+  private static final Properties DEFAULTS = defaulted(DetectorParams.class);
 
   public OWLDetectorConfig() {
-    super(defaults);
+    super(DEFAULTS);
   }
 
   @Override

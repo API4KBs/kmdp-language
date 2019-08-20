@@ -49,35 +49,30 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializer imp
 
   @Override
   public Optional<DocumentCarrier> deserialize(ExpressionCarrier carrier) {
-    return Optional.of(new DocumentCarrier().withStructuredExpression(
-        XMLUtil.loadXMLDocument(carrier.getSerializedExpression().getBytes())
-            .get())
-        .withRepresentation(
-            getParseResultRepresentation(carrier, ParsingLevel.Parsed_Knowedge_Expression)));
+    return XMLUtil.loadXMLDocument(carrier.getSerializedExpression().getBytes())
+        .map(dox -> new DocumentCarrier()
+            .withStructuredExpression(dox)
+            .withRepresentation(
+                getParseResultRepresentation(carrier, ParsingLevel.Parsed_Knowedge_Expression)));
   }
 
   @Override
   public Optional<ASTCarrier> parse(ExpressionCarrier carrier) {
-    return Optional.of(new ASTCarrier().withParsedExpression(JaxbUtil.unmarshall(root,
-        root,
-        carrier.getSerializedExpression(),
-        JaxbUtil.defaultProperties())
-        .get())
-        .withRepresentation(
-            getParseResultRepresentation(carrier, ParsingLevel.Abstract_Knowledge_Expression)));
-
+    return JaxbUtil.unmarshall(root, root, carrier.getSerializedExpression())
+        .map(ast -> new ASTCarrier()
+            .withParsedExpression(ast)
+            .withRepresentation(
+                getParseResultRepresentation(carrier, ParsingLevel.Abstract_Knowledge_Expression)));
   }
 
   @Override
   public Optional<ASTCarrier> abstrakt(DocumentCarrier carrier) {
     Document dox = (Document) carrier.getStructuredExpression();
-    return Optional.of(new ASTCarrier().withParsedExpression(JaxbUtil.unmarshall(root,
-        root,
-        dox,
-        JaxbUtil.defaultProperties())
-        .get())
-        .withRepresentation(
-            getParseResultRepresentation(carrier, ParsingLevel.Abstract_Knowledge_Expression)));
+    return JaxbUtil.unmarshall(root, root, dox)
+        .map(ast -> new ASTCarrier()
+            .withParsedExpression(ast)
+            .withRepresentation(
+                getParseResultRepresentation(carrier, ParsingLevel.Abstract_Knowledge_Expression)));
   }
 
 
@@ -106,7 +101,8 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializer imp
   }
 
   @Override
-  public Optional<ExpressionCarrier> serialize(DocumentCarrier carrier, SyntacticRepresentation into) {
+  public Optional<ExpressionCarrier> serialize(DocumentCarrier carrier,
+      SyntacticRepresentation into) {
     Document dox = (Document) carrier.getStructuredExpression();
     return Optional
         .of(new ExpressionCarrier().withSerializedExpression(new String(XMLUtil.toByteArray(dox)))
@@ -118,15 +114,16 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializer imp
   @Override
   public Optional<DocumentCarrier> concretize(ASTCarrier carrier, SyntacticRepresentation into) {
     T obj = (T) carrier.getParsedExpression();
-    return Optional.of(new DocumentCarrier()
-        .withStructuredExpression(JaxbUtil.marshallDox(Collections.singleton(root),
-            obj,
-            mapper,
-            JaxbUtil.defaultProperties())
-            .get()
-        )
-        .withRepresentation(
-            getSerializeResultRepresentation(carrier, ParsingLevel.Parsed_Knowedge_Expression)));
+    return JaxbUtil.marshallDox(
+        Collections.singleton(root),
+        obj,
+        mapper,
+        JaxbUtil.defaultProperties())
+        .map(dox -> new DocumentCarrier()
+            .withStructuredExpression(dox)
+            .withRepresentation(
+                getSerializeResultRepresentation(carrier,
+                    ParsingLevel.Parsed_Knowedge_Expression)));
   }
 
 

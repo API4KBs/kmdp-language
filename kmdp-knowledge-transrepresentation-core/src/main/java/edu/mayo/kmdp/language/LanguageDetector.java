@@ -24,7 +24,6 @@ import edu.mayo.kmdp.tranx.server.DetectApiDelegate;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._20190801.KnowledgeProcessingOperation;
 import java.util.List;
 import javax.inject.Named;
-import org.omg.spec.api4kp._1_0.services.KPComponent;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
 import org.omg.spec.api4kp._1_0.services.KPServer;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
@@ -58,7 +57,7 @@ public class LanguageDetector implements DetectApiDelegate {
       KnowledgeCarrier sourceArtifact) {
     return attempt(
         anyDo(detectors,
-            (detective) -> detective.getDetectedRepresentation(sourceArtifact)));
+            detective -> detective.getDetectedRepresentation(sourceArtifact)));
   }
 
   @Override
@@ -66,7 +65,7 @@ public class LanguageDetector implements DetectApiDelegate {
       KnowledgeCarrier sourceArtifact) {
     return attempt(
         anyDo(detectors,
-            (detective) -> detective.getDetectedRepresentation(sourceArtifact))
+            detective -> detective.getDetectedRepresentation(sourceArtifact))
             .map(sourceArtifact::withRepresentation));
   }
 }

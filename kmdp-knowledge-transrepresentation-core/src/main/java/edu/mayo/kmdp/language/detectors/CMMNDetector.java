@@ -22,7 +22,6 @@ import static java.util.Collections.singletonList;
 import edu.mayo.kmdp.tranx.server.DetectApiDelegate;
 import edu.mayo.kmdp.util.ws.ResponseHelper;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._20190801.KnowledgeProcessingOperation;
-import java.util.Collections;
 import java.util.List;
 import javax.inject.Named;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
