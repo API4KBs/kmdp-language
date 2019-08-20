@@ -192,7 +192,8 @@ public class OWLDetector implements DetectApiDelegate {
       }
 
       Optional<OWLOntology> onto = Optional
-          .ofNullable(manager.loadOntologyFromOntologyDocument(is));
+          .ofNullable(manager.loadOntologyFromOntologyDocument(is))
+          .filter(o -> o.getOntologyID().getOntologyIRI().isPresent());
 
       if (is.markSupported()) {
         is.reset();
