@@ -16,9 +16,15 @@
 package edu.mayo.kmdp.language.parsers;
 
 
+import static edu.mayo.kmdp.comparator.Contrastor.isNarrowerOrEqual;
+import static org.omg.spec.api4kp._1_0.contrastors.SyntacticRepresentationContrastor.theRepContrastor;
+
 import edu.mayo.kmdp.tranx.server.DeserializeApiDelegate;
+import edu.mayo.kmdp.util.Util;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._20190801.KnowledgeProcessingOperation;
 import edu.mayo.ontology.taxonomies.krformat._20190801.SerializationFormat;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import javax.inject.Named;
 import org.omg.spec.api4kp._1_0.services.ASTCarrier;
@@ -37,35 +43,58 @@ public abstract class MultiFormatParser<T> extends AbstractDeSerializer implemen
   protected XMLBasedLanguageParser<T> xmlParser;
   protected JSONBasedLanguageParser<T> jsonParser;
 
+  private List<AbstractDeSerializer> parserSet;
+
   protected MultiFormatParser(XMLBasedLanguageParser<T> xmlParser,
       JSONBasedLanguageParser<T> jsonParser) {
     this.xmlParser = xmlParser;
     this.jsonParser = jsonParser;
+    this.parserSet = Arrays.asList(xmlParser,jsonParser);
   }
 
   @Override
   public Optional<ASTCarrier> abstrakt(DocumentCarrier carrier) {
-    Optional<ASTCarrier> abstracted = xmlParser.abstrakt(carrier);
-    return abstracted.isPresent() ? abstracted : jsonParser.abstrakt(carrier);
+    return parserSet.stream()
+        .filter(l -> isCandidate(l, carrier.getRepresentation()))
+        .map(l -> l.abstrakt(carrier))
+        .flatMap(Util::trimStream)
+        .findFirst();
+  }
+
+  private boolean isCandidate(AbstractDeSerializer candidate, SyntacticRepresentation argumentRep) {
+    return candidate.getSupportedRepresentations().stream()
+        .anyMatch(supportedRep -> isNarrowerOrEqual(theRepContrastor.contrast(supportedRep,argumentRep)));
   }
 
   @Override
   public Optional<ExpressionCarrier> decode(BinaryCarrier carrier) {
-    Optional<ExpressionCarrier> decoded = xmlParser.decode(carrier);
-    return decoded.isPresent() ? decoded : jsonParser.decode(carrier);
+    return parserSet.stream()
+        .filter(l -> isCandidate(l, carrier.getRepresentation()))
+        .map(l -> l.decode(carrier))
+        .flatMap(Util::trimStream)
+        .findFirst();
   }
 
   @Override
   public Optional<DocumentCarrier> deserialize(ExpressionCarrier carrier) {
-    Optional<DocumentCarrier> deserialized = xmlParser.deserialize(carrier);
-    return deserialized.isPresent() ? deserialized : jsonParser.deserialize(carrier);
+    return parserSet.stream()
+        .filter(l -> isCandidate(l, carrier.getRepresentation()))
+        .map(l -> l.deserialize(carrier))
+        .flatMap(Util::trimStream)
+        .findFirst();
   }
 
   @Override
   public Optional<ASTCarrier> parse(ExpressionCarrier carrier) {
-    Optional<ASTCarrier> parsed = xmlParser.parse(carrier);
-    return parsed.isPresent() ? parsed : jsonParser.parse(carrier);
+    return parserSet.stream()
+        .filter(l -> isCandidate(l, carrier.getRepresentation()))
+        .map(l -> l.parse(carrier))
+        .flatMap(Util::trimStream)
+        .findFirst();
   }
+
+
+
 
 
   @Override

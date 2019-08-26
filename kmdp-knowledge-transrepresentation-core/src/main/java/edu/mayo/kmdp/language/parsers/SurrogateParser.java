@@ -39,7 +39,7 @@ public class SurrogateParser extends MultiFormatParser<KnowledgeAsset> implement
       rep(KnowledgeRepresentationLanguage.Knowledge_Asset_Surrogate, SerializationFormat.XML_1_1, getDefaultCharset()),
       rep(KnowledgeRepresentationLanguage.Knowledge_Asset_Surrogate, SerializationFormat.JSON, getDefaultCharset()));
 
-  protected SurrogateParser() {
+  public SurrogateParser() {
     super(new XMLSurrogateParser(), new JSONSurrogateParser());
   }
 
