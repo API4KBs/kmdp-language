@@ -41,8 +41,8 @@ import java.util.Optional;
 import java.util.Set;
 import javax.inject.Named;
 import org.apache.jena.vocabulary.SKOS;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import org.apache.xerces.util.XMLCatalogResolver;
 import org.omg.spec.api4kp._1_0.services.ASTCarrier;
 import org.omg.spec.api4kp._1_0.services.BinaryCarrier;
@@ -71,7 +71,7 @@ import org.springframework.http.ResponseEntity;
 @KPOperation(KnowledgeProcessingOperation.Detect_Language_Information_Task)
 public class OWLDetector implements DetectApiDelegate {
 
-  protected static final Logger logger = LogManager.getLogger(OWLDetector.class);
+  protected static final Logger logger = LoggerFactory.getLogger(OWLDetector.class);
 
   @Override
   public ResponseEntity<List<SyntacticRepresentation>> getDetectableLanguages() {
