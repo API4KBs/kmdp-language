@@ -16,13 +16,13 @@
 package edu.mayo.kmdp.language.parsers;
 
 
-import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._20190801.KnowledgeProcessingOperation.Lifting_Task;
-import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._20190801.KnowledgeProcessingOperation.Lowering_Task;
+import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Lifting_Task;
+import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Lowering_Task;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.tranx.server.DeserializeApiDelegate;
-import edu.mayo.ontology.taxonomies.krformat._20190801.SerializationFormat;
-import edu.mayo.ontology.taxonomies.krlanguage._20190801.KnowledgeRepresentationLanguage;
+import edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries;
+import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries;
 import java.util.Collections;
 import java.util.List;
 import javax.inject.Named;
@@ -45,7 +45,7 @@ public class CMMNParser extends XMLBasedLanguageParser<TDefinitions> implements
   public List<SyntacticRepresentation> getSupportedRepresentations() {
     return
         Collections.singletonList(
-            rep(KnowledgeRepresentationLanguage.CMMN_1_1, SerializationFormat.XML_1_1, getDefaultCharset()));
+            rep(KnowledgeRepresentationLanguageSeries.CMMN_1_1, SerializationFormatSeries.XML_1_1, getDefaultCharset()));
   }
 
 }

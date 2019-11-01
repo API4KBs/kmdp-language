@@ -15,13 +15,13 @@
  */
 package edu.mayo.kmdp.language.detectors;
 
-import static edu.mayo.ontology.taxonomies.krformat._20190801.SerializationFormat.XML_1_1;
-import static edu.mayo.ontology.taxonomies.krlanguage._20190801.KnowledgeRepresentationLanguage.CMMN_1_1;
+import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.XML_1_1;
+import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.CMMN_1_1;
 import static java.util.Collections.singletonList;
 
 import edu.mayo.kmdp.tranx.server.DetectApiDelegate;
 import edu.mayo.kmdp.util.ws.ResponseHelper;
-import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._20190801.KnowledgeProcessingOperation;
+import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import java.util.List;
 import javax.inject.Named;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
@@ -30,7 +30,7 @@ import org.omg.spec.cmmn._20151109.model.TDefinitions;
 import org.springframework.http.ResponseEntity;
 
 @Named
-@KPOperation(KnowledgeProcessingOperation.Detect_Language_Information_Task)
+@KPOperation(KnowledgeProcessingOperationSeries.Detect_Language_Information_Task)
 public class CMMNDetector extends XMLBasedLanguageDetector<TDefinitions> implements
     DetectApiDelegate {
 

@@ -24,12 +24,11 @@ import static edu.mayo.kmdp.util.ws.ResponseHelper.matches;
 import static org.omg.spec.api4kp._1_0.contrastors.SyntacticRepresentationContrastor.theRepContrastor;
 
 import edu.mayo.kmdp.tranx.server.TransxionApiDelegate;
-import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._20190801.KnowledgeProcessingOperation;
+import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 import javax.inject.Named;
@@ -51,8 +50,8 @@ public class TransrepresentationExecutor implements TransxionApiDelegate {
 
 
   public TransrepresentationExecutor(@Autowired(required = false)
-  @KPOperation(KnowledgeProcessingOperation.Transcreation_Task)
-  @KPOperation(KnowledgeProcessingOperation.Translation_Task)
+  @KPOperation(KnowledgeProcessingOperationSeries.Transcreation_Task)
+  @KPOperation(KnowledgeProcessingOperationSeries.Translation_Task)
       List<TransxionApiDelegate> translators) {
     super();
 

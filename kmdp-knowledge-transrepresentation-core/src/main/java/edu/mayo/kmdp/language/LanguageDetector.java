@@ -21,7 +21,7 @@ import static edu.mayo.kmdp.util.ws.ResponseHelper.attempt;
 import static edu.mayo.kmdp.util.ws.ResponseHelper.succeed;
 
 import edu.mayo.kmdp.tranx.server.DetectApiDelegate;
-import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._20190801.KnowledgeProcessingOperation;
+import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import java.util.List;
 import javax.inject.Named;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
@@ -39,7 +39,7 @@ public class LanguageDetector implements DetectApiDelegate {
 
   @Named
   public LanguageDetector(@Autowired(required = false)
-  @KPOperation(KnowledgeProcessingOperation.Detect_Language_Information_Task)
+  @KPOperation(KnowledgeProcessingOperationSeries.Detect_Language_Information_Task)
       List<DetectApiDelegate> detectors) {
     this.detectors = detectors;
   }

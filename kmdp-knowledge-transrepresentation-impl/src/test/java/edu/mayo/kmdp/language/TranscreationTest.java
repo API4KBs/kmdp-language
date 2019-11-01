@@ -15,9 +15,11 @@
  */
 package edu.mayo.kmdp.language;
 
+import static edu.mayo.kmdp.util.StreamUtil.filterAs;
 import static edu.mayo.kmdp.util.Util.uuid;
-import static edu.mayo.ontology.taxonomies.krlanguage._20190801.KnowledgeRepresentationLanguage.DMN_1_1;
-import static edu.mayo.ontology.taxonomies.krlanguage._20190801.KnowledgeRepresentationLanguage.OWL_2;
+import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Abstract_Knowledge_Expression;
+import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.DMN_1_1;
+import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.OWL_2;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -32,9 +34,9 @@ import edu.mayo.kmdp.tranx.DeserializeApi;
 import edu.mayo.kmdp.tranx.TransxionApi;
 import edu.mayo.kmdp.util.FileUtil;
 import edu.mayo.kmdp.util.NameUtils;
+import edu.mayo.kmdp.util.StreamUtil;
 import edu.mayo.kmdp.util.Util;
-import edu.mayo.ontology.taxonomies.api4kp.parsinglevel._20190801.ParsingLevel;
-import edu.mayo.ontology.taxonomies.lexicon._20190801.Lexicon;
+import edu.mayo.ontology.taxonomies.lexicon.LexiconSeries;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -87,7 +89,7 @@ public class TranscreationTest {
 
     Optional<ASTCarrier> ac = KnowledgeCarrier.of(owl.get(), rep(OWL_2))
         .flatMap((kc) -> transtor.applyTransrepresentation(OWLtoSKOSTranscreator.OPERATOR_ID, kc, p))
-        .flatMap((kc) -> parser.lift(kc, ParsingLevel.Abstract_Knowledge_Expression))
+        .flatMap((kc) -> parser.lift(kc, Abstract_Knowledge_Expression))
         .filter(ASTCarrier.class::isInstance)
         .map(ASTCarrier.class::cast)
         .getOptionalValue();
@@ -104,13 +106,12 @@ public class TranscreationTest {
 
     OWLDataFactory f = onto.getOWLOntologyManager().getOWLDataFactory();
     List<UUID> names = EntitySearcher.getIndividuals(f.getOWLClass(SKOS.CONCEPT.toString()), onto)
-        .filter(OWLNamedIndividual.class::isInstance)
-        .map(OWLNamedIndividual.class::cast)
+        .flatMap(filterAs(OWLNamedIndividual.class))
         .map(OWLNamedIndividual::getIRI)
         .map(IRI::toString)
         .map(NameUtils::getTrailingPart)
         .map(Util::ensureUUID)
-        .flatMap(Util::trimStream)
+        .flatMap(StreamUtil::trimStream)
         .collect(Collectors.toList());
     assertEquals(new HashSet<>(Arrays.asList(
         uuid("A"),
@@ -135,7 +136,7 @@ public class TranscreationTest {
         && ops.get().contains(OWLtoSKOSTranscreator.OPERATOR_ID));
 
     Optional<Set<String>> ops2 = transtor
-        .listOperators(rep(OWL_2), rep(OWL_2).withLexicon(Lexicon.SKOS), null)
+        .listOperators(rep(OWL_2), rep(OWL_2).withLexicon(LexiconSeries.SKOS), null)
         .map((l) -> l.stream()
             .map(KnowledgeProcessingOperator::getOperatorId)
             .collect(Collectors.toSet()))
@@ -166,14 +167,14 @@ public class TranscreationTest {
     KnowledgeCarrier kc = KnowledgeCarrier.of(owl.get(), rep(OWL_2));
 
     Optional<ASTCarrier> ac = transtor
-        .listOperators(kc.getRepresentation(), rep(OWL_2).withLexicon(Lexicon.SKOS), null)
+        .listOperators(kc.getRepresentation(), rep(OWL_2).withLexicon(LexiconSeries.SKOS), null)
         .flatMap(Answer::first)
         .flatMap((op) -> transtor.applyTransrepresentation(
                 op.getOperatorId(),
                 kc,
                 new Owl2SkosConfig(PlatformComponentHelper.defaults(op.getAcceptedParams()))
                     .with(OWLtoSKOSTxParams.TGT_NAMESPACE, "http://bar/skos-example")))
-        .flatMap((out) -> parser.lift(out, ParsingLevel.Abstract_Knowledge_Expression))
+        .flatMap((out) -> parser.lift(out, Abstract_Knowledge_Expression))
         .map(ASTCarrier.class::cast)
         .getOptionalValue();
 

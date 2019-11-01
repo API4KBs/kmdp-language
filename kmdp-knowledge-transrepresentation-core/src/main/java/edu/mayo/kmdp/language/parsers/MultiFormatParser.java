@@ -20,9 +20,10 @@ import static edu.mayo.kmdp.comparator.Contrastor.isNarrowerOrEqual;
 import static org.omg.spec.api4kp._1_0.contrastors.SyntacticRepresentationContrastor.theRepContrastor;
 
 import edu.mayo.kmdp.tranx.server.DeserializeApiDelegate;
+import edu.mayo.kmdp.util.StreamUtil;
 import edu.mayo.kmdp.util.Util;
-import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._20190801.KnowledgeProcessingOperation;
-import edu.mayo.ontology.taxonomies.krformat._20190801.SerializationFormat;
+import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
+import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -35,8 +36,8 @@ import org.omg.spec.api4kp._1_0.services.KPOperation;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 
 @Named
-@KPOperation(KnowledgeProcessingOperation.Lowering_Task)
-@KPOperation(KnowledgeProcessingOperation.Lifting_Task)
+@KPOperation(KnowledgeProcessingOperationSeries.Lowering_Task)
+@KPOperation(KnowledgeProcessingOperationSeries.Lifting_Task)
 public abstract class MultiFormatParser<T> extends AbstractDeSerializer implements
     DeserializeApiDelegate {
 
@@ -57,7 +58,7 @@ public abstract class MultiFormatParser<T> extends AbstractDeSerializer implemen
     return parserSet.stream()
         .filter(l -> isCandidate(l, carrier.getRepresentation()))
         .map(l -> l.abstrakt(carrier))
-        .flatMap(Util::trimStream)
+        .flatMap(StreamUtil::trimStream)
         .findFirst();
   }
 
@@ -71,7 +72,7 @@ public abstract class MultiFormatParser<T> extends AbstractDeSerializer implemen
     return parserSet.stream()
         .filter(l -> isCandidate(l, carrier.getRepresentation()))
         .map(l -> l.decode(carrier))
-        .flatMap(Util::trimStream)
+        .flatMap(StreamUtil::trimStream)
         .findFirst();
   }
 
@@ -80,7 +81,7 @@ public abstract class MultiFormatParser<T> extends AbstractDeSerializer implemen
     return parserSet.stream()
         .filter(l -> isCandidate(l, carrier.getRepresentation()))
         .map(l -> l.deserialize(carrier))
-        .flatMap(Util::trimStream)
+        .flatMap(StreamUtil::trimStream)
         .findFirst();
   }
 
@@ -89,7 +90,7 @@ public abstract class MultiFormatParser<T> extends AbstractDeSerializer implemen
     return parserSet.stream()
         .filter(l -> isCandidate(l, carrier.getRepresentation()))
         .map(l -> l.parse(carrier))
-        .flatMap(Util::trimStream)
+        .flatMap(StreamUtil::trimStream)
         .findFirst();
   }
 
@@ -102,7 +103,7 @@ public abstract class MultiFormatParser<T> extends AbstractDeSerializer implemen
     if (into == null) {
       return xmlParser.concretize(carrier);
     }
-    switch (into.getFormat()) {
+    switch (into.getFormat().asEnum()) {
       case XML_1_1:
         return xmlParser.concretize(carrier);
       case JSON:
@@ -117,7 +118,7 @@ public abstract class MultiFormatParser<T> extends AbstractDeSerializer implemen
     if (into == null) {
       return xmlParser.encode(carrier);
     }
-    switch (into.getFormat()) {
+    switch (into.getFormat().asEnum()) {
       case XML_1_1:
         return xmlParser.encode(carrier);
       case JSON:
@@ -132,7 +133,7 @@ public abstract class MultiFormatParser<T> extends AbstractDeSerializer implemen
     if (into == null) {
       return xmlParser.externalize(carrier);
     }
-    switch (into.getFormat()) {
+    switch (into.getFormat().asEnum()) {
       case XML_1_1:
         return xmlParser.externalize(carrier);
       case JSON:
@@ -148,7 +149,7 @@ public abstract class MultiFormatParser<T> extends AbstractDeSerializer implemen
     if (into == null) {
       return xmlParser.serialize(carrier);
     }
-    switch (into.getFormat()) {
+    switch (into.getFormat().asEnum()) {
       case XML_1_1:
         return xmlParser.serialize(carrier);
       case JSON:

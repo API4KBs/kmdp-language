@@ -26,11 +26,11 @@ import edu.mayo.kmdp.terms.skosifier.Owl2SkosConverter;
 import edu.mayo.kmdp.tranx.server.TransxionApiDelegate;
 import edu.mayo.kmdp.util.Util;
 import edu.mayo.kmdp.util.ws.ResponseHelper;
-import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._20190801.KnowledgeProcessingOperation;
-import edu.mayo.ontology.taxonomies.krformat._20190801.SerializationFormat;
-import edu.mayo.ontology.taxonomies.krlanguage._20190801.KnowledgeRepresentationLanguage;
-import edu.mayo.ontology.taxonomies.krserialization._20190801.KnowledgeRepresentationLanguageSerialization;
-import edu.mayo.ontology.taxonomies.lexicon._20190801.Lexicon;
+import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
+import edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries;
+import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries;
+import edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentationLanguageSerializationSeries;
+import edu.mayo.ontology.taxonomies.lexicon.LexiconSeries;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -52,7 +52,7 @@ import org.omg.spec.api4kp._1_0.services.tranx.TransrepresentationOperator;
 import org.springframework.http.ResponseEntity;
 
 @Named
-@KPOperation(KnowledgeProcessingOperation.Transcreation_Task)
+@KPOperation(KnowledgeProcessingOperationSeries.Transcreation_Task)
 public class OWLtoSKOSTranscreator implements TransxionApiDelegate {
 
   public static final String OPERATOR_ID = "57869ee0-304c-40a4-8759-40ea667c328d";
@@ -65,7 +65,7 @@ public class OWLtoSKOSTranscreator implements TransxionApiDelegate {
     Owl2SkosConfig config = new Owl2SkosConfig(params);
 
     InputStream is;
-    switch (sourceArtifact.getLevel()) {
+    switch (sourceArtifact.getLevel().asEnum()) {
       case Encoded_Knowledge_Expression:
         is = new ByteArrayInputStream(((BinaryCarrier) sourceArtifact).getEncodedExpression());
         break;
@@ -114,10 +114,10 @@ public class OWLtoSKOSTranscreator implements TransxionApiDelegate {
   @Override
   public ResponseEntity<SyntacticRepresentation> getTransrepresentationOutput(String txionId) {
     return succeed(
-        rep(KnowledgeRepresentationLanguage.OWL_2,
-            KnowledgeRepresentationLanguageSerialization.RDF_XML_Syntax,
-            SerializationFormat.XML_1_1)
-            .withLexicon(Lexicon.SKOS));
+        rep(KnowledgeRepresentationLanguageSeries.OWL_2,
+            KnowledgeRepresentationLanguageSerializationSeries.RDF_XML_Syntax,
+            SerializationFormatSeries.XML_1_1)
+            .withLexicon(LexiconSeries.SKOS));
   }
 
   public ResponseEntity<SyntacticRepresentation> getTransrepresentationInput(String txionId) {
@@ -125,9 +125,9 @@ public class OWLtoSKOSTranscreator implements TransxionApiDelegate {
       return fail();
     }
     return succeed(
-        rep(KnowledgeRepresentationLanguage.OWL_2,
-            KnowledgeRepresentationLanguageSerialization.RDF_XML_Syntax,
-            SerializationFormat.XML_1_1));
+        rep(KnowledgeRepresentationLanguageSeries.OWL_2,
+            KnowledgeRepresentationLanguageSerializationSeries.RDF_XML_Syntax,
+            SerializationFormatSeries.XML_1_1));
   }
 
   @Override

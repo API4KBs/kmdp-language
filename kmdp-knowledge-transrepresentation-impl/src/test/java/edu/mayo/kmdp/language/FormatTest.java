@@ -15,6 +15,9 @@
  */
 package edu.mayo.kmdp.language;
 
+import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.XML_1_1;
+import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.OWL_2;
+import static edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentationLanguageSerializationSeries.RDF_XML_Syntax;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -22,9 +25,6 @@ import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.config.LocalTestConfig;
 import edu.mayo.kmdp.tranx.DeserializeApi;
-import edu.mayo.ontology.taxonomies.krformat._20190801.SerializationFormat;
-import edu.mayo.ontology.taxonomies.krlanguage._20190801.KnowledgeRepresentationLanguage;
-import edu.mayo.ontology.taxonomies.krserialization._20190801.KnowledgeRepresentationLanguageSerialization;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -58,11 +58,11 @@ public class FormatTest {
   public void testOWL2() {
     InputStream is = FormatTest.class.getResourceAsStream("/artifacts/test.ofn");
 
-    Optional<KnowledgeCarrier> kc = KnowledgeCarrier.of(is, rep(KnowledgeRepresentationLanguage.OWL_2))
+    Optional<KnowledgeCarrier> kc = KnowledgeCarrier.of(is, rep(OWL_2))
         .flatMap((c) -> parser
             .ensureRepresentation(c,
-                rep(KnowledgeRepresentationLanguage.OWL_2, KnowledgeRepresentationLanguageSerialization.RDF_XML_Syntax,
-                    SerializationFormat.XML_1_1, Charset.defaultCharset().name())))
+                rep(OWL_2, RDF_XML_Syntax,
+                    XML_1_1, Charset.defaultCharset().name())))
         .getOptionalValue();
 
     assertTrue(kc.isPresent());

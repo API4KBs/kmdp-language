@@ -15,6 +15,16 @@
  */
 package edu.mayo.kmdp.language;
 
+import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Abstract_Knowledge_Expression;
+import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Concrete_Knowledge_Expression;
+import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Parsed_Knowedge_Expression;
+import static edu.mayo.ontology.taxonomies.kao.knowledgeassettype.KnowledgeAssetTypeSeries.Cognitive_Process_Model;
+import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.JSON;
+import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.XML_1_1;
+import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.DMN_1_1;
+import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate;
+import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.OWL_2;
+import static edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentationLanguageSerializationSeries.RDF_XML_Syntax;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -30,11 +40,6 @@ import edu.mayo.kmdp.util.FileUtil;
 import edu.mayo.kmdp.util.JSonUtil;
 import edu.mayo.kmdp.util.JaxbUtil;
 import edu.mayo.kmdp.util.XMLUtil;
-import edu.mayo.ontology.taxonomies.api4kp.parsinglevel._20190801.ParsingLevel;
-import edu.mayo.ontology.taxonomies.kao.knowledgeassettype._20190801.KnowledgeAssetType;
-import edu.mayo.ontology.taxonomies.krformat._20190801.SerializationFormat;
-import edu.mayo.ontology.taxonomies.krlanguage._20190801.KnowledgeRepresentationLanguage;
-import edu.mayo.ontology.taxonomies.krserialization._20190801.KnowledgeRepresentationLanguageSerialization;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Collections;
@@ -76,17 +81,17 @@ public class DeserializationTest {
 
     KnowledgeCarrier bin = KnowledgeCarrier.of(dmn.get())
         .withRepresentation(
-            rep(KnowledgeRepresentationLanguage.DMN_1_1, SerializationFormat.XML_1_1, Charset.defaultCharset().name(), "TODO"));
+            rep(DMN_1_1, XML_1_1, Charset.defaultCharset().name(), "TODO"));
 
     Optional<KnowledgeCarrier> expr = parser
-        .lift(bin, ParsingLevel.Concrete_Knowledge_Expression)
+        .lift(bin, Concrete_Knowledge_Expression)
         .getOptionalValue();
     assertTrue(expr.isPresent());
     assertTrue(expr.get() instanceof ExpressionCarrier);
     assertTrue(((ExpressionCarrier)expr.get()).getSerializedExpression().contains("decision name=\"a\""));
 
     DocumentCarrier dox = parser
-        .lift(bin, ParsingLevel.Parsed_Knowedge_Expression)
+        .lift(bin, Parsed_Knowedge_Expression)
         .map(DocumentCarrier.class::cast)
         .getOptionalValue()
         .orElse(null);
@@ -94,7 +99,7 @@ public class DeserializationTest {
     assertTrue(dox.getStructuredExpression() instanceof Document);
 
     DocumentCarrier dox2 = parser
-        .lift(expr.get(), ParsingLevel.Parsed_Knowedge_Expression)
+        .lift(expr.get(), Parsed_Knowedge_Expression)
         .map(DocumentCarrier.class::cast)
         .getOptionalValue()
         .orElse(null);
@@ -105,21 +110,21 @@ public class DeserializationTest {
         XMLUtil.toByteArray((Document) dox2.getStructuredExpression()));
 
     assertTrue(
-        parser.lift(dox, ParsingLevel.Abstract_Knowledge_Expression)
+        parser.lift(dox, Abstract_Knowledge_Expression)
         .map(ASTCarrier.class::cast)
         .map(ASTCarrier::getParsedExpression)
         .map(TDefinitions.class::isInstance)
         .isSuccess());
 
     assertTrue(
-        parser.lift(expr.get(), ParsingLevel.Abstract_Knowledge_Expression)
+        parser.lift(expr.get(), Abstract_Knowledge_Expression)
             .map(ASTCarrier.class::cast)
             .map(ASTCarrier::getParsedExpression)
             .map(TDefinitions.class::isInstance)
             .isSuccess());
 
     assertTrue(
-        parser.lift(bin, ParsingLevel.Abstract_Knowledge_Expression)
+        parser.lift(bin, Abstract_Knowledge_Expression)
             .map(ASTCarrier.class::cast)
             .map(ASTCarrier::getParsedExpression)
             .map(TDefinitions.class::isInstance)
@@ -134,16 +139,16 @@ public class DeserializationTest {
     assertTrue(dmn.isPresent());
 
     KnowledgeCarrier bin = KnowledgeCarrier.of(dmn.get())
-        .withRepresentation(rep(KnowledgeRepresentationLanguage.DMN_1_1,
-            SerializationFormat.XML_1_1,
+        .withRepresentation(rep(DMN_1_1,
+            XML_1_1,
             Charset.defaultCharset().name(),
             "TODO"));
 
-    Answer<ASTCarrier> ast = parser.lift(bin, ParsingLevel.Abstract_Knowledge_Expression)
+    Answer<ASTCarrier> ast = parser.lift(bin, Abstract_Knowledge_Expression)
         .map(ASTCarrier.class::cast);
 
     Answer<DocumentCarrier> dox = ast
-        .flatMap((a) -> parser.lower(a, ParsingLevel.Parsed_Knowedge_Expression))
+        .flatMap((a) -> parser.lower(a, Parsed_Knowedge_Expression))
         .map(DocumentCarrier.class::cast);
 
     assertTrue(dox.isSuccess());
@@ -151,7 +156,7 @@ public class DeserializationTest {
     assertTrue(dox.getOptionalValue().get().getStructuredExpression() instanceof Document);
 
     Optional<ExpressionCarrier> expr = ast
-        .flatMap((a) -> parser.lower(a, ParsingLevel.Concrete_Knowledge_Expression))
+        .flatMap((a) -> parser.lower(a, Concrete_Knowledge_Expression))
         .map(ExpressionCarrier.class::cast)
         .getOptionalValue();
 
@@ -169,10 +174,10 @@ public class DeserializationTest {
     assertTrue(owl.isPresent());
 
     KnowledgeCarrier bin = KnowledgeCarrier.of(owl.get())
-        .withRepresentation(rep(KnowledgeRepresentationLanguage.OWL_2));
+        .withRepresentation(rep(OWL_2));
 
     Answer<ASTCarrier> aast = parser
-        .lift(bin, ParsingLevel.Abstract_Knowledge_Expression)
+        .lift(bin, Abstract_Knowledge_Expression)
         .map(ASTCarrier.class::cast);
 
     assertTrue(aast.isSuccess());
@@ -180,20 +185,20 @@ public class DeserializationTest {
     ASTCarrier ast = aast.getOptionalValue().get();
 
     assertTrue(ast.getParsedExpression() instanceof OWLOntology);
-    assertEquals(KnowledgeRepresentationLanguage.OWL_2, ast.getRepresentation().getLanguage());
+    assertEquals(OWL_2, ast.getRepresentation().getLanguage());
     assertNull(ast.getRepresentation().getSerialization());
 
     Answer<SyntacticRepresentation> arep = parser
-        .lower(ast, ParsingLevel.Concrete_Knowledge_Expression)
+        .lower(ast, Concrete_Knowledge_Expression)
         .map(KnowledgeCarrier::getRepresentation);
 
     assertTrue(arep.isSuccess());
     assertTrue(arep.getOptionalValue().isPresent());
     SyntacticRepresentation rep = arep.getOptionalValue().get();
 
-    assertEquals(KnowledgeRepresentationLanguage.OWL_2,rep.getLanguage());
-    assertEquals(KnowledgeRepresentationLanguageSerialization.RDF_XML_Syntax,rep.getSerialization());
-    assertEquals(SerializationFormat.XML_1_1,rep.getFormat());
+    assertEquals(OWL_2,rep.getLanguage());
+    assertEquals(RDF_XML_Syntax,rep.getSerialization());
+    assertEquals(XML_1_1,rep.getFormat());
 
   }
 
@@ -204,15 +209,15 @@ public class DeserializationTest {
     KnowledgeAsset asset = new edu.mayo.kmdp.metadata.surrogate.resources.KnowledgeAsset()
         .withAssetId(new URIIdentifier().withUri(
             URI.create(Registry.MAYO_ASSETS_BASE_URI + "2c6572ea-867d-4863-963a-b4bc5357429b")))
-        .withFormalType(KnowledgeAssetType.Cognitive_Process_Model);
+        .withFormalType(Cognitive_Process_Model);
     String serializedAsset = JaxbUtil.marshallToString(Collections.singleton(asset.getClass()),asset, JaxbUtil.defaultProperties());
 
     KnowledgeCarrier ast = KnowledgeCarrier.ofAst(asset)
-        .withRepresentation(rep(KnowledgeRepresentationLanguage.Knowledge_Asset_Surrogate))
-        .withLevel(ParsingLevel.Abstract_Knowledge_Expression);
+        .withRepresentation(rep(Knowledge_Asset_Surrogate))
+        .withLevel(Abstract_Knowledge_Expression);
 
     Answer<String> ser = parser
-        .lower(ast,ParsingLevel.Concrete_Knowledge_Expression)
+        .lower(ast,Concrete_Knowledge_Expression)
         .map(ExpressionCarrier.class::cast)
         .map(ExpressionCarrier::getSerializedExpression);
 
@@ -226,20 +231,20 @@ public class DeserializationTest {
     KnowledgeAsset asset = new edu.mayo.kmdp.metadata.surrogate.resources.KnowledgeAsset()
         .withAssetId(new URIIdentifier().withUri(
             URI.create(Registry.MAYO_ASSETS_BASE_URI + "2c6572ea-867d-4863-963a-b4bc5357429b")))
-        .withFormalType(KnowledgeAssetType.Cognitive_Process_Model);
+        .withFormalType(Cognitive_Process_Model);
 
     String serializedAsset = JSonUtil.printJson(asset).orElse("");
 
     KnowledgeCarrier ast = KnowledgeCarrier.ofAst(asset)
-        .withRepresentation(rep(KnowledgeRepresentationLanguage.Knowledge_Asset_Surrogate))
-        .withLevel(ParsingLevel.Abstract_Knowledge_Expression);
+        .withRepresentation(rep(Knowledge_Asset_Surrogate))
+        .withLevel(Abstract_Knowledge_Expression);
 
 
     Answer<String> ser = parser.serialize(
         ast,
-        rep(ast.getRepresentation())
-            .withFormat(SerializationFormat.JSON)
-            .withCharset(Charset.defaultCharset().name()))
+    rep(ast.getRepresentation())
+        .withFormat(JSON)
+        .withCharset(Charset.defaultCharset().name()))
         .map(ExpressionCarrier.class::cast)
         .map(ExpressionCarrier::getSerializedExpression);
     ;
@@ -250,7 +255,7 @@ public class DeserializationTest {
     Answer<String> ser2 = parser.ensureRepresentation(
         ast,
         rep(ast.getRepresentation())
-            .withFormat(SerializationFormat.JSON)
+            .withFormat(JSON)
             .withCharset(Charset.defaultCharset().name()))
         .map(ExpressionCarrier.class::cast)
         .map(ExpressionCarrier::getSerializedExpression);

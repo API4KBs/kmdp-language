@@ -19,17 +19,16 @@ import static edu.mayo.kmdp.util.ws.ResponseHelper.get;
 import static edu.mayo.kmdp.util.ws.ResponseHelper.getAll;
 import static edu.mayo.kmdp.util.ws.ResponseHelper.map;
 import static edu.mayo.kmdp.util.ws.ResponseHelper.succeed;
-import static edu.mayo.ontology.taxonomies.krformat._20190801.SerializationFormat.JSON;
-import static edu.mayo.ontology.taxonomies.krformat._20190801.SerializationFormat.XML_1_1;
-import static edu.mayo.ontology.taxonomies.krlanguage._20190801.KnowledgeRepresentationLanguage.Knowledge_Asset_Surrogate;
+import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate;
 import static java.util.Collections.singletonList;
 
 import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
 import edu.mayo.kmdp.tranx.server.DetectApiDelegate;
 import edu.mayo.kmdp.util.ws.ResponseHelper;
-import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._20190801.KnowledgeProcessingOperation;
-import edu.mayo.ontology.taxonomies.krlanguage._20190801.KnowledgeRepresentationLanguage;
-import edu.mayo.ontology.taxonomies.lexicon._20190801.Lexicon;
+import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
+import edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries;
+import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguage;
+import edu.mayo.ontology.taxonomies.lexicon.LexiconSeries;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -40,7 +39,7 @@ import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 import org.springframework.http.ResponseEntity;
 
 @Named
-@KPOperation(KnowledgeProcessingOperation.Detect_Language_Information_Task)
+@KPOperation(KnowledgeProcessingOperationSeries.Detect_Language_Information_Task)
 public class SurrogateDetector implements DetectApiDelegate {
 
   private XMLSurrogateDetector xmlDetector = new XMLSurrogateDetector();
@@ -85,10 +84,10 @@ public class SurrogateDetector implements DetectApiDelegate {
       return succeed(
           singletonList(new org.omg.spec.api4kp._1_0.services.SyntacticRepresentation()
               .withLanguage(theLanguage)
-              .withFormat(XML_1_1)
-              .withLexicon(Lexicon.Asset_Relationships_Dependencies,
-                  Lexicon.Asset_Relationships_Derivations, Lexicon.Asset_Relationships_Structural,
-                  Lexicon.Asset_Relationships_Variants)));
+              .withFormat(SerializationFormatSeries.XML_1_1)
+              .withLexicon(LexiconSeries.Asset_Relationships_Dependencies,
+                  LexiconSeries.Asset_Relationships_Derivations, LexiconSeries.Asset_Relationships_Structural,
+                  LexiconSeries.Asset_Relationships_Variants)));
     }
   }
 
@@ -104,10 +103,10 @@ public class SurrogateDetector implements DetectApiDelegate {
       return succeed(
           singletonList(new org.omg.spec.api4kp._1_0.services.SyntacticRepresentation()
               .withLanguage(theLanguage)
-              .withFormat(JSON)
-              .withLexicon(Lexicon.Asset_Relationships_Dependencies,
-                  Lexicon.Asset_Relationships_Derivations, Lexicon.Asset_Relationships_Structural,
-                  Lexicon.Asset_Relationships_Variants)));
+              .withFormat(SerializationFormatSeries.JSON)
+              .withLexicon(LexiconSeries.Asset_Relationships_Dependencies,
+                  LexiconSeries.Asset_Relationships_Derivations, LexiconSeries.Asset_Relationships_Structural,
+                  LexiconSeries.Asset_Relationships_Variants)));
     }
   }
 

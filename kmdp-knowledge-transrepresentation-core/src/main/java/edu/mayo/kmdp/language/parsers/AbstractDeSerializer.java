@@ -17,14 +17,14 @@ package edu.mayo.kmdp.language.parsers;
 
 import static edu.mayo.kmdp.util.ws.ResponseHelper.getAll;
 import static edu.mayo.kmdp.util.ws.ResponseHelper.succeed;
-import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel._20190801.ParsingLevel.Abstract_Knowledge_Expression;
 import static org.omg.spec.api4kp._1_0.contrastors.ParsingLevelContrastor.detectLevel;
 
 import edu.mayo.kmdp.comparator.Contrastor.Comparison;
 import edu.mayo.kmdp.tranx.server.DeserializeApiDelegate;
 import edu.mayo.kmdp.util.ws.ResponseHelper;
-import edu.mayo.ontology.taxonomies.api4kp.parsinglevel._20190801.ParsingLevel;
-import edu.mayo.ontology.taxonomies.krformat._20190801.SerializationFormat;
+import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevel;
+import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries;
+import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Optional;
@@ -62,7 +62,7 @@ public abstract class AbstractDeSerializer implements DeserializeApiDelegate, Li
 
     if (sourceArtifact instanceof BinaryCarrier) {
       BinaryCarrier binary = (BinaryCarrier) sourceArtifact;
-      switch (into) {
+      switch (into.asEnum()) {
         case Abstract_Knowledge_Expression:
           Optional<ASTCarrier> parsedBinary = this.decode(binary)
               .flatMap(this::parse);
@@ -84,7 +84,7 @@ public abstract class AbstractDeSerializer implements DeserializeApiDelegate, Li
       }
     } else if (sourceArtifact instanceof ExpressionCarrier) {
       ExpressionCarrier expr = (ExpressionCarrier) sourceArtifact;
-      switch (into) {
+      switch (into.asEnum()) {
         case Abstract_Knowledge_Expression:
           Optional<ASTCarrier> parsedExpr = this.parse(expr);
           result = parsedExpr.orElse(null);
@@ -100,7 +100,7 @@ public abstract class AbstractDeSerializer implements DeserializeApiDelegate, Li
       }
     } else if (sourceArtifact instanceof DocumentCarrier) {
       DocumentCarrier doc = (DocumentCarrier) sourceArtifact;
-      switch (into) {
+      switch (into.asEnum()) {
         case Abstract_Knowledge_Expression:
           Optional<ASTCarrier> parsedExpr = this.abstrakt(doc);
           result = parsedExpr.orElse(null);
@@ -157,7 +157,7 @@ public abstract class AbstractDeSerializer implements DeserializeApiDelegate, Li
 
   private KnowledgeCarrier serializeExpression(ExpressionCarrier expr, ParsingLevel toLevel,
       SyntacticRepresentation into) {
-    switch (toLevel) {
+    switch (toLevel.asEnum()) {
       case Concrete_Knowledge_Expression:
         return expr;
       case Encoded_Knowledge_Expression:
@@ -169,7 +169,7 @@ public abstract class AbstractDeSerializer implements DeserializeApiDelegate, Li
 
   private KnowledgeCarrier serializeDoc(DocumentCarrier doc, ParsingLevel toLevel,
       SyntacticRepresentation into) {
-    switch (toLevel) {
+    switch (toLevel.asEnum()) {
       case Parsed_Knowedge_Expression:
         return doc;
       case Concrete_Knowledge_Expression:
@@ -185,7 +185,7 @@ public abstract class AbstractDeSerializer implements DeserializeApiDelegate, Li
 
   protected KnowledgeCarrier serializeAST(ASTCarrier ast, ParsingLevel toLevel,
       SyntacticRepresentation into) {
-    switch (toLevel) {
+    switch (toLevel.asEnum()) {
       case Abstract_Knowledge_Expression:
         return ast;
       case Parsed_Knowedge_Expression:
@@ -211,7 +211,7 @@ public abstract class AbstractDeSerializer implements DeserializeApiDelegate, Li
     if (srcLevel == tgtLevel && sourceArtifact.getRepresentation().equals(into)) {
       return succeed(sourceArtifact);
     }
-    return ResponseHelper.flatMap(lift(sourceArtifact, Abstract_Knowledge_Expression),
+    return ResponseHelper.flatMap(lift(sourceArtifact, ParsingLevelSeries.Abstract_Knowledge_Expression),
         kc -> serialize(kc, into));
   }
 
@@ -234,7 +234,7 @@ public abstract class AbstractDeSerializer implements DeserializeApiDelegate, Li
       ParsingLevel into) {
     SyntacticRepresentation rep = (SyntacticRepresentation) sourceArtifact.getRepresentation()
         .clone();
-    switch (into) {
+    switch (into.asEnum()) {
       case Abstract_Knowledge_Expression:
         rep.setFormat(null);
         rep.setCharset(null);
@@ -259,7 +259,7 @@ public abstract class AbstractDeSerializer implements DeserializeApiDelegate, Li
       ParsingLevel into) {
     SyntacticRepresentation rep = (SyntacticRepresentation) sourceArtifact.getRepresentation()
         .clone();
-    switch (into) {
+    switch (into.asEnum()) {
       case Concrete_Knowledge_Expression:
         rep.setEncoding(null);
         if (rep.getFormat() == null) {
