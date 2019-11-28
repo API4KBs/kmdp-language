@@ -21,6 +21,7 @@ import edu.mayo.kmdp.Option;
 import edu.mayo.kmdp.language.detectors.OWLDetectorConfig.DetectorParams;
 import java.util.Properties;
 
+@SuppressWarnings("unchecked")
 public class OWLDetectorConfig extends ConfigProperties<OWLDetectorConfig, DetectorParams> {
 
   private static final Properties DEFAULTS = defaulted(DetectorParams.class);
@@ -44,14 +45,14 @@ public class OWLDetectorConfig extends ConfigProperties<OWLDetectorConfig, Detec
         String.class,
         false));
 
-    private Opt opt;
+    private Opt<DetectorParams> opt;
 
-    DetectorParams(Opt opt) {
+    DetectorParams(Opt<DetectorParams> opt) {
       this.opt = opt;
     }
 
     @Override
-    public Opt getOption() {
+    public Opt<DetectorParams> getOption() {
       return opt;
     }
 

@@ -45,7 +45,7 @@ import java.util.Optional;
 import java.util.Set;
 import javax.inject.Named;
 import org.apache.jena.vocabulary.SKOS;
-import org.apache.xerces.util.XMLCatalogResolver;
+import org.apache.xml.resolver.tools.CatalogResolver;
 import org.omg.spec.api4kp._1_0.services.ASTCarrier;
 import org.omg.spec.api4kp._1_0.services.BinaryCarrier;
 import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
@@ -211,11 +211,11 @@ public class OWLDetector implements DetectApiDelegate {
   private void configureCatalog(OWLOntologyManager manager, OWLDetectorConfig params) {
     String catalog = params.get(DetectorParams.CATALOG).orElse(null);
     if (!Util.isEmpty(catalog)) {
-      XMLCatalogResolver resolver = catalogResolver(catalog);
+      CatalogResolver resolver = catalogResolver(catalog);
       manager.setIRIMappers(Collections.singleton(
           (OWLOntologyIRIMapper) iri -> {
             try {
-              String resolved = resolver.resolveURI(iri.toURI().toString());
+              String resolved = resolver.getCatalog().resolveURI(iri.toURI().toString());
               return IRI.create(resolved);
             } catch (IOException e) {
               logger.error(e.getMessage(), e);

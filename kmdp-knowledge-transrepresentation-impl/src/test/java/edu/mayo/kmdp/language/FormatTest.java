@@ -55,6 +55,7 @@ public class FormatTest {
   DeserializeApi parser;
 
   @Test
+  @SuppressWarnings("deprecation")
   public void testOWL2() {
     InputStream is = FormatTest.class.getResourceAsStream("/artifacts/test.ofn");
 
