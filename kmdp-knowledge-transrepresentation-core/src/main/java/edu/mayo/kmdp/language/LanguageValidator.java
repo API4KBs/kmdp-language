@@ -15,8 +15,7 @@
  */
 package edu.mayo.kmdp.language;
 
-import edu.mayo.kmdp.tranx.server.ValidateApiInternal;
-import java.util.Collections;
+import edu.mayo.kmdp.tranx.v3.server.ValidateApiInternal;
 import java.util.List;
 import javax.inject.Named;
 import org.omg.spec.api4kp._1_0.Answer;

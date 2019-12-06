@@ -18,7 +18,7 @@ import static org.omg.spec.api4kp._1_0.PlatformComponentHelper.asParamDefinition
 
 import edu.mayo.kmdp.terms.skosifier.Owl2SkosConfig;
 import edu.mayo.kmdp.terms.skosifier.Owl2SkosConverter;
-import edu.mayo.kmdp.tranx.server.TransxionApiInternal;
+import edu.mayo.kmdp.tranx.v3.server.TransxionApiInternal;
 import edu.mayo.kmdp.util.Util;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries;
@@ -44,7 +44,6 @@ import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.ParameterDefinitions;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 import org.omg.spec.api4kp._1_0.services.tranx.TransrepresentationOperator;
-import org.springframework.stereotype.Component;
 
 @Named
 @KPOperation(KnowledgeProcessingOperationSeries.Transcreation_Task)

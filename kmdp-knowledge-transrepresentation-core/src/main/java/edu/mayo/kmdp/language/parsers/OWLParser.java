@@ -25,7 +25,7 @@ import static edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentati
 import static edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentationLanguageSerializationSeries.Turtle;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
-import edu.mayo.kmdp.tranx.server.DeserializeApiInternal;
+import edu.mayo.kmdp.tranx.v3.server.DeserializeApiInternal;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;

@@ -25,9 +25,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.config.LocalTestConfig;
-import edu.mayo.kmdp.tranx.DeserializeApi;
-import edu.mayo.kmdp.tranx.DetectApi;
-import edu.mayo.kmdp.tranx.TransxionApi;
+import edu.mayo.kmdp.tranx.v3.DeserializeApi;
+import edu.mayo.kmdp.tranx.v3.DetectApi;
+import edu.mayo.kmdp.tranx.v3.TransxionApi;
 import edu.mayo.kmdp.util.FileUtil;
 import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevel;
 import java.util.Optional;

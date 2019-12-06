@@ -20,7 +20,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
 import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
-import edu.mayo.kmdp.tranx.server.DetectApiInternal;
+import edu.mayo.kmdp.tranx.v3.server.DetectApiInternal;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries;
 import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguage;

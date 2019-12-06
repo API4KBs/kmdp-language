@@ -15,7 +15,7 @@ package edu.mayo.kmdp.language.detectors;
 
 import static java.util.Collections.emptyList;
 
-import edu.mayo.kmdp.tranx.server.DetectApiInternal;
+import edu.mayo.kmdp.tranx.v3.server.DetectApiInternal;
 import edu.mayo.kmdp.util.JaxbUtil;
 import java.io.ByteArrayInputStream;
 import java.util.Arrays;

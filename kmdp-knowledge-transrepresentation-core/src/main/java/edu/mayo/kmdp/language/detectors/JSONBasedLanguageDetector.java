@@ -16,7 +16,7 @@
 package edu.mayo.kmdp.language.detectors;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import edu.mayo.kmdp.tranx.server.DetectApiInternal;
+import edu.mayo.kmdp.tranx.v3.server.DetectApiInternal;
 import edu.mayo.kmdp.util.JSonUtil;
 import java.util.Collections;
 import org.omg.spec.api4kp._1_0.Answer;

@@ -35,7 +35,7 @@ import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 import edu.mayo.kmdp.language.config.LocalTestConfig;
 import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
 import edu.mayo.kmdp.registry.Registry;
-import edu.mayo.kmdp.tranx.DeserializeApi;
+import edu.mayo.kmdp.tranx.v3.DeserializeApi;
 import edu.mayo.kmdp.util.FileUtil;
 import edu.mayo.kmdp.util.JSonUtil;
 import edu.mayo.kmdp.util.JaxbUtil;
@@ -46,7 +46,6 @@ import java.util.Collections;
 import java.util.Optional;
 import javax.inject.Inject;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.omg.spec.api4kp._1_0.Answer;
 import org.omg.spec.api4kp._1_0.identifiers.URIIdentifier;
 import org.omg.spec.api4kp._1_0.services.ASTCarrier;
@@ -58,10 +57,7 @@ import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 import org.omg.spec.dmn._20151101.dmn.TDefinitions;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.web.WebAppConfiguration;
 import org.w3c.dom.Document;
 
 @SpringBootTest

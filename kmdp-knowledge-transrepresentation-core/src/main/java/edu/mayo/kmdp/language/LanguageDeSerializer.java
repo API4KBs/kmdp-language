@@ -16,7 +16,7 @@ package edu.mayo.kmdp.language;
 import static org.omg.spec.api4kp._1_0.Answer.anyAble;
 import static org.omg.spec.api4kp._1_0.Answer.delegateTo;
 
-import edu.mayo.kmdp.tranx.server.DeserializeApiInternal;
+import edu.mayo.kmdp.tranx.v3.server.DeserializeApiInternal;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevel;
 import java.util.Collections;
@@ -32,7 +32,6 @@ import org.omg.spec.api4kp._1_0.services.KPServer;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 @Named
 @KPServer

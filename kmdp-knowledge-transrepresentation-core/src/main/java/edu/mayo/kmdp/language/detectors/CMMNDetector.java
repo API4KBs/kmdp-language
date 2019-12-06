@@ -19,7 +19,7 @@ import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.XM
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.CMMN_1_1;
 import static java.util.Collections.singletonList;
 
-import edu.mayo.kmdp.tranx.server.DetectApiInternal;
+import edu.mayo.kmdp.tranx.v3.server.DetectApiInternal;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import java.util.List;
 import javax.inject.Named;

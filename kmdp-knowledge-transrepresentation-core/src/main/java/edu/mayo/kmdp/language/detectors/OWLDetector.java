@@ -20,7 +20,7 @@ import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLan
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.detectors.OWLDetectorConfig.DetectorParams;
-import edu.mayo.kmdp.tranx.server.DetectApiInternal;
+import edu.mayo.kmdp.tranx.v3.server.DetectApiInternal;
 import edu.mayo.kmdp.util.Util;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;

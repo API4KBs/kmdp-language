@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import edu.mayo.kmdp.language.config.LocalTestConfig;
-import edu.mayo.kmdp.tranx.DetectApi;
+import edu.mayo.kmdp.tranx.v3.DetectApi;
 import edu.mayo.kmdp.util.FileUtil;
 import java.io.InputStream;
 import java.util.Optional;

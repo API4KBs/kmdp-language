@@ -15,7 +15,7 @@
  */
 package edu.mayo.kmdp.language.parsers;
 
-import edu.mayo.kmdp.tranx.server.DeserializeApiInternal;
+import edu.mayo.kmdp.tranx.v3.server.DeserializeApiInternal;
 import edu.mayo.kmdp.util.JaxbUtil;
 import edu.mayo.kmdp.util.Util;
 import edu.mayo.kmdp.util.XMLUtil;

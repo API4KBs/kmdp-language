@@ -19,7 +19,7 @@ package edu.mayo.kmdp.language.parsers;
 import static edu.mayo.kmdp.comparator.Contrastor.isNarrowerOrEqual;
 import static org.omg.spec.api4kp._1_0.contrastors.SyntacticRepresentationContrastor.theRepContrastor;
 
-import edu.mayo.kmdp.tranx.server.DeserializeApiInternal;
+import edu.mayo.kmdp.tranx.v3.server.DeserializeApiInternal;
 import edu.mayo.kmdp.util.StreamUtil;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;

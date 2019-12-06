@@ -30,8 +30,8 @@ import edu.mayo.kmdp.language.config.LocalTestConfig;
 import edu.mayo.kmdp.language.translators.OWLtoSKOSTranscreator;
 import edu.mayo.kmdp.terms.skosifier.Owl2SkosConfig;
 import edu.mayo.kmdp.terms.skosifier.Owl2SkosConfig.OWLtoSKOSTxParams;
-import edu.mayo.kmdp.tranx.DeserializeApi;
-import edu.mayo.kmdp.tranx.TransxionApi;
+import edu.mayo.kmdp.tranx.v3.DeserializeApi;
+import edu.mayo.kmdp.tranx.v3.TransxionApi;
 import edu.mayo.kmdp.util.FileUtil;
 import edu.mayo.kmdp.util.NameUtils;
 import edu.mayo.kmdp.util.StreamUtil;
@@ -47,7 +47,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.eclipse.rdf4j.model.vocabulary.SKOS;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.omg.spec.api4kp._1_0.Answer;
 import org.omg.spec.api4kp._1_0.PlatformComponentHelper;
 import org.omg.spec.api4kp._1_0.services.ASTCarrier;
@@ -60,10 +59,7 @@ import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.search.EntitySearcher;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.web.WebAppConfiguration;
 
 @SpringBootTest
 @ContextConfiguration(classes = LocalTestConfig.class)
