@@ -59,15 +59,14 @@ import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.search.EntitySearcher;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 
-@ExtendWith(SpringExtension.class)
+@SpringBootTest
 @ContextConfiguration(classes = LocalTestConfig.class)
-@ActiveProfiles(profiles = "test")
-@WebAppConfiguration
 public class TranscreationTest {
 
   @Inject

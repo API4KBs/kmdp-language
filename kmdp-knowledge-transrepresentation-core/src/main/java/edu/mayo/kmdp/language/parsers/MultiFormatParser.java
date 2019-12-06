@@ -19,7 +19,7 @@ package edu.mayo.kmdp.language.parsers;
 import static edu.mayo.kmdp.comparator.Contrastor.isNarrowerOrEqual;
 import static org.omg.spec.api4kp._1_0.contrastors.SyntacticRepresentationContrastor.theRepContrastor;
 
-import edu.mayo.kmdp.tranx.server.DeserializeApiDelegate;
+import edu.mayo.kmdp.tranx.server.DeserializeApiInternal;
 import edu.mayo.kmdp.util.StreamUtil;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;
@@ -38,7 +38,7 @@ import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 @KPOperation(KnowledgeProcessingOperationSeries.Lowering_Task)
 @KPOperation(KnowledgeProcessingOperationSeries.Lifting_Task)
 public abstract class MultiFormatParser<T> extends AbstractDeSerializer implements
-    DeserializeApiDelegate {
+    DeserializeApiInternal {
 
   protected XMLBasedLanguageParser<T> xmlParser;
   protected JSONBasedLanguageParser<T> jsonParser;

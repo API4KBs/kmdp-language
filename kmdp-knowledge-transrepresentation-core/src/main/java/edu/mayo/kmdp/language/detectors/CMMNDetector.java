@@ -19,28 +19,27 @@ import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.XM
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.CMMN_1_1;
 import static java.util.Collections.singletonList;
 
-import edu.mayo.kmdp.tranx.server.DetectApiDelegate;
-import edu.mayo.kmdp.util.ws.ResponseHelper;
+import edu.mayo.kmdp.tranx.server.DetectApiInternal;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import java.util.List;
 import javax.inject.Named;
+import org.omg.spec.api4kp._1_0.Answer;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 import org.omg.spec.cmmn._20151109.model.TDefinitions;
-import org.springframework.http.ResponseEntity;
 
 @Named
 @KPOperation(KnowledgeProcessingOperationSeries.Detect_Language_Information_Task)
 public class CMMNDetector extends XMLBasedLanguageDetector<TDefinitions> implements
-    DetectApiDelegate {
+    DetectApiInternal {
 
   public CMMNDetector() {
     this.root = TDefinitions.class;
   }
 
   @Override
-  public ResponseEntity<List<SyntacticRepresentation>> getDetectableLanguages() {
-    return ResponseHelper.succeed(
+  public Answer<List<SyntacticRepresentation>> getDetectableLanguages() {
+    return Answer.of(
         singletonList(new org.omg.spec.api4kp._1_0.services.resources.SyntacticRepresentation()
             .withLanguage(CMMN_1_1)
             .withFormat(XML_1_1)));

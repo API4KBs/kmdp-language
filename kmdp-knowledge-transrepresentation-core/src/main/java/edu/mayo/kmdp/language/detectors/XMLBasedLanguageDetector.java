@@ -1,44 +1,41 @@
 /**
  * Copyright © 2018 Mayo Clinic (RSTKNOWLEDGEMGMT@mayo.edu)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package edu.mayo.kmdp.language.detectors;
 
-import static edu.mayo.kmdp.util.ws.ResponseHelper.getAll;
-import static edu.mayo.kmdp.util.ws.ResponseHelper.map;
+import static java.util.Collections.emptyList;
 
-import edu.mayo.kmdp.tranx.server.DetectApiDelegate;
+import edu.mayo.kmdp.tranx.server.DetectApiInternal;
 import edu.mayo.kmdp.util.JaxbUtil;
-import edu.mayo.kmdp.util.ws.ResponseHelper;
 import java.io.ByteArrayInputStream;
 import java.util.Arrays;
+import org.omg.spec.api4kp._1_0.Answer;
 import org.omg.spec.api4kp._1_0.services.ASTCarrier;
 import org.omg.spec.api4kp._1_0.services.BinaryCarrier;
 import org.omg.spec.api4kp._1_0.services.DocumentCarrier;
 import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
-import org.springframework.http.ResponseEntity;
 import org.w3c.dom.Document;
 
 
-public abstract class XMLBasedLanguageDetector<T> implements DetectApiDelegate {
+public abstract class XMLBasedLanguageDetector<T> implements DetectApiInternal {
 
   protected Class<T> root;
 
   @Override
-  public ResponseEntity<SyntacticRepresentation> getDetectedRepresentation(KnowledgeCarrier sourceArtifact) {
+  public Answer<SyntacticRepresentation> getDetectedRepresentation(
+      KnowledgeCarrier sourceArtifact) {
     boolean isLang = false;
 
     try {
@@ -63,19 +60,20 @@ public abstract class XMLBasedLanguageDetector<T> implements DetectApiDelegate {
         isLang = root.isInstance(((ASTCarrier) sourceArtifact).getParsedExpression());
       }
     } catch (Exception e) {
-      return ResponseHelper.fail();
+      return Answer.failed();
     }
 
-    if (isLang && !getAll(getDetectableLanguages()).isEmpty()) {
-      return map(getDetectableLanguages(), l -> l.get(0));
+    if (isLang && !getDetectableLanguages().orElse(emptyList()).isEmpty()) {
+      return getDetectableLanguages().map(l -> l.get(0));
     }
-    return ResponseHelper.fail();
+    return Answer.failed();
   }
 
   @Override
-  public ResponseEntity<KnowledgeCarrier> setDetectedRepresentation(KnowledgeCarrier sourceArtifact) {
-    return map(getDetectedRepresentation(sourceArtifact),
-        sourceArtifact::withRepresentation);
+  public Answer<KnowledgeCarrier> setDetectedRepresentation(KnowledgeCarrier sourceArtifact) {
+    return getDetectedRepresentation(sourceArtifact)
+        .map(
+            sourceArtifact::withRepresentation);
   }
 
 }

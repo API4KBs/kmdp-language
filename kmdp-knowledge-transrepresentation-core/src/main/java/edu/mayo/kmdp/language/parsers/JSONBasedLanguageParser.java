@@ -16,7 +16,7 @@
 package edu.mayo.kmdp.language.parsers;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import edu.mayo.kmdp.tranx.server.DeserializeApiDelegate;
+import edu.mayo.kmdp.tranx.server.DeserializeApiInternal;
 import edu.mayo.kmdp.util.JSonUtil;
 import edu.mayo.kmdp.util.Util;
 import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries;
@@ -30,7 +30,7 @@ import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 
 public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializer implements
-    DeserializeApiDelegate {
+    DeserializeApiInternal {
 
   protected Class<T> root;
 

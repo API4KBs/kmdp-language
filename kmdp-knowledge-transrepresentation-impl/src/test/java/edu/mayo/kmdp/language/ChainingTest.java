@@ -42,13 +42,13 @@ import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
 import org.omg.spec.api4kp._1_0.services.KPComponent;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@ExtendWith(SpringExtension.class)
+@SpringBootTest
 @ContextConfiguration(classes = LocalTestConfig.class)
-@ActiveProfiles("test")
 public class ChainingTest {
 
   @Inject
@@ -72,7 +72,8 @@ public class ChainingTest {
 
     KnowledgeCarrier carrier1 = KnowledgeCarrier.of(dmn.get());
     SyntacticRepresentation rep = detectApi.getDetectedRepresentation(carrier1)
-        .getOptionalValue().orElse(null);
+        .orElse(null);
+    assertNotNull(rep);
 
     assertSame(DMN_1_1, rep.getLanguage());
 
@@ -80,7 +81,6 @@ public class ChainingTest {
 
     KnowledgeCarrier carrier2 = deserializeApi
         .lift(carrier1, Abstract_Knowledge_Expression)
-        .getOptionalValue()
         .orElse(null);
 
     assertTrue(carrier2 instanceof ASTCarrier);
@@ -103,7 +103,6 @@ public class ChainingTest {
 
     KnowledgeCarrier carrier2 = deserializeApi
         .lift(carrier1, Abstract_Knowledge_Expression)
-        .getOptionalValue()
         .orElse(null);
 
     assertTrue(carrier2 instanceof ASTCarrier);
@@ -126,8 +125,7 @@ public class ChainingTest {
 
     KnowledgeCarrier carrier2 = detect
         .apply(carrier1)
-        .flatMap((c1) -> lift.apply(c1, Abstract_Knowledge_Expression))
-        .getOptionalValue()
+        .flatMap(c1 -> lift.apply(c1, Abstract_Knowledge_Expression))
         .orElse(null);
 
     assertTrue(carrier2 instanceof ASTCarrier);
@@ -145,14 +143,12 @@ public class ChainingTest {
         .readBytes(DetectorTest.class.getResource("/artifacts/sample.dmn"));
     assertTrue(dmn.isPresent());
 
-    Optional<KnowledgeCarrier> out = dmn
+    Answer<KnowledgeCarrier> out = Answer.of(dmn)
         .map(KnowledgeCarrier::of)
-        .map(detectApi::setDetectedRepresentation)
-        .flatMap((ans1) -> ans1
-            .flatMap((c1) -> deserializeApi.lift(c1, Abstract_Knowledge_Expression))
-            .getOptionalValue());
+        .flatMap(detectApi::setDetectedRepresentation)
+        .flatMap(c1 -> deserializeApi.lift(c1, Abstract_Knowledge_Expression));
 
-    assertTrue(out.isPresent());
+    assertTrue(out.isSuccess());
     KnowledgeCarrier carrier2 = out.get();
 
     assertTrue(carrier2 instanceof ASTCarrier);
@@ -170,14 +166,12 @@ public class ChainingTest {
         .readBytes(DetectorTest.class.getResource("/artifacts/sample.dmn"));
     assertTrue(dmn.isPresent());
 
-    Optional<KnowledgeCarrier> out = dmn
+    Answer<KnowledgeCarrier> out = Answer.of(dmn)
         .map(KnowledgeCarrier::of)
-        .map(detectApi::setDetectedRepresentation)
-        .flatMap((ans1) -> ans1
-            .flatMap((c1) -> deserializeApi.lift(c1, Abstract_Knowledge_Expression))
-            .getOptionalValue());
+        .flatMap(detectApi::setDetectedRepresentation)
+        .flatMap(c1 -> deserializeApi.lift(c1, Abstract_Knowledge_Expression));
 
-    assertTrue(out.isPresent());
+    assertTrue(out.isSuccess());
     KnowledgeCarrier carrier2 = out.get();
 
     assertTrue(carrier2 instanceof ASTCarrier);
@@ -186,10 +180,9 @@ public class ChainingTest {
     assertNull(carrier2.getRepresentation().getEncoding());
     assertNull(carrier2.getRepresentation().getCharset());
 
-    Optional<KnowledgeCarrier> c3 = out
-        .flatMap((c2) -> deserializeApi.lower(c2, Concrete_Knowledge_Expression)
-            .getOptionalValue());
-    assertTrue(c3.isPresent());
+    Answer<KnowledgeCarrier> c3 = out
+        .flatMap(c2 -> deserializeApi.lower(c2, Concrete_Knowledge_Expression));
+    assertTrue(c3.isSuccess());
     assertTrue(c3.get() instanceof ExpressionCarrier);
   }
 

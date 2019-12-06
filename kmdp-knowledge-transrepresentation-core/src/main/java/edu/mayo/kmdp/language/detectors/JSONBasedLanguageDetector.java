@@ -15,29 +15,25 @@
  */
 package edu.mayo.kmdp.language.detectors;
 
-import static edu.mayo.kmdp.util.ws.ResponseHelper.attempt;
-import static edu.mayo.kmdp.util.ws.ResponseHelper.getAll;
-import static edu.mayo.kmdp.util.ws.ResponseHelper.map;
-
 import com.fasterxml.jackson.databind.JsonNode;
-import edu.mayo.kmdp.tranx.server.DetectApiDelegate;
+import edu.mayo.kmdp.tranx.server.DetectApiInternal;
 import edu.mayo.kmdp.util.JSonUtil;
-import edu.mayo.kmdp.util.ws.ResponseHelper;
+import java.util.Collections;
+import org.omg.spec.api4kp._1_0.Answer;
 import org.omg.spec.api4kp._1_0.services.ASTCarrier;
 import org.omg.spec.api4kp._1_0.services.BinaryCarrier;
 import org.omg.spec.api4kp._1_0.services.DocumentCarrier;
 import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
-import org.springframework.http.ResponseEntity;
 
 
-public abstract class JSONBasedLanguageDetector<T> implements DetectApiDelegate {
+public abstract class JSONBasedLanguageDetector<T> implements DetectApiInternal {
 
   protected Class<T> root;
 
   @Override
-  public ResponseEntity<SyntacticRepresentation> getDetectedRepresentation(KnowledgeCarrier sourceArtifact) {
+  public Answer<SyntacticRepresentation> getDetectedRepresentation(KnowledgeCarrier sourceArtifact) {
     boolean isLang = false;
 
     try {
@@ -54,19 +50,20 @@ public abstract class JSONBasedLanguageDetector<T> implements DetectApiDelegate 
         isLang = root.isInstance(((ASTCarrier) sourceArtifact).getParsedExpression());
       }
     } catch (Exception e) {
-      return ResponseHelper.fail();
+      return Answer.failed();
     }
 
-    if (isLang && !getAll(getDetectableLanguages()).isEmpty()) {
-      return map(getDetectableLanguages(),
-          l -> l.get(0));
+    if (isLang &&
+        !getDetectableLanguages().orElse(Collections.emptyList()).isEmpty()) {
+      return getDetectableLanguages()
+          .map(l -> l.get(0));
     }
-    return ResponseHelper.fail();
+    return Answer.failed();
   }
 
   @Override
-  public ResponseEntity<KnowledgeCarrier> setDetectedRepresentation(KnowledgeCarrier sourceArtifact) {
-    return map(getDetectedRepresentation(sourceArtifact),
-        sourceArtifact::withRepresentation);
+  public Answer<KnowledgeCarrier> setDetectedRepresentation(KnowledgeCarrier sourceArtifact) {
+    return getDetectedRepresentation(sourceArtifact)
+        .map(sourceArtifact::withRepresentation);
   }
 }

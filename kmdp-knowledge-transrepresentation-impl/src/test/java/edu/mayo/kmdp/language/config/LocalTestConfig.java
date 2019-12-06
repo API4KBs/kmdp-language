@@ -15,62 +15,58 @@
  */
 package edu.mayo.kmdp.language.config;
 
+import edu.mayo.kmdp.language.LanguageDeSerializer;
+import edu.mayo.kmdp.language.LanguageDetector;
+import edu.mayo.kmdp.language.LanguageValidator;
+import edu.mayo.kmdp.language.TransrepresentationExecutor;
 import edu.mayo.kmdp.tranx.DeserializeApi;
 import edu.mayo.kmdp.tranx.DetectApi;
 import edu.mayo.kmdp.tranx.TransxionApi;
 import edu.mayo.kmdp.tranx.server.DeserializeApiDelegate;
 import edu.mayo.kmdp.tranx.server.DetectApiDelegate;
 import edu.mayo.kmdp.tranx.server.TransxionApiDelegate;
+import edu.mayo.kmdp.tranx.server.ValidateApiDelegate;
 import javax.inject.Inject;
 import org.omg.spec.api4kp._1_0.services.KPComponent;
 import org.omg.spec.api4kp._1_0.services.KPServer;
-import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.web.client.RestTemplate;
 
 @Configuration
-@ComponentScan(basePackages = {"edu.mayo.kmdp.language"})
+@ComponentScan(basePackageClasses = {
+    TransxionApiDelegate.class,
+    TransrepresentationExecutor.class,
+    DeserializeApiDelegate.class,
+    LanguageDeSerializer.class,
+    DetectApiDelegate.class,
+    LanguageDetector.class,
+    ValidateApiDelegate.class,
+    LanguageValidator.class})
 @PropertySource(value={"classpath:application.test.properties"})
 public class LocalTestConfig {
 
-  @Inject
-  @KPServer
-  DetectApiDelegate detector;
 
   @Bean
   @KPComponent
-  public DetectApi detectApi() {
+  public DetectApi detectApi(@Autowired @KPServer DetectApiDelegate detector) {
     return DetectApi.newInstance(detector);
   }
 
-
-  @Inject
-  @KPServer
-  TransxionApiDelegate txor;
-
   @Bean
   @KPComponent
-  public TransxionApi executionApi() {
+  public TransxionApi txionApi(@Autowired @KPServer TransxionApiDelegate txor) {
     return TransxionApi.newInstance(txor);
   }
 
-
-  @Inject
-  @KPServer
-  DeserializeApiDelegate deser;
-
   @Bean
   @KPComponent
-  public DeserializeApi deserializeApi() {
+  public DeserializeApi deserializeApi(@Autowired @KPServer DeserializeApiDelegate deser) {
     return DeserializeApi.newInstance(deser);
   }
 
-  @Bean
-  public RestTemplate restTemplate() {
-    return new RestTemplate();
-  }
-
 }
+
+

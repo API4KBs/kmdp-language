@@ -19,7 +19,7 @@ package edu.mayo.kmdp.language.parsers;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
-import edu.mayo.kmdp.tranx.server.DeserializeApiDelegate;
+import edu.mayo.kmdp.tranx.server.DeserializeApiInternal;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries;
 import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries;
@@ -33,7 +33,8 @@ import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 @Named
 @KPOperation(KnowledgeProcessingOperationSeries.Lowering_Task)
 @KPOperation(KnowledgeProcessingOperationSeries.Lifting_Task)
-public class SurrogateParser extends MultiFormatParser<KnowledgeAsset> implements DeserializeApiDelegate {
+public class SurrogateParser extends MultiFormatParser<KnowledgeAsset> implements
+    DeserializeApiInternal {
 
   private final List<SyntacticRepresentation> supportedRepresentations = Arrays.asList(
       rep(KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate, SerializationFormatSeries.XML_1_1, getDefaultCharset()),

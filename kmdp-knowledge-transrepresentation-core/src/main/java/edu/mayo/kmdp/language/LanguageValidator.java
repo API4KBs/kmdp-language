@@ -15,18 +15,25 @@
  */
 package edu.mayo.kmdp.language;
 
-import edu.mayo.kmdp.tranx.server.ValidateApiDelegate;
+import edu.mayo.kmdp.tranx.server.ValidateApiInternal;
+import java.util.Collections;
+import java.util.List;
 import javax.inject.Named;
+import org.omg.spec.api4kp._1_0.Answer;
+import org.omg.spec.api4kp._1_0.services.KPServer;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
-import org.springframework.http.ResponseEntity;
 
 @Named
-public class LanguageValidator implements ValidateApiDelegate {
+@KPServer
+public class LanguageValidator implements ValidateApiInternal {
 
+  public LanguageValidator(List<ValidateApiInternal> validators) {
+
+  }
 
   @Override
-  public ResponseEntity<Void> validate(KnowledgeCarrier sourceArtifact, SyntacticRepresentation into) {
+  public Answer<Void> validate(KnowledgeCarrier sourceArtifact, SyntacticRepresentation into) {
     return null;
   }
 

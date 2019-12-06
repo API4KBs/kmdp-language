@@ -25,8 +25,7 @@ import static edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentati
 import static edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentationLanguageSerializationSeries.Turtle;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
-import edu.mayo.kmdp.tranx.server.DeserializeApiDelegate;
-import edu.mayo.kmdp.util.ws.ResponseHelper;
+import edu.mayo.kmdp.tranx.server.DeserializeApiInternal;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;
@@ -36,6 +35,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import javax.inject.Named;
+import org.omg.spec.api4kp._1_0.Answer;
 import org.omg.spec.api4kp._1_0.services.ASTCarrier;
 import org.omg.spec.api4kp._1_0.services.BinaryCarrier;
 import org.omg.spec.api4kp._1_0.services.DocumentCarrier;
@@ -47,12 +47,11 @@ import org.semanticweb.owlapi.formats.RDFXMLDocumentFormat;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
-import org.springframework.http.ResponseEntity;
 
 @Named
 @KPOperation(KnowledgeProcessingOperationSeries.Lowering_Task)
 @KPOperation(KnowledgeProcessingOperationSeries.Lifting_Task)
-public class OWLParser extends AbstractDeSerializer implements DeserializeApiDelegate {
+public class OWLParser extends AbstractDeSerializer implements DeserializeApiInternal {
 
 
   @Override
@@ -129,8 +128,8 @@ public class OWLParser extends AbstractDeSerializer implements DeserializeApiDel
   }
 
   @Override
-  public ResponseEntity<List<SyntacticRepresentation>> getParsableLanguages() {
-    return ResponseHelper.succeed(
+  public Answer<List<SyntacticRepresentation>> getParsableLanguages() {
+    return Answer.of(
         Arrays.asList(
             rep(OWL_2, RDF_XML_Syntax, XML_1_1),
             rep(OWL_2, OWL_Functional_Syntax, TXT),

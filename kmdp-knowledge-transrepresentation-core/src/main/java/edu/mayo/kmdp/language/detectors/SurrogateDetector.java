@@ -15,16 +15,12 @@
  */
 package edu.mayo.kmdp.language.detectors;
 
-import static edu.mayo.kmdp.util.ws.ResponseHelper.get;
-import static edu.mayo.kmdp.util.ws.ResponseHelper.getAll;
-import static edu.mayo.kmdp.util.ws.ResponseHelper.map;
-import static edu.mayo.kmdp.util.ws.ResponseHelper.succeed;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
 import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
-import edu.mayo.kmdp.tranx.server.DetectApiDelegate;
-import edu.mayo.kmdp.util.ws.ResponseHelper;
+import edu.mayo.kmdp.tranx.server.DetectApiInternal;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries;
 import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguage;
@@ -33,14 +29,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Named;
+import org.omg.spec.api4kp._1_0.Answer;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
-import org.springframework.http.ResponseEntity;
 
 @Named
 @KPOperation(KnowledgeProcessingOperationSeries.Detect_Language_Information_Task)
-public class SurrogateDetector implements DetectApiDelegate {
+public class SurrogateDetector implements DetectApiInternal {
 
   private XMLSurrogateDetector xmlDetector = new XMLSurrogateDetector();
   private JSNSurrogateDetector jsnDetector = new JSNSurrogateDetector();
@@ -49,58 +45,61 @@ public class SurrogateDetector implements DetectApiDelegate {
 
 
   @Override
-  public ResponseEntity<List<SyntacticRepresentation>> getDetectableLanguages() {
-    return succeed(Stream.concat(
-        getAll(xmlDetector.getDetectableLanguages()).stream(),
-        getAll(jsnDetector.getDetectableLanguages()).stream())
+  public Answer<List<SyntacticRepresentation>> getDetectableLanguages() {
+    return Answer.of(Stream.concat(
+        xmlDetector.getDetectableLanguages().orElse(emptyList()).stream(),
+        jsnDetector.getDetectableLanguages().orElse(emptyList()).stream())
         .collect(Collectors.toList()));
   }
 
   @Override
-  public ResponseEntity<KnowledgeCarrier> setDetectedRepresentation(
+  public Answer<KnowledgeCarrier> setDetectedRepresentation(
       KnowledgeCarrier sourceArtifact) {
-    return map(getDetectedRepresentation(sourceArtifact),
-        sourceArtifact::withRepresentation);
+    return getDetectedRepresentation(sourceArtifact)
+        .map(sourceArtifact::withRepresentation);
   }
 
   @Override
-  public ResponseEntity<SyntacticRepresentation> getDetectedRepresentation(
+  public Answer<SyntacticRepresentation> getDetectedRepresentation(
       KnowledgeCarrier sourceArtifact) {
-    return ResponseHelper.attempt(
-        get(xmlDetector.getDetectedRepresentation(sourceArtifact))
-            .orElse(get(jsnDetector.getDetectedRepresentation(sourceArtifact))
-                .orElse(null)));
+    Answer<SyntacticRepresentation> xmlOpinion =
+        xmlDetector.getDetectedRepresentation(sourceArtifact);
+    if (xmlOpinion.isSuccess()) {
+      return xmlOpinion;
+    } else {
+      return jsnDetector.getDetectedRepresentation(sourceArtifact);
+    }
   }
 
   private static class XMLSurrogateDetector extends
-      XMLBasedLanguageDetector<KnowledgeAsset> implements DetectApiDelegate {
+      XMLBasedLanguageDetector<KnowledgeAsset> implements DetectApiInternal {
 
     public XMLSurrogateDetector() {
       this.root = KnowledgeAsset.class;
     }
 
     @Override
-    public ResponseEntity<List<SyntacticRepresentation>> getDetectableLanguages() {
-      return succeed(
+    public Answer<List<SyntacticRepresentation>> getDetectableLanguages() {
+      return Answer.of((
           singletonList(new org.omg.spec.api4kp._1_0.services.SyntacticRepresentation()
               .withLanguage(theLanguage)
               .withFormat(SerializationFormatSeries.XML_1_1)
               .withLexicon(LexiconSeries.Asset_Relationships_Dependencies,
                   LexiconSeries.Asset_Relationships_Derivations, LexiconSeries.Asset_Relationships_Structural,
-                  LexiconSeries.Asset_Relationships_Variants)));
+                  LexiconSeries.Asset_Relationships_Variants))));
     }
   }
 
   private static class JSNSurrogateDetector extends
-      JSONBasedLanguageDetector<KnowledgeAsset> implements DetectApiDelegate {
+      JSONBasedLanguageDetector<KnowledgeAsset> implements DetectApiInternal {
 
     public JSNSurrogateDetector() {
       this.root = KnowledgeAsset.class;
     }
 
     @Override
-    public ResponseEntity<List<SyntacticRepresentation>> getDetectableLanguages() {
-      return succeed(
+    public Answer<List<SyntacticRepresentation>> getDetectableLanguages() {
+      return Answer.of(
           singletonList(new org.omg.spec.api4kp._1_0.services.SyntacticRepresentation()
               .withLanguage(theLanguage)
               .withFormat(SerializationFormatSeries.JSON)

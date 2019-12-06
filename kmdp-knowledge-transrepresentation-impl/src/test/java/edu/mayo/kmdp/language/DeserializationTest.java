@@ -57,16 +57,15 @@ import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 import org.omg.spec.dmn._20151101.dmn.TDefinitions;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.w3c.dom.Document;
 
-@ExtendWith(SpringExtension.class)
+@SpringBootTest
 @ContextConfiguration(classes = LocalTestConfig.class)
-@ActiveProfiles(profiles = "test")
-@WebAppConfiguration
 public class DeserializationTest {
 
   @Inject

@@ -13,18 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.mayo.kmdp.language.config;
+package edu.mayo.kmdp.language;
 
 
+import edu.mayo.kmdp.tranx.server.DeserializeApiDelegate;
+import edu.mayo.kmdp.tranx.server.DetectApiDelegate;
+import edu.mayo.kmdp.tranx.server.TransxionApiDelegate;
+import edu.mayo.kmdp.tranx.server.ValidateApiDelegate;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
 
 @Configuration
-@ComponentScan
-@Profile({"default", "inmemory"})
-@PropertySource(value={"classpath:application.properties"})
+@ComponentScan(basePackageClasses = {
+    TransxionApiDelegate.class,
+    TransrepresentationExecutor.class,
+    DeserializeApiDelegate.class,
+    LanguageDeSerializer.class,
+    DetectApiDelegate.class,
+    LanguageDetector.class,
+    ValidateApiDelegate.class,
+    LanguageValidator.class})
+@PropertySource(value = {"classpath:application.properties"})
 public class LanguageConfig {
 
 

@@ -17,7 +17,7 @@ package edu.mayo.kmdp.language.parsers;
 
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
-import edu.mayo.kmdp.tranx.server.DeserializeApiDelegate;
+import edu.mayo.kmdp.tranx.server.DeserializeApiInternal;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries;
 import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries;
@@ -33,7 +33,7 @@ import org.omg.spec.dmn._20151101.dmn.TDefinitions;
 @KPOperation(KnowledgeProcessingOperationSeries.Lifting_Task)
 @KPOperation(KnowledgeProcessingOperationSeries.Lowering_Task)
 public class DMNParser extends XMLBasedLanguageParser<TDefinitions> implements
-    DeserializeApiDelegate {
+    DeserializeApiInternal {
 
   public DMNParser() {
     this.root = TDefinitions.class;

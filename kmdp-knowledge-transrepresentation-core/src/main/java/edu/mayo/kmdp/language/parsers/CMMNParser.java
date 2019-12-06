@@ -20,7 +20,7 @@ import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeP
 import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Lowering_Task;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
-import edu.mayo.kmdp.tranx.server.DeserializeApiDelegate;
+import edu.mayo.kmdp.tranx.server.DeserializeApiInternal;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries;
 import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries;
 import java.util.Collections;
@@ -35,7 +35,7 @@ import org.omg.spec.cmmn._20151109.model.TDefinitions;
 @KPOperation(Lifting_Task)
 @KPOperation(Lowering_Task)
 public class CMMNParser extends XMLBasedLanguageParser<TDefinitions> implements
-    DeserializeApiDelegate {
+    DeserializeApiInternal {
 
   public CMMNParser() {
     this.root = TDefinitions.class;
