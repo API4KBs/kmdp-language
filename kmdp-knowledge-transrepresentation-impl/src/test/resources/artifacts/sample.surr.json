@@ -12,8 +12,7 @@
     "label" : "Cognitive Process Model",
     "tag" : "CognitiveProcessModel",
     "ref" : "http://ontology.mayo.edu/ontology/KAO/CognitiveProcessModel"
-  } ],
-  "assetId" : {
+  } ],  "assetId" : {
     "_class" : "URIIdentifier",
     "uri" : "https://clinicalknowledgemanagement.mayo.edu/assets/2c6572ea-867d-4863-963a-b4bc5357429b"
   }

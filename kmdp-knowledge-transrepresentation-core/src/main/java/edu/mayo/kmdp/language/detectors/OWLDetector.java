@@ -16,20 +16,21 @@
 package edu.mayo.kmdp.language.detectors;
 
 import static edu.mayo.kmdp.util.XMLUtil.catalogResolver;
-import static edu.mayo.kmdp.util.ws.ResponseHelper.attempt;
-import static edu.mayo.kmdp.util.ws.ResponseHelper.map;
-import static edu.mayo.kmdp.util.ws.ResponseHelper.succeed;
-import static edu.mayo.ontology.taxonomies.krlanguage._20190801.KnowledgeRepresentationLanguage.OWL_2;
+import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.OWL_2;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.detectors.OWLDetectorConfig.DetectorParams;
-import edu.mayo.kmdp.tranx.server.DetectApiDelegate;
+import edu.mayo.kmdp.tranx.v3.server.DetectApiInternal;
 import edu.mayo.kmdp.util.Util;
-import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._20190801.KnowledgeProcessingOperation;
-import edu.mayo.ontology.taxonomies.krformat._20190801.SerializationFormat;
-import edu.mayo.ontology.taxonomies.krprofile._20190801.KnowledgeRepresentationLanguageProfile;
-import edu.mayo.ontology.taxonomies.krserialization._20190801.KnowledgeRepresentationLanguageSerialization;
-import edu.mayo.ontology.taxonomies.lexicon._20190801.Lexicon;
+import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
+import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;
+import edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries;
+import edu.mayo.ontology.taxonomies.krprofile.KnowledgeRepresentationLanguageProfile;
+import edu.mayo.ontology.taxonomies.krprofile.KnowledgeRepresentationLanguageProfileSeries;
+import edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentationLanguageSerialization;
+import edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentationLanguageSerializationSeries;
+import edu.mayo.ontology.taxonomies.lexicon.Lexicon;
+import edu.mayo.ontology.taxonomies.lexicon.LexiconSeries;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,9 +42,8 @@ import java.util.Optional;
 import java.util.Set;
 import javax.inject.Named;
 import org.apache.jena.vocabulary.SKOS;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
-import org.apache.xerces.util.XMLCatalogResolver;
+import org.apache.xml.resolver.tools.CatalogResolver;
+import org.omg.spec.api4kp._1_0.Answer;
 import org.omg.spec.api4kp._1_0.services.ASTCarrier;
 import org.omg.spec.api4kp._1_0.services.BinaryCarrier;
 import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
@@ -65,24 +65,25 @@ import org.semanticweb.owlapi.profiles.OWL2DLProfile;
 import org.semanticweb.owlapi.profiles.OWL2ELProfile;
 import org.semanticweb.owlapi.profiles.OWL2QLProfile;
 import org.semanticweb.owlapi.profiles.OWL2RLProfile;
-import org.springframework.http.ResponseEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Named
-@KPOperation(KnowledgeProcessingOperation.Detect_Language_Information_Task)
-public class OWLDetector implements DetectApiDelegate {
+@KPOperation(KnowledgeProcessingOperationSeries.Detect_Language_Information_Task)
+public class OWLDetector implements DetectApiInternal {
 
   protected static final Logger logger = LoggerFactory.getLogger(OWLDetector.class);
 
   @Override
-  public ResponseEntity<List<SyntacticRepresentation>> getDetectableLanguages() {
-    return succeed(Collections.singletonList(rep(OWL_2)));
+  public Answer<List<SyntacticRepresentation>> getDetectableLanguages() {
+    return Answer.of(Collections.singletonList(rep(OWL_2)));
   }
 
   @Override
-  public ResponseEntity<SyntacticRepresentation> getDetectedRepresentation(
+  public Answer<SyntacticRepresentation> getDetectedRepresentation(
       KnowledgeCarrier sourceArtifact) {
     Optional<OWLOntology> owl = asOWL(sourceArtifact);
-    return attempt(
+    return Answer.of(
         owl.map(o -> new SyntacticRepresentation()
             .withLanguage(OWL_2)
             .withProfile(detectProfile(o))
@@ -94,15 +95,15 @@ public class OWLDetector implements DetectApiDelegate {
   private SerializationFormat detectFormat(OWLOntology o) {
     OWLDocumentFormat format = o.getFormat();
     if (format instanceof RDFXMLDocumentFormat) {
-      return SerializationFormat.XML_1_1;
+      return SerializationFormatSeries.XML_1_1;
     } else if (format instanceof ManchesterSyntaxDocumentFormat) {
-      return SerializationFormat.TXT;
+      return SerializationFormatSeries.TXT;
     } else if (format instanceof OWLXMLDocumentFormat) {
-      return SerializationFormat.XML_1_1;
+      return SerializationFormatSeries.XML_1_1;
     } else if (format instanceof TurtleDocumentFormat) {
-      return SerializationFormat.TXT;
+      return SerializationFormatSeries.TXT;
     } else if (format instanceof FunctionalSyntaxDocumentFormat) {
-      return SerializationFormat.TXT;
+      return SerializationFormatSeries.TXT;
     }
     return null;
   }
@@ -110,15 +111,15 @@ public class OWLDetector implements DetectApiDelegate {
   private KnowledgeRepresentationLanguageSerialization detectSerialization(OWLOntology o) {
     OWLDocumentFormat format = o.getFormat();
     if (format instanceof RDFXMLDocumentFormat) {
-      return KnowledgeRepresentationLanguageSerialization.RDF_XML_Syntax;
+      return KnowledgeRepresentationLanguageSerializationSeries.RDF_XML_Syntax;
     } else if (format instanceof ManchesterSyntaxDocumentFormat) {
-      return KnowledgeRepresentationLanguageSerialization.OWL_Manchester_Syntax;
+      return KnowledgeRepresentationLanguageSerializationSeries.OWL_Manchester_Syntax;
     } else if (format instanceof OWLXMLDocumentFormat) {
-      return KnowledgeRepresentationLanguageSerialization.OWL_XML_Serialization;
+      return KnowledgeRepresentationLanguageSerializationSeries.OWL_XML_Serialization;
     } else if (format instanceof TurtleDocumentFormat) {
-      return KnowledgeRepresentationLanguageSerialization.Turtle;
+      return KnowledgeRepresentationLanguageSerializationSeries.Turtle;
     } else if (format instanceof FunctionalSyntaxDocumentFormat) {
-      return KnowledgeRepresentationLanguageSerialization.OWL_Functional_Syntax;
+      return KnowledgeRepresentationLanguageSerializationSeries.OWL_Functional_Syntax;
     }
     return null;
   }
@@ -126,7 +127,7 @@ public class OWLDetector implements DetectApiDelegate {
   private Collection<Lexicon> detectLexicon(OWLOntology o) {
     Set<Lexicon> lexica = new HashSet<>();
     if (o.importsDeclarations().anyMatch(decl -> decl.getIRI().equals(IRI.create(SKOS.uri)))) {
-      lexica.add(Lexicon.SKOS);
+      lexica.add(LexiconSeries.SKOS);
     }
     // eventually check for more...
     return lexica;
@@ -134,29 +135,29 @@ public class OWLDetector implements DetectApiDelegate {
 
   protected KnowledgeRepresentationLanguageProfile detectProfile(OWLOntology o) {
     if (new OWL2RLProfile().checkOntology(o).isInProfile()) {
-      return KnowledgeRepresentationLanguageProfile.OWL2_RL;
+      return KnowledgeRepresentationLanguageProfileSeries.OWL2_RL;
     }
     if (new OWL2QLProfile().checkOntology(o).isInProfile()) {
-      return KnowledgeRepresentationLanguageProfile.OWL2_QL;
+      return KnowledgeRepresentationLanguageProfileSeries.OWL2_QL;
     }
     if (new OWL2ELProfile().checkOntology(o).isInProfile()) {
-      return KnowledgeRepresentationLanguageProfile.OWL2_EL;
+      return KnowledgeRepresentationLanguageProfileSeries.OWL2_EL;
     }
     if (new OWL2DLProfile().checkOntology(o).isInProfile()) {
-      return KnowledgeRepresentationLanguageProfile.OWL2_DL;
+      return KnowledgeRepresentationLanguageProfileSeries.OWL2_DL;
     }
-    return KnowledgeRepresentationLanguageProfile.OWL2_Full;
+    return KnowledgeRepresentationLanguageProfileSeries.OWL2_Full;
   }
 
   @Override
-  public ResponseEntity<KnowledgeCarrier> setDetectedRepresentation(
+  public Answer<KnowledgeCarrier> setDetectedRepresentation(
       KnowledgeCarrier sourceArtifact) {
-    return map(getDetectedRepresentation(sourceArtifact),
-        sourceArtifact::withRepresentation);
+    return getDetectedRepresentation(sourceArtifact)
+        .map(sourceArtifact::withRepresentation);
   }
 
   protected Optional<OWLOntology> asOWL(KnowledgeCarrier sourceArtifact) {
-    switch (sourceArtifact.getLevel()) {
+    switch (sourceArtifact.getLevel().asEnum()) {
       case Abstract_Knowledge_Expression:
         Object ast = ((ASTCarrier) sourceArtifact).getParsedExpression();
         return ast instanceof OWLOntology ? Optional.of((OWLOntology) ast) : Optional.empty();
@@ -205,13 +206,13 @@ public class OWLDetector implements DetectApiDelegate {
   }
 
   private void configureCatalog(OWLOntologyManager manager, OWLDetectorConfig params) {
-    String catalog = params.get(DetectorParams.CATALOG).orElse(null);
+    String catalog = params.getTyped(DetectorParams.CATALOG);
     if (!Util.isEmpty(catalog)) {
-      XMLCatalogResolver resolver = catalogResolver(catalog);
+      CatalogResolver resolver = catalogResolver(catalog);
       manager.setIRIMappers(Collections.singleton(
           (OWLOntologyIRIMapper) iri -> {
             try {
-              String resolved = resolver.resolveURI(iri.toURI().toString());
+              String resolved = resolver.getCatalog().resolveURI(iri.toURI().toString());
               return IRI.create(resolved);
             } catch (IOException e) {
               logger.error(e.getMessage(), e);

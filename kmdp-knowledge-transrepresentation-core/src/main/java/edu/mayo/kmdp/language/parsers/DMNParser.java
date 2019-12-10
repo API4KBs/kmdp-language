@@ -17,10 +17,10 @@ package edu.mayo.kmdp.language.parsers;
 
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
-import edu.mayo.kmdp.tranx.server.DeserializeApiDelegate;
-import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._20190801.KnowledgeProcessingOperation;
-import edu.mayo.ontology.taxonomies.krformat._20190801.SerializationFormat;
-import edu.mayo.ontology.taxonomies.krlanguage._20190801.KnowledgeRepresentationLanguage;
+import edu.mayo.kmdp.tranx.v3.server.DeserializeApiInternal;
+import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
+import edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries;
+import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries;
 import java.util.Collections;
 import java.util.List;
 import javax.inject.Named;
@@ -30,10 +30,10 @@ import org.omg.spec.dmn._20151101.dmn.ObjectFactory;
 import org.omg.spec.dmn._20151101.dmn.TDefinitions;
 
 @Named
-@KPOperation(KnowledgeProcessingOperation.Lifting_Task)
-@KPOperation(KnowledgeProcessingOperation.Lowering_Task)
+@KPOperation(KnowledgeProcessingOperationSeries.Lifting_Task)
+@KPOperation(KnowledgeProcessingOperationSeries.Lowering_Task)
 public class DMNParser extends XMLBasedLanguageParser<TDefinitions> implements
-    DeserializeApiDelegate {
+    DeserializeApiInternal {
 
   public DMNParser() {
     this.root = TDefinitions.class;
@@ -43,7 +43,7 @@ public class DMNParser extends XMLBasedLanguageParser<TDefinitions> implements
   public List<SyntacticRepresentation> getSupportedRepresentations() {
     return
         Collections
-            .singletonList(rep(KnowledgeRepresentationLanguage.DMN_1_1, SerializationFormat.XML_1_1, getDefaultCharset()));
+            .singletonList(rep(KnowledgeRepresentationLanguageSeries.DMN_1_1, SerializationFormatSeries.XML_1_1, getDefaultCharset()));
   }
 
 }

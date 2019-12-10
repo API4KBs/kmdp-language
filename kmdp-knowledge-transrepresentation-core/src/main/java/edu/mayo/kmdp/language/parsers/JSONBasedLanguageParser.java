@@ -16,11 +16,12 @@
 package edu.mayo.kmdp.language.parsers;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import edu.mayo.kmdp.tranx.server.DeserializeApiDelegate;
+import edu.mayo.kmdp.tranx.v3.server.DeserializeApiInternal;
 import edu.mayo.kmdp.util.JSonUtil;
 import edu.mayo.kmdp.util.Util;
-import edu.mayo.ontology.taxonomies.api4kp.parsinglevel._20190801.ParsingLevel;
-import edu.mayo.ontology.taxonomies.krformat._20190801.SerializationFormat;
+import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries;
+import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;
+import edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries;
 import java.util.Optional;
 import org.omg.spec.api4kp._1_0.services.ASTCarrier;
 import org.omg.spec.api4kp._1_0.services.BinaryCarrier;
@@ -29,7 +30,7 @@ import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 
 public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializer implements
-    DeserializeApiDelegate {
+    DeserializeApiInternal {
 
   protected Class<T> root;
 
@@ -38,7 +39,7 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializer im
     return Optional.of(new ExpressionCarrier()
         .withSerializedExpression(new String(carrier.getEncodedExpression()))
         .withRepresentation(
-            getParseResultRepresentation(carrier, ParsingLevel.Concrete_Knowledge_Expression)));
+            getParseResultRepresentation(carrier, ParsingLevelSeries.Concrete_Knowledge_Expression)));
   }
 
   @Override
@@ -47,7 +48,7 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializer im
         .map(json -> new DocumentCarrier()
             .withStructuredExpression(json)
             .withRepresentation(
-                getParseResultRepresentation(carrier, ParsingLevel.Parsed_Knowedge_Expression)));
+                getParseResultRepresentation(carrier, ParsingLevelSeries.Parsed_Knowedge_Expression)));
   }
 
   @Override
@@ -56,7 +57,7 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializer im
         .map(ast -> new ASTCarrier()
             .withParsedExpression(ast)
             .withRepresentation(
-                getParseResultRepresentation(carrier, ParsingLevel.Abstract_Knowledge_Expression)));
+                getParseResultRepresentation(carrier, ParsingLevelSeries.Abstract_Knowledge_Expression)));
   }
 
 
@@ -67,7 +68,7 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializer im
         .map(ast -> new ASTCarrier()
             .withParsedExpression(ast)
             .withRepresentation(
-                getParseResultRepresentation(carrier, ParsingLevel.Abstract_Knowledge_Expression)));
+                getParseResultRepresentation(carrier, ParsingLevelSeries.Abstract_Knowledge_Expression)));
   }
 
 
@@ -76,7 +77,7 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializer im
     return Optional.of(new BinaryCarrier()
         .withEncodedExpression(carrier.getSerializedExpression().getBytes())
         .withRepresentation(
-            getSerializeResultRepresentation(carrier, ParsingLevel.Encoded_Knowledge_Expression)));
+            getSerializeResultRepresentation(carrier, ParsingLevelSeries.Encoded_Knowledge_Expression)));
   }
 
   @Override
@@ -88,7 +89,7 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializer im
             .withSerializedExpression(str)
             .withRepresentation(
                 getSerializeResultRepresentation(
-                    carrier, ParsingLevel.Concrete_Knowledge_Expression)));
+                    carrier, ParsingLevelSeries.Concrete_Knowledge_Expression)));
   }
 
   @Override
@@ -99,7 +100,7 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializer im
         .withSerializedExpression(jNode.toString())
         .withRepresentation(getSerializeResultRepresentation(
             carrier,
-            ParsingLevel.Concrete_Knowledge_Expression)));
+            ParsingLevelSeries.Concrete_Knowledge_Expression)));
   }
 
   @Override
@@ -111,12 +112,12 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializer im
             .withRepresentation(
                 getSerializeResultRepresentation(
                     carrier,
-                    ParsingLevel.Parsed_Knowedge_Expression)));
+                    ParsingLevelSeries.Parsed_Knowedge_Expression)));
   }
 
   @Override
   public SerializationFormat getDefaultFormat() {
-    return SerializationFormat.JSON;
+    return SerializationFormatSeries.JSON;
   }
 
 }

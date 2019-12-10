@@ -15,12 +15,13 @@
  */
 package edu.mayo.kmdp.language.parsers;
 
-import edu.mayo.kmdp.tranx.server.DeserializeApiDelegate;
+import edu.mayo.kmdp.tranx.v3.server.DeserializeApiInternal;
 import edu.mayo.kmdp.util.JaxbUtil;
 import edu.mayo.kmdp.util.Util;
 import edu.mayo.kmdp.util.XMLUtil;
-import edu.mayo.ontology.taxonomies.api4kp.parsinglevel._20190801.ParsingLevel;
-import edu.mayo.ontology.taxonomies.krformat._20190801.SerializationFormat;
+import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries;
+import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;
+import edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Function;
@@ -33,7 +34,7 @@ import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 import org.w3c.dom.Document;
 
 public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializer implements
-    DeserializeApiDelegate {
+    DeserializeApiInternal {
 
   protected Class<T> root;
   protected Function<T, JAXBElement<? super T>> mapper;
@@ -44,7 +45,7 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializer imp
     return Optional.of(new ExpressionCarrier()
         .withSerializedExpression(new String(carrier.getEncodedExpression()))
         .withRepresentation(
-            getParseResultRepresentation(carrier, ParsingLevel.Concrete_Knowledge_Expression)));
+            getParseResultRepresentation(carrier, ParsingLevelSeries.Concrete_Knowledge_Expression)));
   }
 
   @Override
@@ -53,7 +54,7 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializer imp
         .map(dox -> new DocumentCarrier()
             .withStructuredExpression(dox)
             .withRepresentation(
-                getParseResultRepresentation(carrier, ParsingLevel.Parsed_Knowedge_Expression)));
+                getParseResultRepresentation(carrier, ParsingLevelSeries.Parsed_Knowedge_Expression)));
   }
 
   @Override
@@ -62,7 +63,7 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializer imp
         .map(ast -> new ASTCarrier()
             .withParsedExpression(ast)
             .withRepresentation(
-                getParseResultRepresentation(carrier, ParsingLevel.Abstract_Knowledge_Expression)));
+                getParseResultRepresentation(carrier, ParsingLevelSeries.Abstract_Knowledge_Expression)));
   }
 
   @Override
@@ -72,7 +73,7 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializer imp
         .map(ast -> new ASTCarrier()
             .withParsedExpression(ast)
             .withRepresentation(
-                getParseResultRepresentation(carrier, ParsingLevel.Abstract_Knowledge_Expression)));
+                getParseResultRepresentation(carrier, ParsingLevelSeries.Abstract_Knowledge_Expression)));
   }
 
 
@@ -81,7 +82,7 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializer imp
     return Optional.of(new BinaryCarrier()
         .withEncodedExpression(carrier.getSerializedExpression().getBytes())
         .withRepresentation(
-            getSerializeResultRepresentation(carrier, ParsingLevel.Encoded_Knowledge_Expression)));
+            getSerializeResultRepresentation(carrier, ParsingLevelSeries.Encoded_Knowledge_Expression)));
   }
 
   @Override
@@ -97,7 +98,7 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializer imp
             .get()
         )
         .withRepresentation(
-            getSerializeResultRepresentation(carrier, ParsingLevel.Concrete_Knowledge_Expression)));
+            getSerializeResultRepresentation(carrier, ParsingLevelSeries.Concrete_Knowledge_Expression)));
   }
 
   @Override
@@ -107,7 +108,7 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializer imp
     return Optional
         .of(new ExpressionCarrier().withSerializedExpression(new String(XMLUtil.toByteArray(dox)))
             .withRepresentation(getSerializeResultRepresentation(carrier,
-                ParsingLevel.Concrete_Knowledge_Expression)));
+                ParsingLevelSeries.Concrete_Knowledge_Expression)));
   }
 
 
@@ -123,12 +124,12 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializer imp
             .withStructuredExpression(dox)
             .withRepresentation(
                 getSerializeResultRepresentation(carrier,
-                    ParsingLevel.Parsed_Knowedge_Expression)));
+                    ParsingLevelSeries.Parsed_Knowedge_Expression)));
   }
 
 
   @Override
   protected SerializationFormat getDefaultFormat() {
-    return SerializationFormat.XML_1_1;
+    return SerializationFormatSeries.XML_1_1;
   }
 }

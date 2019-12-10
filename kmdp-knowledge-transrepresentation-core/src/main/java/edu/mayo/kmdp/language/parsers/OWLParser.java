@@ -15,27 +15,27 @@
  */
 package edu.mayo.kmdp.language.parsers;
 
-import static edu.mayo.ontology.taxonomies.krformat._20190801.SerializationFormat.TXT;
-import static edu.mayo.ontology.taxonomies.krformat._20190801.SerializationFormat.XML_1_1;
-import static edu.mayo.ontology.taxonomies.krlanguage._20190801.KnowledgeRepresentationLanguage.OWL_2;
-import static edu.mayo.ontology.taxonomies.krserialization._20190801.KnowledgeRepresentationLanguageSerialization.OWL_Functional_Syntax;
-import static edu.mayo.ontology.taxonomies.krserialization._20190801.KnowledgeRepresentationLanguageSerialization.OWL_Manchester_Syntax;
-import static edu.mayo.ontology.taxonomies.krserialization._20190801.KnowledgeRepresentationLanguageSerialization.OWL_XML_Serialization;
-import static edu.mayo.ontology.taxonomies.krserialization._20190801.KnowledgeRepresentationLanguageSerialization.RDF_XML_Syntax;
-import static edu.mayo.ontology.taxonomies.krserialization._20190801.KnowledgeRepresentationLanguageSerialization.Turtle;
+import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.TXT;
+import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.XML_1_1;
+import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.OWL_2;
+import static edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentationLanguageSerializationSeries.OWL_Functional_Syntax;
+import static edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentationLanguageSerializationSeries.OWL_Manchester_Syntax;
+import static edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentationLanguageSerializationSeries.OWL_XML_Serialization;
+import static edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentationLanguageSerializationSeries.RDF_XML_Syntax;
+import static edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentationLanguageSerializationSeries.Turtle;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
-import edu.mayo.kmdp.tranx.server.DeserializeApiDelegate;
-import edu.mayo.kmdp.util.ws.ResponseHelper;
-import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations._20190801.KnowledgeProcessingOperation;
-import edu.mayo.ontology.taxonomies.api4kp.parsinglevel._20190801.ParsingLevel;
-import edu.mayo.ontology.taxonomies.krformat._20190801.SerializationFormat;
+import edu.mayo.kmdp.tranx.v3.server.DeserializeApiInternal;
+import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
+import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries;
+import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import javax.inject.Named;
+import org.omg.spec.api4kp._1_0.Answer;
 import org.omg.spec.api4kp._1_0.services.ASTCarrier;
 import org.omg.spec.api4kp._1_0.services.BinaryCarrier;
 import org.omg.spec.api4kp._1_0.services.DocumentCarrier;
@@ -47,12 +47,11 @@ import org.semanticweb.owlapi.formats.RDFXMLDocumentFormat;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
-import org.springframework.http.ResponseEntity;
 
 @Named
-@KPOperation(KnowledgeProcessingOperation.Lowering_Task)
-@KPOperation(KnowledgeProcessingOperation.Lifting_Task)
-public class OWLParser extends AbstractDeSerializer implements DeserializeApiDelegate {
+@KPOperation(KnowledgeProcessingOperationSeries.Lowering_Task)
+@KPOperation(KnowledgeProcessingOperationSeries.Lifting_Task)
+public class OWLParser extends AbstractDeSerializer implements DeserializeApiInternal {
 
 
   @Override
@@ -65,7 +64,7 @@ public class OWLParser extends AbstractDeSerializer implements DeserializeApiDel
     return Optional.of(new ExpressionCarrier()
         .withSerializedExpression(new String(carrier.getEncodedExpression()))
         .withRepresentation(
-            getParseResultRepresentation(carrier, ParsingLevel.Concrete_Knowledge_Expression)));
+            getParseResultRepresentation(carrier, ParsingLevelSeries.Concrete_Knowledge_Expression)));
   }
 
   @Override
@@ -79,7 +78,7 @@ public class OWLParser extends AbstractDeSerializer implements DeserializeApiDel
       OWLOntology onto = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(
           new ByteArrayInputStream(carrier.getSerializedExpression().getBytes()));
       return Optional.of(new ASTCarrier().withParsedExpression(onto)
-          .withLevel(ParsingLevel.Abstract_Knowledge_Expression)
+          .withLevel(ParsingLevelSeries.Abstract_Knowledge_Expression)
           .withRepresentation(rep(OWL_2)));
     } catch (OWLOntologyCreationException e) {
       return Optional.empty();
@@ -96,7 +95,7 @@ public class OWLParser extends AbstractDeSerializer implements DeserializeApiDel
     return Optional.of(new BinaryCarrier()
         .withEncodedExpression(carrier.getSerializedExpression().getBytes())
         .withRepresentation(
-            getSerializeResultRepresentation(carrier, ParsingLevel.Encoded_Knowledge_Expression)));
+            getSerializeResultRepresentation(carrier, ParsingLevelSeries.Encoded_Knowledge_Expression)));
   }
 
   @Override
@@ -106,7 +105,7 @@ public class OWLParser extends AbstractDeSerializer implements DeserializeApiDel
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       OWLManager.createOWLOntologyManager().saveOntology(onto, new RDFXMLDocumentFormat(), baos);
       return Optional
-          .of(new ExpressionCarrier().withLevel(ParsingLevel.Concrete_Knowledge_Expression)
+          .of(new ExpressionCarrier().withLevel(ParsingLevelSeries.Concrete_Knowledge_Expression)
               .withSerializedExpression(new String(baos.toByteArray()))
               .withRepresentation(
                   rep(OWL_2, RDF_XML_Syntax, XML_1_1)));
@@ -129,8 +128,8 @@ public class OWLParser extends AbstractDeSerializer implements DeserializeApiDel
   }
 
   @Override
-  public ResponseEntity<List<SyntacticRepresentation>> getParsableLanguages() {
-    return ResponseHelper.succeed(
+  public Answer<List<SyntacticRepresentation>> getParsableLanguages() {
+    return Answer.of(
         Arrays.asList(
             rep(OWL_2, RDF_XML_Syntax, XML_1_1),
             rep(OWL_2, OWL_Functional_Syntax, TXT),
