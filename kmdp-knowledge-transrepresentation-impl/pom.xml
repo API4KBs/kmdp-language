@@ -13,6 +13,9 @@
   <artifactId>kmdp-knowledge-transrepresentation-impl</artifactId>
   <packaging>war</packaging>
 
+  <name>KMDP :: Server :: Knowledge Transrepresentation Service (Web)</name>
+
+
   <build>
     <plugins>
       <plugin>

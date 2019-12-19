@@ -47,6 +47,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.eclipse.rdf4j.model.vocabulary.SKOS;
 import org.junit.jupiter.api.Test;
+import org.omg.spec.api4kp._1_0.AbstractCarrier;
 import org.omg.spec.api4kp._1_0.Answer;
 import org.omg.spec.api4kp._1_0.PlatformComponentHelper;
 import org.omg.spec.api4kp._1_0.services.ASTCarrier;
@@ -82,15 +83,16 @@ public class TranscreationTest {
     Owl2SkosConfig p = new Owl2SkosConfig()
         .with(OWLtoSKOSTxParams.TGT_NAMESPACE, "http://bar/skos-example");
 
-    Optional<ASTCarrier> ac = KnowledgeCarrier.of(owl.get(), rep(OWL_2))
-        .flatMap((kc) -> transtor.applyTransrepresentation(OWLtoSKOSTranscreator.OPERATOR_ID, kc, p))
-        .flatMap((kc) -> parser.lift(kc, Abstract_Knowledge_Expression))
-        .filter(ASTCarrier.class::isInstance)
-        .map(ASTCarrier.class::cast)
-        .getOptionalValue();
+    Answer<ASTCarrier> ans =
+        Answer.of(owl)
+            .map(o -> AbstractCarrier.of(o, rep(OWL_2)))
+            .flatMap(
+                kc -> transtor.applyTransrepresentation(OWLtoSKOSTranscreator.OPERATOR_ID, kc, p))
+            .flatMap(kc -> parser.lift(kc, Abstract_Knowledge_Expression))
+            .flatOpt(Util.as(ASTCarrier.class));
 
-    assertTrue(ac.isPresent());
-    checkSKOS(ac.get());
+    assertTrue(ans.isSuccess());
+    checkSKOS(ans.get());
   }
 
   private void checkSKOS(ASTCarrier ac) {
@@ -159,7 +161,7 @@ public class TranscreationTest {
         .readBytes(DetectorTest.class.getResource("/artifacts/exampleHierarchy.rdf"));
     assertTrue(owl.isPresent());
 
-    KnowledgeCarrier kc = KnowledgeCarrier.of(owl.get(), rep(OWL_2));
+    KnowledgeCarrier kc = AbstractCarrier.of(owl.get(), rep(OWL_2));
 
     Optional<ASTCarrier> ac = transtor
         .listOperators(kc.getRepresentation(), rep(OWL_2).withLexicon(LexiconSeries.SKOS), null)

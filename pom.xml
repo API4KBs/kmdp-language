@@ -13,6 +13,9 @@
   <artifactId>kmdp-knowledge-transrepresentation</artifactId>
   <version>3.6.0</version>
 
+  <name>KMDP :: Server :: Knowledge Transrepresentation Service</name>
+
+
   <packaging>pom</packaging>
 
   <modules>

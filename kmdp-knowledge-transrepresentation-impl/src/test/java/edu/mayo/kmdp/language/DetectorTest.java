@@ -35,6 +35,7 @@ import java.io.InputStream;
 import java.util.Optional;
 import javax.inject.Inject;
 import org.junit.jupiter.api.Test;
+import org.omg.spec.api4kp._1_0.AbstractCarrier;
 import org.omg.spec.api4kp._1_0.services.KPComponent;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
@@ -55,7 +56,7 @@ public class DetectorTest {
 
     Optional<String> dmn = FileUtil.read(DetectorTest.class.getResource("/artifacts/sample.dmn"));
     assertTrue(dmn.isPresent());
-    KnowledgeCarrier carrier = KnowledgeCarrier.of(dmn.get());
+    KnowledgeCarrier carrier = AbstractCarrier.of(dmn.get());
 
     Optional<SyntacticRepresentation> rep = detector.getDetectedRepresentation(carrier).getOptionalValue();
 
@@ -71,7 +72,7 @@ public class DetectorTest {
 
     Optional<String> dmn = FileUtil.read(DetectorTest.class.getResource("/artifacts/sample.dmn"));
     assertTrue(dmn.isPresent());
-    KnowledgeCarrier carrier = KnowledgeCarrier.of(dmn.get());
+    KnowledgeCarrier carrier = AbstractCarrier.of(dmn.get());
 
     Optional<SyntacticRepresentation> rep = detector.getDetectedRepresentation(carrier).getOptionalValue();
 
@@ -87,7 +88,7 @@ public class DetectorTest {
 
     Optional<String> cmmn = FileUtil.read(DetectorTest.class.getResource("/artifacts/sample.cmmn"));
     assertTrue(cmmn.isPresent());
-    KnowledgeCarrier carrier = KnowledgeCarrier.of(cmmn.get());
+    KnowledgeCarrier carrier = AbstractCarrier.of(cmmn.get());
 
     Optional<SyntacticRepresentation> rep = detector.getDetectedRepresentation(carrier).getOptionalValue();
 
@@ -104,7 +105,7 @@ public class DetectorTest {
     Optional<String> surr = FileUtil
         .read(DetectorTest.class.getResource("/artifacts/sample.surr.xml"));
     assertTrue(surr.isPresent());
-    KnowledgeCarrier carrier = KnowledgeCarrier.of(surr.get());
+    KnowledgeCarrier carrier = AbstractCarrier.of(surr.get());
 
     Optional<SyntacticRepresentation> rep = detector.getDetectedRepresentation(carrier).getOptionalValue();
 
@@ -115,7 +116,7 @@ public class DetectorTest {
     Optional<String> jsonSurr = FileUtil
         .read(DetectorTest.class.getResource("/artifacts/sample.surr.json"));
     assertTrue(jsonSurr.isPresent());
-    KnowledgeCarrier carrier2 = KnowledgeCarrier.of(jsonSurr.get());
+    KnowledgeCarrier carrier2 = AbstractCarrier.of(jsonSurr.get());
 
     Optional<SyntacticRepresentation> rep2 = detector.getDetectedRepresentation(carrier2)
         .getOptionalValue();
@@ -128,7 +129,7 @@ public class DetectorTest {
   @Test
   public void testOWLDetector() {
     InputStream is = DetectorTest.class.getResourceAsStream("/artifacts/test.ofn");
-    KnowledgeCarrier carrier = KnowledgeCarrier.of(is);
+    KnowledgeCarrier carrier = AbstractCarrier.of(is);
 
     Optional<SyntacticRepresentation> orep = detector.getDetectedRepresentation(carrier).getOptionalValue();
     assertTrue(orep.isPresent());

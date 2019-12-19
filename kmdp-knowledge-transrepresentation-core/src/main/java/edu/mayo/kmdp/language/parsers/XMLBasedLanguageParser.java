@@ -44,6 +44,9 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializer imp
   public Optional<ExpressionCarrier> decode(BinaryCarrier carrier) {
     return Optional.of(new ExpressionCarrier()
         .withSerializedExpression(new String(carrier.getEncodedExpression()))
+        .withAssetId(carrier.getAssetId())
+        .withArtifactId(carrier.getArtifactId())
+        .withLevel(ParsingLevelSeries.Concrete_Knowledge_Expression)
         .withRepresentation(
             getParseResultRepresentation(carrier, ParsingLevelSeries.Concrete_Knowledge_Expression)));
   }
@@ -53,6 +56,9 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializer imp
     return XMLUtil.loadXMLDocument(carrier.getSerializedExpression().getBytes())
         .map(dox -> new DocumentCarrier()
             .withStructuredExpression(dox)
+            .withAssetId(carrier.getAssetId())
+            .withArtifactId(carrier.getArtifactId())
+            .withLevel(ParsingLevelSeries.Parsed_Knowedge_Expression)
             .withRepresentation(
                 getParseResultRepresentation(carrier, ParsingLevelSeries.Parsed_Knowedge_Expression)));
   }
@@ -62,6 +68,9 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializer imp
     return JaxbUtil.unmarshall(root, root, carrier.getSerializedExpression())
         .map(ast -> new ASTCarrier()
             .withParsedExpression(ast)
+            .withAssetId(carrier.getAssetId())
+            .withArtifactId(carrier.getArtifactId())
+            .withLevel(ParsingLevelSeries.Abstract_Knowledge_Expression)
             .withRepresentation(
                 getParseResultRepresentation(carrier, ParsingLevelSeries.Abstract_Knowledge_Expression)));
   }
@@ -72,6 +81,9 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializer imp
     return JaxbUtil.unmarshall(root, root, dox)
         .map(ast -> new ASTCarrier()
             .withParsedExpression(ast)
+            .withAssetId(carrier.getAssetId())
+            .withArtifactId(carrier.getArtifactId())
+            .withLevel(ParsingLevelSeries.Abstract_Knowledge_Expression)
             .withRepresentation(
                 getParseResultRepresentation(carrier, ParsingLevelSeries.Abstract_Knowledge_Expression)));
   }
@@ -81,6 +93,9 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializer imp
   public Optional<BinaryCarrier> encode(ExpressionCarrier carrier, SyntacticRepresentation into) {
     return Optional.of(new BinaryCarrier()
         .withEncodedExpression(carrier.getSerializedExpression().getBytes())
+        .withAssetId(carrier.getAssetId())
+        .withArtifactId(carrier.getArtifactId())
+        .withLevel(ParsingLevelSeries.Encoded_Knowledge_Expression)
         .withRepresentation(
             getSerializeResultRepresentation(carrier, ParsingLevelSeries.Encoded_Knowledge_Expression)));
   }
@@ -97,6 +112,9 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializer imp
             .flatMap(Util::asString)
             .get()
         )
+        .withAssetId(carrier.getAssetId())
+        .withArtifactId(carrier.getArtifactId())
+        .withLevel(ParsingLevelSeries.Concrete_Knowledge_Expression)
         .withRepresentation(
             getSerializeResultRepresentation(carrier, ParsingLevelSeries.Concrete_Knowledge_Expression)));
   }
@@ -107,6 +125,9 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializer imp
     Document dox = (Document) carrier.getStructuredExpression();
     return Optional
         .of(new ExpressionCarrier().withSerializedExpression(new String(XMLUtil.toByteArray(dox)))
+            .withAssetId(carrier.getAssetId())
+            .withArtifactId(carrier.getArtifactId())
+            .withLevel(ParsingLevelSeries.Concrete_Knowledge_Expression)
             .withRepresentation(getSerializeResultRepresentation(carrier,
                 ParsingLevelSeries.Concrete_Knowledge_Expression)));
   }
@@ -122,6 +143,9 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializer imp
         JaxbUtil.defaultProperties())
         .map(dox -> new DocumentCarrier()
             .withStructuredExpression(dox)
+            .withAssetId(carrier.getAssetId())
+            .withArtifactId(carrier.getArtifactId())
+            .withLevel(ParsingLevelSeries.Parsed_Knowedge_Expression)
             .withRepresentation(
                 getSerializeResultRepresentation(carrier,
                     ParsingLevelSeries.Parsed_Knowedge_Expression)));

@@ -46,6 +46,7 @@ import java.util.Collections;
 import java.util.Optional;
 import javax.inject.Inject;
 import org.junit.jupiter.api.Test;
+import org.omg.spec.api4kp._1_0.AbstractCarrier;
 import org.omg.spec.api4kp._1_0.Answer;
 import org.omg.spec.api4kp._1_0.identifiers.URIIdentifier;
 import org.omg.spec.api4kp._1_0.services.ASTCarrier;
@@ -74,7 +75,7 @@ public class DeserializationTest {
         .readBytes(DetectorTest.class.getResource("/artifacts/sample.dmn"));
     assertTrue(dmn.isPresent());
 
-    KnowledgeCarrier bin = KnowledgeCarrier.of(dmn.get())
+    KnowledgeCarrier bin = AbstractCarrier.of(dmn.get())
         .withRepresentation(
             rep(DMN_1_1, XML_1_1, Charset.defaultCharset().name(), "TODO"));
 
@@ -133,7 +134,7 @@ public class DeserializationTest {
         .readBytes(DetectorTest.class.getResource("/artifacts/sample.dmn"));
     assertTrue(dmn.isPresent());
 
-    KnowledgeCarrier bin = KnowledgeCarrier.of(dmn.get())
+    KnowledgeCarrier bin = AbstractCarrier.of(dmn.get())
         .withRepresentation(rep(DMN_1_1,
             XML_1_1,
             Charset.defaultCharset().name(),
@@ -168,7 +169,7 @@ public class DeserializationTest {
         .readBytes(DetectorTest.class.getResource("/artifacts/test.ofn"));
     assertTrue(owl.isPresent());
 
-    KnowledgeCarrier bin = KnowledgeCarrier.of(owl.get())
+    KnowledgeCarrier bin = AbstractCarrier.of(owl.get())
         .withRepresentation(rep(OWL_2));
 
     Answer<ASTCarrier> aast = parser
@@ -207,7 +208,7 @@ public class DeserializationTest {
         .withFormalType(Cognitive_Process_Model);
     String serializedAsset = JaxbUtil.marshallToString(Collections.singleton(asset.getClass()),asset, JaxbUtil.defaultProperties());
 
-    KnowledgeCarrier ast = KnowledgeCarrier.ofAst(asset)
+    KnowledgeCarrier ast = AbstractCarrier.ofAst(asset)
         .withRepresentation(rep(Knowledge_Asset_Surrogate))
         .withLevel(Abstract_Knowledge_Expression);
 
@@ -230,7 +231,7 @@ public class DeserializationTest {
 
     String serializedAsset = JSonUtil.printJson(asset).orElse("");
 
-    KnowledgeCarrier ast = KnowledgeCarrier.ofAst(asset)
+    KnowledgeCarrier ast = AbstractCarrier.ofAst(asset)
         .withRepresentation(rep(Knowledge_Asset_Surrogate))
         .withLevel(Abstract_Knowledge_Expression);
 
