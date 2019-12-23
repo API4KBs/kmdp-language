@@ -90,6 +90,12 @@ public class OWLtoSKOSTranscreator implements TransxionApiInternal {
   }
 
   @Override
+  public Answer<KnowledgeCarrier> applyTransrepresentationInto(KnowledgeCarrier sourceArtifact,
+      SyntacticRepresentation into) {
+    return Answer.unsupported();
+  }
+
+  @Override
   public Answer<TransrepresentationOperator> getTransrepresentation(String txionId) {
     return Answer.of(
         new org.omg.spec.api4kp._1_0.services.tranx.resources.TransrepresentationOperator()
