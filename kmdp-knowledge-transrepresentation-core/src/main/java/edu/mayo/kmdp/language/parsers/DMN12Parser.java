@@ -27,17 +27,17 @@ import javax.inject.Named;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
 import org.omg.spec.api4kp._1_0.services.KPSupport;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
-import org.omg.spec.dmn._20151101.dmn.ObjectFactory;
-import org.omg.spec.dmn._20151101.dmn.TDefinitions;
+import org.omg.spec.dmn._20180521.model.ObjectFactory;
+import org.omg.spec.dmn._20180521.model.TDefinitions;
 
 @Named
 @KPOperation(KnowledgeProcessingOperationSeries.Lifting_Task)
 @KPOperation(KnowledgeProcessingOperationSeries.Lowering_Task)
-@KPSupport(KnowledgeRepresentationLanguageSeries.DMN_1_1)
-public class DMNParser extends XMLBasedLanguageParser<TDefinitions> implements
+@KPSupport(KnowledgeRepresentationLanguageSeries.DMN_1_2)
+public class DMN12Parser extends XMLBasedLanguageParser<TDefinitions> implements
     DeserializeApiInternal {
 
-  public DMNParser() {
+  public DMN12Parser() {
     this.root = TDefinitions.class;
     this.mapper = new ObjectFactory()::createDefinitions;
   }
@@ -45,7 +45,7 @@ public class DMNParser extends XMLBasedLanguageParser<TDefinitions> implements
   public List<SyntacticRepresentation> getSupportedRepresentations() {
     return
         Collections
-            .singletonList(rep(KnowledgeRepresentationLanguageSeries.DMN_1_1,
+            .singletonList(rep(KnowledgeRepresentationLanguageSeries.DMN_1_2,
                 SerializationFormatSeries.XML_1_1, getDefaultCharset()));
   }
 

@@ -35,7 +35,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import javax.inject.Inject;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.omg.spec.api4kp._1_0.AbstractCarrier;
 import org.omg.spec.api4kp._1_0.Answer;
 import org.omg.spec.api4kp._1_0.services.ASTCarrier;
 import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
@@ -43,13 +43,13 @@ import org.omg.spec.api4kp._1_0.services.KPComponent;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @SpringBootTest
 @ContextConfiguration(classes = LocalTestConfig.class)
 public class ChainingTest {
+
+  private static final String SRC = "/artifacts/sample.dmn";
 
   @Inject
   @KPComponent
@@ -67,10 +67,10 @@ public class ChainingTest {
   public void stepwiseTest() {
 
     Optional<byte[]> dmn = FileUtil
-        .readBytes(DetectorTest.class.getResource("/artifacts/sample.dmn"));
+        .readBytes(DetectorTest.class.getResource(SRC));
     assertTrue(dmn.isPresent());
 
-    KnowledgeCarrier carrier1 = KnowledgeCarrier.of(dmn.get());
+    KnowledgeCarrier carrier1 = AbstractCarrier.of(dmn.get());
     SyntacticRepresentation rep = detectApi.getDetectedRepresentation(carrier1)
         .orElse(null);
     assertNotNull(rep);
@@ -95,10 +95,10 @@ public class ChainingTest {
   public void implicitChaining() {
 
     Optional<byte[]> dmn = FileUtil
-        .readBytes(DetectorTest.class.getResource("/artifacts/sample.dmn"));
+        .readBytes(DetectorTest.class.getResource(SRC));
     assertTrue(dmn.isPresent());
 
-    KnowledgeCarrier carrier1 = KnowledgeCarrier.of(dmn.get())
+    KnowledgeCarrier carrier1 = AbstractCarrier.of(dmn.get())
         .withRepresentation(rep(DMN_1_1));
 
     KnowledgeCarrier carrier2 = deserializeApi
@@ -116,9 +116,9 @@ public class ChainingTest {
   public void functionalInversion() {
 
     Optional<byte[]> dmn = FileUtil
-        .readBytes(DetectorTest.class.getResource("/artifacts/sample.dmn"));
+        .readBytes(DetectorTest.class.getResource(SRC));
     assertTrue(dmn.isPresent());
-    KnowledgeCarrier carrier1 = KnowledgeCarrier.of(dmn.get());
+    KnowledgeCarrier carrier1 = AbstractCarrier.of(dmn.get());
 
     Function<KnowledgeCarrier, Answer<KnowledgeCarrier>> detect = detectApi::setDetectedRepresentation;
     BiFunction<KnowledgeCarrier, ParsingLevel, Answer<KnowledgeCarrier>> lift = deserializeApi::lift;
@@ -140,11 +140,11 @@ public class ChainingTest {
   public void monadicChain() {
 
     Optional<byte[]> dmn = FileUtil
-        .readBytes(DetectorTest.class.getResource("/artifacts/sample.dmn"));
+        .readBytes(DetectorTest.class.getResource(SRC));
     assertTrue(dmn.isPresent());
 
     Answer<KnowledgeCarrier> out = Answer.of(dmn)
-        .map(KnowledgeCarrier::of)
+        .map(AbstractCarrier::of)
         .flatMap(detectApi::setDetectedRepresentation)
         .flatMap(c1 -> deserializeApi.lift(c1, Abstract_Knowledge_Expression));
 
@@ -163,11 +163,11 @@ public class ChainingTest {
   public void anonymousChain() {
 
     Optional<byte[]> dmn = FileUtil
-        .readBytes(DetectorTest.class.getResource("/artifacts/sample.dmn"));
+        .readBytes(DetectorTest.class.getResource(SRC));
     assertTrue(dmn.isPresent());
 
     Answer<KnowledgeCarrier> out = Answer.of(dmn)
-        .map(KnowledgeCarrier::of)
+        .map(AbstractCarrier::of)
         .flatMap(detectApi::setDetectedRepresentation)
         .flatMap(c1 -> deserializeApi.lift(c1, Abstract_Knowledge_Expression));
 

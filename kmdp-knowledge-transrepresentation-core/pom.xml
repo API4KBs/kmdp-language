@@ -12,6 +12,8 @@
 
   <artifactId>kmdp-knowledge-transrepresentation-core</artifactId>
 
+  <name>KMDP :: Server :: Knowledge Transrepresentation Service (Internal)</name>
+
   <dependencies>
 
     <dependency>
@@ -46,6 +48,10 @@
     <dependency>
       <groupId>edu.mayo.kmdp</groupId>
       <artifactId>omg-dmn-12</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ca.uhn.hapi.fhir</groupId>
+      <artifactId>hapi-fhir-structures-dstu3</artifactId>
     </dependency>
 
     <dependency>

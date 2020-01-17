@@ -114,4 +114,15 @@ public class TransrepresentationExecutor implements TransxionApiInternal {
     return Optional.ofNullable(translatorById.get(txId));
   }
 
+  @Override
+  public Answer<KnowledgeCarrier> applyTransrepresentationInto(KnowledgeCarrier sourceArtifact,
+      SyntacticRepresentation into) {
+    return listOperators(sourceArtifact.getRepresentation(), into, null)
+        .filter(l -> !l.isEmpty())
+        .map(l -> l.get(0).getOperatorId())
+        .flatMap(chosenOperatorId ->
+            translatorById.get(chosenOperatorId)
+                .applyTransrepresentation(chosenOperatorId, sourceArtifact, new Properties()));
+  }
+
 }

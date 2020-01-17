@@ -46,14 +46,14 @@ public abstract class AbstractDeSerializer implements DeserializeApiInternal, Li
 
     if (getParsableLanguages().orElse(emptyList()).stream()
         .map(SyntacticRepresentation::getLanguage)
-        .noneMatch(lang -> lang == sourceArtifact.getRepresentation().getLanguage())) {
-      return null;
+        .noneMatch(lang -> lang.asEnum() == sourceArtifact.getRepresentation().getLanguage())) {
+      return Answer.unsupported();
     }
 
     ParsingLevel sourceLevel = detectLevel(sourceArtifact);
     if (ParsingLevelContrastor.singleton.contrast(sourceLevel, into) == Comparison.BROADER) {
       // parsing must lift to a higher level <=> sourceLevel must be lower
-      return null;
+      return Answer.unsupported();
     }
 
     KnowledgeCarrier result = null;
@@ -112,7 +112,12 @@ public abstract class AbstractDeSerializer implements DeserializeApiInternal, Li
       result = sourceArtifact;
     }
 
-    return Answer.of(Optional.ofNullable(result));
+    return result != null
+        ? Answer.of(
+        result.withAssetId(sourceArtifact.getAssetId())
+            .withArtifactId(sourceArtifact.getArtifactId())
+            .withHref(sourceArtifact.getHref()))
+        : Answer.failed();
   }
 
 

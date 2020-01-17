@@ -28,10 +28,10 @@ import edu.mayo.kmdp.tranx.v3.DeserializeApi;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.Optional;
 import javax.inject.Inject;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.omg.spec.api4kp._1_0.AbstractCarrier;
+import org.omg.spec.api4kp._1_0.Answer;
 import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
 import org.omg.spec.api4kp._1_0.services.KPComponent;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
@@ -40,10 +40,7 @@ import org.semanticweb.owlapi.formats.RDFXMLDocumentFormat;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.web.WebAppConfiguration;
 
 @SpringBootTest
 @ContextConfiguration(classes = LocalTestConfig.class)
@@ -58,19 +55,22 @@ public class FormatTest {
   public void testOWL2() {
     InputStream is = FormatTest.class.getResourceAsStream("/artifacts/test.ofn");
 
-    Optional<KnowledgeCarrier> kc = KnowledgeCarrier.of(is, rep(OWL_2))
-        .flatMap((c) -> parser
-            .ensureRepresentation(c,
-                rep(OWL_2, RDF_XML_Syntax,
-                    XML_1_1, Charset.defaultCharset().name())))
-        .getOptionalValue();
+    Answer<KnowledgeCarrier> ans =
+        Answer.of(is)
+            .map(i -> AbstractCarrier.of(i, rep(OWL_2)))
+            .flatMap(c -> parser
+                .ensureRepresentation(c,
+                    rep(OWL_2,
+                        RDF_XML_Syntax,
+                        XML_1_1,
+                        Charset.defaultCharset().name())));
 
-    assertTrue(kc.isPresent());
-    assertTrue(kc.get() instanceof ExpressionCarrier);
+    assertTrue(ans.isSuccess());
+    assertTrue(ans.get() instanceof ExpressionCarrier);
     try {
       OWLOntology o = OWLManager.createOWLOntologyManager()
           .loadOntologyFromOntologyDocument(new ByteArrayInputStream(
-              ((ExpressionCarrier) kc.get()).getSerializedExpression().getBytes()));
+              ((ExpressionCarrier) ans.get()).getSerializedExpression().getBytes()));
       assertEquals(new RDFXMLDocumentFormat(), o.getFormat());
     } catch (OWLOntologyCreationException e) {
       fail(e.getMessage());
