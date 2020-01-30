@@ -21,11 +21,13 @@ import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLan
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.FHIR_STU3;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
+import edu.mayo.kmdp.id.helper.DatatypeHelper;
 import edu.mayo.kmdp.tranx.v3.server.TransxionApiInternal;
 import edu.mayo.ontology.taxonomies.lexicon.LexiconSeries;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.UUID;
 import javax.inject.Named;
 import org.omg.spec.api4kp._1_0.AbstractCarrier;
 import org.omg.spec.api4kp._1_0.Answer;
@@ -107,7 +109,10 @@ public class DmnToPlanDefTranslator implements TransxionApiInternal {
         new DmnToPlanDef().transform(
             sourceArtifact.getAssetId(),
             sourceArtifact.as(TDefinitions.class)
-                .orElseThrow(IllegalStateException::new))));
+                .orElseThrow(IllegalStateException::new)))
+        .withAssetId(sourceArtifact.getAssetId())
+        .withArtifactId(DatatypeHelper.uri(UUID.randomUUID().toString()))
+        .withRepresentation(rep(FHIR_STU3)));
   }
 
   @Override
