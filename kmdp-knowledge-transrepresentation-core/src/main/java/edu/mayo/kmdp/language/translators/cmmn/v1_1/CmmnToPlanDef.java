@@ -400,7 +400,7 @@ public class CmmnToPlanDef {
                 .setIdentifier(new Identifier()
                     .setType(new CodeableConcept().setText("TODO - Knowledge Artifact Fragment Identifier"))
                     .setValue(dec.getExternalRef().getLocalPart().replaceAll("_","")))
-        );
+        ).setId(dec.getExternalRef().getLocalPart().replaceAll("_",""));
       }
     });
   }

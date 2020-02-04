@@ -23,6 +23,7 @@ import edu.mayo.kmdp.util.Util;
 import edu.mayo.ontology.taxonomies.kao.knowledgeassettype.KnowledgeAssetTypeSeries;
 import edu.mayo.ontology.taxonomies.kmdo.annotationreltype.AnnotationRelTypeSeries;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -111,7 +112,7 @@ public class DmnToPlanDef {
         .map(info -> {
           URI ref = URI.create(info.getRequiredDecision().getHref());
           if (!Util.isEmpty(ref.getPath())) {
-            cpm.addAction(new PlanDefinitionActionComponent()
+            cpm.addAction((PlanDefinitionActionComponent) new PlanDefinitionActionComponent()
                 .setDefinition(
                     new Reference()
                         .setReference(URIUtil.normalizeURIString(ref))
@@ -119,7 +120,8 @@ public class DmnToPlanDef {
                         .setIdentifier(new Identifier()
                             .setType(new CodeableConcept().setText("TODO - Knowledge Artifact Fragment Identifier"))
                             .setValue(ref.getFragment().replaceAll("_","")))
-                ));
+                ).setId(ref.getFragment().replaceAll("_",""))
+            );
           }
           return ref.getFragment();
         })
@@ -139,8 +141,8 @@ public class DmnToPlanDef {
 //        // TODO This ID should be mapped predictably
 //        .setValue(decisionModel.getId().replaceAll("_",""));
 
-//    cpm.setIdentifier(Arrays.asList(fhirAssetId, fhirArtifactId))
-//        .setVersion("TODO");
+    cpm.setIdentifier(Arrays.asList(fhirAssetId))
+        .setVersion("TODO");
 
     cpm.setType(toCode(KnowledgeAssetTypeSeries.Decision_Model));
     cpm.setId("#" + decisionModel.getNamespace());
@@ -188,8 +190,17 @@ public class DmnToPlanDef {
     return decisionModel.getDrgElement().stream()
         .map(JAXBElement::getValue)
         .flatMap(StreamUtil.filterAs(TInputData.class))
-        .filter(in -> in.getId().equals(requiredInput.getHref()
-            .substring(requiredInput.getHref().lastIndexOf('#') + 1)))
+        // TODO Fix this ID mess....
+        .filter(in ->
+            in.getId()
+                .replace("#", "")
+                .replace("_", "")
+                .equals(
+                    requiredInput.getHref()
+                        .substring(requiredInput.getHref().lastIndexOf('#'))
+                        .replace("#", "")
+                        .replace("_", "")
+                ))
         .findFirst();
   }
 
@@ -265,6 +276,7 @@ public class DmnToPlanDef {
         .filter(ann ->
                 ann.getRel() == null
                     || AnnotationRelTypeSeries.Defines.getTag().equals(ann.getRel().getTag())
+                    || AnnotationRelTypeSeries.Captures.getTag().equals(ann.getRel().getTag())
                     || AnnotationRelTypeSeries.In_Terms_Of.getTag().equals(ann.getRel().getTag())
         )
         .map(SimpleAnnotation::getExpr)
