@@ -19,12 +19,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.SurrogateBuilder;
-import edu.mayo.kmdp.language.parsers.CMMNParser;
-import edu.mayo.kmdp.language.parsers.DMN12Parser;
-import edu.mayo.kmdp.language.parsers.DMNParser;
-import edu.mayo.kmdp.language.parsers.OWLParser;
-import edu.mayo.kmdp.language.parsers.lifters.JenaOwlRdfLifter;
-import edu.mayo.kmdp.language.parsers.lifters.SparqlLifter;
+import edu.mayo.kmdp.language.parsers.cmmn.v1_1.CMMN11Parser;
+import edu.mayo.kmdp.language.parsers.dmn.v1_2.DMN12Parser;
+import edu.mayo.kmdp.language.parsers.dmn.v1_1.DMN11Parser;
+import edu.mayo.kmdp.language.parsers.owl2.OWLParser;
+import edu.mayo.kmdp.language.parsers.owl2.JenaOwlRdfLifter;
+import edu.mayo.kmdp.language.parsers.sparql.SparqlLifter;
 import edu.mayo.kmdp.tranx.v3.server.DeserializeApiInternal;
 import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevel;
 import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries;
@@ -49,7 +49,7 @@ class ParserTest {
   @Test
   void testParseDMN11() {
     testVerticalLift(
-        new DMNParser(),
+        new DMN11Parser(),
         "/dmn11example.dmn",
         DMN_1_1, DMN_1_1_XML_Syntax, XML_1_1,
         org.omg.spec.dmn._20151101.dmn.TDefinitions.class,
@@ -69,7 +69,7 @@ class ParserTest {
   @Test
   void testParseCMMN() {
     testVerticalLift(
-        new CMMNParser(),
+        new CMMN11Parser(),
         "/cmmn11Example.cmmn",
         CMMN_1_1, CMMN_1_1_XML_Syntax, XML_1_1,
         org.omg.spec.cmmn._20151109.model.TDefinitions.class,

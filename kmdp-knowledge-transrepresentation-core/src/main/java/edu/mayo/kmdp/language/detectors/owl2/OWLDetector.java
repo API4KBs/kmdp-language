@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.mayo.kmdp.language.detectors;
+package edu.mayo.kmdp.language.detectors.owl2;
 
 import static edu.mayo.kmdp.util.XMLUtil.catalogResolver;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.OWL_2;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
-import edu.mayo.kmdp.language.detectors.OWLDetectorConfig.DetectorParams;
+import edu.mayo.kmdp.language.detectors.owl2.OWLDetectorConfig.DetectorParams;
 import edu.mayo.kmdp.tranx.v3.server.DetectApiInternal;
 import edu.mayo.kmdp.util.Util;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;

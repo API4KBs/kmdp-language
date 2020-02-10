@@ -11,7 +11,7 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package edu.mayo.kmdp.language.translators;
+package edu.mayo.kmdp.language.translators.owl2;
 
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 import static org.omg.spec.api4kp._1_0.PlatformComponentHelper.asParamDefinitions;

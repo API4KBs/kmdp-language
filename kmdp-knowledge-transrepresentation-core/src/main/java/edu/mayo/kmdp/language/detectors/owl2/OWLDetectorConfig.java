@@ -1,9 +1,9 @@
-package edu.mayo.kmdp.language.detectors;
+package edu.mayo.kmdp.language.detectors.owl2;
 
 import edu.mayo.kmdp.ConfigProperties;
 import edu.mayo.kmdp.Opt;
 import edu.mayo.kmdp.Option;
-import edu.mayo.kmdp.language.detectors.OWLDetectorConfig.DetectorParams;
+import edu.mayo.kmdp.language.detectors.owl2.OWLDetectorConfig.DetectorParams;
 import java.util.Properties;
 
 @SuppressWarnings("unchecked")

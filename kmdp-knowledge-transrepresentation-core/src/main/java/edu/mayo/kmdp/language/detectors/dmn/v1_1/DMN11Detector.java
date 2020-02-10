@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.mayo.kmdp.language.detectors;
+package edu.mayo.kmdp.language.detectors.dmn.v1_1;
 
 import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.XML_1_1;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.DMN_1_1;
 import static java.util.Collections.singletonList;
 
+import edu.mayo.kmdp.language.detectors.XMLBasedLanguageDetector;
 import edu.mayo.kmdp.tranx.v3.server.DetectApiInternal;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import java.util.List;
@@ -30,10 +31,10 @@ import org.omg.spec.dmn._20151101.dmn.TDefinitions;
 
 @Named
 @KPOperation(KnowledgeProcessingOperationSeries.Detect_Language_Information_Task)
-public class DMNDetector extends XMLBasedLanguageDetector<TDefinitions> implements
+public class DMN11Detector extends XMLBasedLanguageDetector<TDefinitions> implements
     DetectApiInternal {
 
-  public DMNDetector() {
+  public DMN11Detector() {
     this.root = TDefinitions.class;
   }
 
