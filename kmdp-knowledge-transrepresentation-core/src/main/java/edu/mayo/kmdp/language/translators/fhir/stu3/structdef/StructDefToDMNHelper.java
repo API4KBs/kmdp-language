@@ -1,4 +1,4 @@
-package edu.mayo.kmdp.language.translators.fhir.stu3.structDef;
+package edu.mayo.kmdp.language.translators.fhir.stu3.structdef;
 
 import ca.uhn.fhir.context.RuntimeChildExtension;
 import java.util.Set;
@@ -51,8 +51,9 @@ public class StructDefToDMNHelper {
     if (x instanceof ElementDefinition) {
       return FHIRAllTypes.EXTENSION.toCode().equals(
           ((ElementDefinition) x).getTypeFirstRep().getCode());
-    } else
+    } else {
       return x instanceof RuntimeChildExtension;
+    }
   }
 
   public static boolean isFeelPrimitive(String type) {

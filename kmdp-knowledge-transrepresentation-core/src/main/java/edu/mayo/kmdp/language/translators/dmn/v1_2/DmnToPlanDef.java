@@ -23,7 +23,6 @@ import edu.mayo.kmdp.util.Util;
 import edu.mayo.ontology.taxonomies.kao.knowledgeassettype.KnowledgeAssetTypeSeries;
 import edu.mayo.ontology.taxonomies.kmdo.annotationreltype.AnnotationRelTypeSeries;
 import java.net.URI;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -66,7 +65,7 @@ public class DmnToPlanDef {
   }
 
   public PlanDefinition transform(URIIdentifier assetId, TDefinitions decisionModel) {
-    System.out.println("Called Translator DMN to PDF  for " + decisionModel.getName() );
+    log.debug("Called Translator DMN to PDF  for {}",decisionModel.getName() );
     PlanDefinition cpm = new PlanDefinition();
 
     mapIdentity(cpm,assetId.getUri(),decisionModel);
@@ -75,7 +74,7 @@ public class DmnToPlanDef {
 
     mapDecisions(cpm,decisionModel);
 
-    System.out.println("Finished DMN to PDef  for " + decisionModel.getName() );
+    log.debug("Finished DMN to PDef  for {} ", decisionModel.getName() );
     return cpm;
   }
 
@@ -105,7 +104,7 @@ public class DmnToPlanDef {
       Map<String, PlanDefinitionActionComponent> mappedDecisions, TDecision dmnDecision) {
 
     PlanDefinitionActionComponent srcAction = mappedDecisions.get(
-        "#" + dmnDecision.getId().replaceAll("_",""));
+        "#" + dmnDecision.getId().replace("_",""));
 
     dmnDecision.getInformationRequirement().stream()
         .filter(info -> info.getRequiredDecision() != null)
@@ -119,29 +118,23 @@ public class DmnToPlanDef {
                         .setDisplay(info.getLabel())
                         .setIdentifier(new Identifier()
                             .setType(new CodeableConcept().setText("TODO - Knowledge Artifact Fragment Identifier"))
-                            .setValue(ref.getFragment().replaceAll("_","")))
-                ).setId(ref.getFragment().replaceAll("_",""))
+                            .setValue(ref.getFragment().replace("_","")))
+                ).setId(ref.getFragment().replace("_",""))
             );
           }
           return ref.getFragment();
         })
         .forEach(tgtActionId -> srcAction.addRelatedAction()
             .setRelationship(ActionRelationshipType.AFTER)
-            .setActionId("#" + tgtActionId.replaceAll("_","")));
+            .setActionId("#" + tgtActionId.replace("_","")));
   }
 
   private void mapIdentity(PlanDefinition cpm, URI assetId, TDefinitions decisionModel) {
-    // TODO Need formal "Asset ID" and "Artifact ID" roles
     Identifier fhirAssetId = new Identifier()
         .setType(toCode(AnnotationRelTypeSeries.Is_Identified_By.asConcept()))
         .setValue(assetId.toString());
 
-//    Identifier fhirArtifactId = new Identifier()
-//        .setType(toCode(AnnotationRelTypeSeries.Is_Identified_By.asConcept()))
-//        // TODO This ID should be mapped predictably
-//        .setValue(decisionModel.getId().replaceAll("_",""));
-
-    cpm.setIdentifier(Arrays.asList(fhirAssetId))
+    cpm.setIdentifier(Collections.singletonList(fhirAssetId))
         .setVersion("TODO");
 
     cpm.setType(toCode(KnowledgeAssetTypeSeries.Decision_Model));
@@ -204,15 +197,6 @@ public class DmnToPlanDef {
         .findFirst();
   }
 
-  private Optional<TDecision> findDecision(TDMNElementReference requiredDecision, TDefinitions decisionModel) {
-    return decisionModel.getDrgElement().stream()
-        .map(JAXBElement::getValue)
-        .flatMap(StreamUtil.filterAs(TDecision.class))
-        .filter(in -> in.getId().equals(requiredDecision.getHref()
-            .substring(requiredDecision.getHref().lastIndexOf('#') + 1)))
-        .findFirst();
-  }
-
   private Optional<TKnowledgeSource> findKnowledgeSource(TDMNElementReference requiredSource, TDefinitions decisionModel) {
     return decisionModel.getDrgElement().stream()
         .map(JAXBElement::getValue)
@@ -272,7 +256,6 @@ public class DmnToPlanDef {
 
     return extensionElements.stream()
         .flatMap(StreamUtil.filterAs(SimpleAnnotation.class))
-        // TODO FIXME Ensure annotations are serialized properly with concept (UU)Ids
         .filter(ann ->
                 ann.getRel() == null
                     || AnnotationRelTypeSeries.Defines.getTag().equals(ann.getRel().getTag())

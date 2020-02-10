@@ -15,15 +15,13 @@
  */
 package edu.mayo.kmdp.language;
 
-import static org.omg.spec.api4kp._1_0.Answer.aggregate;
 import static org.omg.spec.api4kp._1_0.Answer.anyAble;
 
-import edu.mayo.kmdp.tranx.v3.server.DetectApiInternal;
 import edu.mayo.kmdp.tranx.v3.server.ValidateApiInternal;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
 import javax.inject.Named;
 import org.omg.spec.api4kp._1_0.Answer;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
@@ -48,7 +46,7 @@ public class LanguageValidator implements ValidateApiInternal {
   //TODO FIXME Should be renamed 'validateAs'
   public Answer<Void> validate(KnowledgeCarrier sourceArtifact, SyntacticRepresentation into) {
     return
-        anyAble(validators, validator -> validator != null)   // TODO FIXME Needs a 'canDo' thing
+        anyAble(validators, Objects::nonNull)   // TODO FIXME Needs a 'canDo' thing
             .map(v -> v.validate(sourceArtifact, into))
             .orElse(Answer.failed());
   }

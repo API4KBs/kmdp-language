@@ -3,15 +3,11 @@ package edu.mayo.kmdp.language.parsers.fhir.stu3;
 import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.JSON;
 import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.XML_1_1;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.FHIR_STU3;
-import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.OWL_2;
 
 import ca.uhn.fhir.context.FhirContext;
-import edu.mayo.kmdp.Opt;
 import edu.mayo.kmdp.language.parsers.AbstractDeSerializer;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;
-import edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries;
-import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;

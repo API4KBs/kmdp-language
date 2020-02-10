@@ -1,9 +1,9 @@
-package edu.mayo.kmdp.language.translators.fhir.stu3.structDef;
+package edu.mayo.kmdp.language.translators.fhir.stu3.structdef;
 
-import static edu.mayo.kmdp.language.translators.fhir.stu3.structDef.StructDefToDMNHelper.PATH_SEPARATOR;
-import static edu.mayo.kmdp.language.translators.fhir.stu3.structDef.StructDefToDMNHelper.add;
-import static edu.mayo.kmdp.language.translators.fhir.stu3.structDef.StructDefToDMNHelper.findRootElement;
-import static edu.mayo.kmdp.language.translators.fhir.stu3.structDef.StructDefToDMNHelper.isRoot;
+import static edu.mayo.kmdp.language.translators.fhir.stu3.structdef.StructDefToDMNHelper.PATH_SEPARATOR;
+import static edu.mayo.kmdp.language.translators.fhir.stu3.structdef.StructDefToDMNHelper.add;
+import static edu.mayo.kmdp.language.translators.fhir.stu3.structdef.StructDefToDMNHelper.findRootElement;
+import static edu.mayo.kmdp.language.translators.fhir.stu3.structdef.StructDefToDMNHelper.isRoot;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;

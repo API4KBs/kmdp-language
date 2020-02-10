@@ -1,4 +1,4 @@
-package edu.mayo.kmdp.language.translators.fhir.stu3.structDef;
+package edu.mayo.kmdp.language.translators.fhir.stu3.structdef;
 
 import static edu.mayo.kmdp.comparator.Contrastor.isBroaderOrEqual;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.FHIR_STU3;

@@ -73,7 +73,7 @@ public class CmmnToPlanDef {
 
   private static final Logger log = LoggerFactory.getLogger(CmmnToPlanDef.class);
 
-  final String CMIS_DOCUMENT_TYPE = "http://www.omg.org/spec/CMMN/DefinitionType/CMISDocument";
+  static final String CMIS_DOCUMENT_TYPE = "http://www.omg.org/spec/CMMN/DefinitionType/CMISDocument";
 
   public CmmnToPlanDef() {
     // nothing to do
@@ -95,7 +95,7 @@ public class CmmnToPlanDef {
 
     PlanDefinition cpm = new PlanDefinition();
 
-    mapIdentity(cpm, assetId, caseModel);
+    mapIdentity(cpm, assetId);
     mapName(cpm, caseModel);
     mapSubject(cpm, caseModel);
 
@@ -105,18 +105,16 @@ public class CmmnToPlanDef {
     return cpm;
   }
 
-  private void mapIdentity(PlanDefinition cpm, URI assetId, TDefinitions caseModel) {
+  private void mapIdentity(PlanDefinition cpm, URI assetId
+  //    , TDefinitions caseModel
+  ) {
     // TODO Need formal "Asset ID" and "Artifact ID" roles
     Identifier fhirAssetId = new Identifier()
         .setType(toCode(AnnotationRelTypeSeries.Is_Identified_By.asConcept()))
         .setValue(assetId.toString());
 
-//    Identifier fhirArtifactId = new Identifier()
-//        .setType(toCode(AnnotationRelTypeSeries.Is_Identified_By.asConcept()))
-//        .setValue(caseModel.getId().replaceAll("_",""));
-
-//    cpm.setIdentifier(Arrays.asList(fhirAssetId, fhirArtifactId))
-//        .setVersion("TODO");
+    cpm.setIdentifier(Collections.singletonList(fhirAssetId))
+        .setVersion("TODO");
 
     cpm.setType(toCode(KnowledgeAssetTypeSeries.Care_Process_Model));
     cpm.setId( "#" + UUID.randomUUID().toString());
@@ -132,7 +130,7 @@ public class CmmnToPlanDef {
 
     PlanDefinition.PlanDefinitionActionComponent group = new PlanDefinitionActionComponent();
 
-    group.setId(stage.getId().replaceAll("_",""));
+    group.setId(stage.getId().replace("_",""));
     group.setLabel(stage.getName());
 
     mapControls(stage.getDefaultControl(), group);
@@ -316,10 +314,7 @@ public class CmmnToPlanDef {
     getTypeCode(task.getExtensionElements()).stream()
         .map(this::toCode)
         .forEach(planAction::addCode);
-//
-    // Not a group
-//    planAction.setGroupingBehavior(ActionGroupingBehavior.NULL);
-//    planAction.setSelectionBehavior(ActionSelectionBehavior.NULL);
+
     getControls(planItem, task)
         .ifPresent(ctrl -> mapControls(ctrl, planAction));
 
@@ -399,17 +394,14 @@ public class CmmnToPlanDef {
                 .setDisplay(dec.getName())
                 .setIdentifier(new Identifier()
                     .setType(new CodeableConcept().setText("TODO - Knowledge Artifact Fragment Identifier"))
-                    .setValue(dec.getExternalRef().getLocalPart().replaceAll("_","")))
-        ).setId(dec.getExternalRef().getLocalPart().replaceAll("_",""));
+                    .setValue(dec.getExternalRef().getLocalPart().replace("_","")))
+        ).setId(dec.getExternalRef().getLocalPart().replace("_",""));
       }
     });
   }
 
   private void mapControls(TPlanItemControl ctrl, PlanDefinitionActionComponent planAction) {
-    planAction.setPrecheckBehavior(ctrl != null && ctrl.getManualActivationRule() != null
-        ? ActionPrecheckBehavior.NO
-        : ActionPrecheckBehavior.NO);
-//        : ActionPrecheckBehavior.NULL);  <- FIXME? This should be null, but apparently there is a serialization issue?
+    planAction.setPrecheckBehavior(ActionPrecheckBehavior.NO);
 
     planAction.setCardinalityBehavior(ctrl != null && ctrl.getRepetitionRule() != null
         ? ActionCardinalityBehavior.MULTIPLE
@@ -458,8 +450,6 @@ public class CmmnToPlanDef {
 
     return extensionElements.stream()
         .flatMap(StreamUtil.filterAs(SimpleAnnotation.class))
-//        .filter(ann -> AnnotationRelTypeSeries.Captures.sameAs(ann.getRel()))
-        // TODO FIXME Ensure annotations are serialized properly with concept (UU)Ids
         .filter(ann -> AnnotationRelTypeSeries.Captures.getTag().equals(ann.getRel().getTag()))
         .map(SimpleAnnotation::getExpr)
         .map(Term.class::cast)

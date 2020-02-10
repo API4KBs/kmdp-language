@@ -1,6 +1,6 @@
 package edu.mayo.kmdp.language;
 
-import static edu.mayo.kmdp.language.translators.fhir.stu3.structDef.StructDefToDMNHelper.isFeelPrimitive;
+import static edu.mayo.kmdp.language.translators.fhir.stu3.structdef.StructDefToDMNHelper.isFeelPrimitive;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.DMN_1_2;
 import static org.hl7.fhir.dstu3.model.Enumerations.FHIRAllTypes.ATTACHMENT;
 import static org.hl7.fhir.dstu3.model.Enumerations.FHIRAllTypes.CODEABLECONCEPT;
@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.parsers.dmn.v1_2.DMN12Parser;
-import edu.mayo.kmdp.language.translators.fhir.stu3.structDef.StructDefToDMNProjectingTranslator;
+import edu.mayo.kmdp.language.translators.fhir.stu3.structdef.StructDefToDMNProjectingTranslator;
 import edu.mayo.kmdp.language.validators.dmn.v1_2.DMN12Validator;
 import edu.mayo.kmdp.util.FileUtil;
 import edu.mayo.kmdp.util.Util;

@@ -20,8 +20,6 @@ import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLan
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.FHIR_STU3;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
-import edu.mayo.kmdp.SurrogateBuilder;
-import edu.mayo.kmdp.SurrogateHelper;
 import edu.mayo.kmdp.id.helper.DatatypeHelper;
 import edu.mayo.kmdp.tranx.v3.server.TransxionApiInternal;
 import edu.mayo.ontology.taxonomies.lexicon.LexiconSeries;
