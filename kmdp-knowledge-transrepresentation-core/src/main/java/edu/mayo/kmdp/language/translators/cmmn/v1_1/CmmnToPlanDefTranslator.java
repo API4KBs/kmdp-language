@@ -18,28 +18,20 @@ package edu.mayo.kmdp.language.translators.cmmn.v1_1;
 import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Translation_Task;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.CMMN_1_1;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.FHIR_STU3;
-import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
+import static edu.mayo.ontology.taxonomies.lexicon.LexiconSeries.PCV;
+import static edu.mayo.ontology.taxonomies.lexicon.LexiconSeries.SNOMED_CT;
 
-import edu.mayo.kmdp.id.helper.DatatypeHelper;
-import edu.mayo.kmdp.tranx.v3.server.TransxionApiInternal;
-import edu.mayo.ontology.taxonomies.lexicon.LexiconSeries;
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
-import java.util.UUID;
+import edu.mayo.kmdp.language.translators.AbstractSimpleTranslator;
 import javax.inject.Named;
 import org.omg.spec.api4kp._1_0.AbstractCarrier;
-import org.omg.spec.api4kp._1_0.Answer;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
-import org.omg.spec.api4kp._1_0.services.ParameterDefinitions;
 import org.omg.spec.api4kp._1_0.services.resources.SyntacticRepresentation;
-import org.omg.spec.api4kp._1_0.services.tranx.TransrepresentationOperator;
 import org.omg.spec.cmmn._20151109.model.TDefinitions;
 
 @Named
 @KPOperation(Translation_Task)
-public class CmmnToPlanDefTranslator implements TransxionApiInternal {
+public class CmmnToPlanDefTranslator extends AbstractSimpleTranslator {
 
   private static final String OPERATOR_ID = "87402252-a8a1-46a4-be3a-9b04ce45fde7";
 
@@ -54,77 +46,17 @@ public class CmmnToPlanDefTranslator implements TransxionApiInternal {
 
   public org.omg.spec.api4kp._1_0.services.SyntacticRepresentation getTo() {
     return new SyntacticRepresentation()
-        .withLanguage(FHIR_STU3);
-  }
-
-
-  @Override
-  public Answer<TransrepresentationOperator> getTransrepresentation(String txionId) {
-    return Answer.of(
-        new org.omg.spec.api4kp._1_0.services.tranx.resources.TransrepresentationOperator()
-            .withOperatorId(OPERATOR_ID)
-            .withAcceptedParams(getTransrepresentationAcceptedParameters(txionId).orElse(null))
-            .withFrom(getTransrepresentationInput(txionId).orElse(null))
-            .withInto(getTransrepresentationOutput(txionId).orElse(null)));
+        .withLanguage(FHIR_STU3)
+        .withLexicon(PCV, SNOMED_CT);
   }
 
   @Override
-  public Answer<ParameterDefinitions> getTransrepresentationAcceptedParameters(
-      String txionId) {
-    return Answer.of(new ParameterDefinitions());
-  }
-
-
-  public Answer<org.omg.spec.api4kp._1_0.services.SyntacticRepresentation> getTransrepresentationInput(String txionId) {
-    if (txionId != null && !OPERATOR_ID.equals(txionId)) {
-      return Answer.failed(new UnsupportedOperationException());
-    }
-    return Answer.of(
-        rep(CMMN_1_1));
-  }
-
-  @Override
-  public Answer<org.omg.spec.api4kp._1_0.services.SyntacticRepresentation> getTransrepresentationOutput(
-      String txionId) {
-    return Answer.of(
-        rep(FHIR_STU3)
-            .withLexicon(LexiconSeries.SNOMED_CT, LexiconSeries.PCV));
-  }
-
-  @Override
-  public Answer<List<TransrepresentationOperator>> listOperators(
-      org.omg.spec.api4kp._1_0.services.SyntacticRepresentation from,
-      org.omg.spec.api4kp._1_0.services.SyntacticRepresentation into,
-      String method) {
-    return getTransrepresentation(OPERATOR_ID)
-        .map(Collections::singletonList);
-  }
-
-
-  @Override
-  public Answer<KnowledgeCarrier> applyTransrepresentation(
-      String txId,
-      KnowledgeCarrier sourceArtifact,
-      Properties params) {
-    return Answer.of(AbstractCarrier.ofAst(
+  protected KnowledgeCarrier doTransform(KnowledgeCarrier sourceArtifact) {
+    return AbstractCarrier.ofAst(
         new CmmnToPlanDef().transform(
             sourceArtifact.getAssetId(),
             sourceArtifact.as(TDefinitions.class)
-                .orElseThrow(IllegalStateException::new)))
-        .withAssetId(sourceArtifact.getAssetId())
-        .withArtifactId(DatatypeHelper.uri(UUID.randomUUID().toString()))
-        .withRepresentation(rep(FHIR_STU3))
-    );
+                .orElseThrow(IllegalStateException::new)));
   }
-
-  @Override
-  public Answer<KnowledgeCarrier> applyTransrepresentationInto(KnowledgeCarrier sourceArtifact,
-      org.omg.spec.api4kp._1_0.services.SyntacticRepresentation into) {
-    return applyTransrepresentation(
-        OPERATOR_ID,
-        sourceArtifact,
-        null);
-  }
-
 
 }
