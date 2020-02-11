@@ -63,7 +63,7 @@ public abstract class AbstractSimpleTranslator implements TransxionApiInternal {
       KnowledgeCarrier sourceArtifact,
       Properties params) {
     return Answer.of(
-        doTransform(sourceArtifact)
+        doTransform(sourceArtifact, params)
             .withAssetId(mapAssetId(sourceArtifact.getAssetId()))
             .withArtifactId(mapArtifactId(sourceArtifact.getArtifactId()))
             .withLabel(sourceArtifact.getLabel())
@@ -91,12 +91,10 @@ public abstract class AbstractSimpleTranslator implements TransxionApiInternal {
   public abstract org.omg.spec.api4kp._1_0.services.SyntacticRepresentation getTo();
 
   protected KnowledgeCarrier doTransform(KnowledgeCarrier sourceArtifact) {
-    return sourceArtifact;
+    return doTransform(sourceArtifact, new Properties());
   }
 
-  protected KnowledgeCarrier doTransform(KnowledgeCarrier sourceArtifact, Properties params) {
-    return doTransform(sourceArtifact);
-  }
+  protected abstract KnowledgeCarrier doTransform(KnowledgeCarrier sourceArtifact, Properties params);
 
   protected URIIdentifier mapArtifactId(URIIdentifier artifactId) {
     return DatatypeHelper.uri(UUID.randomUUID().toString());

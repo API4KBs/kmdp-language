@@ -28,6 +28,7 @@ import edu.mayo.ontology.taxonomies.kmdo.annotationreltype.AnnotationRelType;
 import edu.mayo.ontology.taxonomies.kmdo.annotationreltype.AnnotationRelTypeSeries;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.Properties;
 import javax.inject.Named;
 import org.hl7.fhir.dstu3.model.Attachment;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
@@ -75,7 +76,7 @@ public class SurrogateToLibraryTranslator extends AbstractSimpleTranslator {
   }
 
   @Override
-  protected KnowledgeCarrier doTransform(KnowledgeCarrier sourceArtifact) {
+  protected KnowledgeCarrier doTransform(KnowledgeCarrier sourceArtifact, Properties props) {
     return AbstractCarrier.ofAst(
         sourceArtifact.as(KnowledgeAsset.class)
         .map(this::transform)
@@ -320,6 +321,9 @@ public class SurrogateToLibraryTranslator extends AbstractSimpleTranslator {
       return;
     }
     switch (knowledgeAsset.getLifecycle().getPublicationStatus().asEnum()) {
+      case Published:
+        lib.setStatus(PublicationStatus.ACTIVE);
+        break;
       case Draft:
         lib.setStatus(PublicationStatus.DRAFT);
         break;
@@ -353,6 +357,9 @@ public class SurrogateToLibraryTranslator extends AbstractSimpleTranslator {
   }
 
   private void mapSurrogateId(KnowledgeAsset knowledgeAsset, Library lib) {
+    if (knowledgeAsset.getSurrogate().isEmpty()) {
+      return;
+    }
     KnowledgeArtifact surrogate = knowledgeAsset.getSurrogate().get(0);
     if (surrogate != null) {
       lib.setId(surrogate.getArtifactId().getTag() + ":" + surrogate.getArtifactId().getVersion());

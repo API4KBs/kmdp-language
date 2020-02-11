@@ -22,6 +22,7 @@ import static edu.mayo.ontology.taxonomies.lexicon.LexiconSeries.PCV;
 import static edu.mayo.ontology.taxonomies.lexicon.LexiconSeries.SNOMED_CT;
 
 import edu.mayo.kmdp.language.translators.AbstractSimpleTranslator;
+import java.util.Properties;
 import javax.inject.Named;
 import org.omg.spec.api4kp._1_0.AbstractCarrier;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
@@ -51,7 +52,7 @@ public class CmmnToPlanDefTranslator extends AbstractSimpleTranslator {
   }
 
   @Override
-  protected KnowledgeCarrier doTransform(KnowledgeCarrier sourceArtifact) {
+  protected KnowledgeCarrier doTransform(KnowledgeCarrier sourceArtifact, Properties props) {
     return AbstractCarrier.ofAst(
         new CmmnToPlanDef().transform(
             sourceArtifact.getAssetId(),

@@ -5,6 +5,7 @@ import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLan
 
 import edu.mayo.kmdp.language.translators.AbstractSimpleTranslator;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
+import java.util.Properties;
 import javax.inject.Named;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.omg.spec.api4kp._1_0.AbstractCarrier;
@@ -42,7 +43,7 @@ public class StructDefToDMNProjectingTranslator extends AbstractSimpleTranslator
   }
 
   @Override
-  protected KnowledgeCarrier doTransform(KnowledgeCarrier sourceArtifact) {
+  protected KnowledgeCarrier doTransform(KnowledgeCarrier sourceArtifact, Properties props) {
     return sourceArtifact.as(StructureDefinition.class)
         .map(sd -> new StructDefToDMN().transformRootElementToFrame(sd))
         .map(AbstractCarrier::ofAst)

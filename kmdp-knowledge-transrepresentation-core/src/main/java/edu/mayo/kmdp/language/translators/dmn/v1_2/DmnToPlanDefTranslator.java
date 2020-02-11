@@ -63,7 +63,7 @@ public class DmnToPlanDefTranslator extends AbstractSimpleTranslator {
   }
 
   @Override
-  protected KnowledgeCarrier doTransform(KnowledgeCarrier sourceArtifact) {
+  protected KnowledgeCarrier doTransform(KnowledgeCarrier sourceArtifact, Properties props) {
     return AbstractCarrier.ofAst(
         new DmnToPlanDef().transform(
             sourceArtifact.getAssetId(),
