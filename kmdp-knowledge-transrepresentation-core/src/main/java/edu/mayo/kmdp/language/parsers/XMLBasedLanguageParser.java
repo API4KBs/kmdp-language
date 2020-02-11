@@ -15,6 +15,7 @@
  */
 package edu.mayo.kmdp.language.parsers;
 
+import edu.mayo.kmdp.metadata.annotations.Annotation;
 import edu.mayo.kmdp.tranx.v3.server.DeserializeApiInternal;
 import edu.mayo.kmdp.util.JaxbUtil;
 import edu.mayo.kmdp.util.Util;
@@ -22,6 +23,8 @@ import edu.mayo.kmdp.util.XMLUtil;
 import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Function;
@@ -65,7 +68,7 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializer imp
 
   @Override
   public Optional<ASTCarrier> parse(ExpressionCarrier carrier) {
-    return JaxbUtil.unmarshall(root, root, carrier.getSerializedExpression())
+    return JaxbUtil.unmarshall(getClassContext(), root, carrier.getSerializedExpression())
         .map(ast -> new ASTCarrier()
             .withParsedExpression(ast)
             .withAssetId(carrier.getAssetId())
@@ -75,10 +78,14 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializer imp
                 getParseResultRepresentation(carrier, ParsingLevelSeries.Abstract_Knowledge_Expression)));
   }
 
+  protected Collection<Class> getClassContext() {
+    return Arrays.asList(root, Annotation.class);
+  }
+
   @Override
   public Optional<ASTCarrier> abstrakt(DocumentCarrier carrier) {
     Document dox = (Document) carrier.getStructuredExpression();
-    return JaxbUtil.unmarshall(root, root, dox)
+    return JaxbUtil.unmarshall(getClassContext(), root, dox)
         .map(ast -> new ASTCarrier()
             .withParsedExpression(ast)
             .withAssetId(carrier.getAssetId())

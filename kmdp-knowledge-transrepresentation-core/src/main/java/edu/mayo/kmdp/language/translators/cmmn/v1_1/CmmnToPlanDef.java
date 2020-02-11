@@ -16,13 +16,15 @@ package edu.mayo.kmdp.language.translators.cmmn.v1_1;
 import edu.mayo.kmdp.id.Term;
 import edu.mayo.kmdp.metadata.annotations.SimpleAnnotation;
 import edu.mayo.kmdp.util.StreamUtil;
+import edu.mayo.ontology.taxonomies.kao.knowledgeassettype.KnowledgeAssetTypeSeries;
 import edu.mayo.ontology.taxonomies.kmdo.annotationreltype.AnnotationRelTypeSeries;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
@@ -35,13 +37,12 @@ import org.hl7.fhir.dstu3.model.PlanDefinition.ActionGroupingBehavior;
 import org.hl7.fhir.dstu3.model.PlanDefinition.ActionPrecheckBehavior;
 import org.hl7.fhir.dstu3.model.PlanDefinition.ActionRelationshipType;
 import org.hl7.fhir.dstu3.model.PlanDefinition.ActionRequiredBehavior;
-import org.hl7.fhir.dstu3.model.PlanDefinition.ActionSelectionBehavior;
 import org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionComponent;
 import org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionRelatedActionComponent;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
-import org.hl7.fhir.dstu3.model.StringType;
 import org.omg.spec.api4kp._1_0.identifiers.ConceptIdentifier;
+import org.omg.spec.api4kp._1_0.identifiers.NamespaceIdentifier;
 import org.omg.spec.api4kp._1_0.identifiers.URIIdentifier;
 import org.omg.spec.cmmn._20151109.model.TAssociation;
 import org.omg.spec.cmmn._20151109.model.TCase;
@@ -72,7 +73,7 @@ public class CmmnToPlanDef {
 
   private static final Logger log = LoggerFactory.getLogger(CmmnToPlanDef.class);
 
-  final String CMIS_DOCUMENT_TYPE = "http://www.omg.org/spec/CMMN/DefinitionType/CMISDocument";
+  static final String CMIS_DOCUMENT_TYPE = "http://www.omg.org/spec/CMMN/DefinitionType/CMISDocument";
 
   public CmmnToPlanDef() {
     // nothing to do
@@ -94,7 +95,7 @@ public class CmmnToPlanDef {
 
     PlanDefinition cpm = new PlanDefinition();
 
-    mapIdentity(cpm, assetId, caseModel);
+    mapIdentity(cpm, assetId);
     mapName(cpm, caseModel);
     mapSubject(cpm, caseModel);
 
@@ -104,18 +105,19 @@ public class CmmnToPlanDef {
     return cpm;
   }
 
-  private void mapIdentity(PlanDefinition cpm, URI assetId, TDefinitions caseModel) {
+  private void mapIdentity(PlanDefinition cpm, URI assetId
+  //    , TDefinitions caseModel
+  ) {
     // TODO Need formal "Asset ID" and "Artifact ID" roles
     Identifier fhirAssetId = new Identifier()
-        .setType(toCode(AnnotationRelTypeSeries.Has_ID.asConcept()))
+        .setType(toCode(AnnotationRelTypeSeries.Is_Identified_By.asConcept()))
         .setValue(assetId.toString());
 
-    Identifier fhirArtifactId = new Identifier()
-        .setType(toCode(AnnotationRelTypeSeries.Has_ID.asConcept()))
-        .setValue(caseModel.getId());
-
-    cpm.setIdentifier(Arrays.asList(fhirAssetId, fhirArtifactId))
+    cpm.setIdentifier(Collections.singletonList(fhirAssetId))
         .setVersion("TODO");
+
+    cpm.setType(toCode(KnowledgeAssetTypeSeries.Care_Process_Model));
+    cpm.setId( "#" + UUID.randomUUID().toString());
   }
 
 
@@ -128,7 +130,7 @@ public class CmmnToPlanDef {
 
     PlanDefinition.PlanDefinitionActionComponent group = new PlanDefinitionActionComponent();
 
-    group.setId(stage.getId());
+    group.setId(stage.getId().replace("_",""));
     group.setLabel(stage.getName());
 
     mapControls(stage.getDefaultControl(), group);
@@ -249,14 +251,18 @@ public class CmmnToPlanDef {
         .ifPresent(cpm::setTopic);
   }
 
-  private CodeableConcept toCode(ConceptIdentifier conceptIdentifier) {
+  private CodeableConcept toCode(Term cid) {
     return new CodeableConcept()
         .setCoding(Collections.singletonList(
             new Coding()
-                .setCode(conceptIdentifier.getTag())
-                .setDisplay(conceptIdentifier.getLabel())
-                .setSystem(conceptIdentifier.getNamespace().getId().toString())
-                .setVersion(conceptIdentifier.getNamespace().getVersion())));
+                .setCode(cid.getTag())
+                .setDisplay(cid.getLabel())
+                .setSystem(cid.getNamespace() != null
+                    ? ((NamespaceIdentifier)cid.getNamespace()).getId().toString()
+                    : null)
+                .setVersion(cid.getNamespace() != null
+                    ? ((NamespaceIdentifier)cid.getNamespace()).getVersion()
+                    : null)));
   }
 
   private void mapName(PlanDefinition cpm, TDefinitions tCase) {
@@ -305,16 +311,10 @@ public class CmmnToPlanDef {
     planAction.setId(task.getId());
     planAction.setLabel(task.getName());
 
-    // TODO Use the proper code
-    planAction.addCode(new CodeableConcept()
-        .addCoding(new Coding()
-            .setCode(task.getName())
-            .setDisplayElement((StringType) new StringType().setValue(task.getName())))
-        .setText(task.getName()));
+    getTypeCode(task.getExtensionElements()).stream()
+        .map(this::toCode)
+        .forEach(planAction::addCode);
 
-    // Not a group
-    planAction.setGroupingBehavior(ActionGroupingBehavior.NULL);
-    planAction.setSelectionBehavior(ActionSelectionBehavior.NULL);
     getControls(planItem, task)
         .ifPresent(ctrl -> mapControls(ctrl, planAction));
 
@@ -322,6 +322,7 @@ public class CmmnToPlanDef {
 
     return planAction;
   }
+
 
   private PlanDefinition.PlanDefinitionActionComponent processHumanTask(
       TPlanItem planItem,
@@ -389,16 +390,18 @@ public class CmmnToPlanDef {
       } else {
         planAction.setDefinition(
             new Reference()
-                .setReference(dec.getExternalRef().getLocalPart())
-        );
+                .setReference(dec.getExternalRef().getNamespaceURI())
+                .setDisplay(dec.getName())
+                .setIdentifier(new Identifier()
+                    .setType(new CodeableConcept().setText("TODO - Knowledge Artifact Fragment Identifier"))
+                    .setValue(dec.getExternalRef().getLocalPart().replace("_","")))
+        ).setId(dec.getExternalRef().getLocalPart().replace("_",""));
       }
     });
   }
 
   private void mapControls(TPlanItemControl ctrl, PlanDefinitionActionComponent planAction) {
-    planAction.setPrecheckBehavior(ctrl != null && ctrl.getManualActivationRule() != null
-        ? ActionPrecheckBehavior.NO
-        : ActionPrecheckBehavior.NULL);
+    planAction.setPrecheckBehavior(ActionPrecheckBehavior.NO);
 
     planAction.setCardinalityBehavior(ctrl != null && ctrl.getRepetitionRule() != null
         ? ActionCardinalityBehavior.MULTIPLE
@@ -435,25 +438,22 @@ public class CmmnToPlanDef {
   }
 
 
-  private static Optional<Term> findPco(TExtensionElements extensionElements) {
-    return findPco(extensionElements.getAny());
+
+  private static Collection<Term> getTypeCode(TExtensionElements extensionElements) {
+    return getTypeCode(extensionElements.getAny());
   }
 
-  private static Optional<Term> findPco(List<Object> extensionElements) {
+  private static List<Term> getTypeCode(List<Object> extensionElements) {
     if (extensionElements == null || extensionElements.isEmpty()) {
-      return Optional.empty();
+      return Collections.emptyList();
     }
 
-    return Optional.empty();
-//    return extensionElements.stream()
-//        .flatMap(StreamUtil.filterAs(SimpleAnnotation.class))
-//        .filter(ann -> AnnotationRelTypeSeries.Captures.getConceptId()
-//            .equals(ann.getRel().getConceptId()))
-//        .map(SimpleAnnotation::getExpr)
-//        .map(PropositionalConceptsSeries::resolve)
-//        .filter(Optional::isPresent)
-//        .map(Optional::get)
-//        .findAny();
+    return extensionElements.stream()
+        .flatMap(StreamUtil.filterAs(SimpleAnnotation.class))
+        .filter(ann -> AnnotationRelTypeSeries.Captures.getTag().equals(ann.getRel().getTag()))
+        .map(SimpleAnnotation::getExpr)
+        .map(Term.class::cast)
+        .collect(Collectors.toList());
   }
 
 
@@ -466,7 +466,7 @@ public class CmmnToPlanDef {
       List<SimpleAnnotation> annotations = extensionElements.stream()
           .flatMap(StreamUtil.filterAs(SimpleAnnotation.class))
           .filter(annotation -> annotation.getRel().getConceptId()
-              .equals(AnnotationRelTypeSeries.Has_Subject.getConceptId()))
+              .equals(AnnotationRelTypeSeries.Has_Primary_Subject.getConceptId()))
           .collect(Collectors.toList());
 
       if (annotations.size() > 1) {

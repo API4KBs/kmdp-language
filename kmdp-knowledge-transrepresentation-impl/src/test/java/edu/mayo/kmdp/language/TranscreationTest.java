@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.config.LocalTestConfig;
-import edu.mayo.kmdp.language.translators.OWLtoSKOSTranscreator;
+import edu.mayo.kmdp.language.translators.owl2.OWLtoSKOSTranscreator;
 import edu.mayo.kmdp.terms.skosifier.Owl2SkosConfig;
 import edu.mayo.kmdp.terms.skosifier.Owl2SkosConfig.OWLtoSKOSTxParams;
 import edu.mayo.kmdp.tranx.v3.DeserializeApi;

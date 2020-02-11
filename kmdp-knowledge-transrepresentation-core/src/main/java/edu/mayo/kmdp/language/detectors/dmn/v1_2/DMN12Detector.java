@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.mayo.kmdp.language.detectors;
+package edu.mayo.kmdp.language.detectors.dmn.v1_2;
 
 import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.XML_1_1;
-import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.CMMN_1_1;
+import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.DMN_1_2;
 import static java.util.Collections.singletonList;
 
+import edu.mayo.kmdp.language.detectors.XMLBasedLanguageDetector;
 import edu.mayo.kmdp.tranx.v3.server.DetectApiInternal;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import java.util.List;
@@ -26,14 +27,14 @@ import javax.inject.Named;
 import org.omg.spec.api4kp._1_0.Answer;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
-import org.omg.spec.cmmn._20151109.model.TDefinitions;
+import org.omg.spec.dmn._20180521.model.TDefinitions;
 
 @Named
 @KPOperation(KnowledgeProcessingOperationSeries.Detect_Language_Information_Task)
-public class CMMNDetector extends XMLBasedLanguageDetector<TDefinitions> implements
+public class DMN12Detector extends XMLBasedLanguageDetector<TDefinitions> implements
     DetectApiInternal {
 
-  public CMMNDetector() {
+  public DMN12Detector() {
     this.root = TDefinitions.class;
   }
 
@@ -41,8 +42,7 @@ public class CMMNDetector extends XMLBasedLanguageDetector<TDefinitions> impleme
   public Answer<List<SyntacticRepresentation>> getDetectableLanguages() {
     return Answer.of(
         singletonList(new org.omg.spec.api4kp._1_0.services.resources.SyntacticRepresentation()
-            .withLanguage(CMMN_1_1)
+            .withLanguage(DMN_1_2)
             .withFormat(XML_1_1)));
   }
-
 }

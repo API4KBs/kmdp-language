@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.mayo.kmdp.language.parsers;
+package edu.mayo.kmdp.language.parsers.dmn.v1_1;
 
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
+import edu.mayo.kmdp.language.parsers.XMLBasedLanguageParser;
 import edu.mayo.kmdp.tranx.v3.server.DeserializeApiInternal;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries;
@@ -34,10 +35,10 @@ import org.omg.spec.dmn._20151101.dmn.TDefinitions;
 @KPOperation(KnowledgeProcessingOperationSeries.Lifting_Task)
 @KPOperation(KnowledgeProcessingOperationSeries.Lowering_Task)
 @KPSupport(KnowledgeRepresentationLanguageSeries.DMN_1_1)
-public class DMNParser extends XMLBasedLanguageParser<TDefinitions> implements
+public class DMN11Parser extends XMLBasedLanguageParser<TDefinitions> implements
     DeserializeApiInternal {
 
-  public DMNParser() {
+  public DMN11Parser() {
     this.root = TDefinitions.class;
     this.mapper = new ObjectFactory()::createDefinitions;
   }

@@ -17,6 +17,7 @@ import static org.omg.spec.api4kp._1_0.Answer.aggregate;
 
 import edu.mayo.kmdp.tranx.v3.server.DetectApiInternal;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Named;
@@ -37,7 +38,7 @@ public class LanguageDetector implements DetectApiInternal {
   public LanguageDetector(@Autowired(required = false)
   @KPOperation(KnowledgeProcessingOperationSeries.Detect_Language_Information_Task)
       List<DetectApiInternal> detectors) {
-    this.detectors = detectors;
+    this.detectors = new ArrayList<>(detectors);
   }
 
   @Override

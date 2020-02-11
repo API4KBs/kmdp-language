@@ -13,39 +13,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.mayo.kmdp.language.parsers;
+package edu.mayo.kmdp.language.parsers.dmn.v1_2;
 
-
-import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Lifting_Task;
-import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Lowering_Task;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
+import edu.mayo.kmdp.language.parsers.XMLBasedLanguageParser;
 import edu.mayo.kmdp.tranx.v3.server.DeserializeApiInternal;
+import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries;
 import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries;
 import java.util.Collections;
 import java.util.List;
 import javax.inject.Named;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
+import org.omg.spec.api4kp._1_0.services.KPSupport;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
-import org.omg.spec.cmmn._20151109.model.ObjectFactory;
-import org.omg.spec.cmmn._20151109.model.TDefinitions;
+import org.omg.spec.dmn._20180521.model.ObjectFactory;
+import org.omg.spec.dmn._20180521.model.TDefinitions;
 
 @Named
-@KPOperation(Lifting_Task)
-@KPOperation(Lowering_Task)
-public class CMMNParser extends XMLBasedLanguageParser<TDefinitions> implements
+@KPOperation(KnowledgeProcessingOperationSeries.Lifting_Task)
+@KPOperation(KnowledgeProcessingOperationSeries.Lowering_Task)
+@KPSupport(KnowledgeRepresentationLanguageSeries.DMN_1_2)
+public class DMN12Parser extends XMLBasedLanguageParser<TDefinitions> implements
     DeserializeApiInternal {
 
-  public CMMNParser() {
+  public DMN12Parser() {
     this.root = TDefinitions.class;
     this.mapper = new ObjectFactory()::createDefinitions;
   }
 
   public List<SyntacticRepresentation> getSupportedRepresentations() {
     return
-        Collections.singletonList(
-            rep(KnowledgeRepresentationLanguageSeries.CMMN_1_1, SerializationFormatSeries.XML_1_1, getDefaultCharset()));
+        Collections
+            .singletonList(rep(KnowledgeRepresentationLanguageSeries.DMN_1_2,
+                SerializationFormatSeries.XML_1_1, getDefaultCharset()));
   }
 
 }

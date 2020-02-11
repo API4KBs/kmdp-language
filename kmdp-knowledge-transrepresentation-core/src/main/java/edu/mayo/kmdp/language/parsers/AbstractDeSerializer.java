@@ -240,12 +240,14 @@ public abstract class AbstractDeSerializer implements DeserializeApiInternal, Li
     switch (into.asEnum()) {
       case Abstract_Knowledge_Expression:
         rep.setFormat(null);
+        rep.setSerialization(null);
         rep.setCharset(null);
         rep.setEncoding(null);
         break;
       case Parsed_Knowedge_Expression:
         rep.setCharset(null);
         rep.setEncoding(null);
+        rep.setSerialization(null);
         break;
       case Concrete_Knowledge_Expression:
         rep.setEncoding(null);
@@ -275,6 +277,7 @@ public abstract class AbstractDeSerializer implements DeserializeApiInternal, Li
       case Parsed_Knowedge_Expression:
         rep.setCharset(null);
         rep.setEncoding(null);
+        rep.setSerialization(null);
         if (rep.getFormat() == null) {
           rep.setFormat(getDefaultFormat());
         }
@@ -283,6 +286,7 @@ public abstract class AbstractDeSerializer implements DeserializeApiInternal, Li
         rep.setFormat(null);
         rep.setCharset(null);
         rep.setEncoding(null);
+        rep.setSerialization(null);
         break;
       default:
         break;

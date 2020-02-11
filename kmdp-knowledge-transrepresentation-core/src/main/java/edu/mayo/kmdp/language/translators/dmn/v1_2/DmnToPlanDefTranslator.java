@@ -19,13 +19,18 @@ import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeP
 import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.JSON;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.DMN_1_2;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.FHIR_STU3;
+import static edu.mayo.ontology.taxonomies.lexicon.LexiconSeries.PCV;
+import static edu.mayo.ontology.taxonomies.lexicon.LexiconSeries.SNOMED_CT;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
+import edu.mayo.kmdp.id.helper.DatatypeHelper;
+import edu.mayo.kmdp.language.translators.AbstractSimpleTranslator;
 import edu.mayo.kmdp.tranx.v3.server.TransxionApiInternal;
 import edu.mayo.ontology.taxonomies.lexicon.LexiconSeries;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.UUID;
 import javax.inject.Named;
 import org.omg.spec.api4kp._1_0.AbstractCarrier;
 import org.omg.spec.api4kp._1_0.Answer;
@@ -38,7 +43,7 @@ import org.omg.spec.dmn._20180521.model.TDefinitions;
 
 @Named
 @KPOperation(Translation_Task)
-public class DmnToPlanDefTranslator implements TransxionApiInternal {
+public class DmnToPlanDefTranslator extends AbstractSimpleTranslator {
 
   private static final String OPERATOR_ID = "0e990fd3-66ea-45f6-a435-0be83e9654d3";
 
@@ -54,71 +59,16 @@ public class DmnToPlanDefTranslator implements TransxionApiInternal {
   public org.omg.spec.api4kp._1_0.services.SyntacticRepresentation getTo() {
     return new SyntacticRepresentation()
         .withLanguage(FHIR_STU3)
-        .withFormat(JSON);
+        .withLexicon(PCV,SNOMED_CT);
   }
 
   @Override
-  public Answer<TransrepresentationOperator> getTransrepresentation(String txionId) {
-    return Answer.of(
-        new org.omg.spec.api4kp._1_0.services.tranx.resources.TransrepresentationOperator()
-            .withOperatorId(OPERATOR_ID)
-            .withAcceptedParams(getTransrepresentationAcceptedParameters(txionId).orElse(null))
-            .withFrom(getTransrepresentationInput(txionId).orElse(null))
-            .withInto(getTransrepresentationOutput(txionId).orElse(null)));
-  }
-
-  @Override
-  public Answer<ParameterDefinitions> getTransrepresentationAcceptedParameters(
-      String txionId) {
-    return Answer.of(new ParameterDefinitions());
-  }
-
-
-  public Answer<org.omg.spec.api4kp._1_0.services.SyntacticRepresentation> getTransrepresentationInput(String txionId) {
-    if (txionId != null && !OPERATOR_ID.equals(txionId)) {
-      return Answer.failed(new UnsupportedOperationException());
-    }
-    return Answer.of(
-        rep(DMN_1_2));
-  }
-
-  @Override
-  public Answer<org.omg.spec.api4kp._1_0.services.SyntacticRepresentation> getTransrepresentationOutput(
-      String txionId) {
-    return Answer.of(
-        rep(FHIR_STU3)
-            .withLexicon(LexiconSeries.SNOMED_CT, LexiconSeries.PCV));
-  }
-
-  @Override
-  public Answer<List<TransrepresentationOperator>> listOperators(
-      org.omg.spec.api4kp._1_0.services.SyntacticRepresentation from,
-      org.omg.spec.api4kp._1_0.services.SyntacticRepresentation into, String method) {
-    return getTransrepresentation(OPERATOR_ID)
-        .map(Collections::singletonList);
-  }
-
-  @Override
-  public Answer<KnowledgeCarrier> applyTransrepresentation(
-      String txId,
-      KnowledgeCarrier sourceArtifact,
-      Properties params) {
-    return Answer.of(AbstractCarrier.ofAst(
+  protected KnowledgeCarrier doTransform(KnowledgeCarrier sourceArtifact, Properties props) {
+    return AbstractCarrier.ofAst(
         new DmnToPlanDef().transform(
             sourceArtifact.getAssetId(),
             sourceArtifact.as(TDefinitions.class)
-                .orElseThrow(IllegalStateException::new))));
+                .orElseThrow(IllegalStateException::new)));
   }
-
-  @Override
-  public Answer<KnowledgeCarrier> applyTransrepresentationInto(KnowledgeCarrier sourceArtifact,
-      org.omg.spec.api4kp._1_0.services.SyntacticRepresentation into) {
-    return applyTransrepresentation(
-        OPERATOR_ID,
-        sourceArtifact,
-        null);
-  }
-
-
 
 }
