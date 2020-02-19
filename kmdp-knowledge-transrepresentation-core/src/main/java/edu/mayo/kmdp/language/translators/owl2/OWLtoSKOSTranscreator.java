@@ -13,6 +13,7 @@
  */
 package edu.mayo.kmdp.language.translators.owl2;
 
+import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Transcreation_Task;
 import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.XML_1_1;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.OWL_2;
 import static edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentationLanguageSerializationSeries.RDF_XML_Syntax;
@@ -23,7 +24,6 @@ import edu.mayo.kmdp.language.translators.AbstractSimpleTranslator;
 import edu.mayo.kmdp.terms.skosifier.Owl2SkosConfig;
 import edu.mayo.kmdp.terms.skosifier.Owl2SkosConverter;
 import edu.mayo.kmdp.util.Util;
-import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import edu.mayo.ontology.taxonomies.lexicon.LexiconSeries;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -44,7 +44,7 @@ import org.omg.spec.api4kp._1_0.services.ParameterDefinitions;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 
 @Named
-@KPOperation(KnowledgeProcessingOperationSeries.Transcreation_Task)
+@KPOperation(Transcreation_Task)
 @KPSupport(OWL_2)
 public class OWLtoSKOSTranscreator extends AbstractSimpleTranslator {
 

@@ -15,6 +15,7 @@
  */
 package edu.mayo.kmdp.language.detectors.surrogate.v1;
 
+import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Detect_Language_Information_Task;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -23,7 +24,6 @@ import edu.mayo.kmdp.language.detectors.JSONBasedLanguageDetector;
 import edu.mayo.kmdp.language.detectors.XMLBasedLanguageDetector;
 import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
 import edu.mayo.kmdp.tranx.v3.server.DetectApiInternal;
-import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries;
 import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguage;
 import edu.mayo.ontology.taxonomies.lexicon.LexiconSeries;
@@ -33,11 +33,13 @@ import java.util.stream.Stream;
 import javax.inject.Named;
 import org.omg.spec.api4kp._1_0.Answer;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
+import org.omg.spec.api4kp._1_0.services.KPSupport;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 
 @Named
-@KPOperation(KnowledgeProcessingOperationSeries.Detect_Language_Information_Task)
+@KPOperation(Detect_Language_Information_Task)
+@KPSupport(Knowledge_Asset_Surrogate)
 public class SurrogateDetector implements DetectApiInternal {
 
   private XMLSurrogateDetector xmlDetector = new XMLSurrogateDetector();

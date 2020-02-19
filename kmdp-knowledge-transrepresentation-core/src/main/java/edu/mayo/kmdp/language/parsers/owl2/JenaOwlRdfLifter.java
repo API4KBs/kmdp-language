@@ -13,12 +13,13 @@
  */
 package edu.mayo.kmdp.language.parsers.owl2;
 
+import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Lifting_Task;
+import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Lowering_Task;
 import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.TXT;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.OWL_2;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.tranx.v3.server.DeserializeApiInternal;
-import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevel;
 import java.io.ByteArrayInputStream;
 import javax.inject.Named;
@@ -33,8 +34,8 @@ import org.omg.spec.api4kp._1_0.services.KPSupport;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 
 @Named
-@KPOperation(KnowledgeProcessingOperationSeries.Lifting_Task)
-@KPOperation(KnowledgeProcessingOperationSeries.Lowering_Task)
+@KPOperation(Lifting_Task)
+@KPOperation(Lowering_Task)
 @KPSupport(OWL_2)
 public class JenaOwlRdfLifter implements
     DeserializeApiInternal._lift {

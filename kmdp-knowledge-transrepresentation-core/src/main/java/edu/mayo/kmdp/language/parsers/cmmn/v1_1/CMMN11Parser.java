@@ -18,16 +18,17 @@ package edu.mayo.kmdp.language.parsers.cmmn.v1_1;
 
 import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Lifting_Task;
 import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Lowering_Task;
+import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.CMMN_1_1;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.parsers.XMLBasedLanguageParser;
 import edu.mayo.kmdp.tranx.v3.server.DeserializeApiInternal;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries;
-import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries;
 import java.util.Collections;
 import java.util.List;
 import javax.inject.Named;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
+import org.omg.spec.api4kp._1_0.services.KPSupport;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 import org.omg.spec.cmmn._20151109.model.ObjectFactory;
 import org.omg.spec.cmmn._20151109.model.TDefinitions;
@@ -35,6 +36,7 @@ import org.omg.spec.cmmn._20151109.model.TDefinitions;
 @Named
 @KPOperation(Lifting_Task)
 @KPOperation(Lowering_Task)
+@KPSupport(CMMN_1_1)
 public class CMMN11Parser extends XMLBasedLanguageParser<TDefinitions> implements
     DeserializeApiInternal {
 
@@ -46,7 +48,7 @@ public class CMMN11Parser extends XMLBasedLanguageParser<TDefinitions> implement
   public List<SyntacticRepresentation> getSupportedRepresentations() {
     return
         Collections.singletonList(
-            rep(KnowledgeRepresentationLanguageSeries.CMMN_1_1, SerializationFormatSeries.XML_1_1, getDefaultCharset()));
+            rep(CMMN_1_1, SerializationFormatSeries.XML_1_1, getDefaultCharset()));
   }
 
 }

@@ -15,6 +15,8 @@
  */
 package edu.mayo.kmdp.language.parsers.owl2;
 
+import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Lifting_Task;
+import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Lowering_Task;
 import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.TXT;
 import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.XML_1_1;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.OWL_2;
@@ -27,7 +29,6 @@ import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.parsers.AbstractDeSerializer;
 import edu.mayo.kmdp.tranx.v3.server.DeserializeApiInternal;
-import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;
 import java.io.ByteArrayInputStream;
@@ -42,6 +43,7 @@ import org.omg.spec.api4kp._1_0.services.BinaryCarrier;
 import org.omg.spec.api4kp._1_0.services.DocumentCarrier;
 import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
+import org.omg.spec.api4kp._1_0.services.KPSupport;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.formats.RDFXMLDocumentFormat;
@@ -50,8 +52,9 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
 @Named
-@KPOperation(KnowledgeProcessingOperationSeries.Lowering_Task)
-@KPOperation(KnowledgeProcessingOperationSeries.Lifting_Task)
+@KPOperation(Lowering_Task)
+@KPOperation(Lifting_Task)
+@KPSupport(OWL_2)
 public class OWLParser extends AbstractDeSerializer implements DeserializeApiInternal {
 
 

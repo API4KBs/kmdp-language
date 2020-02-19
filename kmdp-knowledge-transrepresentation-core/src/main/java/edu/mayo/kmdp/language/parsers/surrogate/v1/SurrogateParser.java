@@ -16,6 +16,8 @@
 package edu.mayo.kmdp.language.parsers.surrogate.v1;
 
 
+import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Lifting_Task;
+import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Lowering_Task;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.parsers.JSONBasedLanguageParser;
@@ -23,7 +25,6 @@ import edu.mayo.kmdp.language.parsers.MultiFormatParser;
 import edu.mayo.kmdp.language.parsers.XMLBasedLanguageParser;
 import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
 import edu.mayo.kmdp.tranx.v3.server.DeserializeApiInternal;
-import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries;
 import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries;
 import java.util.Arrays;
@@ -34,8 +35,8 @@ import org.omg.spec.api4kp._1_0.services.KPOperation;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 
 @Named
-@KPOperation(KnowledgeProcessingOperationSeries.Lowering_Task)
-@KPOperation(KnowledgeProcessingOperationSeries.Lifting_Task)
+@KPOperation(Lowering_Task)
+@KPOperation(Lifting_Task)
 public class SurrogateParser extends MultiFormatParser<KnowledgeAsset> implements
     DeserializeApiInternal {
 
