@@ -1,11 +1,11 @@
 package edu.mayo.kmdp.language.validators.dmn.v1_2;
 
+import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Well_Formedness_Check_Task;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.DMN_1_2;
 
 import edu.mayo.kmdp.language.parsers.dmn.v1_2.DMN12Parser;
 import edu.mayo.kmdp.tranx.v3.server.ValidateApiInternal;
 import edu.mayo.kmdp.util.XMLUtil;
-import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries;
 import edu.mayo.ontology.taxonomies.api4kp.responsecodes.ResponseCodeSeries;
 import java.io.ByteArrayInputStream;
@@ -16,12 +16,14 @@ import javax.xml.validation.Schema;
 import org.omg.spec.api4kp._1_0.Answer;
 import org.omg.spec.api4kp._1_0.services.BinaryCarrier;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
+import org.omg.spec.api4kp._1_0.services.KPSupport;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 import org.w3c.dom.Document;
 
 @Named
-@KPOperation(KnowledgeProcessingOperationSeries.Well_Formedness_Check_Task)
+@KPOperation(Well_Formedness_Check_Task)
+@KPSupport(DMN_1_2)
 public class DMN12Validator implements ValidateApiInternal {
 
   @Override

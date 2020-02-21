@@ -16,19 +16,28 @@
 package edu.mayo.kmdp.language.detectors.owl2;
 
 import static edu.mayo.kmdp.util.XMLUtil.catalogResolver;
+import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Detect_Language_Information_Task;
+import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.TXT;
+import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.XML_1_1;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.OWL_2;
+import static edu.mayo.ontology.taxonomies.krprofile.KnowledgeRepresentationLanguageProfileSeries.OWL2_DL;
+import static edu.mayo.ontology.taxonomies.krprofile.KnowledgeRepresentationLanguageProfileSeries.OWL2_EL;
+import static edu.mayo.ontology.taxonomies.krprofile.KnowledgeRepresentationLanguageProfileSeries.OWL2_Full;
+import static edu.mayo.ontology.taxonomies.krprofile.KnowledgeRepresentationLanguageProfileSeries.OWL2_QL;
+import static edu.mayo.ontology.taxonomies.krprofile.KnowledgeRepresentationLanguageProfileSeries.OWL2_RL;
+import static edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentationLanguageSerializationSeries.OWL_Functional_Syntax;
+import static edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentationLanguageSerializationSeries.OWL_Manchester_Syntax;
+import static edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentationLanguageSerializationSeries.OWL_XML_Serialization;
+import static edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentationLanguageSerializationSeries.RDF_XML_Syntax;
+import static edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentationLanguageSerializationSeries.Turtle;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.detectors.owl2.OWLDetectorConfig.DetectorParams;
 import edu.mayo.kmdp.tranx.v3.server.DetectApiInternal;
 import edu.mayo.kmdp.util.Util;
-import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;
-import edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries;
 import edu.mayo.ontology.taxonomies.krprofile.KnowledgeRepresentationLanguageProfile;
-import edu.mayo.ontology.taxonomies.krprofile.KnowledgeRepresentationLanguageProfileSeries;
 import edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentationLanguageSerialization;
-import edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentationLanguageSerializationSeries;
 import edu.mayo.ontology.taxonomies.lexicon.Lexicon;
 import edu.mayo.ontology.taxonomies.lexicon.LexiconSeries;
 import java.io.ByteArrayInputStream;
@@ -48,6 +57,7 @@ import org.omg.spec.api4kp._1_0.services.ASTCarrier;
 import org.omg.spec.api4kp._1_0.services.BinaryCarrier;
 import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
+import org.omg.spec.api4kp._1_0.services.KPSupport;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -69,7 +79,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Named
-@KPOperation(KnowledgeProcessingOperationSeries.Detect_Language_Information_Task)
+@KPOperation(Detect_Language_Information_Task)
+@KPSupport(OWL_2)
 public class OWLDetector implements DetectApiInternal {
 
   protected static final Logger logger = LoggerFactory.getLogger(OWLDetector.class);
@@ -95,15 +106,15 @@ public class OWLDetector implements DetectApiInternal {
   private SerializationFormat detectFormat(OWLOntology o) {
     OWLDocumentFormat format = o.getFormat();
     if (format instanceof RDFXMLDocumentFormat) {
-      return SerializationFormatSeries.XML_1_1;
+      return XML_1_1;
     } else if (format instanceof ManchesterSyntaxDocumentFormat) {
-      return SerializationFormatSeries.TXT;
+      return TXT;
     } else if (format instanceof OWLXMLDocumentFormat) {
-      return SerializationFormatSeries.XML_1_1;
+      return XML_1_1;
     } else if (format instanceof TurtleDocumentFormat) {
-      return SerializationFormatSeries.TXT;
+      return TXT;
     } else if (format instanceof FunctionalSyntaxDocumentFormat) {
-      return SerializationFormatSeries.TXT;
+      return TXT;
     }
     return null;
   }
@@ -111,15 +122,15 @@ public class OWLDetector implements DetectApiInternal {
   private KnowledgeRepresentationLanguageSerialization detectSerialization(OWLOntology o) {
     OWLDocumentFormat format = o.getFormat();
     if (format instanceof RDFXMLDocumentFormat) {
-      return KnowledgeRepresentationLanguageSerializationSeries.RDF_XML_Syntax;
+      return RDF_XML_Syntax;
     } else if (format instanceof ManchesterSyntaxDocumentFormat) {
-      return KnowledgeRepresentationLanguageSerializationSeries.OWL_Manchester_Syntax;
+      return OWL_Manchester_Syntax;
     } else if (format instanceof OWLXMLDocumentFormat) {
-      return KnowledgeRepresentationLanguageSerializationSeries.OWL_XML_Serialization;
+      return OWL_XML_Serialization;
     } else if (format instanceof TurtleDocumentFormat) {
-      return KnowledgeRepresentationLanguageSerializationSeries.Turtle;
+      return Turtle;
     } else if (format instanceof FunctionalSyntaxDocumentFormat) {
-      return KnowledgeRepresentationLanguageSerializationSeries.OWL_Functional_Syntax;
+      return OWL_Functional_Syntax;
     }
     return null;
   }
@@ -135,18 +146,18 @@ public class OWLDetector implements DetectApiInternal {
 
   protected KnowledgeRepresentationLanguageProfile detectProfile(OWLOntology o) {
     if (new OWL2RLProfile().checkOntology(o).isInProfile()) {
-      return KnowledgeRepresentationLanguageProfileSeries.OWL2_RL;
+      return OWL2_RL;
     }
     if (new OWL2QLProfile().checkOntology(o).isInProfile()) {
-      return KnowledgeRepresentationLanguageProfileSeries.OWL2_QL;
+      return OWL2_QL;
     }
     if (new OWL2ELProfile().checkOntology(o).isInProfile()) {
-      return KnowledgeRepresentationLanguageProfileSeries.OWL2_EL;
+      return OWL2_EL;
     }
     if (new OWL2DLProfile().checkOntology(o).isInProfile()) {
-      return KnowledgeRepresentationLanguageProfileSeries.OWL2_DL;
+      return OWL2_DL;
     }
-    return KnowledgeRepresentationLanguageProfileSeries.OWL2_Full;
+    return OWL2_Full;
   }
 
   @Override

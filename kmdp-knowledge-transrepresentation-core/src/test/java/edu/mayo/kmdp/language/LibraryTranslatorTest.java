@@ -77,7 +77,7 @@ public class LibraryTranslatorTest {
 
     assertEquals(Clinical_Rule.asEnum().getTag(),
         lib.getType().getCodingFirstRep().getCode());
-    assertEquals(BASE_UUID_URN + "0c36a4a3-7645-4276-baf5-be957112717b",
+    assertEquals("0c36a4a3-7645-4276-baf5-be957112717b",
         lib.getIdentifierFirstRep().getValue());
 
     assertEquals(6, lib.getRelatedArtifact().size());

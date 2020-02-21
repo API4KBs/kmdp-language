@@ -15,13 +15,14 @@
  */
 package edu.mayo.kmdp.language.parsers.dmn.v1_1;
 
+import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Lifting_Task;
+import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Lowering_Task;
+import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.DMN_1_1;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.parsers.XMLBasedLanguageParser;
 import edu.mayo.kmdp.tranx.v3.server.DeserializeApiInternal;
-import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries;
-import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries;
 import java.util.Collections;
 import java.util.List;
 import javax.inject.Named;
@@ -32,9 +33,9 @@ import org.omg.spec.dmn._20151101.dmn.ObjectFactory;
 import org.omg.spec.dmn._20151101.dmn.TDefinitions;
 
 @Named
-@KPOperation(KnowledgeProcessingOperationSeries.Lifting_Task)
-@KPOperation(KnowledgeProcessingOperationSeries.Lowering_Task)
-@KPSupport(KnowledgeRepresentationLanguageSeries.DMN_1_1)
+@KPOperation(Lifting_Task)
+@KPOperation(Lowering_Task)
+@KPSupport(DMN_1_1)
 public class DMN11Parser extends XMLBasedLanguageParser<TDefinitions> implements
     DeserializeApiInternal {
 
@@ -46,7 +47,7 @@ public class DMN11Parser extends XMLBasedLanguageParser<TDefinitions> implements
   public List<SyntacticRepresentation> getSupportedRepresentations() {
     return
         Collections
-            .singletonList(rep(KnowledgeRepresentationLanguageSeries.DMN_1_1,
+            .singletonList(rep(DMN_1_1,
                 SerializationFormatSeries.XML_1_1, getDefaultCharset()));
   }
 

@@ -56,7 +56,7 @@ import org.omg.spec.api4kp._1_0.services.tranx.ModelMIMECoder;
 @KPSupport(Knowledge_Asset_Surrogate)
 public class SurrogateToLibraryTranslator extends AbstractSimpleTranslator {
 
-  private final static String OPERATOR_ID = "da544016-f112-4a69-afef-d64726330476";
+  private static final String OPERATOR_ID = "da544016-f112-4a69-afef-d64726330476";
 
   @Override
   public String getId() {

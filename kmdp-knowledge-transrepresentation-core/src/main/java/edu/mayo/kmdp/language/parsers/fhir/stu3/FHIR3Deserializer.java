@@ -1,12 +1,13 @@
 package edu.mayo.kmdp.language.parsers.fhir.stu3;
 
+import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Lifting_Task;
+import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Lowering_Task;
 import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.JSON;
 import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.XML_1_1;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.FHIR_STU3;
 
 import ca.uhn.fhir.context.FhirContext;
 import edu.mayo.kmdp.language.parsers.AbstractDeSerializer;
-import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;
 import java.util.Arrays;
 import java.util.List;
@@ -22,8 +23,8 @@ import org.omg.spec.api4kp._1_0.services.KPSupport;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 
 @Named
-@KPOperation(KnowledgeProcessingOperationSeries.Lifting_Task)
-@KPOperation(KnowledgeProcessingOperationSeries.Lowering_Task)
+@KPOperation(Lifting_Task)
+@KPOperation(Lowering_Task)
 @KPSupport(FHIR_STU3)
 public class FHIR3Deserializer extends AbstractDeSerializer {
 

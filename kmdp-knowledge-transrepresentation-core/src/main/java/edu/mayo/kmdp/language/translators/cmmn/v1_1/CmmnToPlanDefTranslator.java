@@ -26,12 +26,14 @@ import java.util.Properties;
 import javax.inject.Named;
 import org.omg.spec.api4kp._1_0.AbstractCarrier;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
+import org.omg.spec.api4kp._1_0.services.KPSupport;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.resources.SyntacticRepresentation;
 import org.omg.spec.cmmn._20151109.model.TDefinitions;
 
 @Named
 @KPOperation(Translation_Task)
+@KPSupport({FHIR_STU3,CMMN_1_1})
 public class CmmnToPlanDefTranslator extends AbstractSimpleTranslator {
 
   private static final String OPERATOR_ID = "87402252-a8a1-46a4-be3a-9b04ce45fde7";

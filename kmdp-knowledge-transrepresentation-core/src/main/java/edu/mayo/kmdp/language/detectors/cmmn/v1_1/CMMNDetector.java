@@ -15,22 +15,24 @@
  */
 package edu.mayo.kmdp.language.detectors.cmmn.v1_1;
 
+import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Detect_Language_Information_Task;
 import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.XML_1_1;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.CMMN_1_1;
 import static java.util.Collections.singletonList;
 
 import edu.mayo.kmdp.language.detectors.XMLBasedLanguageDetector;
 import edu.mayo.kmdp.tranx.v3.server.DetectApiInternal;
-import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import java.util.List;
 import javax.inject.Named;
 import org.omg.spec.api4kp._1_0.Answer;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
+import org.omg.spec.api4kp._1_0.services.KPSupport;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 import org.omg.spec.cmmn._20151109.model.TDefinitions;
 
 @Named
-@KPOperation(KnowledgeProcessingOperationSeries.Detect_Language_Information_Task)
+@KPOperation(Detect_Language_Information_Task)
+@KPSupport(CMMN_1_1)
 public class CMMNDetector extends XMLBasedLanguageDetector<TDefinitions> implements
     DetectApiInternal {
 
