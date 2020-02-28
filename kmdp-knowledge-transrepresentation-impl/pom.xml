@@ -11,6 +11,8 @@
   </parent>
 
   <artifactId>kmdp-knowledge-transrepresentation-impl</artifactId>
+  <version>3.6.1-SNAPSHOT</version>
+
   <packaging>war</packaging>
 
   <name>KMDP :: Server :: Knowledge Transrepresentation Service (Web)</name>
