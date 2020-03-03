@@ -37,6 +37,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import javax.inject.Named;
+import org.apache.jena.vocabulary.DCTerms;
 import org.omg.spec.api4kp._1_0.Answer;
 import org.omg.spec.api4kp._1_0.services.ASTCarrier;
 import org.omg.spec.api4kp._1_0.services.BinaryCarrier;
@@ -47,8 +48,12 @@ import org.omg.spec.api4kp._1_0.services.KPSupport;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.formats.RDFXMLDocumentFormat;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.MissingImportHandlingStrategy;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyLoaderConfiguration;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
 @Named
@@ -79,7 +84,13 @@ public class OWLParser extends AbstractDeSerializer implements DeserializeApiInt
   @Override
   public Optional<ASTCarrier> parse(ExpressionCarrier carrier) {
     try {
-      OWLOntology onto = OWLManager.createOWLOntologyManager().loadOntologyFromOntologyDocument(
+      OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+      OWLOntologyLoaderConfiguration conf = new OWLOntologyLoaderConfiguration()
+          .setMissingImportHandlingStrategy(MissingImportHandlingStrategy.SILENT)
+          .addIgnoredImport(IRI.create(DCTerms.getURI()));
+      manager.setOntologyLoaderConfiguration(conf);
+
+      OWLOntology onto = manager.loadOntologyFromOntologyDocument(
           new ByteArrayInputStream(carrier.getSerializedExpression().getBytes()));
       return Optional.of(new ASTCarrier().withParsedExpression(onto)
           .withLevel(ParsingLevelSeries.Abstract_Knowledge_Expression)
