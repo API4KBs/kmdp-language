@@ -7,7 +7,7 @@
   <parent>
     <groupId>edu.mayo.kmdp</groupId>
     <artifactId>kmdp-knowledge-transrepresentation</artifactId>
-    <version>3.6.1-SNAPSHOT</version>
+    <version>3.7.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>kmdp-knowledge-transrepresentation-core</artifactId>
@@ -107,6 +107,15 @@
     <dependency>
       <groupId>org.jsoup</groupId>
       <artifactId>jsoup</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.sun.xml.bind</groupId>
+      <artifactId>jaxb-impl</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.xml.bind</groupId>
+      <artifactId>jaxb-core</artifactId>
     </dependency>
   </dependencies>
 
