@@ -13,21 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.mayo.kmdp.language.parsers.surrogate.v1;
+package edu.mayo.kmdp.language.parsers.surrogate.v2;
 
 
 import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Lifting_Task;
 import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Lowering_Task;
-import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate;
+import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.JSON;
+import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.XML_1_1;
+import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate_2_0;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.parsers.JSONBasedLanguageParser;
 import edu.mayo.kmdp.language.parsers.MultiFormatParser;
 import edu.mayo.kmdp.language.parsers.XMLBasedLanguageParser;
-import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
-import edu.mayo.kmdp.metadata.surrogate.ObjectFactory;
+import edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset;
+import edu.mayo.kmdp.metadata.v2.surrogate.ObjectFactory;
 import edu.mayo.kmdp.tranx.v3.server.DeserializeApiInternal;
-import edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries;
+import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -39,15 +41,15 @@ import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 @Named
 @KPOperation(Lowering_Task)
 @KPOperation(Lifting_Task)
-@KPSupport(Knowledge_Asset_Surrogate)
-public class SurrogateParser extends MultiFormatParser<KnowledgeAsset> implements
+@KPSupport(Knowledge_Asset_Surrogate_2_0)
+public class Surrogate2Parser extends MultiFormatParser<KnowledgeAsset> implements
     DeserializeApiInternal {
 
   private final List<SyntacticRepresentation> supportedRepresentations = Arrays.asList(
-      rep(Knowledge_Asset_Surrogate, SerializationFormatSeries.XML_1_1, getDefaultCharset()),
-      rep(Knowledge_Asset_Surrogate, SerializationFormatSeries.JSON, getDefaultCharset()));
+      rep(Knowledge_Asset_Surrogate_2_0, XML_1_1, getDefaultCharset()),
+      rep(Knowledge_Asset_Surrogate_2_0, JSON, getDefaultCharset()));
 
-  public SurrogateParser() {
+  public Surrogate2Parser() {
     super(new XMLSurrogateParser(), new JSONSurrogateParser());
   }
 
@@ -67,7 +69,7 @@ public class SurrogateParser extends MultiFormatParser<KnowledgeAsset> implement
     @Override
     protected List<SyntacticRepresentation> getSupportedRepresentations() {
       return Collections
-          .singletonList(rep(Knowledge_Asset_Surrogate, SerializationFormatSeries.XML_1_1, getDefaultCharset()));
+          .singletonList(rep(KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate_2_0, XML_1_1, getDefaultCharset()));
     }
   }
 
@@ -81,7 +83,7 @@ public class SurrogateParser extends MultiFormatParser<KnowledgeAsset> implement
     @Override
     protected List<SyntacticRepresentation> getSupportedRepresentations() {
       return Collections
-          .singletonList(rep(Knowledge_Asset_Surrogate, SerializationFormatSeries.JSON, getDefaultCharset()));
+          .singletonList(rep(KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate_2_0, JSON, getDefaultCharset()));
     }
   }
 

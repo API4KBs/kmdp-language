@@ -132,8 +132,8 @@ public abstract class AbstractDeSerializer implements DeserializeApiInternal, Li
 
     if (getSerializableLanguages().get().stream()
         .map(SyntacticRepresentation::getLanguage)
-        .noneMatch(lang -> lang == sourceArtifact.getRepresentation().getLanguage())) {
-      return null;
+        .noneMatch(lang -> lang.asEnum() == sourceArtifact.getRepresentation().getLanguage())) {
+      return Answer.failed();
     }
 
     ParsingLevel sourceLevel = detectLevel(sourceArtifact);
