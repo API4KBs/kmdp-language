@@ -25,7 +25,6 @@ import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Function;
 import javax.xml.bind.JAXBElement;
@@ -78,8 +77,11 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializer imp
                 getParseResultRepresentation(carrier, ParsingLevelSeries.Abstract_Knowledge_Expression)));
   }
 
-  protected Collection<Class> getClassContext() {
-    return Arrays.asList(root, Annotation.class);
+  protected Collection<Class<?>> getClassContext() {
+    return Arrays.asList(
+        root,
+        Annotation.class,
+        edu.mayo.kmdp.metadata.v2.surrogate.annotations.Annotation.class);
   }
 
   @Override
@@ -112,12 +114,12 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializer imp
     T obj = (T) carrier.getParsedExpression();
     return Optional.of(new ExpressionCarrier()
         .withSerializedExpression(JaxbUtil.marshall(
-            Collections.singleton(obj.getClass()),
+            getClassContext(),
             obj,
             mapper,
             JaxbUtil.defaultProperties())
             .flatMap(Util::asString)
-            .get()
+            .orElse("FAILED")
         )
         .withAssetId(carrier.getAssetId())
         .withArtifactId(carrier.getArtifactId())
@@ -144,7 +146,7 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializer imp
   public Optional<DocumentCarrier> concretize(ASTCarrier carrier, SyntacticRepresentation into) {
     T obj = (T) carrier.getParsedExpression();
     return JaxbUtil.marshallDox(
-        Collections.singleton(root),
+        getClassContext(),
         obj,
         mapper,
         JaxbUtil.defaultProperties())

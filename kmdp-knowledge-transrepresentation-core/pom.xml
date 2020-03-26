@@ -40,6 +40,10 @@
       <groupId>edu.mayo.kmdp</groupId>
       <artifactId>kmdp-asset-metadata</artifactId>
     </dependency>
+    <dependency>
+      <groupId>edu.mayo.kmdp</groupId>
+      <artifactId>kmdp-asset-surrogate</artifactId>
+    </dependency>
 
     <dependency>
       <artifactId>omg-dmn-11</artifactId>

@@ -7,6 +7,7 @@ import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.XM
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.CMMN_1_1;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.DMN_1_1;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.DMN_1_2;
+import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate_2_0;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.OWL_2;
 import static edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentationLanguageSerializationSeries.CMMN_1_1_XML_Syntax;
 import static edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentationLanguageSerializationSeries.DMN_1_1_XML_Syntax;
@@ -18,9 +19,11 @@ import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.SurrogateBuilder;
 import edu.mayo.kmdp.language.parsers.cmmn.v1_1.CMMN11Parser;
-import edu.mayo.kmdp.language.parsers.dmn.v1_2.DMN12Parser;
 import edu.mayo.kmdp.language.parsers.dmn.v1_1.DMN11Parser;
+import edu.mayo.kmdp.language.parsers.dmn.v1_2.DMN12Parser;
 import edu.mayo.kmdp.language.parsers.owl2.OWLParser;
+import edu.mayo.kmdp.language.parsers.surrogate.v2.Surrogate2Parser;
+import edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset;
 import edu.mayo.kmdp.tranx.v3.server.DeserializeApiInternal;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;
 import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguage;
@@ -71,6 +74,15 @@ class LifterTest {
         "/owlExample.owl",
         OWL_2, OWL_Manchester_Syntax, TXT,
         OWLOntology.class);
+  }
+
+  @Test
+  void testParseSurr2() {
+    testVerticalLift(
+        new Surrogate2Parser(),
+        "/surr2.xml",
+        Knowledge_Asset_Surrogate_2_0, null, XML_1_1,
+        KnowledgeAsset.class);
   }
 
   private void testVerticalLift(

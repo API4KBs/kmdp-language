@@ -34,6 +34,7 @@ import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.config.LocalTestConfig;
 import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
+import edu.mayo.kmdp.metadata.v2.surrogate.annotations.Annotation;
 import edu.mayo.kmdp.registry.Registry;
 import edu.mayo.kmdp.tranx.v3.DeserializeApi;
 import edu.mayo.kmdp.util.FileUtil;
@@ -42,6 +43,7 @@ import edu.mayo.kmdp.util.JaxbUtil;
 import edu.mayo.kmdp.util.XMLUtil;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
 import javax.inject.Inject;
@@ -206,7 +208,12 @@ public class DeserializationTest {
         .withAssetId(new URIIdentifier().withUri(
             URI.create(Registry.MAYO_ASSETS_BASE_URI + "2c6572ea-867d-4863-963a-b4bc5357429b")))
         .withFormalType(Cognitive_Process_Model);
-    String serializedAsset = JaxbUtil.marshallToString(Collections.singleton(asset.getClass()),asset, JaxbUtil.defaultProperties());
+
+    String serializedAsset = JaxbUtil.marshallToString(
+        Arrays.asList(asset.getClass(), Annotation.class,
+            edu.mayo.kmdp.metadata.annotations.Annotation.class),
+        asset,
+        JaxbUtil.defaultProperties());
 
     KnowledgeCarrier ast = AbstractCarrier.ofAst(asset)
         .withRepresentation(rep(Knowledge_Asset_Surrogate))
@@ -217,7 +224,7 @@ public class DeserializationTest {
         .map(ExpressionCarrier.class::cast)
         .map(ExpressionCarrier::getSerializedExpression);
 
-    assertEquals(serializedAsset, ser.getOptionalValue().orElse("Fail"));
+    assertEquals(serializedAsset, ser.orElse("Fail"));
   }
 
 
@@ -243,9 +250,8 @@ public class DeserializationTest {
         .withCharset(Charset.defaultCharset().name()))
         .map(ExpressionCarrier.class::cast)
         .map(ExpressionCarrier::getSerializedExpression);
-    ;
 
-    assertEquals(serializedAsset, ser.getOptionalValue().orElse("Fail"));
+    assertEquals(serializedAsset, ser.orElse("Fail"));
 
 
     Answer<String> ser2 = parser.ensureRepresentation(
@@ -256,7 +262,7 @@ public class DeserializationTest {
         .map(ExpressionCarrier.class::cast)
         .map(ExpressionCarrier::getSerializedExpression);
 
-    assertEquals(serializedAsset, ser2.getOptionalValue().orElse("Fail"));
+    assertEquals(serializedAsset, ser2.orElse("Fail"));
 
 
   }
