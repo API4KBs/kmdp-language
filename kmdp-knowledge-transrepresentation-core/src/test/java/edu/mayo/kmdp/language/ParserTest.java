@@ -18,14 +18,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
-import edu.mayo.kmdp.SurrogateBuilder;
 import edu.mayo.kmdp.language.parsers.cmmn.v1_1.CMMN11Parser;
-import edu.mayo.kmdp.language.parsers.dmn.v1_2.DMN12Parser;
 import edu.mayo.kmdp.language.parsers.dmn.v1_1.DMN11Parser;
-import edu.mayo.kmdp.language.parsers.owl2.OWLParser;
+import edu.mayo.kmdp.language.parsers.dmn.v1_2.DMN12Parser;
 import edu.mayo.kmdp.language.parsers.owl2.JenaOwlRdfLifter;
+import edu.mayo.kmdp.language.parsers.owl2.OWLParser;
 import edu.mayo.kmdp.language.parsers.sparql.SparqlLifter;
-import edu.mayo.kmdp.tranx.v3.server.DeserializeApiInternal;
+import edu.mayo.kmdp.metadata.v2.surrogate.SurrogateBuilder;
+import edu.mayo.kmdp.tranx.v4.server.DeserializeApiInternal;
 import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevel;
 import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;
@@ -37,7 +37,7 @@ import org.apache.jena.rdf.model.Model;
 import org.junit.jupiter.api.Test;
 import org.omg.spec.api4kp._1_0.AbstractCarrier;
 import org.omg.spec.api4kp._1_0.Answer;
-import org.omg.spec.api4kp._1_0.identifiers.URIIdentifier;
+import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
 import org.omg.spec.api4kp._1_0.services.DocumentCarrier;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -132,7 +132,7 @@ class ParserTest {
       Class<?> astRootClass,
       ParsingLevel level) {
 
-    URIIdentifier assetId = SurrogateBuilder.assetId(UUID.randomUUID(), VER);
+    ResourceIdentifier assetId = SurrogateBuilder.assetId(UUID.randomUUID(), VER);
 
     KnowledgeCarrier carrier =
         AbstractCarrier.of(ParserTest.class.getResourceAsStream(sourcePath))

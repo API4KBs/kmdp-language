@@ -19,7 +19,7 @@ import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.TX
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.OWL_2;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
-import edu.mayo.kmdp.tranx.v3.server.DeserializeApiInternal;
+import edu.mayo.kmdp.tranx.v4.server.DeserializeApiInternal;
 import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevel;
 import java.io.ByteArrayInputStream;
 import javax.inject.Named;

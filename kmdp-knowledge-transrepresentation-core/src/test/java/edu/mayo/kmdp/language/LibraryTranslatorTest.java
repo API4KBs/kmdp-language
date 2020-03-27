@@ -43,7 +43,7 @@ import edu.mayo.kmdp.metadata.surrogate.SubLanguage;
 import edu.mayo.kmdp.metadata.surrogate.Summary;
 import edu.mayo.kmdp.metadata.surrogate.Variant;
 import edu.mayo.kmdp.metadata.surrogate.Version;
-import edu.mayo.kmdp.tranx.v3.server.TransxionApiInternal;
+import edu.mayo.kmdp.tranx.v4.server.TransxionApiInternal;
 import edu.mayo.ontology.taxonomies.iso639_2_languagecodes.LanguageSeries;
 import java.util.UUID;
 import org.hl7.fhir.dstu3.model.Attachment;

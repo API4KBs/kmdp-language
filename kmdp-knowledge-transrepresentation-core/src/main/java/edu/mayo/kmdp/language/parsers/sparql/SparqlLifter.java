@@ -22,7 +22,7 @@ import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.TX
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.SPARQL_1_1;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
-import edu.mayo.kmdp.tranx.v3.server.DeserializeApiInternal;
+import edu.mayo.kmdp.tranx.v4.server.DeserializeApiInternal;
 import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevel;
 import javax.inject.Named;
 import org.apache.jena.query.ParameterizedSparqlString;

@@ -26,7 +26,7 @@ import edu.mayo.kmdp.language.parsers.MultiFormatParser;
 import edu.mayo.kmdp.language.parsers.XMLBasedLanguageParser;
 import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
 import edu.mayo.kmdp.metadata.surrogate.ObjectFactory;
-import edu.mayo.kmdp.tranx.v3.server.DeserializeApiInternal;
+import edu.mayo.kmdp.tranx.v4.server.DeserializeApiInternal;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries;
 import java.util.Arrays;
 import java.util.Collections;

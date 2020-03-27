@@ -16,7 +16,7 @@ package edu.mayo.kmdp.language;
 import static org.omg.spec.api4kp._1_0.Answer.anyAble;
 import static org.omg.spec.api4kp._1_0.Answer.delegateTo;
 
-import edu.mayo.kmdp.tranx.v3.server.DeserializeApiInternal;
+import edu.mayo.kmdp.tranx.v4.server.DeserializeApiInternal;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevel;
 import java.util.Collections;

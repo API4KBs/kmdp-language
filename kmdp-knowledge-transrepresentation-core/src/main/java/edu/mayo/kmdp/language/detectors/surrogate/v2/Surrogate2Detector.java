@@ -23,7 +23,7 @@ import static java.util.Collections.singletonList;
 import edu.mayo.kmdp.language.detectors.JSONBasedLanguageDetector;
 import edu.mayo.kmdp.language.detectors.XMLBasedLanguageDetector;
 import edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset;
-import edu.mayo.kmdp.tranx.v3.server.DetectApiInternal;
+import edu.mayo.kmdp.tranx.v4.server.DetectApiInternal;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries;
 import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguage;
 import edu.mayo.ontology.taxonomies.lexicon.LexiconSeries;

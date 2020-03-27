@@ -36,7 +36,7 @@ import edu.mayo.kmdp.language.config.LocalTestConfig;
 import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
 import edu.mayo.kmdp.metadata.v2.surrogate.annotations.Annotation;
 import edu.mayo.kmdp.registry.Registry;
-import edu.mayo.kmdp.tranx.v3.DeserializeApi;
+import edu.mayo.kmdp.tranx.v4.DeserializeApi;
 import edu.mayo.kmdp.util.FileUtil;
 import edu.mayo.kmdp.util.JSonUtil;
 import edu.mayo.kmdp.util.JaxbUtil;

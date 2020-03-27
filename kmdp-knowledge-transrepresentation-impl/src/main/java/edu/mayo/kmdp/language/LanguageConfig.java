@@ -16,10 +16,10 @@
 package edu.mayo.kmdp.language;
 
 
-import edu.mayo.kmdp.tranx.v3.server.DeserializeApiDelegate;
-import edu.mayo.kmdp.tranx.v3.server.DetectApiDelegate;
-import edu.mayo.kmdp.tranx.v3.server.TransxionApiDelegate;
-import edu.mayo.kmdp.tranx.v3.server.ValidateApiDelegate;
+import edu.mayo.kmdp.tranx.v4.server.DeserializeApiDelegate;
+import edu.mayo.kmdp.tranx.v4.server.DetectApiDelegate;
+import edu.mayo.kmdp.tranx.v4.server.TransxionApiDelegate;
+import edu.mayo.kmdp.tranx.v4.server.ValidateApiDelegate;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
