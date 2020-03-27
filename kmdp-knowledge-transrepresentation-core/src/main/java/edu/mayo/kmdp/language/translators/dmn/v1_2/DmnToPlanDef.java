@@ -43,9 +43,9 @@ import org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionComponent;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.UriType;
+import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
 import org.omg.spec.api4kp._1_0.identifiers.ConceptIdentifier;
 import org.omg.spec.api4kp._1_0.identifiers.NamespaceIdentifier;
-import org.omg.spec.api4kp._1_0.identifiers.URIIdentifier;
 import org.omg.spec.dmn._20180521.model.TAuthorityRequirement;
 import org.omg.spec.dmn._20180521.model.TDMNElement.ExtensionElements;
 import org.omg.spec.dmn._20180521.model.TDMNElementReference;
@@ -64,11 +64,11 @@ public class DmnToPlanDef {
     // nothing to do
   }
 
-  public PlanDefinition transform(URIIdentifier assetId, TDefinitions decisionModel) {
+  public PlanDefinition transform(ResourceIdentifier assetId, TDefinitions decisionModel) {
     log.debug("Called Translator DMN to PDF  for {}",decisionModel.getName() );
     PlanDefinition cpm = new PlanDefinition();
 
-    mapIdentity(cpm,assetId.getUri(),decisionModel);
+    mapIdentity(cpm,assetId.getResourceId(),decisionModel);
     mapName(cpm,decisionModel);
     mapSubject(cpm,decisionModel);
 

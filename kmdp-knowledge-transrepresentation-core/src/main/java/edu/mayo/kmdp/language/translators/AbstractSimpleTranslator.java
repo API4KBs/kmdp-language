@@ -3,14 +3,15 @@ package edu.mayo.kmdp.language.translators;
 import static edu.mayo.kmdp.comparator.Contrastor.isNarrowerOrEqual;
 import static org.omg.spec.api4kp._1_0.contrastors.SyntacticRepresentationContrastor.theRepContrastor;
 
-import edu.mayo.kmdp.id.helper.DatatypeHelper;
 import edu.mayo.kmdp.tranx.v4.server.TransxionApiInternal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 import org.omg.spec.api4kp._1_0.Answer;
-import org.omg.spec.api4kp._1_0.identifiers.URIIdentifier;
+import org.omg.spec.api4kp._1_0.id.IdentifierConstants;
+import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
+import org.omg.spec.api4kp._1_0.id.SemanticIdentifier;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.ParameterDefinitions;
 import org.omg.spec.api4kp._1_0.services.tranx.TransrepresentationOperator;
@@ -96,11 +97,12 @@ public abstract class AbstractSimpleTranslator implements TransxionApiInternal {
 
   protected abstract KnowledgeCarrier doTransform(KnowledgeCarrier sourceArtifact, Properties params);
 
-  protected URIIdentifier mapArtifactId(URIIdentifier artifactId) {
-    return DatatypeHelper.uri(UUID.randomUUID().toString());
+  protected ResourceIdentifier mapArtifactId(ResourceIdentifier artifactId) {
+    // in general, translations preserve the asset, but create brand new artifacts
+    return SemanticIdentifier.newId(UUID.randomUUID(), IdentifierConstants.VERSION_ZERO);
   }
 
-  protected URIIdentifier mapAssetId(URIIdentifier assetId) {
+  protected ResourceIdentifier mapAssetId(ResourceIdentifier assetId) {
     return assetId;
   }
 

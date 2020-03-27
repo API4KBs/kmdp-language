@@ -41,9 +41,9 @@ import org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionComponent;
 import org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionRelatedActionComponent;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
+import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
 import org.omg.spec.api4kp._1_0.identifiers.ConceptIdentifier;
 import org.omg.spec.api4kp._1_0.identifiers.NamespaceIdentifier;
-import org.omg.spec.api4kp._1_0.identifiers.URIIdentifier;
 import org.omg.spec.cmmn._20151109.model.TAssociation;
 import org.omg.spec.cmmn._20151109.model.TCase;
 import org.omg.spec.cmmn._20151109.model.TCaseFileItem;
@@ -79,12 +79,12 @@ public class CmmnToPlanDef {
     // nothing to do
   }
 
-  public PlanDefinition transform(URIIdentifier assetId, TDefinitions caseModel) {
+  public PlanDefinition transform(ResourceIdentifier assetId, TDefinitions caseModel) {
     if (caseModel.getCase().isEmpty() || caseModel.getCase().size() > 1) {
       throw new IllegalArgumentException("TODO Support case models with 2+ cases");
     }
     return Optional.ofNullable(caseModel.getCase().get(0))
-        .map(topCase -> process(assetId.getUri(), caseModel, topCase))
+        .map(topCase -> process(assetId.getResourceId(), caseModel, topCase))
         .orElseThrow(IllegalArgumentException::new);
   }
 
