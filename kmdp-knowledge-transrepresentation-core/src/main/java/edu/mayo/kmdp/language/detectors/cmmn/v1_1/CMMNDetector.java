@@ -21,7 +21,7 @@ import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLan
 import static java.util.Collections.singletonList;
 
 import edu.mayo.kmdp.language.detectors.XMLBasedLanguageDetector;
-import edu.mayo.kmdp.tranx.v3.server.DetectApiInternal;
+import edu.mayo.kmdp.tranx.v4.server.DetectApiInternal;
 import java.util.List;
 import javax.inject.Named;
 import org.omg.spec.api4kp._1_0.Answer;

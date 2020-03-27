@@ -17,7 +17,7 @@ package edu.mayo.kmdp.language;
 
 import static org.omg.spec.api4kp._1_0.Answer.anyAble;
 
-import edu.mayo.kmdp.tranx.v3.server.ValidateApiInternal;
+import edu.mayo.kmdp.tranx.v4.server.ValidateApiInternal;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import java.util.ArrayList;
 import java.util.List;

@@ -4,7 +4,7 @@ import static edu.mayo.kmdp.comparator.Contrastor.isNarrowerOrEqual;
 import static org.omg.spec.api4kp._1_0.contrastors.SyntacticRepresentationContrastor.theRepContrastor;
 
 import edu.mayo.kmdp.id.helper.DatatypeHelper;
-import edu.mayo.kmdp.tranx.v3.server.TransxionApiInternal;
+import edu.mayo.kmdp.tranx.v4.server.TransxionApiInternal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;

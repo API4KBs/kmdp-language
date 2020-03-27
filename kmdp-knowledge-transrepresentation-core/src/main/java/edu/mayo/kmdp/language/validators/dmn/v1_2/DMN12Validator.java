@@ -4,7 +4,7 @@ import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeP
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.DMN_1_2;
 
 import edu.mayo.kmdp.language.parsers.dmn.v1_2.DMN12Parser;
-import edu.mayo.kmdp.tranx.v3.server.ValidateApiInternal;
+import edu.mayo.kmdp.tranx.v4.server.ValidateApiInternal;
 import edu.mayo.kmdp.util.XMLUtil;
 import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries;
 import edu.mayo.ontology.taxonomies.api4kp.responsecodes.ResponseCodeSeries;

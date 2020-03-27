@@ -16,7 +16,7 @@ package edu.mayo.kmdp.language;
 import static edu.mayo.kmdp.comparator.Contrastor.isBroaderOrEqual;
 import static org.omg.spec.api4kp._1_0.contrastors.SyntacticRepresentationContrastor.theRepContrastor;
 
-import edu.mayo.kmdp.tranx.v3.server.TransxionApiInternal;
+import edu.mayo.kmdp.tranx.v4.server.TransxionApiInternal;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import java.util.Collections;
 import java.util.HashMap;

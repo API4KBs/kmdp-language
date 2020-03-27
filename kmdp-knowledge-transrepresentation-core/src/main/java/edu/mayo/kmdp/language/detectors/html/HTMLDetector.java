@@ -22,7 +22,7 @@ import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.TX
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.HTML;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
-import edu.mayo.kmdp.tranx.v3.server.DetectApiInternal;
+import edu.mayo.kmdp.tranx.v4.server.DetectApiInternal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
