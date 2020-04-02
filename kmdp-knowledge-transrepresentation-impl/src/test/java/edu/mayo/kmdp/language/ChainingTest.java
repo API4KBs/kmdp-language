@@ -37,8 +37,6 @@ import javax.inject.Inject;
 import org.junit.jupiter.api.Test;
 import org.omg.spec.api4kp._1_0.AbstractCarrier;
 import org.omg.spec.api4kp._1_0.Answer;
-import org.omg.spec.api4kp._1_0.services.ASTCarrier;
-import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
 import org.omg.spec.api4kp._1_0.services.KPComponent;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
@@ -83,7 +81,6 @@ public class ChainingTest {
         .lift(carrier1, Abstract_Knowledge_Expression)
         .orElse(null);
 
-    assertTrue(carrier2 instanceof ASTCarrier);
     assertSame(DMN_1_1, carrier2.getRepresentation().getLanguage());
     assertNull(carrier2.getRepresentation().getFormat());
     assertNull(carrier2.getRepresentation().getEncoding());
@@ -105,7 +102,6 @@ public class ChainingTest {
         .lift(carrier1, Abstract_Knowledge_Expression)
         .orElse(null);
 
-    assertTrue(carrier2 instanceof ASTCarrier);
     assertSame(DMN_1_1, carrier2.getRepresentation().getLanguage());
     assertNull(carrier2.getRepresentation().getFormat());
     assertNull(carrier2.getRepresentation().getEncoding());
@@ -128,7 +124,6 @@ public class ChainingTest {
         .flatMap(c1 -> lift.apply(c1, Abstract_Knowledge_Expression))
         .orElse(null);
 
-    assertTrue(carrier2 instanceof ASTCarrier);
     assertSame(DMN_1_1, carrier2.getRepresentation().getLanguage());
     assertNull(carrier2.getRepresentation().getFormat());
     assertNull(carrier2.getRepresentation().getEncoding());
@@ -151,7 +146,6 @@ public class ChainingTest {
     assertTrue(out.isSuccess());
     KnowledgeCarrier carrier2 = out.get();
 
-    assertTrue(carrier2 instanceof ASTCarrier);
     assertSame(DMN_1_1, carrier2.getRepresentation().getLanguage());
     assertNull(carrier2.getRepresentation().getFormat());
     assertNull(carrier2.getRepresentation().getEncoding());
@@ -174,7 +168,6 @@ public class ChainingTest {
     assertTrue(out.isSuccess());
     KnowledgeCarrier carrier2 = out.get();
 
-    assertTrue(carrier2 instanceof ASTCarrier);
     assertSame(DMN_1_1, carrier2.getRepresentation().getLanguage());
     assertNull(carrier2.getRepresentation().getFormat());
     assertNull(carrier2.getRepresentation().getEncoding());
@@ -183,7 +176,6 @@ public class ChainingTest {
     Answer<KnowledgeCarrier> c3 = out
         .flatMap(c2 -> deserializeApi.lower(c2, Concrete_Knowledge_Expression));
     assertTrue(c3.isSuccess());
-    assertTrue(c3.get() instanceof ExpressionCarrier);
   }
 
 

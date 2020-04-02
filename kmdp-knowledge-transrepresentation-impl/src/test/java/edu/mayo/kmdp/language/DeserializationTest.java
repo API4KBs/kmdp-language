@@ -44,16 +44,13 @@ import edu.mayo.kmdp.util.XMLUtil;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Optional;
 import javax.inject.Inject;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.omg.spec.api4kp._1_0.AbstractCarrier;
 import org.omg.spec.api4kp._1_0.Answer;
 import org.omg.spec.api4kp._1_0.identifiers.URIIdentifier;
-import org.omg.spec.api4kp._1_0.services.ASTCarrier;
-import org.omg.spec.api4kp._1_0.services.DocumentCarrier;
-import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
 import org.omg.spec.api4kp._1_0.services.KPComponent;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
@@ -85,46 +82,41 @@ public class DeserializationTest {
         .lift(bin, Concrete_Knowledge_Expression)
         .getOptionalValue();
     assertTrue(expr.isPresent());
-    assertTrue(expr.get() instanceof ExpressionCarrier);
-    assertTrue(((ExpressionCarrier)expr.get()).getSerializedExpression().contains("decision name=\"a\""));
+    assertTrue(expr.get().asString().orElse("").contains("decision name=\"a\""));
 
-    DocumentCarrier dox = parser
+    KnowledgeCarrier dox = parser
         .lift(bin, Parsed_Knowedge_Expression)
-        .map(DocumentCarrier.class::cast)
         .getOptionalValue()
         .orElse(null);
     assertNotNull(dox);
-    assertTrue(dox.getStructuredExpression() instanceof Document);
+    assertTrue(dox.is(Document.class));
 
-    DocumentCarrier dox2 = parser
+    KnowledgeCarrier dox2 = parser
         .lift(expr.get(), Parsed_Knowedge_Expression)
-        .map(DocumentCarrier.class::cast)
         .getOptionalValue()
         .orElse(null);
 
     assertNotNull(dox2);
-    assertTrue(dox2.getStructuredExpression() instanceof Document);
-    assertArrayEquals(XMLUtil.toByteArray((Document) dox.getStructuredExpression()),
-        XMLUtil.toByteArray((Document) dox2.getStructuredExpression()));
+    assertTrue(dox2.is(Document.class));
+    assertArrayEquals(
+        XMLUtil.toByteArray(dox.as(Document.class).orElseGet(Assertions::fail)),
+        XMLUtil.toByteArray(dox2.as(Document.class).orElseGet(Assertions::fail)));
 
     assertTrue(
         parser.lift(dox, Abstract_Knowledge_Expression)
-        .map(ASTCarrier.class::cast)
-        .map(ASTCarrier::getParsedExpression)
+        .map(KnowledgeCarrier::getExpression)
         .map(TDefinitions.class::isInstance)
         .isSuccess());
 
     assertTrue(
         parser.lift(expr.get(), Abstract_Knowledge_Expression)
-            .map(ASTCarrier.class::cast)
-            .map(ASTCarrier::getParsedExpression)
+            .map(KnowledgeCarrier::getExpression)
             .map(TDefinitions.class::isInstance)
             .isSuccess());
 
     assertTrue(
         parser.lift(bin, Abstract_Knowledge_Expression)
-            .map(ASTCarrier.class::cast)
-            .map(ASTCarrier::getParsedExpression)
+            .map(KnowledgeCarrier::getExpression)
             .map(TDefinitions.class::isInstance)
             .isSuccess());
   }
@@ -142,25 +134,22 @@ public class DeserializationTest {
             Charset.defaultCharset(),
             "TODO"));
 
-    Answer<ASTCarrier> ast = parser.lift(bin, Abstract_Knowledge_Expression)
-        .map(ASTCarrier.class::cast);
+    Answer<KnowledgeCarrier> ast = parser.lift(bin, Abstract_Knowledge_Expression);
 
-    Answer<DocumentCarrier> dox = ast
-        .flatMap((a) -> parser.lower(a, Parsed_Knowedge_Expression))
-        .map(DocumentCarrier.class::cast);
+    Answer<KnowledgeCarrier> dox = ast
+        .flatMap((a) -> parser.lower(a, Parsed_Knowedge_Expression));
 
     assertTrue(dox.isSuccess());
     assertTrue(dox.getOptionalValue().isPresent());
-    assertTrue(dox.getOptionalValue().get().getStructuredExpression() instanceof Document);
+    assertTrue(dox.getOptionalValue().get().getExpression() instanceof Document);
 
-    Optional<ExpressionCarrier> expr = ast
+    Optional<KnowledgeCarrier> expr = ast
         .flatMap((a) -> parser.lower(a, Concrete_Knowledge_Expression))
-        .map(ExpressionCarrier.class::cast)
         .getOptionalValue();
 
     assertTrue(expr.isPresent());
-    assertNotNull(expr.get().getSerializedExpression());
-    assertTrue(expr.get().getSerializedExpression().contains("decision"));
+    assertTrue(expr.get().asString().isPresent());
+    assertTrue(expr.get().asString().orElse("").contains("decision"));
 
 
   }
@@ -174,15 +163,14 @@ public class DeserializationTest {
     KnowledgeCarrier bin = AbstractCarrier.of(owl.get())
         .withRepresentation(rep(OWL_2));
 
-    Answer<ASTCarrier> aast = parser
-        .lift(bin, Abstract_Knowledge_Expression)
-        .map(ASTCarrier.class::cast);
+    Answer<KnowledgeCarrier> aast = parser
+        .lift(bin, Abstract_Knowledge_Expression);
 
     assertTrue(aast.isSuccess());
     assertTrue(aast.getOptionalValue().isPresent());
-    ASTCarrier ast = aast.getOptionalValue().get();
+    KnowledgeCarrier ast = aast.getOptionalValue().get();
 
-    assertTrue(ast.getParsedExpression() instanceof OWLOntology);
+    assertTrue(ast.is(OWLOntology.class));
     assertEquals(OWL_2, ast.getRepresentation().getLanguage());
     assertNull(ast.getRepresentation().getSerialization());
 
@@ -221,8 +209,7 @@ public class DeserializationTest {
 
     Answer<String> ser = parser
         .lower(ast,Concrete_Knowledge_Expression)
-        .map(ExpressionCarrier.class::cast)
-        .map(ExpressionCarrier::getSerializedExpression);
+        .flatOpt(AbstractCarrier::asString);
 
     assertEquals(serializedAsset, ser.orElse("Fail"));
   }
@@ -242,25 +229,21 @@ public class DeserializationTest {
         .withRepresentation(rep(Knowledge_Asset_Surrogate))
         .withLevel(Abstract_Knowledge_Expression);
 
-
     Answer<String> ser = parser.serialize(
         ast,
-    rep(ast.getRepresentation())
-        .withFormat(JSON)
-        .withCharset(Charset.defaultCharset().name()))
-        .map(ExpressionCarrier.class::cast)
-        .map(ExpressionCarrier::getSerializedExpression);
+        rep(ast.getRepresentation())
+            .withFormat(JSON)
+            .withCharset(Charset.defaultCharset().name()))
+        .flatOpt(AbstractCarrier::asString);
 
     assertEquals(serializedAsset, ser.orElse("Fail"));
-
 
     Answer<String> ser2 = parser.ensureRepresentation(
         ast,
         rep(ast.getRepresentation())
             .withFormat(JSON)
             .withCharset(Charset.defaultCharset().name()))
-        .map(ExpressionCarrier.class::cast)
-        .map(ExpressionCarrier::getSerializedExpression);
+        .flatOpt(AbstractCarrier::asString);
 
     assertEquals(serializedAsset, ser2.orElse("Fail"));
 

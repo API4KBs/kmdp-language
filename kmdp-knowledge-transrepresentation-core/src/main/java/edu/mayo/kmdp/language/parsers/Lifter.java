@@ -16,18 +16,15 @@
 package edu.mayo.kmdp.language.parsers;
 
 import java.util.Optional;
-import org.omg.spec.api4kp._1_0.services.ASTCarrier;
-import org.omg.spec.api4kp._1_0.services.BinaryCarrier;
-import org.omg.spec.api4kp._1_0.services.DocumentCarrier;
-import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
+import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 
 public interface Lifter {
 
-  Optional<ExpressionCarrier> decode(BinaryCarrier carrier);
+  Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier);
 
-  Optional<DocumentCarrier> deserialize(ExpressionCarrier carrier);
+  Optional<KnowledgeCarrier> innerDeserialize(KnowledgeCarrier carrier);
 
-  Optional<ASTCarrier> parse(ExpressionCarrier carrier);
+  Optional<KnowledgeCarrier> innerParse(KnowledgeCarrier carrier);
 
-  Optional<ASTCarrier> abstrakt(DocumentCarrier carrier);
+  Optional<KnowledgeCarrier> innerAbstract(KnowledgeCarrier carrier);
 }

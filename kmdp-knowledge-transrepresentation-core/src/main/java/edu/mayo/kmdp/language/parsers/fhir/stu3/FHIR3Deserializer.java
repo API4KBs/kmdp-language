@@ -14,12 +14,9 @@ import java.util.List;
 import java.util.Optional;
 import javax.inject.Named;
 import org.omg.spec.api4kp._1_0.AbstractCarrier;
-import org.omg.spec.api4kp._1_0.services.ASTCarrier;
-import org.omg.spec.api4kp._1_0.services.BinaryCarrier;
-import org.omg.spec.api4kp._1_0.services.DocumentCarrier;
-import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
 import org.omg.spec.api4kp._1_0.services.KPSupport;
+import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 
 @Named
@@ -42,56 +39,57 @@ public class FHIR3Deserializer extends AbstractDeSerializer {
   }
 
   @Override
-  public Optional<ExpressionCarrier> decode(BinaryCarrier carrier) {
-    return Optional.of(
-        (ExpressionCarrier) AbstractCarrier.of(new String(carrier.getEncodedExpression()))
-    );
+  public Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier) {
+    return carrier.asString()
+        .map(AbstractCarrier::of);
   }
 
   @Override
-  public Optional<DocumentCarrier> deserialize(ExpressionCarrier carrier) {
+  public Optional<KnowledgeCarrier> innerDeserialize(KnowledgeCarrier carrier) {
     return Optional.empty();
   }
 
   @Override
-  public Optional<ASTCarrier> parse(ExpressionCarrier carrier) {
+  public Optional<KnowledgeCarrier> innerParse(KnowledgeCarrier carrier) {
     switch (carrier.getRepresentation().getFormat().asEnum()) {
       case JSON:
-        return Optional.of((ASTCarrier) AbstractCarrier.ofAst(FhirContext.forDstu3().newJsonParser()
-            .parseResource(carrier.getSerializedExpression())));
+        return carrier.asString()
+            .map(str -> AbstractCarrier.ofAst(FhirContext.forDstu3().newJsonParser()
+                .parseResource(str)));
       case XML_1_1:
-        return Optional.of((ASTCarrier) AbstractCarrier.ofAst(FhirContext.forDstu3().newXmlParser()
-            .parseResource(carrier.getSerializedExpression())));
+        return carrier.asString()
+            .map(str -> AbstractCarrier.ofAst(FhirContext.forDstu3().newXmlParser()
+                .parseResource(str)));
       default:
         return Optional.empty();
     }
   }
 
   @Override
-  public Optional<ASTCarrier> abstrakt(DocumentCarrier carrier) {
+  public Optional<KnowledgeCarrier> innerAbstract(KnowledgeCarrier carrier) {
     return Optional.empty();
   }
 
 
 
   @Override
-  public Optional<BinaryCarrier> encode(ExpressionCarrier carrier, SyntacticRepresentation into) {
+  public Optional<KnowledgeCarrier> innerEncode(KnowledgeCarrier carrier, SyntacticRepresentation into) {
     return Optional.empty();
   }
 
   @Override
-  public Optional<ExpressionCarrier> externalize(ASTCarrier carrier, SyntacticRepresentation into) {
+  public Optional<KnowledgeCarrier> innerExternalize(KnowledgeCarrier carrier, SyntacticRepresentation into) {
     return Optional.empty();
   }
 
   @Override
-  public Optional<ExpressionCarrier> serialize(DocumentCarrier carrier,
+  public Optional<KnowledgeCarrier> innerSerialize(KnowledgeCarrier carrier,
       SyntacticRepresentation into) {
     return Optional.empty();
   }
 
   @Override
-  public Optional<DocumentCarrier> concretize(ASTCarrier carrier, SyntacticRepresentation into) {
+  public Optional<KnowledgeCarrier> innerConcretize(KnowledgeCarrier carrier, SyntacticRepresentation into) {
     return Optional.empty();
   }
 }

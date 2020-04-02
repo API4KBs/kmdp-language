@@ -17,13 +17,10 @@ import static java.util.Collections.emptyList;
 
 import edu.mayo.kmdp.tranx.v4.server.DetectApiInternal;
 import edu.mayo.kmdp.util.JaxbUtil;
+import edu.mayo.kmdp.util.Util;
 import java.io.ByteArrayInputStream;
 import java.util.Arrays;
 import org.omg.spec.api4kp._1_0.Answer;
-import org.omg.spec.api4kp._1_0.services.ASTCarrier;
-import org.omg.spec.api4kp._1_0.services.BinaryCarrier;
-import org.omg.spec.api4kp._1_0.services.DocumentCarrier;
-import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 import org.w3c.dom.Document;
@@ -39,25 +36,29 @@ public abstract class XMLBasedLanguageDetector<T> implements DetectApiInternal {
     boolean isLang = false;
 
     try {
-      if (sourceArtifact instanceof BinaryCarrier) {
-        byte[] data = ((BinaryCarrier) sourceArtifact).getEncodedExpression();
-        isLang = Arrays.equals("<".getBytes(), Arrays.copyOfRange(data, 0, 1))
-            && JaxbUtil.unmarshall(root,
-            root,
-            new ByteArrayInputStream(data)).isPresent();
-      } else if (sourceArtifact instanceof ExpressionCarrier) {
-        String str = ((ExpressionCarrier) sourceArtifact).getSerializedExpression();
-
-        isLang = str.startsWith("<") && JaxbUtil.unmarshall(root,
-            root,
-            str).isPresent();
-      } else if (sourceArtifact instanceof DocumentCarrier) {
-        Object dox = ((DocumentCarrier) sourceArtifact).getStructuredExpression();
-        isLang = dox instanceof Document && JaxbUtil.unmarshall(root,
-            root,
-            (Document) dox).isPresent();
-      } else if (sourceArtifact instanceof ASTCarrier) {
-        isLang = root.isInstance(((ASTCarrier) sourceArtifact).getParsedExpression());
+      switch (sourceArtifact.getLevel().asEnum()) {
+        case Encoded_Knowledge_Expression:
+          isLang = sourceArtifact.asBinary()
+              .filter(data -> Arrays.equals("<".getBytes(), Arrays.copyOfRange(data, 0, 1)))
+              .flatMap(data -> JaxbUtil.unmarshall(root, root, new ByteArrayInputStream(data)))
+              .isPresent();
+          break;
+        case Concrete_Knowledge_Expression:
+          isLang = sourceArtifact.asString()
+              .filter(str -> !Util.isEmpty(str) && str.charAt(0) == '<')
+              .flatMap(str -> JaxbUtil.unmarshall(root, root, str))
+              .isPresent();
+          break;
+        case Parsed_Knowedge_Expression:
+          Object dox = sourceArtifact.getExpression();
+          isLang = dox instanceof Document && JaxbUtil.unmarshall(root,
+              root,
+              (Document) dox).isPresent();
+          break;
+        case Abstract_Knowledge_Expression:
+          isLang = root.isInstance(sourceArtifact.getExpression());
+          break;
+        default:
       }
     } catch (Exception e) {
       return Answer.failed();

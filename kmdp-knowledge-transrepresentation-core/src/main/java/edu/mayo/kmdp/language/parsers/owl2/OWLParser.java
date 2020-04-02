@@ -34,17 +34,15 @@ import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import javax.inject.Named;
 import org.apache.jena.vocabulary.DCTerms;
 import org.omg.spec.api4kp._1_0.Answer;
-import org.omg.spec.api4kp._1_0.services.ASTCarrier;
-import org.omg.spec.api4kp._1_0.services.BinaryCarrier;
-import org.omg.spec.api4kp._1_0.services.DocumentCarrier;
-import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
 import org.omg.spec.api4kp._1_0.services.KPSupport;
+import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.formats.RDFXMLDocumentFormat;
@@ -64,25 +62,28 @@ public class OWLParser extends AbstractDeSerializer implements DeserializeApiInt
 
 
   @Override
-  public Optional<ASTCarrier> abstrakt(DocumentCarrier carrier) {
+  public Optional<KnowledgeCarrier> innerAbstract(KnowledgeCarrier carrier) {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public Optional<ExpressionCarrier> decode(BinaryCarrier carrier) {
-    return Optional.of(new ExpressionCarrier()
-        .withSerializedExpression(new String(carrier.getEncodedExpression()))
-        .withRepresentation(
-            getParseResultRepresentation(carrier, ParsingLevelSeries.Concrete_Knowledge_Expression)));
+  public Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier) {
+    return carrier.asBinary()
+        .map(String::new)
+        .map(str -> new KnowledgeCarrier()
+            .withExpression(str)
+            .withRepresentation(
+                getParseResultRepresentation(carrier,
+                    ParsingLevelSeries.Concrete_Knowledge_Expression)));
   }
 
   @Override
-  public Optional<DocumentCarrier> deserialize(ExpressionCarrier carrier) {
+  public Optional<KnowledgeCarrier> innerDeserialize(KnowledgeCarrier carrier) {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public Optional<ASTCarrier> parse(ExpressionCarrier carrier) {
+  public Optional<KnowledgeCarrier> innerParse(KnowledgeCarrier carrier) {
     try {
       OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
       OWLOntologyLoaderConfiguration conf = new OWLOntologyLoaderConfiguration()
@@ -90,9 +91,14 @@ public class OWLParser extends AbstractDeSerializer implements DeserializeApiInt
           .addIgnoredImport(IRI.create(DCTerms.getURI()));
       manager.setOntologyLoaderConfiguration(conf);
 
+      Optional<byte[]> bytes = carrier.asBinary();
+      if (!bytes.isPresent()) {
+        return Optional.empty();
+      }
       OWLOntology onto = manager.loadOntologyFromOntologyDocument(
-          new ByteArrayInputStream(carrier.getSerializedExpression().getBytes()));
-      return Optional.of(new ASTCarrier().withParsedExpression(onto)
+          new ByteArrayInputStream(bytes.get()));
+      return Optional.of(new KnowledgeCarrier()
+          .withExpression(onto)
           .withLevel(ParsingLevelSeries.Abstract_Knowledge_Expression)
           .withRepresentation(rep(OWL_2)));
     } catch (OWLOntologyCreationException e) {
@@ -101,27 +107,36 @@ public class OWLParser extends AbstractDeSerializer implements DeserializeApiInt
   }
 
   @Override
-  public Optional<DocumentCarrier> concretize(ASTCarrier carrier, SyntacticRepresentation into) {
+  public Optional<KnowledgeCarrier> innerConcretize(KnowledgeCarrier carrier, SyntacticRepresentation into) {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public Optional<BinaryCarrier> encode(ExpressionCarrier carrier, SyntacticRepresentation into) {
-    return Optional.of(new BinaryCarrier()
-        .withEncodedExpression(carrier.getSerializedExpression().getBytes())
-        .withRepresentation(
-            getSerializeResultRepresentation(carrier, ParsingLevelSeries.Encoded_Knowledge_Expression)));
+  public Optional<KnowledgeCarrier> innerEncode(KnowledgeCarrier carrier,
+      SyntacticRepresentation into) {
+    return carrier.asBinary()
+        .map(bytes -> new KnowledgeCarrier()
+            .withExpression(bytes)
+            .withRepresentation(
+                getSerializeResultRepresentation(carrier,
+                    ParsingLevelSeries.Encoded_Knowledge_Expression)));
   }
 
   @Override
-  public Optional<ExpressionCarrier> externalize(ASTCarrier carrier, SyntacticRepresentation into) {
+  public Optional<KnowledgeCarrier> innerExternalize(KnowledgeCarrier carrier, SyntacticRepresentation into) {
     try {
-      OWLOntology onto = (OWLOntology) carrier.getParsedExpression();
+      Optional<OWLOntology> onto = carrier.as(OWLOntology.class);
+      if (!onto.isPresent()) {
+        return Optional.empty();
+      }
+
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      OWLManager.createOWLOntologyManager().saveOntology(onto, new RDFXMLDocumentFormat(), baos);
+      OWLManager.createOWLOntologyManager()
+          .saveOntology(onto.get(), new RDFXMLDocumentFormat(), baos);
       return Optional
-          .of(new ExpressionCarrier().withLevel(ParsingLevelSeries.Concrete_Knowledge_Expression)
-              .withSerializedExpression(new String(baos.toByteArray()))
+          .of(new KnowledgeCarrier()
+              .withLevel(ParsingLevelSeries.Concrete_Knowledge_Expression)
+              .withExpression(new String(baos.toByteArray()))
               .withRepresentation(
                   rep(OWL_2, RDF_XML_Syntax, XML_1_1)));
     } catch (OWLOntologyStorageException e) {
@@ -130,7 +145,7 @@ public class OWLParser extends AbstractDeSerializer implements DeserializeApiInt
   }
 
   @Override
-  public Optional<ExpressionCarrier> serialize(DocumentCarrier carrier,
+  public Optional<KnowledgeCarrier> innerSerialize(KnowledgeCarrier carrier,
       SyntacticRepresentation into) {
     throw new UnsupportedOperationException();
   }
@@ -138,7 +153,7 @@ public class OWLParser extends AbstractDeSerializer implements DeserializeApiInt
 
   @Override
   protected List<SyntacticRepresentation> getSupportedRepresentations() {
-    return Arrays.asList(
+    return Collections.singletonList(
         rep(OWL_2, RDF_XML_Syntax, XML_1_1));
   }
 

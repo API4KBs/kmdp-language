@@ -16,36 +16,33 @@
 package edu.mayo.kmdp.language.parsers;
 
 import java.util.Optional;
-import org.omg.spec.api4kp._1_0.services.ASTCarrier;
-import org.omg.spec.api4kp._1_0.services.BinaryCarrier;
-import org.omg.spec.api4kp._1_0.services.DocumentCarrier;
-import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
+import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 
 public interface Lowerer {
 
 
-  default Optional<BinaryCarrier> encode(ExpressionCarrier carrier) {
-    return encode(carrier,null);
+  default Optional<KnowledgeCarrier> innerEncode(KnowledgeCarrier carrier) {
+    return innerEncode(carrier,null);
   }
 
-  default Optional<ExpressionCarrier> externalize(ASTCarrier carrier) {
-    return externalize(carrier,null);
+  default Optional<KnowledgeCarrier> innerExternalize(KnowledgeCarrier carrier) {
+    return innerExternalize(carrier,null);
   }
 
-  default Optional<ExpressionCarrier> serialize(DocumentCarrier carrier) {
-    return serialize(carrier,null);
+  default Optional<KnowledgeCarrier> innerSerialize(KnowledgeCarrier carrier) {
+    return innerSerialize(carrier,null);
   }
 
-  default Optional<DocumentCarrier> concretize(ASTCarrier carrier) {
-    return concretize(carrier,null);
+  default Optional<KnowledgeCarrier> innerConcretize(KnowledgeCarrier carrier) {
+    return innerConcretize(carrier,null);
   }
 
-  Optional<BinaryCarrier> encode(ExpressionCarrier carrier, SyntacticRepresentation into);
+  Optional<KnowledgeCarrier> innerEncode(KnowledgeCarrier carrier, SyntacticRepresentation into);
 
-  Optional<ExpressionCarrier> externalize(ASTCarrier carrier, SyntacticRepresentation into);
+  Optional<KnowledgeCarrier> innerExternalize(KnowledgeCarrier carrier, SyntacticRepresentation into);
 
-  Optional<ExpressionCarrier> serialize(DocumentCarrier carrier, SyntacticRepresentation into);
+  Optional<KnowledgeCarrier> innerSerialize(KnowledgeCarrier carrier, SyntacticRepresentation into);
 
-  Optional<DocumentCarrier> concretize(ASTCarrier carrier, SyntacticRepresentation into);
+  Optional<KnowledgeCarrier> innerConcretize(KnowledgeCarrier carrier, SyntacticRepresentation into);
 }

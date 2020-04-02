@@ -16,8 +16,6 @@
 package edu.mayo.kmdp.language.detectors.html;
 
 import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Detect_Language_Information_Task;
-import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel._20190801.ParsingLevel.Concrete_Knowledge_Expression;
-import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel._20190801.ParsingLevel.Encoded_Knowledge_Expression;
 import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.TXT;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.HTML;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
@@ -32,8 +30,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.safety.Cleaner;
 import org.jsoup.safety.Whitelist;
 import org.omg.spec.api4kp._1_0.Answer;
-import org.omg.spec.api4kp._1_0.services.BinaryCarrier;
-import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
 import org.omg.spec.api4kp._1_0.services.KPSupport;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
@@ -73,15 +69,7 @@ public class HTMLDetector implements DetectApiInternal {
   }
 
   private Optional<String> getSerializedContent(KnowledgeCarrier sourceArtifact) {
-    if (sourceArtifact.getLevel().sameAs(Encoded_Knowledge_Expression)
-        || sourceArtifact instanceof BinaryCarrier) {
-      return Optional.of(new String(((BinaryCarrier) sourceArtifact).getEncodedExpression()));
-    }
-    if (sourceArtifact.getLevel().sameAs(Concrete_Knowledge_Expression)
-        || sourceArtifact instanceof ExpressionCarrier) {
-      return Optional.of(((ExpressionCarrier) sourceArtifact).getSerializedExpression());
-    }
-    return Optional.empty();
+    return sourceArtifact.asString();
   }
 
 

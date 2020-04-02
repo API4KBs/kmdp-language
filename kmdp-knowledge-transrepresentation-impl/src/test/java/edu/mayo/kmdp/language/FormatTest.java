@@ -29,10 +29,10 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import javax.inject.Inject;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.omg.spec.api4kp._1_0.AbstractCarrier;
 import org.omg.spec.api4kp._1_0.Answer;
-import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
 import org.omg.spec.api4kp._1_0.services.KPComponent;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -66,11 +66,12 @@ public class FormatTest {
                         Charset.defaultCharset())));
 
     assertTrue(ans.isSuccess());
-    assertTrue(ans.get() instanceof ExpressionCarrier);
     try {
       OWLOntology o = OWLManager.createOWLOntologyManager()
           .loadOntologyFromOntologyDocument(new ByteArrayInputStream(
-              ((ExpressionCarrier) ans.get()).getSerializedExpression().getBytes()));
+              ans.flatOpt(AbstractCarrier::asBinary)
+                  .orElseGet(Assertions::fail)
+          ));
       assertEquals(new RDFXMLDocumentFormat(), o.getFormat());
     } catch (OWLOntologyCreationException e) {
       fail(e.getMessage());

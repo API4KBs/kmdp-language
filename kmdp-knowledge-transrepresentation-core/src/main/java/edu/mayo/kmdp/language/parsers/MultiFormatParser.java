@@ -27,11 +27,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import javax.inject.Named;
-import org.omg.spec.api4kp._1_0.services.ASTCarrier;
-import org.omg.spec.api4kp._1_0.services.BinaryCarrier;
-import org.omg.spec.api4kp._1_0.services.DocumentCarrier;
-import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
+import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 
 @Named
@@ -53,10 +50,10 @@ public abstract class MultiFormatParser<T> extends AbstractDeSerializer implemen
   }
 
   @Override
-  public Optional<ASTCarrier> abstrakt(DocumentCarrier carrier) {
+  public Optional<KnowledgeCarrier> innerAbstract(KnowledgeCarrier carrier) {
     return parserSet.stream()
         .filter(l -> isCandidate(l, carrier.getRepresentation()))
-        .map(l -> l.abstrakt(carrier))
+        .map(l -> l.innerAbstract(carrier))
         .flatMap(StreamUtil::trimStream)
         .findFirst();
   }
@@ -67,28 +64,28 @@ public abstract class MultiFormatParser<T> extends AbstractDeSerializer implemen
   }
 
   @Override
-  public Optional<ExpressionCarrier> decode(BinaryCarrier carrier) {
+  public Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier) {
     return parserSet.stream()
         .filter(l -> isCandidate(l, carrier.getRepresentation()))
-        .map(l -> l.decode(carrier))
+        .map(l -> l.innerDecode(carrier))
         .flatMap(StreamUtil::trimStream)
         .findFirst();
   }
 
   @Override
-  public Optional<DocumentCarrier> deserialize(ExpressionCarrier carrier) {
+  public Optional<KnowledgeCarrier> innerDeserialize(KnowledgeCarrier carrier) {
     return parserSet.stream()
         .filter(l -> isCandidate(l, carrier.getRepresentation()))
-        .map(l -> l.deserialize(carrier))
+        .map(l -> l.innerDeserialize(carrier))
         .flatMap(StreamUtil::trimStream)
         .findFirst();
   }
 
   @Override
-  public Optional<ASTCarrier> parse(ExpressionCarrier carrier) {
+  public Optional<KnowledgeCarrier> innerParse(KnowledgeCarrier carrier) {
     return parserSet.stream()
         .filter(l -> isCandidate(l, carrier.getRepresentation()))
-        .map(l -> l.parse(carrier))
+        .map(l -> l.innerParse(carrier))
         .flatMap(StreamUtil::trimStream)
         .findFirst();
   }
@@ -98,61 +95,61 @@ public abstract class MultiFormatParser<T> extends AbstractDeSerializer implemen
 
 
   @Override
-  public Optional<DocumentCarrier> concretize(ASTCarrier carrier, SyntacticRepresentation into) {
+  public Optional<KnowledgeCarrier> innerConcretize(KnowledgeCarrier carrier, SyntacticRepresentation into) {
     if (into == null) {
-      return xmlParser.concretize(carrier);
+      return xmlParser.innerConcretize(carrier);
     }
     switch (into.getFormat().asEnum()) {
       case XML_1_1:
-        return xmlParser.concretize(carrier);
+        return xmlParser.innerConcretize(carrier);
       case JSON:
-        return jsonParser.concretize(carrier);
+        return jsonParser.innerConcretize(carrier);
       default:
         throw new UnsupportedOperationException();
     }
   }
 
   @Override
-  public Optional<BinaryCarrier> encode(ExpressionCarrier carrier, SyntacticRepresentation into) {
+  public Optional<KnowledgeCarrier> innerEncode(KnowledgeCarrier carrier, SyntacticRepresentation into) {
     if (into == null) {
-      return xmlParser.encode(carrier);
+      return xmlParser.innerEncode(carrier);
     }
     switch (into.getFormat().asEnum()) {
       case XML_1_1:
-        return xmlParser.encode(carrier);
+        return xmlParser.innerEncode(carrier);
       case JSON:
-        return jsonParser.encode(carrier);
+        return jsonParser.innerEncode(carrier);
       default:
         throw new UnsupportedOperationException();
     }
   }
 
   @Override
-  public Optional<ExpressionCarrier> externalize(ASTCarrier carrier, SyntacticRepresentation into) {
+  public Optional<KnowledgeCarrier> innerExternalize(KnowledgeCarrier carrier, SyntacticRepresentation into) {
     if (into == null) {
-      return xmlParser.externalize(carrier);
+      return xmlParser.innerExternalize(carrier);
     }
     switch (into.getFormat().asEnum()) {
       case XML_1_1:
-        return xmlParser.externalize(carrier);
+        return xmlParser.innerExternalize(carrier);
       case JSON:
-        return jsonParser.externalize(carrier);
+        return jsonParser.innerExternalize(carrier);
       default:
         throw new UnsupportedOperationException();
     }
   }
 
   @Override
-  public Optional<ExpressionCarrier> serialize(DocumentCarrier carrier,
+  public Optional<KnowledgeCarrier> innerSerialize(KnowledgeCarrier carrier,
       SyntacticRepresentation into) {
     if (into == null) {
-      return xmlParser.serialize(carrier);
+      return xmlParser.innerSerialize(carrier);
     }
     switch (into.getFormat().asEnum()) {
       case XML_1_1:
-        return xmlParser.serialize(carrier);
+        return xmlParser.innerSerialize(carrier);
       case JSON:
-        return jsonParser.serialize(carrier);
+        return jsonParser.innerSerialize(carrier);
       default:
         throw new UnsupportedOperationException();
     }

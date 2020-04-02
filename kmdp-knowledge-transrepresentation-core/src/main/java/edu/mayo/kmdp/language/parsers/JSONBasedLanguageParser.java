@@ -23,10 +23,7 @@ import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries;
 import java.util.Optional;
-import org.omg.spec.api4kp._1_0.services.ASTCarrier;
-import org.omg.spec.api4kp._1_0.services.BinaryCarrier;
-import org.omg.spec.api4kp._1_0.services.DocumentCarrier;
-import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
+import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 
 public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializer implements
@@ -35,80 +32,92 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializer im
   protected Class<T> root;
 
   @Override
-  public Optional<ExpressionCarrier> decode(BinaryCarrier carrier) {
-    return Optional.of(new ExpressionCarrier()
-        .withSerializedExpression(new String(carrier.getEncodedExpression()))
-        .withRepresentation(
-            getParseResultRepresentation(carrier, ParsingLevelSeries.Concrete_Knowledge_Expression)));
-  }
-
-  @Override
-  public Optional<DocumentCarrier> deserialize(ExpressionCarrier carrier) {
-    return JSonUtil.readJson(carrier.getSerializedExpression().getBytes())
-        .map(json -> new DocumentCarrier()
-            .withStructuredExpression(json)
+  public Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier) {
+    return carrier.asString()
+        .map(str -> new KnowledgeCarrier()
+            .withExpression(str)
             .withRepresentation(
-                getParseResultRepresentation(carrier, ParsingLevelSeries.Parsed_Knowedge_Expression)));
+                getParseResultRepresentation(carrier,
+                    ParsingLevelSeries.Concrete_Knowledge_Expression)));
   }
 
   @Override
-  public Optional<ASTCarrier> parse(ExpressionCarrier carrier) {
-    return JSonUtil.parseJson(carrier.getSerializedExpression(), root)
-        .map(ast -> new ASTCarrier()
-            .withParsedExpression(ast)
+  public Optional<KnowledgeCarrier> innerDeserialize(KnowledgeCarrier carrier) {
+    return carrier.asString()
+        .flatMap(JSonUtil::readJson)
+        .map(json -> new KnowledgeCarrier()
+            .withExpression(json)
             .withRepresentation(
-                getParseResultRepresentation(carrier, ParsingLevelSeries.Abstract_Knowledge_Expression)));
+                getParseResultRepresentation(carrier,
+                    ParsingLevelSeries.Parsed_Knowedge_Expression)));
   }
 
-
   @Override
-  public Optional<ASTCarrier> abstrakt(DocumentCarrier carrier) {
-    JsonNode jNode = (JsonNode) carrier.getStructuredExpression();
-    return JSonUtil.parseJson(jNode, root)
-        .map(ast -> new ASTCarrier()
-            .withParsedExpression(ast)
+  public Optional<KnowledgeCarrier> innerParse(KnowledgeCarrier carrier) {
+    return carrier.asString()
+        .flatMap(str -> JSonUtil.parseJson(str, root))
+        .map(ast -> new KnowledgeCarrier()
+            .withExpression(ast)
             .withRepresentation(
-                getParseResultRepresentation(carrier, ParsingLevelSeries.Abstract_Knowledge_Expression)));
+                getParseResultRepresentation(carrier,
+                    ParsingLevelSeries.Abstract_Knowledge_Expression)));
   }
 
 
   @Override
-  public Optional<BinaryCarrier> encode(ExpressionCarrier carrier, SyntacticRepresentation into) {
-    return Optional.of(new BinaryCarrier()
-        .withEncodedExpression(carrier.getSerializedExpression().getBytes())
-        .withRepresentation(
-            getSerializeResultRepresentation(carrier, ParsingLevelSeries.Encoded_Knowledge_Expression)));
+  public Optional<KnowledgeCarrier> innerAbstract(KnowledgeCarrier carrier) {
+    return carrier.as(JsonNode.class)
+        .flatMap(jNode -> JSonUtil.parseJson(jNode, root))
+        .map(ast -> new KnowledgeCarrier()
+            .withExpression(ast)
+            .withRepresentation(
+                getParseResultRepresentation(carrier,
+                    ParsingLevelSeries.Abstract_Knowledge_Expression)));
+  }
+
+
+  @Override
+  public Optional<KnowledgeCarrier> innerEncode(KnowledgeCarrier carrier,
+      SyntacticRepresentation into) {
+    return carrier.asString()
+        .map(str -> new KnowledgeCarrier()
+            .withExpression(str.getBytes())
+            .withRepresentation(
+                getSerializeResultRepresentation(carrier,
+                    ParsingLevelSeries.Encoded_Knowledge_Expression)));
   }
 
   @Override
-  public Optional<ExpressionCarrier> externalize(ASTCarrier carrier, SyntacticRepresentation into) {
-    T obj = (T) carrier.getParsedExpression();
-    return JSonUtil.writeJson(obj)
+  public Optional<KnowledgeCarrier> innerExternalize(KnowledgeCarrier carrier,
+      SyntacticRepresentation into) {
+    return carrier.as(root)
+        .flatMap(JSonUtil::writeJson)
         .flatMap(Util::asString)
-        .map(str -> new ExpressionCarrier()
-            .withSerializedExpression(str)
+        .map(str -> new KnowledgeCarrier()
+            .withExpression(str)
             .withRepresentation(
                 getSerializeResultRepresentation(
                     carrier, ParsingLevelSeries.Concrete_Knowledge_Expression)));
   }
 
   @Override
-  public Optional<ExpressionCarrier> serialize(DocumentCarrier carrier,
+  public Optional<KnowledgeCarrier> innerSerialize(KnowledgeCarrier carrier,
       SyntacticRepresentation into) {
-    JsonNode jNode = (JsonNode) carrier.getStructuredExpression();
-    return Optional.of(new ExpressionCarrier()
-        .withSerializedExpression(jNode.toString())
-        .withRepresentation(getSerializeResultRepresentation(
-            carrier,
-            ParsingLevelSeries.Concrete_Knowledge_Expression)));
+    return carrier.as(JsonNode.class)
+        .map(jNode -> new KnowledgeCarrier()
+            .withExpression(jNode.toString())
+            .withRepresentation(getSerializeResultRepresentation(
+                carrier,
+                ParsingLevelSeries.Concrete_Knowledge_Expression)));
   }
 
   @Override
-  public Optional<DocumentCarrier> concretize(ASTCarrier carrier, SyntacticRepresentation into) {
-    T obj = (T) carrier.getParsedExpression();
-    return JSonUtil.toJsonNode(obj)
-        .map(json -> new DocumentCarrier()
-            .withStructuredExpression(json)
+  public Optional<KnowledgeCarrier> innerConcretize(KnowledgeCarrier carrier,
+      SyntacticRepresentation into) {
+    return carrier.as(root)
+        .flatMap(JSonUtil::toJsonNode)
+        .map(json -> new KnowledgeCarrier()
+            .withExpression(json)
             .withRepresentation(
                 getSerializeResultRepresentation(
                     carrier,

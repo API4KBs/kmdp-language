@@ -26,9 +26,6 @@ import javax.inject.Named;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.omg.spec.api4kp._1_0.Answer;
-import org.omg.spec.api4kp._1_0.services.BinaryCarrier;
-import org.omg.spec.api4kp._1_0.services.DocumentCarrier;
-import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
 import org.omg.spec.api4kp._1_0.services.KPSupport;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
@@ -45,35 +42,31 @@ public class JenaOwlRdfLifter implements
   public Answer<KnowledgeCarrier> lift(KnowledgeCarrier sourceArtifact,
       ParsingLevel level) {
     switch (sourceArtifact.getLevel().asEnum()) {
+
       case Encoded_Knowledge_Expression:
         switch (level.asEnum()) {
           case Encoded_Knowledge_Expression:
             return Answer.of(sourceArtifact);
           case Concrete_Knowledge_Expression:
-            String str = new String(((BinaryCarrier) sourceArtifact).getEncodedExpression());
-            return Answer.of(new ExpressionCarrier()
-                .withSerializedExpression(str)
-                .withAssetId(sourceArtifact.getAssetId())
-                .withLevel(level)
-                .withRepresentation(rep(sourceArtifact.getRepresentation().getLanguage(),
-                    sourceArtifact.getRepresentation().getSerialization(),
-                    TXT)));
+            return Answer.of(
+                sourceArtifact.asString()
+                    .map(str -> new KnowledgeCarrier()
+                        .withExpression(str)
+                        .withAssetId(sourceArtifact.getAssetId())
+                        .withLevel(level)
+                        .withRepresentation(rep(sourceArtifact.getRepresentation().getLanguage(),
+                            sourceArtifact.getRepresentation().getSerialization(),
+                            TXT))));
           case Parsed_Knowedge_Expression:
-            Model m = sourceArtifact.getRepresentation().getLanguage().sameAs(OWL_2)
-                ? ModelFactory.createOntologyModel()
-                : ModelFactory.createDefaultModel();
-            m.read(
-                new ByteArrayInputStream(((BinaryCarrier) sourceArtifact).getEncodedExpression()),
-                null);
-            return Answer.of(new DocumentCarrier()
-                .withStructuredExpression(m)
-                .withAssetId(sourceArtifact.getAssetId())
-                .withLevel(level)
-                .withRepresentation(rep(sourceArtifact.getRepresentation().getLanguage())));
+            return Answer.of(
+                sourceArtifact.asBinary()
+                .map(String::new)
+                .map(str -> readModel(sourceArtifact,str,level)));
           case Abstract_Knowledge_Expression:
           default:
-            throw new UnsupportedOperationException();
+            return Answer.unsupported();
         }
+
       case Concrete_Knowledge_Expression:
         switch (level.asEnum()) {
           case Encoded_Knowledge_Expression:
@@ -81,28 +74,34 @@ public class JenaOwlRdfLifter implements
           case Concrete_Knowledge_Expression:
             return Answer.of(sourceArtifact);
           case Parsed_Knowedge_Expression:
-            Model m = sourceArtifact.getRepresentation().getLanguage()
-                == OWL_2
-                ? ModelFactory.createOntologyModel()
-                : ModelFactory.createDefaultModel();
-            m.read(
-                new ByteArrayInputStream(
-                    ((ExpressionCarrier) sourceArtifact).getSerializedExpression().getBytes()),
-                null);
-            return Answer.of(new DocumentCarrier()
-                .withStructuredExpression(m)
-                .withAssetId(sourceArtifact.getAssetId())
-                .withLevel(level)
-                .withRepresentation(rep(sourceArtifact.getRepresentation().getLanguage())));
+            return Answer.of(
+                sourceArtifact.asString()
+                    .map(str -> readModel(sourceArtifact,str,level)));
           case Abstract_Knowledge_Expression:
           default:
-            throw new UnsupportedOperationException();
+            return Answer.unsupported();
         }
+
       case Parsed_Knowedge_Expression:
         return Answer.of(sourceArtifact);
       default:
-        throw new UnsupportedOperationException();
+        return Answer.unsupported();
     }
+  }
+
+  private KnowledgeCarrier readModel(KnowledgeCarrier sourceArtifact, String str,
+      ParsingLevel level) {
+    Model m = sourceArtifact.getRepresentation().getLanguage().sameAs(OWL_2)
+        ? ModelFactory.createOntologyModel()
+        : ModelFactory.createDefaultModel();
+
+    m.read(new ByteArrayInputStream(str.getBytes()), null);
+    return new KnowledgeCarrier()
+        .withExpression(m)
+        .withAssetId(sourceArtifact.getAssetId())
+        .withLevel(level)
+        .withRepresentation(
+            rep(sourceArtifact.getRepresentation().getLanguage()));
   }
 
 

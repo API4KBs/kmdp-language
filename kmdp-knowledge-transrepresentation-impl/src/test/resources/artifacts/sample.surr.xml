@@ -1,4 +1,5 @@
-<surr:knowledgeAsset xmlns:ann="http://kmdp.mayo.edu/metadata/annotations" xmlns:surr="http://kmdp.mayo.edu/metadata/surrogate" xmlns:id="http://www.omg.org/spec/API4KP/1.0/identifiers">
+<surr:knowledgeAsset xmlns:surr="http://kmdp.mayo.edu/metadata/surrogate"
+  xmlns:id="http://www.omg.org/spec/API4KP/1.0/identifiers">
   <surr:assetId
     uri="https://clinicalknowledgemanagement.mayo.edu/assets/2c6572ea-867d-4863-963a-b4bc5357429b" />
   <surr:formalType

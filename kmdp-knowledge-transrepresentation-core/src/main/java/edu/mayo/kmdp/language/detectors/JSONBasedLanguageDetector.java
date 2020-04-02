@@ -20,10 +20,6 @@ import edu.mayo.kmdp.tranx.v4.server.DetectApiInternal;
 import edu.mayo.kmdp.util.JSonUtil;
 import java.util.Collections;
 import org.omg.spec.api4kp._1_0.Answer;
-import org.omg.spec.api4kp._1_0.services.ASTCarrier;
-import org.omg.spec.api4kp._1_0.services.BinaryCarrier;
-import org.omg.spec.api4kp._1_0.services.DocumentCarrier;
-import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 
@@ -37,17 +33,26 @@ public abstract class JSONBasedLanguageDetector<T> implements DetectApiInternal 
     boolean isLang = false;
 
     try {
-      if (sourceArtifact instanceof BinaryCarrier) {
-        byte[] data = ((BinaryCarrier) sourceArtifact).getEncodedExpression();
-        isLang = JSonUtil.tryParseJson(new String(data), root).isPresent();
-      } else if (sourceArtifact instanceof ExpressionCarrier) {
-        String str = ((ExpressionCarrier) sourceArtifact).getSerializedExpression();
-        isLang = JSonUtil.tryParseJson(str, root).isPresent();
-      } else if (sourceArtifact instanceof DocumentCarrier) {
-        JsonNode node = (JsonNode) ((DocumentCarrier) sourceArtifact).getStructuredExpression();
-        isLang = JSonUtil.tryParseJson(node, root).isPresent();
-      } else if (sourceArtifact instanceof ASTCarrier) {
-        isLang = root.isInstance(((ASTCarrier) sourceArtifact).getParsedExpression());
+      switch (sourceArtifact.getLevel().asEnum()) {
+        case Encoded_Knowledge_Expression:
+          isLang = sourceArtifact.asBinary()
+              .flatMap(data -> JSonUtil.tryParseJson(new String(data), root))
+              .isPresent();
+          break;
+        case Concrete_Knowledge_Expression:
+          isLang = sourceArtifact.asString()
+              .flatMap(str -> JSonUtil.tryParseJson(str, root))
+              .isPresent();
+          break;
+        case Parsed_Knowedge_Expression:
+          Object node = sourceArtifact.getExpression();
+          isLang = node instanceof JsonNode
+              && JSonUtil.tryParseJson((JsonNode) node, root).isPresent();
+          break;
+        case Abstract_Knowledge_Expression:
+          isLang = root.isInstance(sourceArtifact.getExpression());
+          break;
+        default:
       }
     } catch (Exception e) {
       return Answer.failed();

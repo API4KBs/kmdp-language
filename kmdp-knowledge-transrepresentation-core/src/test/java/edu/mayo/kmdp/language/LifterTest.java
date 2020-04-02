@@ -33,7 +33,6 @@ import org.junit.jupiter.api.Test;
 import org.omg.spec.api4kp._1_0.AbstractCarrier;
 import org.omg.spec.api4kp._1_0.Answer;
 import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
-import org.omg.spec.api4kp._1_0.identifiers.URIIdentifier;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.semanticweb.owlapi.model.OWLOntology;
 
@@ -109,11 +108,11 @@ class LifterTest {
         parser.lift(carrier, Abstract_Knowledge_Expression);
 
     assertTrue(parsed.isSuccess());
-    KnowledgeCarrier astCarrier = parsed.get();
-    assertEquals(carrier.getAssetId(), astCarrier.getAssetId());
-    assertEquals(Abstract_Knowledge_Expression, astCarrier.getLevel().asEnum());
+    KnowledgeCarrier KnowledgeCarrier = parsed.get();
+    assertEquals(carrier.getAssetId(), KnowledgeCarrier.getAssetId());
+    assertEquals(Abstract_Knowledge_Expression, KnowledgeCarrier.getLevel().asEnum());
 
-    assertTrue(astCarrier.as(astRootClass).isPresent());
+    assertTrue(KnowledgeCarrier.is(astRootClass));
   }
 
 

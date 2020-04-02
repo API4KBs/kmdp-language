@@ -1,17 +1,15 @@
 /**
  * Copyright © 2018 Mayo Clinic (RSTKNOWLEDGEMGMT@mayo.edu)
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package edu.mayo.kmdp.language.parsers;
 
@@ -28,10 +26,6 @@ import java.util.List;
 import java.util.Optional;
 import org.omg.spec.api4kp._1_0.Answer;
 import org.omg.spec.api4kp._1_0.contrastors.ParsingLevelContrastor;
-import org.omg.spec.api4kp._1_0.services.ASTCarrier;
-import org.omg.spec.api4kp._1_0.services.BinaryCarrier;
-import org.omg.spec.api4kp._1_0.services.DocumentCarrier;
-import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 
@@ -58,60 +52,62 @@ public abstract class AbstractDeSerializer implements DeserializeApiInternal, Li
 
     KnowledgeCarrier result = null;
 
-    if (sourceArtifact instanceof BinaryCarrier) {
-      BinaryCarrier binary = (BinaryCarrier) sourceArtifact;
-      switch (into.asEnum()) {
-        case Abstract_Knowledge_Expression:
-          Optional<ASTCarrier> parsedBinary = this.decode(binary)
-              .flatMap(this::parse);
-          result = parsedBinary.orElse(null);
-          break;
-        case Parsed_Knowedge_Expression:
-          Optional<DocumentCarrier> deserializedBinary = this.decode(binary)
-              .flatMap(this::deserialize);
-          result = deserializedBinary.orElse(null);
-          break;
-        case Concrete_Knowledge_Expression:
-          Optional<ExpressionCarrier> decodedBinary = this.decode((binary));
-          result = decodedBinary.orElse(null);
-          break;
-        case Encoded_Knowledge_Expression:
-          result = binary;
-          break;
-        default:
-      }
-    } else if (sourceArtifact instanceof ExpressionCarrier) {
-      ExpressionCarrier expr = (ExpressionCarrier) sourceArtifact;
-      switch (into.asEnum()) {
-        case Abstract_Knowledge_Expression:
-          Optional<ASTCarrier> parsedExpr = this.parse(expr);
-          result = parsedExpr.orElse(null);
-          break;
-        case Parsed_Knowedge_Expression:
-          Optional<DocumentCarrier> deserializedExpr = this.deserialize(expr);
-          result = deserializedExpr.orElse(null);
-          break;
-        case Concrete_Knowledge_Expression:
-          result = expr;
-          break;
-        default:
-      }
-    } else if (sourceArtifact instanceof DocumentCarrier) {
-      DocumentCarrier doc = (DocumentCarrier) sourceArtifact;
-      switch (into.asEnum()) {
-        case Abstract_Knowledge_Expression:
-          Optional<ASTCarrier> parsedExpr = this.abstrakt(doc);
-          result = parsedExpr.orElse(null);
-          break;
-        case Parsed_Knowedge_Expression:
-          result = doc;
-          break;
-        default:
-      }
-    } else if (sourceArtifact instanceof ASTCarrier) {
-      result = sourceArtifact;
+    switch (sourceArtifact.getLevel().asEnum()) {
+      case Encoded_Knowledge_Expression:
+        switch (into.asEnum()) {
+          case Abstract_Knowledge_Expression:
+            Optional<KnowledgeCarrier> parsedBinary = this.innerDecode(sourceArtifact)
+                .flatMap(this::innerParse);
+            result = parsedBinary.orElse(null);
+            break;
+          case Parsed_Knowedge_Expression:
+            Optional<KnowledgeCarrier> deserializedBinary = this.innerDecode(sourceArtifact)
+                .flatMap(this::innerDeserialize);
+            result = deserializedBinary.orElse(null);
+            break;
+          case Concrete_Knowledge_Expression:
+            Optional<KnowledgeCarrier> decodedBinary = this.innerDecode((sourceArtifact));
+            result = decodedBinary.orElse(null);
+            break;
+          case Encoded_Knowledge_Expression:
+            result = sourceArtifact;
+            break;
+          default:
+        }
+        break;
+      case Concrete_Knowledge_Expression:
+        switch (into.asEnum()) {
+          case Abstract_Knowledge_Expression:
+            Optional<KnowledgeCarrier> parsedExpr = this.innerParse(sourceArtifact);
+            result = parsedExpr.orElse(null);
+            break;
+          case Parsed_Knowedge_Expression:
+            Optional<KnowledgeCarrier> deserializedExpr = this.innerDeserialize(sourceArtifact);
+            result = deserializedExpr.orElse(null);
+            break;
+          case Concrete_Knowledge_Expression:
+            result = sourceArtifact;
+            break;
+          default:
+        }
+        break;
+      case Parsed_Knowedge_Expression:
+        switch (into.asEnum()) {
+          case Abstract_Knowledge_Expression:
+            Optional<KnowledgeCarrier> parsedExpr = this.innerAbstract(sourceArtifact);
+            result = parsedExpr.orElse(null);
+            break;
+          case Parsed_Knowedge_Expression:
+            result = sourceArtifact;
+            break;
+          default:
+        }
+        break;
+      case Abstract_Knowledge_Expression:
+        result = sourceArtifact;
+        break;
+      default:
     }
-
     return result != null
         ? Answer.of(
         result.withAssetId(sourceArtifact.getAssetId())
@@ -142,65 +138,65 @@ public abstract class AbstractDeSerializer implements DeserializeApiInternal, Li
       return Answer.failed();
     }
 
-    if (sourceArtifact instanceof ASTCarrier) {
-      ASTCarrier ast = (ASTCarrier) sourceArtifact;
+    if (sourceArtifact instanceof KnowledgeCarrier) {
+      KnowledgeCarrier ast = (KnowledgeCarrier) sourceArtifact;
       return Answer.of(serializeAST(ast, toLevel, into));
-    } else if (sourceArtifact instanceof DocumentCarrier) {
-      DocumentCarrier doc = (DocumentCarrier) sourceArtifact;
+    } else if (sourceArtifact instanceof KnowledgeCarrier) {
+      KnowledgeCarrier doc = (KnowledgeCarrier) sourceArtifact;
       return Answer.of(serializeDoc(doc, toLevel, into));
-    } else if (sourceArtifact instanceof ExpressionCarrier) {
-      ExpressionCarrier expr = (ExpressionCarrier) sourceArtifact;
+    } else if (sourceArtifact instanceof KnowledgeCarrier) {
+      KnowledgeCarrier expr = (KnowledgeCarrier) sourceArtifact;
       return Answer.of(serializeExpression(expr, toLevel, into));
-    } else if (sourceArtifact instanceof BinaryCarrier) {
+    } else if (sourceArtifact instanceof KnowledgeCarrier) {
       return Answer.of(sourceArtifact);
     }
 
     return Answer.failed();
   }
 
-  private KnowledgeCarrier serializeExpression(ExpressionCarrier expr, ParsingLevel toLevel,
+  private KnowledgeCarrier serializeExpression(KnowledgeCarrier expr, ParsingLevel toLevel,
       SyntacticRepresentation into) {
     switch (toLevel.asEnum()) {
       case Concrete_Knowledge_Expression:
         return expr;
       case Encoded_Knowledge_Expression:
       default:
-        Optional<BinaryCarrier> encodedExpr = this.encode(expr, into);
+        Optional<KnowledgeCarrier> encodedExpr = this.innerEncode(expr, into);
         return encodedExpr.orElse(null);
     }
   }
 
-  private KnowledgeCarrier serializeDoc(DocumentCarrier doc, ParsingLevel toLevel,
+  private KnowledgeCarrier serializeDoc(KnowledgeCarrier doc, ParsingLevel toLevel,
       SyntacticRepresentation into) {
     switch (toLevel.asEnum()) {
       case Parsed_Knowedge_Expression:
         return doc;
       case Concrete_Knowledge_Expression:
-        Optional<ExpressionCarrier> serializedDoc = this.serialize(doc, into);
+        Optional<KnowledgeCarrier> serializedDoc = this.innerSerialize(doc, into);
         return serializedDoc.orElse(null);
       case Encoded_Knowledge_Expression:
       default:
-        Optional<BinaryCarrier> encodedDoc = this.serialize(doc, into)
-            .flatMap(this::encode);
+        Optional<KnowledgeCarrier> encodedDoc = this.innerSerialize(doc, into)
+            .flatMap(this::innerEncode);
         return encodedDoc.orElse(null);
     }
   }
 
-  protected KnowledgeCarrier serializeAST(ASTCarrier ast, ParsingLevel toLevel,
+  protected KnowledgeCarrier serializeAST(KnowledgeCarrier ast, ParsingLevel toLevel,
       SyntacticRepresentation into) {
     switch (toLevel.asEnum()) {
       case Abstract_Knowledge_Expression:
         return ast;
       case Parsed_Knowedge_Expression:
-        Optional<DocumentCarrier> concretizedAST = this.concretize(ast, into);
+        Optional<KnowledgeCarrier> concretizedAST = this.innerConcretize(ast, into);
         return concretizedAST.orElse(null);
       case Concrete_Knowledge_Expression:
-        Optional<ExpressionCarrier> serializedAST = this.externalize(ast, into);
+        Optional<KnowledgeCarrier> serializedAST = this.innerExternalize(ast, into);
         return serializedAST.orElse(null);
       case Encoded_Knowledge_Expression:
       default:
-        Optional<BinaryCarrier> encodedAST = this.externalize(ast, into)
-            .flatMap(this::encode);
+        Optional<KnowledgeCarrier> encodedAST = this.innerExternalize(ast, into)
+            .flatMap(this::innerEncode);
         return encodedAST.orElse(null);
     }
   }

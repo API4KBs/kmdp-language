@@ -14,7 +14,6 @@ import javax.inject.Named;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import org.omg.spec.api4kp._1_0.Answer;
-import org.omg.spec.api4kp._1_0.services.BinaryCarrier;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
 import org.omg.spec.api4kp._1_0.services.KPSupport;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
@@ -45,12 +44,12 @@ public class DMN12Validator implements ValidateApiInternal {
         isValid = new DMN12Parser()
             .lower(sourceArtifact, ParsingLevelSeries.Parsed_Knowedge_Expression)
             .flatOpt(kc ->
-                kc.asParseTree(Document.class))
+                kc.as(Document.class))
             .map(dox -> XMLUtil.validate(dox, dmn12Schema))
             .orElse(false);
         break;
       case Parsed_Knowedge_Expression:
-        isValid = sourceArtifact.asParseTree(Document.class)
+        isValid = sourceArtifact.as(Document.class)
             .map(dox -> XMLUtil.validate(dox,dmn12Schema))
             .orElse(false);
         break;
@@ -60,9 +59,11 @@ public class DMN12Validator implements ValidateApiInternal {
             .orElse(false);
         break;
       case Encoded_Knowledge_Expression:
-        isValid = XMLUtil.validate(
-            new StreamSource(new ByteArrayInputStream(((BinaryCarrier)sourceArtifact).getEncodedExpression())),
-            dmn12Schema);
+        isValid = sourceArtifact.asBinary()
+            .filter(bytes -> XMLUtil.validate(
+                new StreamSource(new ByteArrayInputStream(bytes)),
+                dmn12Schema))
+            .isPresent();
         break;
       default:
     }

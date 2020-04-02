@@ -53,9 +53,6 @@ import javax.inject.Named;
 import org.apache.jena.vocabulary.SKOS;
 import org.apache.xml.resolver.tools.CatalogResolver;
 import org.omg.spec.api4kp._1_0.Answer;
-import org.omg.spec.api4kp._1_0.services.ASTCarrier;
-import org.omg.spec.api4kp._1_0.services.BinaryCarrier;
-import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
 import org.omg.spec.api4kp._1_0.services.KPSupport;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
@@ -170,19 +167,13 @@ public class OWLDetector implements DetectApiInternal {
   protected Optional<OWLOntology> asOWL(KnowledgeCarrier sourceArtifact) {
     switch (sourceArtifact.getLevel().asEnum()) {
       case Abstract_Knowledge_Expression:
-        Object ast = ((ASTCarrier) sourceArtifact).getParsedExpression();
-        return ast instanceof OWLOntology ? Optional.of((OWLOntology) ast) : Optional.empty();
-
+        Object expr = sourceArtifact.getExpression();
+        return (expr instanceof OWLOntology) ? Optional.of((OWLOntology) expr) : Optional.empty();
       case Encoded_Knowledge_Expression:
-        return loadOntology(
-            new ByteArrayInputStream(((BinaryCarrier) sourceArtifact).getEncodedExpression()));
       case Concrete_Knowledge_Expression:
-        return loadOntology(
-            new ByteArrayInputStream(
-                ((ExpressionCarrier) sourceArtifact).getSerializedExpression().getBytes()));
-
-      case Parsed_Knowedge_Expression:
-
+        return sourceArtifact.asBinary()
+            .map(ByteArrayInputStream::new)
+            .flatMap(this::loadOntology);
       default:
         return Optional.empty();
     }

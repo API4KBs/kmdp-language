@@ -35,8 +35,6 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.omg.spec.api4kp._1_0.AbstractCarrier;
 import org.omg.spec.api4kp._1_0.Answer;
-import org.omg.spec.api4kp._1_0.services.BinaryCarrier;
-import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
 import org.omg.spec.api4kp._1_0.services.KPSupport;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
@@ -79,11 +77,12 @@ public class OWLtoSKOSTranscreator extends AbstractSimpleTranslator {
     InputStream is;
     switch (sourceArtifact.getLevel().asEnum()) {
       case Encoded_Knowledge_Expression:
-        is = new ByteArrayInputStream(((BinaryCarrier) sourceArtifact).getEncodedExpression());
+        is = new ByteArrayInputStream(sourceArtifact.asBinary()
+            .orElseThrow(IllegalArgumentException::new));
         break;
       case Concrete_Knowledge_Expression:
-        is = new ByteArrayInputStream(
-            ((ExpressionCarrier) sourceArtifact).getSerializedExpression().getBytes());
+        is = new ByteArrayInputStream(sourceArtifact.asString().map(String::getBytes)
+            .orElseThrow(IllegalArgumentException::new));
         break;
       case Parsed_Knowedge_Expression:
       case Abstract_Knowledge_Expression:

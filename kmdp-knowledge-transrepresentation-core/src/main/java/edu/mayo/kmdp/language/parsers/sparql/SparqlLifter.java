@@ -27,10 +27,6 @@ import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevel;
 import javax.inject.Named;
 import org.apache.jena.query.ParameterizedSparqlString;
 import org.omg.spec.api4kp._1_0.Answer;
-import org.omg.spec.api4kp._1_0.services.ASTCarrier;
-import org.omg.spec.api4kp._1_0.services.BinaryCarrier;
-import org.omg.spec.api4kp._1_0.services.DocumentCarrier;
-import org.omg.spec.api4kp._1_0.services.ExpressionCarrier;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
 import org.omg.spec.api4kp._1_0.services.KPSupport;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
@@ -46,33 +42,25 @@ public class SparqlLifter implements
   @Override
   public Answer<KnowledgeCarrier> lift(KnowledgeCarrier sourceArtifact,
       ParsingLevel level) {
-    String sparql;
-    switch (sourceArtifact.getLevel().asEnum()) {
-      case Encoded_Knowledge_Expression:
-        sparql = new String(((BinaryCarrier) sourceArtifact).getEncodedExpression());
-        break;
-      case Concrete_Knowledge_Expression:
-        sparql = ((ExpressionCarrier) sourceArtifact).getSerializedExpression();
-        break;
-      default:
-        throw new UnsupportedOperationException();
-    }
+    String sparql = sourceArtifact.asString()
+        .orElseThrow(UnsupportedOperationException::new);
+
     switch (level.asEnum()) {
       case Concrete_Knowledge_Expression:
-        return Answer.of(new ExpressionCarrier()
-            .withSerializedExpression(sparql)
+        return Answer.of(new KnowledgeCarrier()
+            .withExpression(sparql)
             .withAssetId(sourceArtifact.getAssetId())
             .withLevel(level)
             .withRepresentation(rep(SPARQL_1_1, TXT)));
       case Parsed_Knowedge_Expression:
-        return Answer.of(new DocumentCarrier()
-            .withStructuredExpression(new ParameterizedSparqlString(sparql))
+        return Answer.of(new KnowledgeCarrier()
+            .withExpression(new ParameterizedSparqlString(sparql))
             .withAssetId(sourceArtifact.getAssetId())
             .withLevel(level)
             .withRepresentation(rep(SPARQL_1_1)));
       case Abstract_Knowledge_Expression:
-        return Answer.of(new ASTCarrier()
-            .withParsedExpression(new ParameterizedSparqlString(sparql).asQuery())
+        return Answer.of(new KnowledgeCarrier()
+            .withExpression(new ParameterizedSparqlString(sparql).asQuery())
             .withAssetId(sourceArtifact.getAssetId())
             .withLevel(level)
             .withRepresentation(rep(SPARQL_1_1)));

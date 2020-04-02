@@ -38,7 +38,6 @@ import org.junit.jupiter.api.Test;
 import org.omg.spec.api4kp._1_0.AbstractCarrier;
 import org.omg.spec.api4kp._1_0.Answer;
 import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
-import org.omg.spec.api4kp._1_0.services.DocumentCarrier;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.semanticweb.owlapi.model.OWLOntology;
 
@@ -147,15 +146,14 @@ class ParserTest {
         parser.lift(carrier, level);
 
     assertTrue(parsed.isSuccess());
-    KnowledgeCarrier astCarrier = parsed.get();
-    assertEquals(carrier.getAssetId(), astCarrier.getAssetId());
-    assertEquals(level, astCarrier.getLevel().asEnum());
+    KnowledgeCarrier KnowledgeCarrier = parsed.get();
+    assertEquals(carrier.getAssetId(), KnowledgeCarrier.getAssetId());
+    assertEquals(level, KnowledgeCarrier.getLevel().asEnum());
 
     if (level.sameAs(Abstract_Knowledge_Expression)) {
-      assertTrue(astCarrier.as(astRootClass).isPresent());
+      assertTrue(KnowledgeCarrier.as(astRootClass).isPresent());
     } else if (level.sameAs(Encoded_Knowledge_Expression)) {
-      assertTrue(astCarrier instanceof DocumentCarrier);
-      assertTrue(astRootClass.isAssignableFrom(((DocumentCarrier)astCarrier).getStructuredExpression().getClass()));
+      assertTrue(astRootClass.isAssignableFrom(carrier.getExpression().getClass()));
     }
   }
 
