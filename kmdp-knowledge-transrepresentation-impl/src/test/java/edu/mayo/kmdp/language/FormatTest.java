@@ -63,7 +63,7 @@ public class FormatTest {
                     rep(OWL_2,
                         RDF_XML_Syntax,
                         XML_1_1,
-                        Charset.defaultCharset().name())));
+                        Charset.defaultCharset())));
 
     assertTrue(ans.isSuccess());
     assertTrue(ans.get() instanceof ExpressionCarrier);

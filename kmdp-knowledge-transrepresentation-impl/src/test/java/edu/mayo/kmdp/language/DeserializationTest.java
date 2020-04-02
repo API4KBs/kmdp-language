@@ -79,7 +79,7 @@ public class DeserializationTest {
 
     KnowledgeCarrier bin = AbstractCarrier.of(dmn.get())
         .withRepresentation(
-            rep(DMN_1_1, XML_1_1, Charset.defaultCharset().name(), "TODO"));
+            rep(DMN_1_1, XML_1_1, Charset.defaultCharset(), "TODO"));
 
     Optional<KnowledgeCarrier> expr = parser
         .lift(bin, Concrete_Knowledge_Expression)
@@ -139,7 +139,7 @@ public class DeserializationTest {
     KnowledgeCarrier bin = AbstractCarrier.of(dmn.get())
         .withRepresentation(rep(DMN_1_1,
             XML_1_1,
-            Charset.defaultCharset().name(),
+            Charset.defaultCharset(),
             "TODO"));
 
     Answer<ASTCarrier> ast = parser.lift(bin, Abstract_Knowledge_Expression)

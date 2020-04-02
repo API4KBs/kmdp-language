@@ -37,7 +37,7 @@ import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 
 public abstract class AbstractDeSerializer implements DeserializeApiInternal, Lifter, Lowerer {
 
-  private static final String CHARSET = Charset.defaultCharset().name();
+  private static final Charset CHARSET = Charset.defaultCharset();
 
 
   @Override
@@ -271,7 +271,7 @@ public abstract class AbstractDeSerializer implements DeserializeApiInternal, Li
           rep.setFormat(getDefaultFormat());
         }
         if (rep.getCharset() == null) {
-          rep.setCharset(getDefaultCharset());
+          rep.setCharset(getDefaultCharset().name());
         }
         break;
       case Parsed_Knowedge_Expression:
@@ -306,7 +306,7 @@ public abstract class AbstractDeSerializer implements DeserializeApiInternal, Li
     return Answer.of(getSupportedRepresentations());
   }
 
-  protected String getDefaultCharset() {
+  protected Charset getDefaultCharset() {
     return CHARSET;
   }
 
