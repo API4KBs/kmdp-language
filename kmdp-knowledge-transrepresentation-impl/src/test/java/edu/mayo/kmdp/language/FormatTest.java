@@ -15,16 +15,19 @@
  */
 package edu.mayo.kmdp.language;
 
+import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Abstract_Knowledge_Expression;
 import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.XML_1_1;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.OWL_2;
 import static edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentationLanguageSerializationSeries.RDF_XML_Syntax;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.omg.spec.api4kp._1_0.AbstractCarrier.codedRep;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.config.LocalTestConfig;
 import edu.mayo.kmdp.tranx.v4.DeserializeApi;
+import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -58,9 +61,11 @@ public class FormatTest {
     Answer<KnowledgeCarrier> ans =
         Answer.of(is)
             .map(i -> AbstractCarrier.of(i, rep(OWL_2)))
+            .flatMap(c -> parser.applyLift(c, Abstract_Knowledge_Expression))
             .flatMap(c -> parser
-                .ensureRepresentation(c,
-                    rep(OWL_2,
+                .applyLower(c,
+                    ParsingLevelSeries.Concrete_Knowledge_Expression,
+                    codedRep(OWL_2,
                         RDF_XML_Syntax,
                         XML_1_1,
                         Charset.defaultCharset())));

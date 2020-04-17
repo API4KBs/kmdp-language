@@ -20,46 +20,62 @@ import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLan
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.FHIR_STU3;
 import static edu.mayo.ontology.taxonomies.lexicon.LexiconSeries.PCV;
 import static edu.mayo.ontology.taxonomies.lexicon.LexiconSeries.SNOMED_CT;
+import static java.util.Collections.singletonList;
+import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.translators.AbstractSimpleTranslator;
-import java.util.Properties;
+import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguage;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import javax.inject.Named;
-import org.omg.spec.api4kp._1_0.AbstractCarrier;
+import org.hl7.fhir.dstu3.model.PlanDefinition;
+import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
+import org.omg.spec.api4kp._1_0.id.SemanticIdentifier;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
 import org.omg.spec.api4kp._1_0.services.KPSupport;
-import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
-import org.omg.spec.api4kp._1_0.services.resources.SyntacticRepresentation;
+import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 import org.omg.spec.cmmn._20151109.model.TDefinitions;
 
 @Named
 @KPOperation(Translation_Task)
 @KPSupport({FHIR_STU3,CMMN_1_1})
-public class CmmnToPlanDefTranslator extends AbstractSimpleTranslator {
+public class CmmnToPlanDefTranslator
+    extends AbstractSimpleTranslator<TDefinitions,PlanDefinition> {
 
-  private static final String OPERATOR_ID = "87402252-a8a1-46a4-be3a-9b04ce45fde7";
+  public static final UUID id = UUID.fromString("87402252-a8a1-46a4-be3a-9b04ce45fde7");
+  public static final String version = "1.0.0";
 
-  public String getId() {
-    return OPERATOR_ID;
-  }
-
-  public org.omg.spec.api4kp._1_0.services.SyntacticRepresentation getFrom() {
-    return new SyntacticRepresentation()
-        .withLanguage(CMMN_1_1);
-  }
-
-  public org.omg.spec.api4kp._1_0.services.SyntacticRepresentation getTo() {
-    return new SyntacticRepresentation()
-        .withLanguage(FHIR_STU3)
-        .withLexicon(PCV, SNOMED_CT);
+  public CmmnToPlanDefTranslator() {
+    setId(SemanticIdentifier.newId(id,version));
   }
 
   @Override
-  protected KnowledgeCarrier doTransform(KnowledgeCarrier sourceArtifact, Properties props) {
-    return AbstractCarrier.ofAst(
-        new CmmnToPlanDef().transform(
-            sourceArtifact.getAssetId(),
-            sourceArtifact.as(TDefinitions.class)
-                .orElseThrow(IllegalStateException::new)));
+  public List<SyntacticRepresentation> getFrom() {
+    return singletonList(rep(CMMN_1_1));
   }
 
+  @Override
+  public List<SyntacticRepresentation> getInto() {
+    return singletonList(
+        rep(FHIR_STU3)
+            .withLexicon(PCV, SNOMED_CT));
+  }
+
+  @Override
+  protected Optional<PlanDefinition> transformAst(
+      ResourceIdentifier assetId, TDefinitions expression,
+      SyntacticRepresentation tgtRep) {
+    return Optional.ofNullable(new CmmnToPlanDef().transform(assetId, expression));
+  }
+
+  @Override
+  public KnowledgeRepresentationLanguage getSupportedLanguage() {
+    return CMMN_1_1;
+  }
+
+  @Override
+  public KnowledgeRepresentationLanguage getTargetLanguage() {
+    return FHIR_STU3;
+  }
 }

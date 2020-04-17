@@ -15,40 +15,116 @@
  */
 package edu.mayo.kmdp.language;
 
+import static java.util.Collections.singletonList;
 import static org.omg.spec.api4kp._1_0.Answer.anyAble;
 
+import edu.mayo.kmdp.tranx.v4.server.DiscoveryApiInternal;
 import edu.mayo.kmdp.tranx.v4.server.ValidateApiInternal;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.inject.Named;
 import org.omg.spec.api4kp._1_0.Answer;
+import org.omg.spec.api4kp._1_0.KnowledgePlatformComponent;
+import org.omg.spec.api4kp._1_0.id.KeyIdentifier;
+import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
 import org.omg.spec.api4kp._1_0.services.KPServer;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
-import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
+import org.omg.spec.api4kp._1_0.services.tranx.ValidationOperator;
+import org.omg.spec.api4kp._1_0.services.tranx.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Named
 @KPServer
-public class LanguageValidator implements ValidateApiInternal {
+public class LanguageValidator implements KnowledgePlatformComponent<Validator>,
+    ValidateApiInternal, DiscoveryApiInternal {
 
-  List<ValidateApiInternal> validators;
+  private UUID id = UUID.randomUUID();
+  private Validator descriptor;
 
+  Map<KeyIdentifier,ValidateApiOperator> validators;
+
+  @Named
   public LanguageValidator(@Autowired(required = false)
   @KPOperation(KnowledgeProcessingOperationSeries.Well_Formedness_Check_Task)
-  List<ValidateApiInternal> validateApiInternalList) {
-    this.validators = new ArrayList<>(validateApiInternalList);
+      List<ValidateApiOperator> validators) {
+
+    this.validators = validators.stream()
+        .collect(Collectors.toMap(
+            det -> det.getOperatorId().asKey(),
+            det -> det
+        ));
+
+    this.descriptor = toKPComponent(getComponentId());
+  }
+
+
+  @Override
+  public Answer<Validator> getValidationComponent(UUID componentId) {
+    return Answer.of(getDescriptor());
   }
 
   @Override
-  //TODO FIXME Should be renamed 'validateAs'
-  public Answer<Void> validate(KnowledgeCarrier sourceArtifact, SyntacticRepresentation into) {
-    return
-        anyAble(validators, Objects::nonNull)   // TODO FIXME Needs a 'canDo' thing
-            .map(v -> v.validate(sourceArtifact, into))
-            .orElse(Answer.failed());
+  public Answer<List<Validator>> listValidationComponents() {
+    return Answer.of(singletonList(getDescriptor()));
   }
 
+  @Override
+  public Answer<ValidationOperator> getValidationOperator(UUID operatorId) {
+    return Answer.of(getValidator(operatorId)
+        .map(ValidateApiOperator::getDescriptor));
+  }
+
+  @Override
+  public Answer<List<ValidationOperator>> listValidationOperators() {
+    return Answer.of(validators.values().stream()
+        .map(ValidateApiOperator::getDescriptor)
+        .collect(Collectors.toList()));
+  }
+
+  @Override
+  public Answer<Void> applyValidate(KnowledgeCarrier sourceArtifact) {
+    return Answer.of(anyAble(validators.values(),
+        ValidateApiOperator::can_applyValidate))
+        .flatOpt(ValidateApiOperator::as_applyValidate)
+        .flatMap(v -> v.applyValidate(sourceArtifact));
+  }
+
+  @Override
+  public Answer<Void> applyNamedValidate(UUID operatorId,
+      KnowledgeCarrier sourceArtifact) {
+    return Answer.of(getValidator(operatorId))
+        .flatOpt(ValidateApiOperator::as_applyNamedValidate)
+        .flatMap(v -> v.applyNamedValidate(operatorId, sourceArtifact));
+  }
+
+
+  @Override
+  public UUID getComponentUuid() {
+    return id;
+  }
+
+  @Override
+  public Validator toKPComponent(ResourceIdentifier componentId) {
+    return new Validator()
+        .withInstanceId(getComponentId());
+  }
+
+  @Override
+  public Validator getDescriptor() {
+    return descriptor;
+  }
+
+
+  private Optional<ValidateApiOperator> getValidator(UUID operatorId) {
+    return validators.keySet().stream()
+        .filter(key -> key.getUuid().equals(operatorId))
+        .findFirst()
+        .map(validators::get);
+  }
 }
+

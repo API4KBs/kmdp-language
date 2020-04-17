@@ -2,6 +2,7 @@ package edu.mayo.kmdp.language;
 
 import static edu.mayo.kmdp.language.translators.fhir.stu3.structdef.StructDefToDMNHelper.isFeelPrimitive;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.DMN_1_2;
+import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.FHIR_STU3;
 import static org.hl7.fhir.dstu3.model.Enumerations.FHIRAllTypes.ATTACHMENT;
 import static org.hl7.fhir.dstu3.model.Enumerations.FHIRAllTypes.CODEABLECONCEPT;
 import static org.hl7.fhir.dstu3.model.Enumerations.FHIRAllTypes.CODING;
@@ -47,6 +48,7 @@ import org.junit.jupiter.api.Test;
 import org.omg.spec.api4kp._1_0.AbstractCarrier;
 import org.omg.spec.api4kp._1_0.Answer;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
+import org.omg.spec.api4kp._1_0.services.tranx.ModelMIMECoder;
 import org.omg.spec.dmn._20180521.model.TDefinitions;
 import org.omg.spec.dmn._20180521.model.TItemDefinition;
 
@@ -56,7 +58,7 @@ public class FhirProfileTranslatorTest {
   void testTranslator() {
     KnowledgeCarrier kc = readProfile("FHIRObservationStructureDefinitionFullList.json");
     Answer<KnowledgeCarrier> ast = new StructDefToDMNProjectingTranslator()
-        .applyTransrepresentationInto(kc, rep(DMN_1_2));
+        .applyTransrepresent(kc, ModelMIMECoder.encode(rep(DMN_1_2)));
 
     assertTrue(ast.isSuccess());
     validate(ast.get());
@@ -75,7 +77,8 @@ public class FhirProfileTranslatorTest {
   private void validate(KnowledgeCarrier kc) {
     LanguageValidator validator = new LanguageValidator(
         Collections.singletonList(new DMN12Validator()));
-    validator.validate(kc, kc.getRepresentation());
+    Answer<Void> validationResponse = validator.applyValidate(kc);
+    assertTrue(validationResponse.isSuccess());
   }
 
   private void test(TDefinitions dmn) {
@@ -292,7 +295,7 @@ public class FhirProfileTranslatorTest {
 
   private void printout(Answer<KnowledgeCarrier> ast) {
     ast.flatMap(ans -> new DMN12Parser()
-        .lower(ans, ParsingLevelSeries.Parsed_Knowedge_Expression))
+        .applyLower(ans, ParsingLevelSeries.Parsed_Knowedge_Expression, null))
         .flatOpt(AbstractCarrier::asString)
         .ifPresent(System.out::print);
   }
@@ -303,7 +306,7 @@ public class FhirProfileTranslatorTest {
             .getResourceAsStream("/fhir.stu3/" + srcFile))
             .map(str -> FHIR3JsonUtil.instance.parse(str, StructureDefinition.class))
             .orElse(null)
-    );
+    ).withRepresentation(rep(FHIR_STU3));
   }
 
 }

@@ -24,11 +24,11 @@ import edu.mayo.kmdp.language.parsers.owl2.OWLParser;
 import edu.mayo.kmdp.language.parsers.surrogate.v2.Surrogate2Parser;
 import edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset;
 import edu.mayo.kmdp.metadata.v2.surrogate.SurrogateBuilder;
-import edu.mayo.kmdp.tranx.v4.server.DeserializeApiInternal;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;
 import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguage;
 import edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentationLanguageSerialization;
 import java.util.UUID;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.omg.spec.api4kp._1_0.AbstractCarrier;
 import org.omg.spec.api4kp._1_0.Answer;
@@ -86,7 +86,7 @@ class LifterTest {
   }
 
   private void testVerticalLift(
-      DeserializeApiInternal parser,
+      DeserializeApiOperator parser,
       String sourcePath,
       KnowledgeRepresentationLanguage language,
       KnowledgeRepresentationLanguageSerialization ser,
@@ -105,7 +105,9 @@ class LifterTest {
     assertEquals(language, carrier.getRepresentation().getLanguage());
 
     Answer<KnowledgeCarrier> parsed =
-        parser.lift(carrier, Abstract_Knowledge_Expression);
+        parser.as_applyLift()
+            .orElseGet(Assertions::fail)
+            .applyLift(carrier, Abstract_Knowledge_Expression, null);
 
     assertTrue(parsed.isSuccess());
     KnowledgeCarrier KnowledgeCarrier = parsed.get();

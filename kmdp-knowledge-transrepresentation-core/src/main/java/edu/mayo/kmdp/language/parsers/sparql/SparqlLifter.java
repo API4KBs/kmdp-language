@@ -17,53 +17,88 @@ package edu.mayo.kmdp.language.parsers.sparql;
 
 
 import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Lifting_Task;
-import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Lowering_Task;
+import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Abstract_Knowledge_Expression;
+import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Concrete_Knowledge_Expression;
+import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Parsed_Knowedge_Expression;
 import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.TXT;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.SPARQL_1_1;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
-import edu.mayo.kmdp.tranx.v4.server.DeserializeApiInternal;
+import edu.mayo.kmdp.language.DeserializeApiOperator;
+import edu.mayo.kmdp.language.parsers.Lifter;
 import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevel;
+import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguage;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import javax.inject.Named;
 import org.apache.jena.query.ParameterizedSparqlString;
+import org.apache.jena.query.Query;
 import org.omg.spec.api4kp._1_0.Answer;
+import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
+import org.omg.spec.api4kp._1_0.id.SemanticIdentifier;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
 import org.omg.spec.api4kp._1_0.services.KPSupport;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
+import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 
 @Named
 @KPOperation(Lifting_Task)
-@KPOperation(Lowering_Task)
 @KPSupport(SPARQL_1_1)
-public class SparqlLifter implements
-    DeserializeApiInternal._lift {
+public class SparqlLifter
+    implements DeserializeApiOperator, Lifter {
 
+  static UUID id = UUID.randomUUID();
+  static String version = "1.0.0";
+
+  private ResourceIdentifier operatorId;
+
+  public SparqlLifter() {
+    this.operatorId = SemanticIdentifier.newId(id,version);
+  }
 
   @Override
-  public Answer<KnowledgeCarrier> lift(KnowledgeCarrier sourceArtifact,
-      ParsingLevel level) {
-    String sparql = sourceArtifact.asString()
-        .orElseThrow(UnsupportedOperationException::new);
+  public Answer<KnowledgeCarrier> applyLift(KnowledgeCarrier knowledgeCarrier,
+      ParsingLevel parsingLevel, String xAccept) {
+    //TODO should check for consistency between source level and targetLevel;
 
-    switch (level.asEnum()) {
+    switch (parsingLevel.asEnum()) {
       case Concrete_Knowledge_Expression:
-        return Answer.of(new KnowledgeCarrier()
-            .withExpression(sparql)
-            .withAssetId(sourceArtifact.getAssetId())
-            .withLevel(level)
-            .withRepresentation(rep(SPARQL_1_1, TXT)));
+        switch (knowledgeCarrier.getLevel().asEnum()) {
+          case Encoded_Knowledge_Expression:
+            return Answer.of(innerDecode(knowledgeCarrier));
+          default:
+            return Answer.unsupported();
+        }
       case Parsed_Knowedge_Expression:
-        return Answer.of(new KnowledgeCarrier()
-            .withExpression(new ParameterizedSparqlString(sparql))
-            .withAssetId(sourceArtifact.getAssetId())
-            .withLevel(level)
-            .withRepresentation(rep(SPARQL_1_1)));
+        switch (knowledgeCarrier.getLevel().asEnum()) {
+          case Encoded_Knowledge_Expression:
+            return Answer.of(
+                innerDecode(knowledgeCarrier)
+                .flatMap(this::innerDeserialize));
+          case Concrete_Knowledge_Expression:
+            return Answer.of(
+                innerDeserialize(knowledgeCarrier));
+          case Parsed_Knowedge_Expression:
+            return Answer.of(knowledgeCarrier);
+          default:
+            return Answer.unsupported();
+        }
       case Abstract_Knowledge_Expression:
-        return Answer.of(new KnowledgeCarrier()
-            .withExpression(new ParameterizedSparqlString(sparql).asQuery())
-            .withAssetId(sourceArtifact.getAssetId())
-            .withLevel(level)
-            .withRepresentation(rep(SPARQL_1_1)));
+        switch (knowledgeCarrier.getLevel().asEnum()) {
+          case Encoded_Knowledge_Expression:
+            return Answer.of(
+                innerDecode(knowledgeCarrier)
+                    .flatMap(this::innerParse));
+          case Concrete_Knowledge_Expression:
+            return Answer.of(
+                innerParse(knowledgeCarrier));
+          case Parsed_Knowedge_Expression:
+            return Answer.of(innerAbstract(knowledgeCarrier));
+          default:
+            return Answer.of(knowledgeCarrier);
+        }
 
       default:
         throw new UnsupportedOperationException();
@@ -71,5 +106,63 @@ public class SparqlLifter implements
     }
   }
 
+  @Override
+  public List<SyntacticRepresentation> getFrom() {
+    return Collections.singletonList(rep(SPARQL_1_1,TXT));
+  }
 
+  @Override
+  public List<SyntacticRepresentation> getInto() {
+    return Collections.singletonList(rep(SPARQL_1_1));
+  }
+
+  @Override
+  public ResourceIdentifier getOperatorId() {
+    return operatorId;
+  }
+
+  @Override
+  public Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier) {
+    String sparql = carrier.asString()
+        .orElseThrow(UnsupportedOperationException::new);
+    return Optional.of(
+        DeserializeApiOperator
+            .newVerticalCarrier(carrier, Concrete_Knowledge_Expression, rep(SPARQL_1_1,TXT), sparql));
+  }
+
+  @Override
+  public Optional<KnowledgeCarrier> innerDeserialize(KnowledgeCarrier carrier) {
+    ParameterizedSparqlString sparql = carrier.asString()
+        .map(ParameterizedSparqlString::new)
+        .orElseThrow(UnsupportedOperationException::new);
+    return Optional.of(
+        DeserializeApiOperator
+            .newVerticalCarrier(carrier, Parsed_Knowedge_Expression, rep(SPARQL_1_1), sparql));
+  }
+
+  @Override
+  public Optional<KnowledgeCarrier> innerParse(KnowledgeCarrier carrier) {
+    Query sparql = carrier.asString()
+        .map(ParameterizedSparqlString::new)
+        .map(ParameterizedSparqlString::asQuery)
+        .orElseThrow(UnsupportedOperationException::new);
+    return Optional.of(
+        DeserializeApiOperator
+            .newVerticalCarrier(carrier, Abstract_Knowledge_Expression, rep(SPARQL_1_1), sparql));
+  }
+
+  @Override
+  public Optional<KnowledgeCarrier> innerAbstract(KnowledgeCarrier carrier) {
+    Query sparql = carrier.as(ParameterizedSparqlString.class)
+        .map(ParameterizedSparqlString::asQuery)
+        .orElseThrow(UnsupportedOperationException::new);
+    return Optional.of(
+        DeserializeApiOperator
+            .newVerticalCarrier(carrier, Abstract_Knowledge_Expression, rep(SPARQL_1_1), sparql));
+  }
+
+  @Override
+  public KnowledgeRepresentationLanguage getSupportedLanguage() {
+    return SPARQL_1_1;
+  }
 }

@@ -34,6 +34,7 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import javax.inject.Inject;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.omg.spec.api4kp._1_0.AbstractCarrier;
 import org.omg.spec.api4kp._1_0.Answer;
@@ -66,10 +67,11 @@ public class ChainingTest {
 
     Optional<byte[]> dmn = FileUtil
         .readBytes(DetectorTest.class.getResource(SRC));
-    assertTrue(dmn.isPresent());
+    byte[] dmnBytes = dmn.orElseGet(Assertions::fail);
 
-    KnowledgeCarrier carrier1 = AbstractCarrier.of(dmn.get());
-    SyntacticRepresentation rep = detectApi.getDetectedRepresentation(carrier1)
+    KnowledgeCarrier carrier1 = AbstractCarrier.of(dmnBytes);
+    SyntacticRepresentation rep = detectApi.applyDetect(carrier1)
+        .map(KnowledgeCarrier::getRepresentation)
         .orElse(null);
     assertNotNull(rep);
 
@@ -78,7 +80,7 @@ public class ChainingTest {
     carrier1.withRepresentation(rep);
 
     KnowledgeCarrier carrier2 = deserializeApi
-        .lift(carrier1, Abstract_Knowledge_Expression)
+        .applyLift(carrier1, Abstract_Knowledge_Expression)
         .orElse(null);
 
     assertSame(DMN_1_1, carrier2.getRepresentation().getLanguage());
@@ -93,13 +95,13 @@ public class ChainingTest {
 
     Optional<byte[]> dmn = FileUtil
         .readBytes(DetectorTest.class.getResource(SRC));
-    assertTrue(dmn.isPresent());
+    byte[] dmnBytes = dmn.orElseGet(Assertions::fail);
 
-    KnowledgeCarrier carrier1 = AbstractCarrier.of(dmn.get())
+    KnowledgeCarrier carrier1 = AbstractCarrier.of(dmnBytes)
         .withRepresentation(rep(DMN_1_1));
 
     KnowledgeCarrier carrier2 = deserializeApi
-        .lift(carrier1, Abstract_Knowledge_Expression)
+        .applyLift(carrier1, Abstract_Knowledge_Expression)
         .orElse(null);
 
     assertSame(DMN_1_1, carrier2.getRepresentation().getLanguage());
@@ -113,15 +115,15 @@ public class ChainingTest {
 
     Optional<byte[]> dmn = FileUtil
         .readBytes(DetectorTest.class.getResource(SRC));
-    assertTrue(dmn.isPresent());
-    KnowledgeCarrier carrier1 = AbstractCarrier.of(dmn.get());
+    byte[] dmnBytes = dmn.orElseGet(Assertions::fail);
+    KnowledgeCarrier carrier1 = AbstractCarrier.of(dmnBytes);
 
-    Function<KnowledgeCarrier, Answer<KnowledgeCarrier>> detect = detectApi::setDetectedRepresentation;
-    BiFunction<KnowledgeCarrier, ParsingLevel, Answer<KnowledgeCarrier>> lift = deserializeApi::lift;
+    Function<KnowledgeCarrier, Answer<KnowledgeCarrier>> detect = detectApi::applyDetect;
+    BiFunction<KnowledgeCarrier, ParsingLevel, Answer<KnowledgeCarrier>> applyLift = deserializeApi::applyLift;
 
     KnowledgeCarrier carrier2 = detect
         .apply(carrier1)
-        .flatMap(c1 -> lift.apply(c1, Abstract_Knowledge_Expression))
+        .flatMap(c1 -> applyLift.apply(c1, Abstract_Knowledge_Expression))
         .orElse(null);
 
     assertSame(DMN_1_1, carrier2.getRepresentation().getLanguage());
@@ -140,8 +142,8 @@ public class ChainingTest {
 
     Answer<KnowledgeCarrier> out = Answer.of(dmn)
         .map(AbstractCarrier::of)
-        .flatMap(detectApi::setDetectedRepresentation)
-        .flatMap(c1 -> deserializeApi.lift(c1, Abstract_Knowledge_Expression));
+        .flatMap(detectApi::applyDetect)
+        .flatMap(c1 -> deserializeApi.applyLift(c1, Abstract_Knowledge_Expression));
 
     assertTrue(out.isSuccess());
     KnowledgeCarrier carrier2 = out.get();
@@ -162,8 +164,8 @@ public class ChainingTest {
 
     Answer<KnowledgeCarrier> out = Answer.of(dmn)
         .map(AbstractCarrier::of)
-        .flatMap(detectApi::setDetectedRepresentation)
-        .flatMap(c1 -> deserializeApi.lift(c1, Abstract_Knowledge_Expression));
+        .flatMap(detectApi::applyDetect)
+        .flatMap(c1 -> deserializeApi.applyLift(c1, Abstract_Knowledge_Expression));
 
     assertTrue(out.isSuccess());
     KnowledgeCarrier carrier2 = out.get();
@@ -174,7 +176,7 @@ public class ChainingTest {
     assertNull(carrier2.getRepresentation().getCharset());
 
     Answer<KnowledgeCarrier> c3 = out
-        .flatMap(c2 -> deserializeApi.lower(c2, Concrete_Knowledge_Expression));
+        .flatMap(c2 -> deserializeApi.applyLower(c2, Concrete_Knowledge_Expression));
     assertTrue(c3.isSuccess());
   }
 

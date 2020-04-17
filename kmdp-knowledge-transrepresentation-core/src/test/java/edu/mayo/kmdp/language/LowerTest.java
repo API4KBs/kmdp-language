@@ -26,8 +26,8 @@ class LowerTest {
         .withAny(new edu.mayo.kmdp.metadata.annotations.resources.SimpleAnnotation()));
 
     String str = new DMN12Parser()
-        .lower( ofAst(dmnModel).withRepresentation(rep(DMN_1_2)),
-            Concrete_Knowledge_Expression)
+        .applyLower( ofAst(dmnModel).withRepresentation(rep(DMN_1_2)),
+            Concrete_Knowledge_Expression, null)
     .flatOpt(KnowledgeCarrier::asString)
         .orElse("");
 
@@ -42,8 +42,8 @@ class LowerTest {
         .withSubject(new edu.mayo.kmdp.metadata.annotations.SimpleAnnotation());
 
     String str = new SurrogateParser()
-        .lower( ofAst(surrogate).withRepresentation(rep(Knowledge_Asset_Surrogate)),
-            Concrete_Knowledge_Expression)
+        .applyLower( ofAst(surrogate).withRepresentation(rep(Knowledge_Asset_Surrogate)),
+            Concrete_Knowledge_Expression, null)
     .flatOpt(KnowledgeCarrier::asString)
         .orElse("");
 
@@ -59,8 +59,8 @@ class LowerTest {
         .withAnnotation(new Annotation());
 
     String str = new edu.mayo.kmdp.language.parsers.surrogate.v2.Surrogate2Parser()
-        .lower( ofAst(surrogate2).withRepresentation(rep(Knowledge_Asset_Surrogate_2_0)),
-            Concrete_Knowledge_Expression)
+        .applyLower( ofAst(surrogate2).withRepresentation(rep(Knowledge_Asset_Surrogate_2_0)),
+            Concrete_Knowledge_Expression, null)
     .flatOpt(KnowledgeCarrier::asString)
         .orElse("");
 

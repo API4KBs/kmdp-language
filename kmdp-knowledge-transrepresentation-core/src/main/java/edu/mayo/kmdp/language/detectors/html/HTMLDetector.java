@@ -20,19 +20,21 @@ import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.TX
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.HTML;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
-import edu.mayo.kmdp.tranx.v4.server.DetectApiInternal;
-import java.util.Collections;
+import edu.mayo.kmdp.language.DetectApiOperator;
+import edu.mayo.kmdp.language.detectors.AbstractLanguageDetector;
+import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguage;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import javax.inject.Named;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.safety.Cleaner;
 import org.jsoup.safety.Whitelist;
-import org.omg.spec.api4kp._1_0.Answer;
+import org.omg.spec.api4kp._1_0.id.SemanticIdentifier;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
 import org.omg.spec.api4kp._1_0.services.KPSupport;
-import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,26 +42,62 @@ import org.slf4j.LoggerFactory;
 @Named
 @KPOperation(Detect_Language_Information_Task)
 @KPSupport(HTML)
-public class HTMLDetector implements DetectApiInternal {
+public class HTMLDetector
+  extends AbstractLanguageDetector
+    implements DetectApiOperator {
+
+  static UUID id = UUID.randomUUID();
+  static String version = "1.0.0";
 
   protected static final Logger logger = LoggerFactory.getLogger(HTMLDetector.class);
 
-  @Override
-  public Answer<List<SyntacticRepresentation>> getDetectableLanguages() {
-    return Answer.of(Collections.singletonList(rep(HTML)));
+  public HTMLDetector() {
+    setId(SemanticIdentifier.newId(id,version));
   }
 
   @Override
-  public Answer<SyntacticRepresentation> getDetectedRepresentation(
-      KnowledgeCarrier sourceArtifact) {
-    Optional<String> str = getSerializedContent(sourceArtifact);
-    if (str.isPresent() && isHtml(str.get())) {
-      return Answer.of(new SyntacticRepresentation()
+  public List<SyntacticRepresentation> getInto() {
+    return getSupportedRepresentations();
+  }
+
+  @Override
+  public KnowledgeRepresentationLanguage getSupportedLanguage() {
+    return HTML;
+  }
+
+  @Override
+  public List<SyntacticRepresentation> getSupportedRepresentations() {
+    return Arrays.asList(
+        rep(HTML),
+        rep(HTML,TXT));
+  }
+
+  @Override
+  protected Optional<SyntacticRepresentation> detectBinary(byte[] bytes) {
+    return detectString(new String(bytes));
+  }
+
+  @Override
+  protected Optional<SyntacticRepresentation> detectString(String str) {
+    if (isHtml(str)) {
+      return Optional.of(new SyntacticRepresentation()
           .withLanguage(HTML)
           .withFormat(TXT));
     } else {
-      return Answer.failed();
+      return Optional.empty();
     }
+  }
+
+  @Override
+  protected Optional<SyntacticRepresentation> detectTree(Object ast) {
+    return detectAST(ast);
+  }
+
+  @Override
+  protected Optional<SyntacticRepresentation> detectAST(Object parseTree) {
+    return (parseTree instanceof Document)
+        ? Optional.of(rep(HTML))
+        : Optional.empty();
   }
 
   private boolean isHtml(String s) {
@@ -67,18 +105,5 @@ public class HTMLDetector implements DetectApiInternal {
     Document dox = new Cleaner(Whitelist.relaxed()).clean(dirtyDoc);
     return ! (dox.body().children().isEmpty() && dox.head().children().isEmpty());
   }
-
-  private Optional<String> getSerializedContent(KnowledgeCarrier sourceArtifact) {
-    return sourceArtifact.asString();
-  }
-
-
-  @Override
-  public Answer<KnowledgeCarrier> setDetectedRepresentation(
-      KnowledgeCarrier sourceArtifact) {
-    return getDetectedRepresentation(sourceArtifact)
-        .map(sourceArtifact::withRepresentation);
-  }
-
 
 }

@@ -26,6 +26,8 @@ import static edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentati
 import static edu.mayo.ontology.taxonomies.lexicon.LexiconSeries.SNOMED_CT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
+import static org.omg.spec.api4kp._1_0.services.tranx.ModelMIMECoder.encode;
 
 import edu.mayo.kmdp.id.helper.DatatypeHelper;
 import edu.mayo.kmdp.language.translators.surrogate.v1.SurrogateToLibraryTranslator;
@@ -43,7 +45,6 @@ import edu.mayo.kmdp.metadata.surrogate.SubLanguage;
 import edu.mayo.kmdp.metadata.surrogate.Summary;
 import edu.mayo.kmdp.metadata.surrogate.Variant;
 import edu.mayo.kmdp.metadata.surrogate.Version;
-import edu.mayo.kmdp.tranx.v4.server.TransxionApiInternal;
 import edu.mayo.ontology.taxonomies.iso639_2_languagecodes.LanguageSeries;
 import java.util.UUID;
 import org.hl7.fhir.dstu3.model.Attachment;
@@ -59,16 +60,17 @@ import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 public class LibraryTranslatorTest {
 
   KnowledgeAsset meta = buildMetadata();
-  TransxionApiInternal translator = new SurrogateToLibraryTranslator();
+  TransionApiOperator translator = new SurrogateToLibraryTranslator();
 
   @Test
   void testLibraryTranslation() {
     Answer<KnowledgeCarrier> fhir =
-        Answer.of(AbstractCarrier.ofAst(meta))
-            .flatMap(kc -> translator.applyTransrepresentationInto(
+        Answer.of(AbstractCarrier.ofAst(meta)
+            .withRepresentation(rep(Knowledge_Asset_Surrogate)))
+            .flatMap(kc -> translator.as_applyTransrepresent().get().applyTransrepresent(
                 kc,
-                new SyntacticRepresentation()
-                    .withLanguage(FHIR_STU3)));
+                encode(new SyntacticRepresentation()
+                    .withLanguage(FHIR_STU3))));
 
     assertTrue(fhir.isSuccess());
     Library lib = fhir

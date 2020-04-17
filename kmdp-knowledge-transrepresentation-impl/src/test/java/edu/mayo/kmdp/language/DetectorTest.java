@@ -58,7 +58,9 @@ public class DetectorTest {
     assertTrue(dmn.isPresent());
     KnowledgeCarrier carrier = AbstractCarrier.of(dmn.get());
 
-    Optional<SyntacticRepresentation> rep = detector.getDetectedRepresentation(carrier).getOptionalValue();
+    Optional<SyntacticRepresentation> rep = detector.applyDetect(carrier)
+        .map(KnowledgeCarrier::getRepresentation)
+        .getOptionalValue();
 
     assertTrue(rep.isPresent());
     assertEquals(DMN_1_1, rep.get().getLanguage());
@@ -74,7 +76,9 @@ public class DetectorTest {
     assertTrue(dmn.isPresent());
     KnowledgeCarrier carrier = AbstractCarrier.of(dmn.get());
 
-    Optional<SyntacticRepresentation> rep = detector.getDetectedRepresentation(carrier).getOptionalValue();
+    Optional<SyntacticRepresentation> rep = detector.applyDetect(carrier)
+        .map(KnowledgeCarrier::getRepresentation)
+        .getOptionalValue();
 
     assertTrue(rep.isPresent());
     assertEquals(DMN_1_1, rep.get().getLanguage());
@@ -90,7 +94,9 @@ public class DetectorTest {
     assertTrue(cmmn.isPresent());
     KnowledgeCarrier carrier = AbstractCarrier.of(cmmn.get());
 
-    Optional<SyntacticRepresentation> rep = detector.getDetectedRepresentation(carrier).getOptionalValue();
+    Optional<SyntacticRepresentation> rep = detector.applyDetect(carrier)
+        .map(KnowledgeCarrier::getRepresentation)
+        .getOptionalValue();
 
     assertTrue(rep.isPresent());
     assertEquals(CMMN_1_1, rep.get().getLanguage());
@@ -107,7 +113,9 @@ public class DetectorTest {
     assertTrue(surr.isPresent());
     KnowledgeCarrier carrier = AbstractCarrier.of(surr.get());
 
-    Optional<SyntacticRepresentation> rep = detector.getDetectedRepresentation(carrier).getOptionalValue();
+    Optional<SyntacticRepresentation> rep = detector.applyDetect(carrier)
+        .map(KnowledgeCarrier::getRepresentation)
+        .getOptionalValue();
 
     assertTrue(rep.isPresent());
     assertEquals(Knowledge_Asset_Surrogate, rep.get().getLanguage());
@@ -118,7 +126,8 @@ public class DetectorTest {
     assertTrue(jsonSurr.isPresent());
     KnowledgeCarrier carrier2 = AbstractCarrier.of(jsonSurr.get());
 
-    Optional<SyntacticRepresentation> rep2 = detector.getDetectedRepresentation(carrier2)
+    Optional<SyntacticRepresentation> rep2 = detector.applyDetect(carrier)
+        .map(KnowledgeCarrier::getRepresentation)
         .getOptionalValue();
 
     assertTrue(rep2.isPresent());
@@ -131,7 +140,10 @@ public class DetectorTest {
     InputStream is = DetectorTest.class.getResourceAsStream("/artifacts/test.ofn");
     KnowledgeCarrier carrier = AbstractCarrier.of(is);
 
-    Optional<SyntacticRepresentation> orep = detector.getDetectedRepresentation(carrier).getOptionalValue();
+    Optional<SyntacticRepresentation> orep = detector.applyDetect(carrier)
+        .map(KnowledgeCarrier::getRepresentation)
+        .getOptionalValue();
+
     assertTrue(orep.isPresent());
     SyntacticRepresentation rep = orep.get();
 

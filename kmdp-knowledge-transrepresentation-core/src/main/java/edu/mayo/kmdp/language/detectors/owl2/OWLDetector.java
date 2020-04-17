@@ -32,10 +32,12 @@ import static edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentati
 import static edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentationLanguageSerializationSeries.Turtle;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
+import edu.mayo.kmdp.language.DetectApiOperator;
+import edu.mayo.kmdp.language.detectors.AbstractLanguageDetector;
 import edu.mayo.kmdp.language.detectors.owl2.OWLDetectorConfig.DetectorParams;
-import edu.mayo.kmdp.tranx.v4.server.DetectApiInternal;
 import edu.mayo.kmdp.util.Util;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;
+import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguage;
 import edu.mayo.ontology.taxonomies.krprofile.KnowledgeRepresentationLanguageProfile;
 import edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentationLanguageSerialization;
 import edu.mayo.ontology.taxonomies.lexicon.Lexicon;
@@ -43,16 +45,19 @@ import edu.mayo.ontology.taxonomies.lexicon.LexiconSeries;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import javax.inject.Named;
 import org.apache.jena.vocabulary.SKOS;
 import org.apache.xml.resolver.tools.CatalogResolver;
-import org.omg.spec.api4kp._1_0.Answer;
+import org.omg.spec.api4kp._1_0.id.SemanticIdentifier;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
 import org.omg.spec.api4kp._1_0.services.KPSupport;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
@@ -78,27 +83,82 @@ import org.slf4j.LoggerFactory;
 @Named
 @KPOperation(Detect_Language_Information_Task)
 @KPSupport(OWL_2)
-public class OWLDetector implements DetectApiInternal {
+public class OWLDetector
+  extends AbstractLanguageDetector
+    implements DetectApiOperator {
+
+  static UUID id = UUID.randomUUID();
+  static String version = "1.0.0";
 
   protected static final Logger logger = LoggerFactory.getLogger(OWLDetector.class);
 
-  @Override
-  public Answer<List<SyntacticRepresentation>> getDetectableLanguages() {
-    return Answer.of(Collections.singletonList(rep(OWL_2)));
+  public OWLDetector() {
+    setId(SemanticIdentifier.newId(id,version));
   }
 
   @Override
-  public Answer<SyntacticRepresentation> getDetectedRepresentation(
-      KnowledgeCarrier sourceArtifact) {
-    Optional<OWLOntology> owl = asOWL(sourceArtifact);
-    return Answer.of(
-        owl.map(o -> new SyntacticRepresentation()
-            .withLanguage(OWL_2)
-            .withProfile(detectProfile(o))
-            .withSerialization(detectSerialization(o))
-            .withFormat(detectFormat(o))
-            .withLexicon(detectLexicon(o))));
+  public List<SyntacticRepresentation> getInto() {
+    return getSupportedRepresentations();
   }
+
+  @Override
+  public List<SyntacticRepresentation> getSupportedRepresentations() {
+    return Arrays.asList(
+        // TODO need all permutations
+        rep(OWL_2),
+        rep(OWL_2,OWL_XML_Serialization,XML_1_1),
+        rep(OWL_2,RDF_XML_Syntax,XML_1_1),
+        rep(OWL_2,Turtle,TXT));
+  }
+
+
+
+  protected Optional<OWLOntology> asOWL(KnowledgeCarrier sourceArtifact) {
+    switch (sourceArtifact.getLevel().asEnum()) {
+      case Abstract_Knowledge_Expression:
+        Object expr = sourceArtifact.getExpression();
+        return (expr instanceof OWLOntology) ? Optional.of((OWLOntology) expr) : Optional.empty();
+      case Encoded_Knowledge_Expression:
+      case Concrete_Knowledge_Expression:
+        return sourceArtifact.asBinary()
+            .map(ByteArrayInputStream::new)
+            .flatMap(this::loadOntology);
+      default:
+        return Optional.empty();
+    }
+  }
+
+
+  @Override
+  protected Optional<SyntacticRepresentation> detectBinary(byte[] bytes) {
+    return loadOntology(new ByteArrayInputStream(bytes))
+        .map(o -> rep(
+            OWL_2,
+            detectProfile(o),
+            detectSerialization(o),
+            detectFormat(o),
+            Charset.defaultCharset(),
+            null,
+            detectLexicon(o)));
+  }
+
+  @Override
+  protected Optional<SyntacticRepresentation> detectString(String string) {
+    return detectBinary(string.getBytes());
+  }
+
+  @Override
+  protected Optional<SyntacticRepresentation> detectTree(Object parseTree) {
+    return detectAST(parseTree);
+  }
+
+  @Override
+  protected Optional<SyntacticRepresentation> detectAST(Object ast) {
+    return ast instanceof OWLOntology
+        ? Optional.of(rep(OWL_2,detectProfile((OWLOntology) ast)))
+        : Optional.empty();
+  }
+
 
   private SerializationFormat detectFormat(OWLOntology o) {
     OWLDocumentFormat format = o.getFormat();
@@ -157,29 +217,6 @@ public class OWLDetector implements DetectApiInternal {
     return OWL2_Full;
   }
 
-  @Override
-  public Answer<KnowledgeCarrier> setDetectedRepresentation(
-      KnowledgeCarrier sourceArtifact) {
-    return getDetectedRepresentation(sourceArtifact)
-        .map(sourceArtifact::withRepresentation);
-  }
-
-  protected Optional<OWLOntology> asOWL(KnowledgeCarrier sourceArtifact) {
-    switch (sourceArtifact.getLevel().asEnum()) {
-      case Abstract_Knowledge_Expression:
-        Object expr = sourceArtifact.getExpression();
-        return (expr instanceof OWLOntology) ? Optional.of((OWLOntology) expr) : Optional.empty();
-      case Encoded_Knowledge_Expression:
-      case Concrete_Knowledge_Expression:
-        return sourceArtifact.asBinary()
-            .map(ByteArrayInputStream::new)
-            .flatMap(this::loadOntology);
-      default:
-        return Optional.empty();
-    }
-  }
-
-
   protected Optional<OWLOntology> loadOntology(InputStream is) {
     return loadOntology(is, new OWLDetectorConfig());
   }
@@ -225,5 +262,11 @@ public class OWLDetector implements DetectApiInternal {
     }
 
   }
+
+  @Override
+  public KnowledgeRepresentationLanguage getSupportedLanguage() {
+    return OWL_2;
+  }
+
 
 }

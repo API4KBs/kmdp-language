@@ -17,6 +17,9 @@ package edu.mayo.kmdp.language.parsers.owl2;
 
 import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Lifting_Task;
 import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Lowering_Task;
+import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Abstract_Knowledge_Expression;
+import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Concrete_Knowledge_Expression;
+import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Encoded_Knowledge_Expression;
 import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.TXT;
 import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.XML_1_1;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.OWL_2;
@@ -27,19 +30,19 @@ import static edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentati
 import static edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentationLanguageSerializationSeries.Turtle;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
+import edu.mayo.kmdp.language.DeserializeApiOperator;
 import edu.mayo.kmdp.language.parsers.AbstractDeSerializer;
-import edu.mayo.kmdp.tranx.v4.server.DeserializeApiInternal;
-import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;
+import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import javax.inject.Named;
 import org.apache.jena.vocabulary.DCTerms;
-import org.omg.spec.api4kp._1_0.Answer;
+import org.omg.spec.api4kp._1_0.id.SemanticIdentifier;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
 import org.omg.spec.api4kp._1_0.services.KPSupport;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
@@ -58,8 +61,14 @@ import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 @KPOperation(Lowering_Task)
 @KPOperation(Lifting_Task)
 @KPSupport(OWL_2)
-public class OWLParser extends AbstractDeSerializer implements DeserializeApiInternal {
+public class OWLParser extends AbstractDeSerializer {
 
+  static UUID id = UUID.randomUUID();
+  static String version = "1.0.0";
+
+  public OWLParser() {
+    setId(SemanticIdentifier.newId(id,version));
+  }
 
   @Override
   public Optional<KnowledgeCarrier> innerAbstract(KnowledgeCarrier carrier) {
@@ -70,11 +79,13 @@ public class OWLParser extends AbstractDeSerializer implements DeserializeApiInt
   public Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier) {
     return carrier.asBinary()
         .map(String::new)
-        .map(str -> new KnowledgeCarrier()
-            .withExpression(str)
-            .withRepresentation(
-                getParseResultRepresentation(carrier,
-                    ParsingLevelSeries.Concrete_Knowledge_Expression)));
+        .map(str -> DeserializeApiOperator.newVerticalCarrier(
+            carrier,
+            Concrete_Knowledge_Expression,
+            getParseResultRepresentation(carrier,
+                Concrete_Knowledge_Expression),
+            str
+        ));
   }
 
   @Override
@@ -97,10 +108,13 @@ public class OWLParser extends AbstractDeSerializer implements DeserializeApiInt
       }
       OWLOntology onto = manager.loadOntologyFromOntologyDocument(
           new ByteArrayInputStream(bytes.get()));
-      return Optional.of(new KnowledgeCarrier()
-          .withExpression(onto)
-          .withLevel(ParsingLevelSeries.Abstract_Knowledge_Expression)
-          .withRepresentation(rep(OWL_2)));
+
+      return Optional.ofNullable(
+          DeserializeApiOperator.newVerticalCarrier(
+              carrier,
+              Abstract_Knowledge_Expression,
+              rep(OWL_2),
+              onto));
     } catch (OWLOntologyCreationException e) {
       return Optional.empty();
     }
@@ -115,11 +129,13 @@ public class OWLParser extends AbstractDeSerializer implements DeserializeApiInt
   public Optional<KnowledgeCarrier> innerEncode(KnowledgeCarrier carrier,
       SyntacticRepresentation into) {
     return carrier.asBinary()
-        .map(bytes -> new KnowledgeCarrier()
-            .withExpression(bytes)
-            .withRepresentation(
-                getSerializeResultRepresentation(carrier,
-                    ParsingLevelSeries.Encoded_Knowledge_Expression)));
+        .map(bytes -> DeserializeApiOperator.newVerticalCarrier(
+            carrier,
+            Encoded_Knowledge_Expression,
+            getParseResultRepresentation(carrier,
+                Encoded_Knowledge_Expression),
+            bytes
+        ));
   }
 
   @Override
@@ -133,12 +149,12 @@ public class OWLParser extends AbstractDeSerializer implements DeserializeApiInt
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       OWLManager.createOWLOntologyManager()
           .saveOntology(onto.get(), new RDFXMLDocumentFormat(), baos);
-      return Optional
-          .of(new KnowledgeCarrier()
-              .withLevel(ParsingLevelSeries.Concrete_Knowledge_Expression)
-              .withExpression(new String(baos.toByteArray()))
-              .withRepresentation(
-                  rep(OWL_2, RDF_XML_Syntax, XML_1_1)));
+      return Optional.ofNullable(
+          DeserializeApiOperator.newVerticalCarrier(
+              carrier,
+              Concrete_Knowledge_Expression,
+              rep(OWL_2, RDF_XML_Syntax, XML_1_1),
+              new String(baos.toByteArray())));
     } catch (OWLOntologyStorageException e) {
       return Optional.empty();
     }
@@ -153,20 +169,14 @@ public class OWLParser extends AbstractDeSerializer implements DeserializeApiInt
 
   @Override
   protected List<SyntacticRepresentation> getSupportedRepresentations() {
-    return Collections.singletonList(
-        rep(OWL_2, RDF_XML_Syntax, XML_1_1));
+    return Arrays.asList(
+        rep(OWL_2, RDF_XML_Syntax, XML_1_1),
+        rep(OWL_2, OWL_Functional_Syntax, TXT),
+        rep(OWL_2, OWL_Manchester_Syntax, TXT),
+        rep(OWL_2, OWL_XML_Serialization, XML_1_1),
+        rep(OWL_2, Turtle, TXT));
   }
 
-  @Override
-  public Answer<List<SyntacticRepresentation>> getParsableLanguages() {
-    return Answer.of(
-        Arrays.asList(
-            rep(OWL_2, RDF_XML_Syntax, XML_1_1),
-            rep(OWL_2, OWL_Functional_Syntax, TXT),
-            rep(OWL_2, OWL_Manchester_Syntax, TXT),
-            rep(OWL_2, OWL_XML_Serialization, XML_1_1),
-            rep(OWL_2, Turtle, TXT)));
-  }
 
   @Override
   protected SerializationFormat getDefaultFormat() {
@@ -174,4 +184,8 @@ public class OWLParser extends AbstractDeSerializer implements DeserializeApiInt
   }
 
 
+  @Override
+  public KnowledgeRepresentationLanguage getSupportedLanguage() {
+    return OWL_2;
+  }
 }

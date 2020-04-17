@@ -13,116 +13,116 @@
  */
 package edu.mayo.kmdp.language;
 
-import static edu.mayo.kmdp.comparator.Contrastor.isBroaderOrEqual;
-import static org.omg.spec.api4kp._1_0.contrastors.SyntacticRepresentationContrastor.theRepContrastor;
+import static java.util.Collections.singletonList;
+import static org.omg.spec.api4kp._1_0.Answer.anyAble;
 
+import edu.mayo.kmdp.tranx.v4.server.DiscoveryApiInternal;
 import edu.mayo.kmdp.tranx.v4.server.TransxionApiInternal;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Properties;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.inject.Named;
 import org.omg.spec.api4kp._1_0.Answer;
+import org.omg.spec.api4kp._1_0.KnowledgePlatformComponent;
+import org.omg.spec.api4kp._1_0.id.KeyIdentifier;
+import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
 import org.omg.spec.api4kp._1_0.services.KPServer;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
-import org.omg.spec.api4kp._1_0.services.KnowledgeProcessingOperator;
-import org.omg.spec.api4kp._1_0.services.ParameterDefinitions;
-import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 import org.omg.spec.api4kp._1_0.services.tranx.TransrepresentationOperator;
+import org.omg.spec.api4kp._1_0.services.tranx.Transrepresentator;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Named
 @KPServer
-public class TransrepresentationExecutor implements TransxionApiInternal {
+public class TransrepresentationExecutor implements KnowledgePlatformComponent<Transrepresentator>,
+    TransxionApiInternal, DiscoveryApiInternal {
 
-  private Map<String, TransxionApiInternal> translatorById;
+  private UUID id = UUID.randomUUID();
+  private Transrepresentator descriptor;
+
+  private Map<KeyIdentifier, TransionApiOperator> translators;
 
   @Named
   public TransrepresentationExecutor(
       @Autowired(required = false)
       @KPOperation(KnowledgeProcessingOperationSeries.Transcreation_Task)
       @KPOperation(KnowledgeProcessingOperationSeries.Translation_Task)
-          List<TransxionApiInternal> translators) {
-    if (translators != null) {
-      translatorById = new HashMap<>();
+          List<TransionApiOperator> translators) {
 
-      translators.forEach(t ->
-          t.getTransrepresentation(null)
-              .map(KnowledgeProcessingOperator::getOperatorId)
-              .ifPresent(id -> translatorById.put(id, t)));
-    } else {
-      this.translatorById = Collections.emptyMap();
-    }
+    this.translators = translators.stream()
+        .collect(Collectors.toMap(
+            tx -> tx.getOperatorId().asKey(),
+            tx -> tx
+        ));
 
+    this.descriptor = toKPComponent(getComponentId());
   }
 
   @Override
-  public Answer<KnowledgeCarrier> applyTransrepresentation(String txionId,
-      final KnowledgeCarrier sourceArtifact, Properties config) {
-    return Answer.of(getTxOperator(txionId))
-        .flatMap(txion -> txion.applyTransrepresentation(txionId, sourceArtifact, config));
+  public Answer<Transrepresentator> getTxComponent(UUID componentId) {
+    return Answer.of(getDescriptor());
   }
 
   @Override
-  public Answer<TransrepresentationOperator> getTransrepresentation(String txionId) {
-    return Answer.of(getTxOperator(txionId))
-        .flatMap(t -> t.getTransrepresentation(txionId));
+  public Answer<List<Transrepresentator>> listTxComponents() {
+    return Answer.of(singletonList(getDescriptor()));
   }
 
   @Override
-  public Answer<ParameterDefinitions> getTransrepresentationAcceptedParameters(
-      String txionId) {
-    return Answer.of(getTxOperator(txionId))
-        .flatMap(t -> t.getTransrepresentation(txionId))
-        .map(KnowledgeProcessingOperator::getAcceptedParams);
+  public Answer<KnowledgeCarrier> applyTransrepresent(KnowledgeCarrier sourceArtifact, String xAccept) {
+    return Answer.of(anyAble(translators.values(),
+        TransionApiOperator::can_applyTransrepresent))
+        .flatOpt(TransionApiOperator::as_applyTransrepresent)
+        .flatMap(a -> a.applyTransrepresent(sourceArtifact, xAccept));
   }
 
   @Override
-  public Answer<SyntacticRepresentation> getTransrepresentationOutput(String txionId) {
-    return Answer.of(getTxOperator(txionId))
-        .flatMap(t -> t.getTransrepresentation(txionId))
-        .map(TransrepresentationOperator::getInto);
+  public Answer<KnowledgeCarrier> applyNamedTransrepresent(UUID operatorId,
+      KnowledgeCarrier sourceArtifact, String xAccept) {
+    return Answer.of(getTransrepresentator(operatorId))
+        .flatOpt(TransionApiOperator::as_applyNamedTransrepresent)
+        .flatMap(a -> a.applyNamedTransrepresent(operatorId, sourceArtifact, xAccept));
   }
 
   @Override
-  public Answer<List<TransrepresentationOperator>> listOperators(
-      SyntacticRepresentation from,
-      SyntacticRepresentation into,
-      String method) {
-
-    return
-        translatorById.values().stream()
-            .map(tx -> tx.getTransrepresentation(null))
-            .collect(Answer.toList(tx -> canTransform(tx, into, from)))
-        ;
-
-  }
-
-  private boolean canTransform(TransrepresentationOperator op, SyntacticRepresentation into,
-      SyntacticRepresentation from) {
-    return (from == null || isBroaderOrEqual(theRepContrastor.contrast(from, op.getFrom())))
-        &&
-        (into == null || isBroaderOrEqual(theRepContrastor.contrast(into, op.getInto())));
-  }
-
-
-  private Optional<TransxionApiInternal> getTxOperator(String txId) {
-    return Optional.ofNullable(translatorById.get(txId));
+  public Answer<TransrepresentationOperator> getTxionOperator(UUID operatorId) {
+    return Answer.of(getTransrepresentator(operatorId)
+        .map(TransionApiOperator::getDescriptor));
   }
 
   @Override
-  public Answer<KnowledgeCarrier> applyTransrepresentationInto(KnowledgeCarrier sourceArtifact,
-      SyntacticRepresentation into) {
-    return listOperators(sourceArtifact.getRepresentation(), into, null)
-        .filter(l -> !l.isEmpty())
-        .map(l -> l.get(0).getOperatorId())
-        .flatMap(chosenOperatorId ->
-            translatorById.get(chosenOperatorId)
-                .applyTransrepresentation(chosenOperatorId, sourceArtifact, new Properties()));
+  public Answer<List<TransrepresentationOperator>> listTxionOperators() {
+    return Answer.of(translators.values().stream()
+        .map(TransionApiOperator::getDescriptor)
+        .collect(Collectors.toList()));
+  }
+
+
+  @Override
+  public UUID getComponentUuid() {
+    return id;
+  }
+
+  @Override
+  public Transrepresentator toKPComponent(ResourceIdentifier componentId) {
+    return new Transrepresentator()
+        .withInstanceId(getComponentId());
+  }
+
+  @Override
+  public Transrepresentator getDescriptor() {
+    return descriptor;
+  }
+
+  private Optional<TransionApiOperator> getTransrepresentator(UUID operatorId) {
+    return translators.keySet().stream()
+        .filter(key -> key.getUuid().equals(operatorId))
+        .findFirst()
+        .map(translators::get);
   }
 
 }

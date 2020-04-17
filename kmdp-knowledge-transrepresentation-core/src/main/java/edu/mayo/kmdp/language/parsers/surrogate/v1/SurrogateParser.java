@@ -26,12 +26,13 @@ import edu.mayo.kmdp.language.parsers.MultiFormatParser;
 import edu.mayo.kmdp.language.parsers.XMLBasedLanguageParser;
 import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
 import edu.mayo.kmdp.metadata.surrogate.ObjectFactory;
-import edu.mayo.kmdp.tranx.v4.server.DeserializeApiInternal;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries;
+import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguage;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import javax.inject.Named;
+import org.omg.spec.api4kp._1_0.id.SemanticIdentifier;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
 import org.omg.spec.api4kp._1_0.services.KPSupport;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
@@ -40,21 +41,29 @@ import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 @KPOperation(Lowering_Task)
 @KPOperation(Lifting_Task)
 @KPSupport(Knowledge_Asset_Surrogate)
-public class SurrogateParser extends MultiFormatParser<KnowledgeAsset> implements
-    DeserializeApiInternal {
+public class SurrogateParser extends MultiFormatParser<KnowledgeAsset> {
 
   private final List<SyntacticRepresentation> supportedRepresentations = Arrays.asList(
       rep(Knowledge_Asset_Surrogate, SerializationFormatSeries.XML_1_1, getDefaultCharset()),
       rep(Knowledge_Asset_Surrogate, SerializationFormatSeries.JSON, getDefaultCharset()));
 
+  static UUID id = UUID.randomUUID();
+  static String version = "1.0.0";
+
   public SurrogateParser() {
     super(new XMLSurrogateParser(), new JSONSurrogateParser());
+    setId(SemanticIdentifier.newId(id,version));
   }
 
 
   @Override
   protected List<SyntacticRepresentation> getSupportedRepresentations() {
     return supportedRepresentations;
+  }
+
+  @Override
+  public KnowledgeRepresentationLanguage getSupportedLanguage() {
+    return Knowledge_Asset_Surrogate;
   }
 
   private static class XMLSurrogateParser extends XMLBasedLanguageParser<KnowledgeAsset> {
@@ -65,9 +74,8 @@ public class SurrogateParser extends MultiFormatParser<KnowledgeAsset> implement
     }
 
     @Override
-    protected List<SyntacticRepresentation> getSupportedRepresentations() {
-      return Collections
-          .singletonList(rep(Knowledge_Asset_Surrogate, SerializationFormatSeries.XML_1_1, getDefaultCharset()));
+    public KnowledgeRepresentationLanguage getSupportedLanguage() {
+      return Knowledge_Asset_Surrogate;
     }
   }
 
@@ -79,9 +87,8 @@ public class SurrogateParser extends MultiFormatParser<KnowledgeAsset> implement
     }
 
     @Override
-    protected List<SyntacticRepresentation> getSupportedRepresentations() {
-      return Collections
-          .singletonList(rep(Knowledge_Asset_Surrogate, SerializationFormatSeries.JSON, getDefaultCharset()));
+    public KnowledgeRepresentationLanguage getSupportedLanguage() {
+      return Knowledge_Asset_Surrogate;
     }
   }
 

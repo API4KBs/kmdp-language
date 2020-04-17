@@ -17,78 +17,73 @@ import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeP
 import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.XML_1_1;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.OWL_2;
 import static edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentationLanguageSerializationSeries.RDF_XML_Syntax;
+import static java.util.Collections.singletonList;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
-import static org.omg.spec.api4kp._1_0.PlatformComponentHelper.asParamDefinitions;
 
 import edu.mayo.kmdp.language.translators.AbstractSimpleTranslator;
 import edu.mayo.kmdp.terms.skosifier.Owl2SkosConfig;
 import edu.mayo.kmdp.terms.skosifier.Owl2SkosConverter;
 import edu.mayo.kmdp.util.Util;
+import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguage;
 import edu.mayo.ontology.taxonomies.lexicon.LexiconSeries;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
+import java.util.UUID;
 import javax.inject.Named;
 import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.omg.spec.api4kp._1_0.AbstractCarrier;
-import org.omg.spec.api4kp._1_0.Answer;
+import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
+import org.omg.spec.api4kp._1_0.id.SemanticIdentifier;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
 import org.omg.spec.api4kp._1_0.services.KPSupport;
-import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
-import org.omg.spec.api4kp._1_0.services.ParameterDefinitions;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 
 @Named
 @KPOperation(Transcreation_Task)
 @KPSupport(OWL_2)
-public class OWLtoSKOSTranscreator extends AbstractSimpleTranslator {
+public class OWLtoSKOSTranscreator extends AbstractSimpleTranslator<String,String> {
 
-  public static final String OPERATOR_ID = "57869ee0-304c-40a4-8759-40ea667c328d";
+  public static final UUID id = UUID.fromString("57869ee0-304c-40a4-8759-40ea667c328d");
+  public static final String version = "1.0.0";
 
-  @Override
-  public String getId() {
-    return OPERATOR_ID;
+  public OWLtoSKOSTranscreator() {
+    setId(SemanticIdentifier.newId(id,version));
   }
 
   @Override
-  public SyntacticRepresentation getFrom() {
-    return rep(OWL_2,
+  public List<SyntacticRepresentation> getFrom() {
+    return singletonList(rep(OWL_2,
         RDF_XML_Syntax,
-        XML_1_1);
+        XML_1_1));
   }
 
   @Override
-  public SyntacticRepresentation getTo() {
-    return rep(OWL_2,
+  public List<SyntacticRepresentation> getInto() {
+    return singletonList(rep(OWL_2,
         RDF_XML_Syntax,
         XML_1_1)
-        .withLexicon(LexiconSeries.SKOS);
+        .withLexicon(LexiconSeries.SKOS));
   }
 
   @Override
-  protected KnowledgeCarrier doTransform(KnowledgeCarrier sourceArtifact,
-      Properties params) {
+  protected Optional<String> transformString(ResourceIdentifier assetId, String str,
+      SyntacticRepresentation tgtRep) {
+    return doTransform(new ByteArrayInputStream(str.getBytes()), new Owl2SkosConfig());
+  }
 
+  @Override
+  protected Optional<String> transformBinary(ResourceIdentifier assetId, byte[] bytes,
+      SyntacticRepresentation tgtRep) {
+    return doTransform(new ByteArrayInputStream(bytes), new Owl2SkosConfig());
+  }
+
+  protected Optional<String> doTransform(InputStream is, Properties params) {
     Owl2SkosConfig config = new Owl2SkosConfig(params);
-
-    InputStream is;
-    switch (sourceArtifact.getLevel().asEnum()) {
-      case Encoded_Knowledge_Expression:
-        is = new ByteArrayInputStream(sourceArtifact.asBinary()
-            .orElseThrow(IllegalArgumentException::new));
-        break;
-      case Concrete_Knowledge_Expression:
-        is = new ByteArrayInputStream(sourceArtifact.asString().map(String::getBytes)
-            .orElseThrow(IllegalArgumentException::new));
-        break;
-      case Parsed_Knowedge_Expression:
-      case Abstract_Knowledge_Expression:
-      default:
-        throw new UnsupportedOperationException();
-    }
 
     Model model = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
     model = model.read(is, null);
@@ -102,15 +97,18 @@ public class OWLtoSKOSTranscreator extends AbstractSimpleTranslator {
     if (Util.isEmpty(skos)) {
       throw new UnsupportedOperationException();
     }
-    return AbstractCarrier.of(skos);
+    return Optional.of(skos);
   }
 
 
   @Override
-  public Answer<ParameterDefinitions> getTransrepresentationAcceptedParameters(
-      String txionId) {
-    return Answer.of(asParamDefinitions(new Owl2SkosConfig()));
+  public KnowledgeRepresentationLanguage getSupportedLanguage() {
+    return OWL_2;
   }
 
+  @Override
+  public KnowledgeRepresentationLanguage getTargetLanguage() {
+    return OWL_2;
+  }
 
 }

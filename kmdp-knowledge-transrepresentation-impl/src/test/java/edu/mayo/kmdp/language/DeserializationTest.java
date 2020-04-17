@@ -30,7 +30,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.omg.spec.api4kp._1_0.AbstractCarrier.codedRep;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
+import static org.omg.spec.api4kp._1_0.services.tranx.ModelMIMECoder.encode;
 
 import edu.mayo.kmdp.language.config.LocalTestConfig;
 import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
@@ -79,20 +81,20 @@ public class DeserializationTest {
             rep(DMN_1_1, XML_1_1, Charset.defaultCharset(), "TODO"));
 
     Optional<KnowledgeCarrier> expr = parser
-        .lift(bin, Concrete_Knowledge_Expression)
+        .applyLift(bin, Concrete_Knowledge_Expression)
         .getOptionalValue();
     assertTrue(expr.isPresent());
     assertTrue(expr.get().asString().orElse("").contains("decision name=\"a\""));
 
     KnowledgeCarrier dox = parser
-        .lift(bin, Parsed_Knowedge_Expression)
+        .applyLift(bin, Parsed_Knowedge_Expression)
         .getOptionalValue()
         .orElse(null);
     assertNotNull(dox);
     assertTrue(dox.is(Document.class));
 
     KnowledgeCarrier dox2 = parser
-        .lift(expr.get(), Parsed_Knowedge_Expression)
+        .applyLift(expr.get(), Parsed_Knowedge_Expression)
         .getOptionalValue()
         .orElse(null);
 
@@ -103,19 +105,19 @@ public class DeserializationTest {
         XMLUtil.toByteArray(dox2.as(Document.class).orElseGet(Assertions::fail)));
 
     assertTrue(
-        parser.lift(dox, Abstract_Knowledge_Expression)
+        parser.applyLift(dox, Abstract_Knowledge_Expression)
         .map(KnowledgeCarrier::getExpression)
         .map(TDefinitions.class::isInstance)
         .isSuccess());
 
     assertTrue(
-        parser.lift(expr.get(), Abstract_Knowledge_Expression)
+        parser.applyLift(expr.get(), Abstract_Knowledge_Expression)
             .map(KnowledgeCarrier::getExpression)
             .map(TDefinitions.class::isInstance)
             .isSuccess());
 
     assertTrue(
-        parser.lift(bin, Abstract_Knowledge_Expression)
+        parser.applyLift(bin, Abstract_Knowledge_Expression)
             .map(KnowledgeCarrier::getExpression)
             .map(TDefinitions.class::isInstance)
             .isSuccess());
@@ -134,17 +136,17 @@ public class DeserializationTest {
             Charset.defaultCharset(),
             "TODO"));
 
-    Answer<KnowledgeCarrier> ast = parser.lift(bin, Abstract_Knowledge_Expression);
+    Answer<KnowledgeCarrier> ast = parser.applyLift(bin, Abstract_Knowledge_Expression);
 
     Answer<KnowledgeCarrier> dox = ast
-        .flatMap((a) -> parser.lower(a, Parsed_Knowedge_Expression));
+        .flatMap((a) -> parser.applyLower(a, Parsed_Knowedge_Expression));
 
     assertTrue(dox.isSuccess());
     assertTrue(dox.getOptionalValue().isPresent());
     assertTrue(dox.getOptionalValue().get().getExpression() instanceof Document);
 
     Optional<KnowledgeCarrier> expr = ast
-        .flatMap((a) -> parser.lower(a, Concrete_Knowledge_Expression))
+        .flatMap((a) -> parser.applyLower(a, Concrete_Knowledge_Expression))
         .getOptionalValue();
 
     assertTrue(expr.isPresent());
@@ -164,7 +166,7 @@ public class DeserializationTest {
         .withRepresentation(rep(OWL_2));
 
     Answer<KnowledgeCarrier> aast = parser
-        .lift(bin, Abstract_Knowledge_Expression);
+        .applyLift(bin, Abstract_Knowledge_Expression);
 
     assertTrue(aast.isSuccess());
     assertTrue(aast.getOptionalValue().isPresent());
@@ -175,7 +177,7 @@ public class DeserializationTest {
     assertNull(ast.getRepresentation().getSerialization());
 
     Answer<SyntacticRepresentation> arep = parser
-        .lower(ast, Concrete_Knowledge_Expression)
+        .applyLower(ast, Concrete_Knowledge_Expression)
         .map(KnowledgeCarrier::getRepresentation);
 
     assertTrue(arep.isSuccess());
@@ -208,7 +210,7 @@ public class DeserializationTest {
         .withLevel(Abstract_Knowledge_Expression);
 
     Answer<String> ser = parser
-        .lower(ast,Concrete_Knowledge_Expression)
+        .applyLower(ast,Concrete_Knowledge_Expression)
         .flatOpt(AbstractCarrier::asString);
 
     assertEquals(serializedAsset, ser.orElse("Fail"));
@@ -229,20 +231,18 @@ public class DeserializationTest {
         .withRepresentation(rep(Knowledge_Asset_Surrogate))
         .withLevel(Abstract_Knowledge_Expression);
 
-    Answer<String> ser = parser.serialize(
+    Answer<String> ser = parser.applyLower(
         ast,
-        rep(ast.getRepresentation())
-            .withFormat(JSON)
-            .withCharset(Charset.defaultCharset().name()))
+        Concrete_Knowledge_Expression,
+        codedRep(ast.getRepresentation().getLanguage(), JSON, Charset.defaultCharset()))
         .flatOpt(AbstractCarrier::asString);
 
     assertEquals(serializedAsset, ser.orElse("Fail"));
 
-    Answer<String> ser2 = parser.ensureRepresentation(
+    Answer<String> ser2 = parser.applyLower(
         ast,
-        rep(ast.getRepresentation())
-            .withFormat(JSON)
-            .withCharset(Charset.defaultCharset().name()))
+        Concrete_Knowledge_Expression,
+        codedRep(ast.getRepresentation().getLanguage(), JSON, Charset.defaultCharset()))
         .flatOpt(AbstractCarrier::asString);
 
     assertEquals(serializedAsset, ser2.orElse("Fail"));

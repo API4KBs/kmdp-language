@@ -15,52 +15,46 @@
  */
 package edu.mayo.kmdp.language.parsers;
 
+import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Abstract_Knowledge_Expression;
+import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Concrete_Knowledge_Expression;
+import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Encoded_Knowledge_Expression;
+import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Parsed_Knowedge_Expression;
+import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.JSON;
+import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
+
 import com.fasterxml.jackson.databind.JsonNode;
-import edu.mayo.kmdp.tranx.v4.server.DeserializeApiInternal;
 import edu.mayo.kmdp.util.JSonUtil;
 import edu.mayo.kmdp.util.Util;
-import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 
-public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializer implements
-    DeserializeApiInternal {
+public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializer {
 
   protected Class<T> root;
 
   @Override
   public Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier) {
     return carrier.asString()
-        .map(str -> new KnowledgeCarrier()
-            .withExpression(str)
-            .withRepresentation(
-                getParseResultRepresentation(carrier,
-                    ParsingLevelSeries.Concrete_Knowledge_Expression)));
+        .map(str -> newVerticalCarrier(carrier, Concrete_Knowledge_Expression, str));
   }
 
   @Override
   public Optional<KnowledgeCarrier> innerDeserialize(KnowledgeCarrier carrier) {
     return carrier.asString()
         .flatMap(JSonUtil::readJson)
-        .map(json -> new KnowledgeCarrier()
-            .withExpression(json)
-            .withRepresentation(
-                getParseResultRepresentation(carrier,
-                    ParsingLevelSeries.Parsed_Knowedge_Expression)));
+        .map(json -> newVerticalCarrier(carrier, Parsed_Knowedge_Expression, json));
   }
 
   @Override
   public Optional<KnowledgeCarrier> innerParse(KnowledgeCarrier carrier) {
     return carrier.asString()
         .flatMap(str -> JSonUtil.parseJson(str, root))
-        .map(ast -> new KnowledgeCarrier()
-            .withExpression(ast)
-            .withRepresentation(
-                getParseResultRepresentation(carrier,
-                    ParsingLevelSeries.Abstract_Knowledge_Expression)));
+        .map(ast -> newVerticalCarrier(carrier, Abstract_Knowledge_Expression, ast));
   }
 
 
@@ -68,23 +62,15 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializer im
   public Optional<KnowledgeCarrier> innerAbstract(KnowledgeCarrier carrier) {
     return carrier.as(JsonNode.class)
         .flatMap(jNode -> JSonUtil.parseJson(jNode, root))
-        .map(ast -> new KnowledgeCarrier()
-            .withExpression(ast)
-            .withRepresentation(
-                getParseResultRepresentation(carrier,
-                    ParsingLevelSeries.Abstract_Knowledge_Expression)));
+        .map(ast -> newVerticalCarrier(carrier, Abstract_Knowledge_Expression, ast));
   }
 
 
   @Override
   public Optional<KnowledgeCarrier> innerEncode(KnowledgeCarrier carrier,
       SyntacticRepresentation into) {
-    return carrier.asString()
-        .map(str -> new KnowledgeCarrier()
-            .withExpression(str.getBytes())
-            .withRepresentation(
-                getSerializeResultRepresentation(carrier,
-                    ParsingLevelSeries.Encoded_Knowledge_Expression)));
+    return carrier.asBinary()
+        .map(bytes -> newVerticalCarrier(carrier, Encoded_Knowledge_Expression, bytes));
   }
 
   @Override
@@ -93,22 +79,15 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializer im
     return carrier.as(root)
         .flatMap(JSonUtil::writeJson)
         .flatMap(Util::asString)
-        .map(str -> new KnowledgeCarrier()
-            .withExpression(str)
-            .withRepresentation(
-                getSerializeResultRepresentation(
-                    carrier, ParsingLevelSeries.Concrete_Knowledge_Expression)));
+        .map(str -> newVerticalCarrier(carrier, Concrete_Knowledge_Expression, str));
   }
 
   @Override
   public Optional<KnowledgeCarrier> innerSerialize(KnowledgeCarrier carrier,
       SyntacticRepresentation into) {
     return carrier.as(JsonNode.class)
-        .map(jNode -> new KnowledgeCarrier()
-            .withExpression(jNode.toString())
-            .withRepresentation(getSerializeResultRepresentation(
-                carrier,
-                ParsingLevelSeries.Concrete_Knowledge_Expression)));
+        .map(JsonNode::toString)
+        .map(str -> newVerticalCarrier(carrier, Concrete_Knowledge_Expression, str));
   }
 
   @Override
@@ -116,12 +95,15 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializer im
       SyntacticRepresentation into) {
     return carrier.as(root)
         .flatMap(JSonUtil::toJsonNode)
-        .map(json -> new KnowledgeCarrier()
-            .withExpression(json)
-            .withRepresentation(
-                getSerializeResultRepresentation(
-                    carrier,
-                    ParsingLevelSeries.Parsed_Knowedge_Expression)));
+        .map(json -> newVerticalCarrier(carrier, Parsed_Knowedge_Expression, json));
+  }
+
+
+  @Override
+  public List<SyntacticRepresentation> getSupportedRepresentations() {
+    return Arrays.asList(
+        rep(getSupportedLanguage()),
+        rep(getSupportedLanguage(), JSON));
   }
 
   @Override

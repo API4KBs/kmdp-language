@@ -3,107 +3,131 @@ package edu.mayo.kmdp.language.translators;
 import static edu.mayo.kmdp.comparator.Contrastor.isNarrowerOrEqual;
 import static org.omg.spec.api4kp._1_0.contrastors.SyntacticRepresentationContrastor.theRepContrastor;
 
-import edu.mayo.kmdp.tranx.v4.server.TransxionApiInternal;
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
+import edu.mayo.kmdp.language.TransionApiOperator;
+import edu.mayo.kmdp.tranx.v4.server.TransxionApiInternal._applyNamedTransrepresent;
+import edu.mayo.kmdp.tranx.v4.server.TransxionApiInternal._applyTransrepresent;
+import edu.mayo.kmdp.util.Util;
+import java.util.Optional;
 import java.util.UUID;
 import org.omg.spec.api4kp._1_0.Answer;
+import org.omg.spec.api4kp._1_0.contrastors.ParsingLevelContrastor;
 import org.omg.spec.api4kp._1_0.id.IdentifierConstants;
 import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
 import org.omg.spec.api4kp._1_0.id.SemanticIdentifier;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
-import org.omg.spec.api4kp._1_0.services.ParameterDefinitions;
-import org.omg.spec.api4kp._1_0.services.tranx.TransrepresentationOperator;
+import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
+import org.omg.spec.api4kp._1_0.services.tranx.ModelMIMECoder;
 
-public abstract class AbstractSimpleTranslator implements TransxionApiInternal {
+public abstract class AbstractSimpleTranslator<S,T>
+    implements TransionApiOperator, _applyTransrepresent, _applyNamedTransrepresent {
+
+  protected ResourceIdentifier operatorId;
+
+  public ResourceIdentifier getOperatorId() {
+    return operatorId;
+  }
+
+  protected void setId(ResourceIdentifier id) {
+    this.operatorId = id;
+  }
 
   @Override
-  public Answer<TransrepresentationOperator> getTransrepresentation(String txionId) {
+  public Answer<KnowledgeCarrier> applyTransrepresent(KnowledgeCarrier knowledgeCarrier,
+      String xAccept) {
+    SyntacticRepresentation targetRep = checkTargetRepresentation(knowledgeCarrier,
+        toTargetRepresentation(xAccept));
     return Answer.of(
-        new org.omg.spec.api4kp._1_0.services.tranx.resources.TransrepresentationOperator()
-            .withOperatorId(getId())
-            .withAcceptedParams(getTransrepresentationAcceptedParameters(txionId).orElse(null))
-            .withFrom(getTransrepresentationInput(txionId).orElse(null))
-            .withInto(getTransrepresentationOutput(txionId).orElse(null)));
+        applyTransrepresentation(knowledgeCarrier, targetRep));
   }
 
   @Override
-  public Answer<ParameterDefinitions> getTransrepresentationAcceptedParameters(
-      String txionId) {
-    return Answer.of(new ParameterDefinitions());
+  public Answer<KnowledgeCarrier> applyNamedTransrepresent(UUID uuid,
+      KnowledgeCarrier knowledgeCarrier, String xAccept) {
+    return uuid.equals(getOperatorId().getUuid())
+        ? applyTransrepresent(knowledgeCarrier, xAccept)
+        : Answer.unsupported();
   }
 
-
-  public Answer<org.omg.spec.api4kp._1_0.services.SyntacticRepresentation> getTransrepresentationInput(String txionId) {
-    if (txionId != null && !getId().equals(txionId)) {
-      return Answer.failed(new UnsupportedOperationException());
+  protected SyntacticRepresentation checkTargetRepresentation(KnowledgeCarrier knowledgeCarrier,
+      SyntacticRepresentation tgtRep) {
+    if (knowledgeCarrier.getRepresentation() == null ||
+        !knowledgeCarrier.getRepresentation().getLanguage().sameAs(getSupportedLanguage())) {
+      throw new UnsupportedOperationException();
     }
-    return Answer.of(getFrom());
+    if (getFrom().stream()
+        .noneMatch(
+            from -> knowledgeCarrier.getLevel().sameAs(ParsingLevelContrastor.detectLevel(from)))) {
+      throw new UnsupportedOperationException();
+    }
+    if (getInto().stream()
+        .noneMatch(into -> isNarrowerOrEqual(theRepContrastor.contrast(into, tgtRep)))) {
+      throw new UnsupportedOperationException("Requested narrower reprsentation than supported");
+    }
+    return tgtRep;
   }
 
-  @Override
-  public Answer<org.omg.spec.api4kp._1_0.services.SyntacticRepresentation> getTransrepresentationOutput(
-      String txionId) {
-    return Answer.of(getTo());
+  protected Optional<KnowledgeCarrier> applyTransrepresentation(
+      KnowledgeCarrier src,
+      SyntacticRepresentation tgtRep) {
+    switch (src.getLevel().asEnum()) {
+      case Encoded_Knowledge_Expression:
+        return src.asBinary()
+            .flatMap(bytes -> transformBinary(src.getAssetId(), bytes,tgtRep))
+            .map(out -> TransionApiOperator.newHorizontalCarrier(
+                tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getArtifactId())));
+      case Concrete_Knowledge_Expression:
+        return src.asString()
+            .flatMap(str -> transformString(src.getAssetId(), str,tgtRep))
+            .map(out -> TransionApiOperator.newHorizontalCarrier(
+                tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getArtifactId())));
+      case Parsed_Knowedge_Expression:
+        return transformTree(src.getAssetId(), src.getExpression(), tgtRep)
+            .map(out -> TransionApiOperator.newHorizontalCarrier(
+                tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getArtifactId())));
+      case Abstract_Knowledge_Expression:
+        return transformAst(src.getAssetId(), (S) src.getExpression(), tgtRep)
+            .map(out -> TransionApiOperator.newHorizontalCarrier(
+                tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getArtifactId())));
+      default:
+        throw new UnsupportedOperationException();
+    }
   }
 
-  @Override
-  public Answer<List<TransrepresentationOperator>> listOperators(
-      org.omg.spec.api4kp._1_0.services.SyntacticRepresentation from,
-      org.omg.spec.api4kp._1_0.services.SyntacticRepresentation into,
-      String method) {
-    return getTransrepresentation(getId())
-        .map(Collections::singletonList);
+  protected Optional<T> transformAst(
+      ResourceIdentifier assetId, S expression,
+      SyntacticRepresentation tgtRep) {
+    throw new UnsupportedOperationException();
+  }
+
+  protected Optional<T> transformTree(
+      ResourceIdentifier assetId, Object tree,
+      SyntacticRepresentation tgtRep) {
+    throw new UnsupportedOperationException();
+  }
+
+  protected Optional<T> transformString(
+      ResourceIdentifier assetId, String str,
+      SyntacticRepresentation tgtRep) {
+    throw new UnsupportedOperationException();
+  }
+
+  protected Optional<T> transformBinary(
+      ResourceIdentifier assetId, byte[] bytes,
+      SyntacticRepresentation tgtRep) {
+    throw new UnsupportedOperationException();
   }
 
 
-  @Override
-  public Answer<KnowledgeCarrier> applyTransrepresentation(
-      String txId,
-      KnowledgeCarrier sourceArtifact,
-      Properties params) {
-    return Answer.of(
-        doTransform(sourceArtifact, params)
-            .withAssetId(mapAssetId(sourceArtifact.getAssetId()))
-            .withArtifactId(mapArtifactId(sourceArtifact.getArtifactId()))
-            .withLabel(sourceArtifact.getLabel())
-            .withRepresentation(getTo())
-    );
-  }
-
-  @Override
-  public Answer<KnowledgeCarrier> applyTransrepresentationInto(KnowledgeCarrier sourceArtifact,
-      org.omg.spec.api4kp._1_0.services.SyntacticRepresentation into) {
-    if (isNarrowerOrEqual(theRepContrastor.contrast(getTo(), into))) {
-      return applyTransrepresentation(
-          getId(),
-          sourceArtifact,
-          new Properties());
+  protected SyntacticRepresentation toTargetRepresentation(String xAccept) {
+    SyntacticRepresentation tgtRep;
+    if (Util.isEmpty(xAccept)) {
+      tgtRep = getInto().get(0);
     } else {
-      return Answer.unsupported();
+      tgtRep = ModelMIMECoder.decode(xAccept)
+          .orElseThrow(UnsupportedOperationException::new);
     }
+    return tgtRep;
   }
 
-  public abstract String getId();
-
-  public abstract org.omg.spec.api4kp._1_0.services.SyntacticRepresentation getFrom();
-
-  public abstract org.omg.spec.api4kp._1_0.services.SyntacticRepresentation getTo();
-
-  protected KnowledgeCarrier doTransform(KnowledgeCarrier sourceArtifact) {
-    return doTransform(sourceArtifact, new Properties());
-  }
-
-  protected abstract KnowledgeCarrier doTransform(KnowledgeCarrier sourceArtifact, Properties params);
-
-  protected ResourceIdentifier mapArtifactId(ResourceIdentifier artifactId) {
-    // in general, translations preserve the asset, but create brand new artifacts
-    return SemanticIdentifier.newId(UUID.randomUUID(), IdentifierConstants.VERSION_ZERO);
-  }
-
-  protected ResourceIdentifier mapAssetId(ResourceIdentifier assetId) {
-    return assetId;
-  }
 
 }

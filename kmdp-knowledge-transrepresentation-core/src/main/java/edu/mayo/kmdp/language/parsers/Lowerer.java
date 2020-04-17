@@ -15,11 +15,79 @@
  */
 package edu.mayo.kmdp.language.parsers;
 
+import edu.mayo.kmdp.tranx.v4.server.DeserializeApiInternal._applyLower;
+import edu.mayo.kmdp.tranx.v4.server.DeserializeApiInternal._applyNamedLower;
+import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevel;
 import java.util.Optional;
+import java.util.UUID;
+import org.omg.spec.api4kp._1_0.Answer;
+import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 
-public interface Lowerer {
+public interface Lowerer extends _applyLower, _applyNamedLower {
+
+  @Override
+  default Answer<KnowledgeCarrier> applyNamedLower(UUID uuid, KnowledgeCarrier knowledgeCarrier,
+      ParsingLevel parsingLevel, String xAccept) {
+    return uuid.equals(getOperatorId().getUuid())
+        ? applyLower(knowledgeCarrier, parsingLevel, xAccept)
+        : Answer.unsupported();
+  }
+
+  ResourceIdentifier getOperatorId();
+
+  /**
+   * Lowers a concrete expression (String)
+   * into a binary-encoded expression (byte[])
+   *
+   * @see Lifter#innerDecode(KnowledgeCarrier)
+   * @param carrier A binary carrier
+   * @param into A representation that provides the details of encoding
+   *             Must be compatible with the source representation at the
+   *             language/syntax/serialization level
+   * @return A string carrier
+   */
+  Optional<KnowledgeCarrier> innerEncode(KnowledgeCarrier carrier, SyntacticRepresentation into);
+
+  /**
+   * Lowers an abstract expression (abstract syntax tree)
+   * into a concrete expression (string)
+   *
+   * @see Lifter#innerParse(KnowledgeCarrier)
+   * @param carrier A parse tree carrier
+   * @param into A representation that defines how to derive the serialized, concrete expression
+   *             Must be compatible with the source representation at the language level
+   *             (Note: only String is currently supported)
+   * @return A string carrier
+   */
+  Optional<KnowledgeCarrier> innerExternalize(KnowledgeCarrier carrier, SyntacticRepresentation into);
+
+  /**
+   * Lowers a parsed expression (parse tree)
+   * into a concrete expression (string)
+   *
+   * @see Lifter#innerDeserialize(KnowledgeCarrier)
+   * @param carrier A parse tree carrier
+   * @param into A representation that defines how to derive the serialized, concrete expression
+   *             Must be compatible with the source representation at the language/syntax level
+   *             (Note: only String is currently supported)
+   * @return A string carrier
+   */
+  Optional<KnowledgeCarrier> innerSerialize(KnowledgeCarrier carrier, SyntacticRepresentation into);
+
+
+  /**
+   * Lowers an abstract expression (abstract syntax tree)
+   * into a parsed expression for a given syntax (parse tree)
+   *
+   * @see Lifter#innerAbstract(KnowledgeCarrier)
+   * @param carrier A parse tree carrier
+   * @param into A representation that defines how to derive the concrete expression in a given syntax
+   *             Must be compatible with the source representation at the language level
+   * @return A string carrier
+   */
+  Optional<KnowledgeCarrier> innerConcretize(KnowledgeCarrier carrier, SyntacticRepresentation into);
 
 
   default Optional<KnowledgeCarrier> innerEncode(KnowledgeCarrier carrier) {
@@ -37,12 +105,4 @@ public interface Lowerer {
   default Optional<KnowledgeCarrier> innerConcretize(KnowledgeCarrier carrier) {
     return innerConcretize(carrier,null);
   }
-
-  Optional<KnowledgeCarrier> innerEncode(KnowledgeCarrier carrier, SyntacticRepresentation into);
-
-  Optional<KnowledgeCarrier> innerExternalize(KnowledgeCarrier carrier, SyntacticRepresentation into);
-
-  Optional<KnowledgeCarrier> innerSerialize(KnowledgeCarrier carrier, SyntacticRepresentation into);
-
-  Optional<KnowledgeCarrier> innerConcretize(KnowledgeCarrier carrier, SyntacticRepresentation into);
 }

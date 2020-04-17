@@ -7,6 +7,7 @@ import edu.mayo.kmdp.language.detectors.html.HTMLDetector;
 import edu.mayo.kmdp.language.detectors.surrogate.v2.Surrogate2Detector;
 import org.junit.jupiter.api.Test;
 import org.omg.spec.api4kp._1_0.Answer;
+import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 
 public class DetectorTest {
@@ -23,7 +24,8 @@ public class DetectorTest {
         + "</html>";
 
     HTMLDetector htmlDetector = new HTMLDetector();
-    Answer<SyntacticRepresentation> rep = htmlDetector.getDetectedRepresentation(of(html));
+    Answer<SyntacticRepresentation> rep = htmlDetector.applyDetect(of(html))
+        .map(KnowledgeCarrier::getRepresentation);
     assertTrue(rep.isSuccess());
   }
 
@@ -32,7 +34,8 @@ public class DetectorTest {
     String html = "<foo></foo>";
 
     HTMLDetector htmlDetector = new HTMLDetector();
-    Answer<SyntacticRepresentation> rep = htmlDetector.getDetectedRepresentation(of(html));
+    Answer<SyntacticRepresentation> rep = htmlDetector.applyDetect(of(html))
+        .map(KnowledgeCarrier::getRepresentation);
     assertTrue(rep.isFailure());
   }
 
@@ -41,7 +44,8 @@ public class DetectorTest {
     String html = "blah blah blah";
 
     HTMLDetector htmlDetector = new HTMLDetector();
-    Answer<SyntacticRepresentation> rep = htmlDetector.getDetectedRepresentation(of(html));
+    Answer<SyntacticRepresentation> rep = htmlDetector.applyDetect(of(html))
+        .map(KnowledgeCarrier::getRepresentation);
     assertTrue(rep.isFailure());
   }
 
@@ -55,7 +59,8 @@ public class DetectorTest {
         + "</ns5:knowledgeAsset>";
 
     Surrogate2Detector surrDetector = new Surrogate2Detector();
-    Answer<SyntacticRepresentation> rep = surrDetector.getDetectedRepresentation(of(xml));
+    Answer<SyntacticRepresentation> rep = surrDetector.applyDetect(of(xml))
+        .map(KnowledgeCarrier::getRepresentation);
     assertTrue(rep.isSuccess());
   }
 

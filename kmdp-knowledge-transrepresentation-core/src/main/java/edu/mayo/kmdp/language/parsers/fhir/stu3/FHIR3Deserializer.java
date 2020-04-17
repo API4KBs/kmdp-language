@@ -9,11 +9,14 @@ import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLan
 import ca.uhn.fhir.context.FhirContext;
 import edu.mayo.kmdp.language.parsers.AbstractDeSerializer;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;
+import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguage;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import javax.inject.Named;
 import org.omg.spec.api4kp._1_0.AbstractCarrier;
+import org.omg.spec.api4kp._1_0.id.SemanticIdentifier;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
 import org.omg.spec.api4kp._1_0.services.KPSupport;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
@@ -24,6 +27,13 @@ import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 @KPOperation(Lowering_Task)
 @KPSupport(FHIR_STU3)
 public class FHIR3Deserializer extends AbstractDeSerializer {
+
+  static UUID id = UUID.randomUUID();
+  static String version = "1.0.0";
+
+  public FHIR3Deserializer() {
+    setId(SemanticIdentifier.newId(id,version));
+  }
 
   @Override
   protected List<SyntacticRepresentation> getSupportedRepresentations() {
@@ -91,5 +101,10 @@ public class FHIR3Deserializer extends AbstractDeSerializer {
   @Override
   public Optional<KnowledgeCarrier> innerConcretize(KnowledgeCarrier carrier, SyntacticRepresentation into) {
     return Optional.empty();
+  }
+
+  @Override
+  public KnowledgeRepresentationLanguage getSupportedLanguage() {
+    return FHIR_STU3;
   }
 }

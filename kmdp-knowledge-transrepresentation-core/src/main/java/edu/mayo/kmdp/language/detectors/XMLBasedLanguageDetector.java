@@ -13,68 +13,69 @@
  */
 package edu.mayo.kmdp.language.detectors;
 
-import static java.util.Collections.emptyList;
+import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.XML_1_1;
+import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
-import edu.mayo.kmdp.tranx.v4.server.DetectApiInternal;
 import edu.mayo.kmdp.util.JaxbUtil;
 import edu.mayo.kmdp.util.Util;
 import java.io.ByteArrayInputStream;
+import java.nio.charset.Charset;
 import java.util.Arrays;
-import org.omg.spec.api4kp._1_0.Answer;
-import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
+import java.util.List;
+import java.util.Optional;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 import org.w3c.dom.Document;
 
 
-public abstract class XMLBasedLanguageDetector<T> implements DetectApiInternal {
+public abstract class XMLBasedLanguageDetector<T>
+    extends AbstractLanguageDetector {
 
   protected Class<T> root;
 
   @Override
-  public Answer<SyntacticRepresentation> getDetectedRepresentation(
-      KnowledgeCarrier sourceArtifact) {
-    boolean isLang = false;
-
-    try {
-      switch (sourceArtifact.getLevel().asEnum()) {
-        case Encoded_Knowledge_Expression:
-          isLang = sourceArtifact.asBinary()
-              .filter(data -> Arrays.equals("<".getBytes(), Arrays.copyOfRange(data, 0, 1)))
-              .flatMap(data -> JaxbUtil.unmarshall(root, root, new ByteArrayInputStream(data)))
-              .isPresent();
-          break;
-        case Concrete_Knowledge_Expression:
-          isLang = sourceArtifact.asString()
-              .filter(str -> !Util.isEmpty(str) && str.charAt(0) == '<')
-              .flatMap(str -> JaxbUtil.unmarshall(root, root, str))
-              .isPresent();
-          break;
-        case Parsed_Knowedge_Expression:
-          Object dox = sourceArtifact.getExpression();
-          isLang = dox instanceof Document && JaxbUtil.unmarshall(root,
-              root,
-              (Document) dox).isPresent();
-          break;
-        case Abstract_Knowledge_Expression:
-          isLang = root.isInstance(sourceArtifact.getExpression());
-          break;
-        default:
-      }
-    } catch (Exception e) {
-      return Answer.failed();
-    }
-
-    if (isLang && !getDetectableLanguages().orElse(emptyList()).isEmpty()) {
-      return getDetectableLanguages().map(l -> l.get(0));
-    }
-    return Answer.failed();
+  public List<SyntacticRepresentation> getSupportedRepresentations() {
+    return Arrays.asList(
+        rep(getSupportedLanguage()),
+        rep(getSupportedLanguage(), XML_1_1));
   }
 
   @Override
-  public Answer<KnowledgeCarrier> setDetectedRepresentation(KnowledgeCarrier sourceArtifact) {
-    return getDetectedRepresentation(sourceArtifact)
-        .map(
-            sourceArtifact::withRepresentation);
+  protected Optional<SyntacticRepresentation> detectBinary(byte[] bytes) {
+    if (Arrays.equals("<".getBytes(), Arrays.copyOfRange(bytes, 0, 1))
+        && JaxbUtil.unmarshall(root, root, new ByteArrayInputStream(bytes)).isPresent()) {
+      return Optional.of(rep(getSupportedLanguage(), XML_1_1, Charset.defaultCharset()));
+    } else {
+      return Optional.empty();
+    }
+  }
+
+  @Override
+  protected Optional<SyntacticRepresentation> detectString(String str) {
+    if (!Util.isEmpty(str) && str.charAt(0) == '<'
+        && JaxbUtil.unmarshall(root, root, str).isPresent()) {
+      return Optional.of(rep(getSupportedLanguage(), XML_1_1, Charset.defaultCharset()));
+    } else {
+      return Optional.empty();
+    }
+  }
+
+  @Override
+  protected Optional<SyntacticRepresentation> detectAST(Object dox) {
+    if (dox instanceof Document
+        && JaxbUtil.unmarshall(root, root, (Document) dox).isPresent()) {
+      return Optional.of(rep(getSupportedLanguage(), XML_1_1));
+    } else {
+      return Optional.empty();
+    }
+  }
+
+  @Override
+  protected Optional<SyntacticRepresentation> detectTree(Object ast) {
+    if (root.isInstance(ast)) {
+      return Optional.of(rep(getSupportedLanguage()));
+    } else {
+      return Optional.empty();
+    }
   }
 
 }

@@ -21,7 +21,7 @@ import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 import edu.mayo.kmdp.language.parsers.cmmn.v1_1.CMMN11Parser;
 import edu.mayo.kmdp.language.parsers.dmn.v1_1.DMN11Parser;
 import edu.mayo.kmdp.language.parsers.dmn.v1_2.DMN12Parser;
-import edu.mayo.kmdp.language.parsers.owl2.JenaOwlRdfLifter;
+import edu.mayo.kmdp.language.parsers.owl2.JenaOwlParser;
 import edu.mayo.kmdp.language.parsers.owl2.OWLParser;
 import edu.mayo.kmdp.language.parsers.sparql.SparqlLifter;
 import edu.mayo.kmdp.metadata.v2.surrogate.SurrogateBuilder;
@@ -88,7 +88,7 @@ class ParserTest {
   @Test
   void testParseOWLWithJena() {
     testVerticalLift(
-        new JenaOwlRdfLifter(),
+        new JenaOwlParser(),
         "/owlExample.rdf",
         OWL_2, RDF_XML_Syntax, XML_1_1,
         Model.class,
@@ -113,7 +113,7 @@ class ParserTest {
       SerializationFormat fmt,
       Class<?> astRootClass,
       ParsingLevel level) {
-    testVerticalLift(parser::lift,
+    testVerticalLift(parser::applyLift,
         sourcePath,
         language,
         ser,
@@ -123,7 +123,7 @@ class ParserTest {
   }
 
   private void testVerticalLift(
-      DeserializeApiInternal._lift parser,
+      DeserializeApiInternal._applyLift parser,
       String sourcePath,
       KnowledgeRepresentationLanguage language,
       KnowledgeRepresentationLanguageSerialization ser,
@@ -143,7 +143,7 @@ class ParserTest {
     assertEquals(language, carrier.getRepresentation().getLanguage());
 
     Answer<KnowledgeCarrier> parsed =
-        parser.lift(carrier, level);
+        parser.applyLift(carrier, level, null);
 
     assertTrue(parsed.isSuccess());
     KnowledgeCarrier KnowledgeCarrier = parsed.get();

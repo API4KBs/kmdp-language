@@ -16,16 +16,18 @@
 package edu.mayo.kmdp.language.parsers;
 
 
+import static edu.mayo.kmdp.comparator.Contrastor.isBroaderOrEqual;
 import static edu.mayo.kmdp.comparator.Contrastor.isNarrowerOrEqual;
 import static org.omg.spec.api4kp._1_0.contrastors.SyntacticRepresentationContrastor.theRepContrastor;
 
-import edu.mayo.kmdp.tranx.v4.server.DeserializeApiInternal;
 import edu.mayo.kmdp.util.StreamUtil;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Predicate;
 import javax.inject.Named;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
@@ -34,131 +36,113 @@ import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 @Named
 @KPOperation(KnowledgeProcessingOperationSeries.Lowering_Task)
 @KPOperation(KnowledgeProcessingOperationSeries.Lifting_Task)
-public abstract class MultiFormatParser<T> extends AbstractDeSerializer implements
-    DeserializeApiInternal {
-
-  protected XMLBasedLanguageParser<T> xmlParser;
-  protected JSONBasedLanguageParser<T> jsonParser;
+public abstract class MultiFormatParser<T> extends AbstractDeSerializer {
 
   private List<AbstractDeSerializer> parserSet;
 
   protected MultiFormatParser(XMLBasedLanguageParser<T> xmlParser,
       JSONBasedLanguageParser<T> jsonParser) {
-    this.xmlParser = xmlParser;
-    this.jsonParser = jsonParser;
     this.parserSet = Arrays.asList(xmlParser,jsonParser);
   }
 
   @Override
   public Optional<KnowledgeCarrier> innerAbstract(KnowledgeCarrier carrier) {
-    return parserSet.stream()
-        .filter(l -> isCandidate(l, carrier.getRepresentation()))
-        .map(l -> l.innerAbstract(carrier))
-        .flatMap(StreamUtil::trimStream)
-        .findFirst();
-  }
-
-  private boolean isCandidate(AbstractDeSerializer candidate, SyntacticRepresentation argumentRep) {
-    return candidate.getSupportedRepresentations().stream()
-        .anyMatch(supportedRep -> isNarrowerOrEqual(theRepContrastor.contrast(supportedRep,argumentRep)));
+    return processLift(
+        carrier,
+        Lifter::innerAbstract);
   }
 
   @Override
   public Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier) {
-    return parserSet.stream()
-        .filter(l -> isCandidate(l, carrier.getRepresentation()))
-        .map(l -> l.innerDecode(carrier))
-        .flatMap(StreamUtil::trimStream)
-        .findFirst();
+    return processLift(
+        carrier,
+        Lifter::innerDecode);
   }
 
   @Override
   public Optional<KnowledgeCarrier> innerDeserialize(KnowledgeCarrier carrier) {
-    return parserSet.stream()
-        .filter(l -> isCandidate(l, carrier.getRepresentation()))
-        .map(l -> l.innerDeserialize(carrier))
-        .flatMap(StreamUtil::trimStream)
-        .findFirst();
+    return processLift(
+        carrier,
+        Lifter::innerDeserialize);
   }
 
   @Override
   public Optional<KnowledgeCarrier> innerParse(KnowledgeCarrier carrier) {
+    return processLift(
+        carrier,
+        Lifter::innerParse);
+  }
+
+
+  private boolean isLiftCandidate(AbstractDeSerializer candidate, SyntacticRepresentation argumentRep) {
+    return candidate.getSupportedRepresentations().stream()
+        .anyMatch(supportedRep -> isNarrowerOrEqual(theRepContrastor.contrast(supportedRep,argumentRep)));
+  }
+
+  private boolean isLowerCandidate(AbstractDeSerializer candidate, SyntacticRepresentation argumentRep) {
+    return candidate.getSupportedRepresentations().stream()
+        .anyMatch(supportedRep -> isBroaderOrEqual(theRepContrastor.contrast(supportedRep,argumentRep)));
+  }
+
+  protected Optional<KnowledgeCarrier> processLift(KnowledgeCarrier source,
+      BiFunction<AbstractDeSerializer,KnowledgeCarrier,Optional<KnowledgeCarrier>> mapper) {
+    return process(
+        source,
+        mapper,
+        parser -> isLiftCandidate(parser, source.getRepresentation()));
+  }
+
+  protected Optional<KnowledgeCarrier> processLower(KnowledgeCarrier source,
+      BiFunction<AbstractDeSerializer,KnowledgeCarrier,Optional<KnowledgeCarrier>> mapper) {
+    return process(
+        source,
+        mapper,
+        parser -> isLowerCandidate(parser, source.getRepresentation()));
+  }
+
+  protected Optional<KnowledgeCarrier> process(KnowledgeCarrier source,
+      BiFunction<AbstractDeSerializer,KnowledgeCarrier,Optional<KnowledgeCarrier>> mapper,
+      Predicate<AbstractDeSerializer> test) {
     return parserSet.stream()
-        .filter(l -> isCandidate(l, carrier.getRepresentation()))
-        .map(l -> l.innerParse(carrier))
+        .filter(test)
+        .map(l -> mapper.apply(l,source))
         .flatMap(StreamUtil::trimStream)
         .findFirst();
   }
 
 
-
-
-
   @Override
   public Optional<KnowledgeCarrier> innerConcretize(KnowledgeCarrier carrier, SyntacticRepresentation into) {
-    if (into == null) {
-      return xmlParser.innerConcretize(carrier);
-    }
-    switch (into.getFormat().asEnum()) {
-      case XML_1_1:
-        return xmlParser.innerConcretize(carrier);
-      case JSON:
-        return jsonParser.innerConcretize(carrier);
-      default:
-        throw new UnsupportedOperationException();
-    }
+    return processLower(
+        carrier,
+        Lowerer::innerConcretize);
   }
 
   @Override
   public Optional<KnowledgeCarrier> innerEncode(KnowledgeCarrier carrier, SyntacticRepresentation into) {
-    if (into == null) {
-      return xmlParser.innerEncode(carrier);
-    }
-    switch (into.getFormat().asEnum()) {
-      case XML_1_1:
-        return xmlParser.innerEncode(carrier);
-      case JSON:
-        return jsonParser.innerEncode(carrier);
-      default:
-        throw new UnsupportedOperationException();
-    }
+    return processLower(
+        carrier,
+        Lowerer::innerEncode);
   }
 
   @Override
   public Optional<KnowledgeCarrier> innerExternalize(KnowledgeCarrier carrier, SyntacticRepresentation into) {
-    if (into == null) {
-      return xmlParser.innerExternalize(carrier);
-    }
-    switch (into.getFormat().asEnum()) {
-      case XML_1_1:
-        return xmlParser.innerExternalize(carrier);
-      case JSON:
-        return jsonParser.innerExternalize(carrier);
-      default:
-        throw new UnsupportedOperationException();
-    }
+    return processLower(
+        carrier,
+        Lowerer::innerExternalize);
   }
 
   @Override
   public Optional<KnowledgeCarrier> innerSerialize(KnowledgeCarrier carrier,
       SyntacticRepresentation into) {
-    if (into == null) {
-      return xmlParser.innerSerialize(carrier);
-    }
-    switch (into.getFormat().asEnum()) {
-      case XML_1_1:
-        return xmlParser.innerSerialize(carrier);
-      case JSON:
-        return jsonParser.innerSerialize(carrier);
-      default:
-        throw new UnsupportedOperationException();
-    }
+    return processLower(
+        carrier,
+        Lowerer::innerSerialize);
   }
 
   @Override
   protected SerializationFormat getDefaultFormat() {
     return null;
   }
-
 
 }

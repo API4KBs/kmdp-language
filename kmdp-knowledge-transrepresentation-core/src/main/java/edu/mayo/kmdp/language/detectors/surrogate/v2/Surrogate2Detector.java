@@ -16,100 +16,103 @@
 package edu.mayo.kmdp.language.detectors.surrogate.v2;
 
 import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Detect_Language_Information_Task;
+import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.JSON;
+import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.XML_1_1;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate_2_0;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
+import static edu.mayo.ontology.taxonomies.lexicon.LexiconSeries.Asset_Relationships_Dependencies;
+import static edu.mayo.ontology.taxonomies.lexicon.LexiconSeries.Asset_Relationships_Derivations;
+import static edu.mayo.ontology.taxonomies.lexicon.LexiconSeries.Asset_Relationships_Structural;
+import static edu.mayo.ontology.taxonomies.lexicon.LexiconSeries.Asset_Relationships_Variants;
+import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
-import edu.mayo.kmdp.language.detectors.JSONBasedLanguageDetector;
+import edu.mayo.kmdp.language.detectors.JsonBasedLanguageDetector;
+import edu.mayo.kmdp.language.detectors.MultiFormatLanguageDetector;
 import edu.mayo.kmdp.language.detectors.XMLBasedLanguageDetector;
 import edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset;
 import edu.mayo.kmdp.tranx.v4.server.DetectApiInternal;
-import edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries;
 import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguage;
-import edu.mayo.ontology.taxonomies.lexicon.LexiconSeries;
+import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.UUID;
 import javax.inject.Named;
-import org.omg.spec.api4kp._1_0.Answer;
+import org.omg.spec.api4kp._1_0.id.SemanticIdentifier;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
 import org.omg.spec.api4kp._1_0.services.KPSupport;
-import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 
 @Named
 @KPOperation(Detect_Language_Information_Task)
 @KPSupport(Knowledge_Asset_Surrogate_2_0)
-public class Surrogate2Detector implements DetectApiInternal {
+public class Surrogate2Detector
+    extends MultiFormatLanguageDetector<KnowledgeAsset>
+    implements DetectApiInternal._applyDetect, DetectApiInternal._applyNamedDetect {
 
-  private XMLSurrogateDetector xmlDetector = new XMLSurrogateDetector();
-  private JSNSurrogateDetector jsnDetector = new JSNSurrogateDetector();
+  static UUID id = UUID.randomUUID();
+  static String version = "1.0.0";
 
   protected static final KnowledgeRepresentationLanguage theLanguage = Knowledge_Asset_Surrogate_2_0;
 
-
-  @Override
-  public Answer<List<SyntacticRepresentation>> getDetectableLanguages() {
-    return Answer.of(Stream.concat(
-        xmlDetector.getDetectableLanguages().orElse(emptyList()).stream(),
-        jsnDetector.getDetectableLanguages().orElse(emptyList()).stream())
-        .collect(Collectors.toList()));
+  public Surrogate2Detector() {
+    super(new XMLSurrogateDetector(), new JSNSurrogateDetector());
+    setId(SemanticIdentifier.newId(id,version));
   }
 
   @Override
-  public Answer<KnowledgeCarrier> setDetectedRepresentation(
-      KnowledgeCarrier sourceArtifact) {
-    return getDetectedRepresentation(sourceArtifact)
-        .map(sourceArtifact::withRepresentation);
-  }
-
-  @Override
-  public Answer<SyntacticRepresentation> getDetectedRepresentation(
-      KnowledgeCarrier sourceArtifact) {
-    Answer<SyntacticRepresentation> xmlOpinion =
-        xmlDetector.getDetectedRepresentation(sourceArtifact);
-    if (xmlOpinion.isSuccess()) {
-      return xmlOpinion;
-    } else {
-      return jsnDetector.getDetectedRepresentation(sourceArtifact);
-    }
+  public KnowledgeRepresentationLanguage getSupportedLanguage() {
+    return theLanguage;
   }
 
   private static class XMLSurrogateDetector extends
-      XMLBasedLanguageDetector<KnowledgeAsset> implements DetectApiInternal {
+      XMLBasedLanguageDetector<KnowledgeAsset>  {
 
     public XMLSurrogateDetector() {
       this.root = KnowledgeAsset.class;
     }
 
     @Override
-    public Answer<List<SyntacticRepresentation>> getDetectableLanguages() {
-      return Answer.of((
-          singletonList(new SyntacticRepresentation()
-              .withLanguage(theLanguage)
-              .withFormat(SerializationFormatSeries.XML_1_1)
-              .withLexicon(LexiconSeries.Asset_Relationships_Dependencies,
-                  LexiconSeries.Asset_Relationships_Derivations, LexiconSeries.Asset_Relationships_Structural,
-                  LexiconSeries.Asset_Relationships_Variants))));
+    public List<SyntacticRepresentation> getSupportedRepresentations() {
+      return Arrays.asList(
+          rep(theLanguage, XML_1_1,
+              Asset_Relationships_Dependencies,
+              Asset_Relationships_Derivations, Asset_Relationships_Structural,
+              Asset_Relationships_Variants),
+          rep(theLanguage,
+              Asset_Relationships_Dependencies,
+              Asset_Relationships_Derivations, Asset_Relationships_Structural,
+              Asset_Relationships_Variants)
+      );
+    }
+
+    @Override
+    public KnowledgeRepresentationLanguage getSupportedLanguage() {
+      return theLanguage;
     }
   }
 
   private static class JSNSurrogateDetector extends
-      JSONBasedLanguageDetector<KnowledgeAsset> implements DetectApiInternal {
+      JsonBasedLanguageDetector<KnowledgeAsset> implements DetectApiInternal {
 
     public JSNSurrogateDetector() {
       this.root = KnowledgeAsset.class;
     }
 
     @Override
-    public Answer<List<SyntacticRepresentation>> getDetectableLanguages() {
-      return Answer.of(
-          singletonList(new SyntacticRepresentation()
-              .withLanguage(theLanguage)
-              .withFormat(SerializationFormatSeries.JSON)
-              .withLexicon(LexiconSeries.Asset_Relationships_Dependencies,
-                  LexiconSeries.Asset_Relationships_Derivations, LexiconSeries.Asset_Relationships_Structural,
-                  LexiconSeries.Asset_Relationships_Variants)));
+    public List<SyntacticRepresentation> getSupportedRepresentations() {
+      return Arrays.asList(
+          rep(theLanguage, JSON,
+              Asset_Relationships_Dependencies,
+              Asset_Relationships_Derivations, Asset_Relationships_Structural,
+              Asset_Relationships_Variants),
+          rep(theLanguage,
+              Asset_Relationships_Dependencies,
+              Asset_Relationships_Derivations, Asset_Relationships_Structural,
+              Asset_Relationships_Variants)
+      );
+    }
+
+    @Override
+    public KnowledgeRepresentationLanguage getSupportedLanguage() {
+      return theLanguage;
     }
   }
 
