@@ -27,31 +27,33 @@ import edu.mayo.kmdp.util.JSonUtil;
 import edu.mayo.kmdp.util.Util;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 
-public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializer {
+public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializeOperator {
 
   protected Class<T> root;
 
   @Override
-  public Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier) {
+  public Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier, Properties config) {
     return carrier.asString()
         .map(str -> newVerticalCarrier(carrier, Concrete_Knowledge_Expression, str));
   }
 
   @Override
-  public Optional<KnowledgeCarrier> innerDeserialize(KnowledgeCarrier carrier) {
+  public Optional<KnowledgeCarrier> innerDeserialize(KnowledgeCarrier carrier, Properties config) {
     return carrier.asString()
         .flatMap(JSonUtil::readJson)
         .map(json -> newVerticalCarrier(carrier, Parsed_Knowedge_Expression, json));
   }
 
   @Override
-  public Optional<KnowledgeCarrier> innerParse(KnowledgeCarrier carrier) {
+  public Optional<KnowledgeCarrier> innerParse(KnowledgeCarrier carrier, Properties config) {
     return carrier.asString()
         .flatMap(str -> JSonUtil.parseJson(str, root))
         .map(ast -> newVerticalCarrier(carrier, Abstract_Knowledge_Expression, ast));
@@ -59,7 +61,7 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializer {
 
 
   @Override
-  public Optional<KnowledgeCarrier> innerAbstract(KnowledgeCarrier carrier) {
+  public Optional<KnowledgeCarrier> innerAbstract(KnowledgeCarrier carrier, Properties config) {
     return carrier.as(JsonNode.class)
         .flatMap(jNode -> JSonUtil.parseJson(jNode, root))
         .map(ast -> newVerticalCarrier(carrier, Abstract_Knowledge_Expression, ast));
@@ -68,14 +70,14 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializer {
 
   @Override
   public Optional<KnowledgeCarrier> innerEncode(KnowledgeCarrier carrier,
-      SyntacticRepresentation into) {
+      SyntacticRepresentation into, Properties config) {
     return carrier.asBinary()
         .map(bytes -> newVerticalCarrier(carrier, Encoded_Knowledge_Expression, bytes));
   }
 
   @Override
   public Optional<KnowledgeCarrier> innerExternalize(KnowledgeCarrier carrier,
-      SyntacticRepresentation into) {
+      SyntacticRepresentation into, Properties config) {
     return carrier.as(root)
         .flatMap(JSonUtil::writeJson)
         .flatMap(Util::asString)
@@ -84,7 +86,7 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializer {
 
   @Override
   public Optional<KnowledgeCarrier> innerSerialize(KnowledgeCarrier carrier,
-      SyntacticRepresentation into) {
+      SyntacticRepresentation into, Properties config) {
     return carrier.as(JsonNode.class)
         .map(JsonNode::toString)
         .map(str -> newVerticalCarrier(carrier, Concrete_Knowledge_Expression, str));
@@ -92,7 +94,7 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializer {
 
   @Override
   public Optional<KnowledgeCarrier> innerConcretize(KnowledgeCarrier carrier,
-      SyntacticRepresentation into) {
+      SyntacticRepresentation into, Properties config) {
     return carrier.as(root)
         .flatMap(JSonUtil::toJsonNode)
         .map(json -> newVerticalCarrier(carrier, Parsed_Knowedge_Expression, json));
@@ -103,7 +105,9 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializer {
   public List<SyntacticRepresentation> getSupportedRepresentations() {
     return Arrays.asList(
         rep(getSupportedLanguage()),
-        rep(getSupportedLanguage(), JSON));
+        rep(getSupportedLanguage(), JSON),
+        rep(getSupportedLanguage(), JSON, Charset.defaultCharset()),
+        rep(getSupportedLanguage(), JSON, Charset.defaultCharset(), "default"));
   }
 
   @Override

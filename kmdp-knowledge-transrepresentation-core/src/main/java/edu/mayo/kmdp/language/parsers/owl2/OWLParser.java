@@ -31,7 +31,7 @@ import static edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentati
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.DeserializeApiOperator;
-import edu.mayo.kmdp.language.parsers.AbstractDeSerializer;
+import edu.mayo.kmdp.language.parsers.AbstractDeSerializeOperator;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;
 import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguage;
 import java.io.ByteArrayInputStream;
@@ -39,6 +39,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.UUID;
 import javax.inject.Named;
 import org.apache.jena.vocabulary.DCTerms;
@@ -61,22 +62,22 @@ import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 @KPOperation(Lowering_Task)
 @KPOperation(Lifting_Task)
 @KPSupport(OWL_2)
-public class OWLParser extends AbstractDeSerializer {
+public class OWLParser extends AbstractDeSerializeOperator {
 
-  static UUID id = UUID.randomUUID();
-  static String version = "1.0.0";
+  public static final UUID id = UUID.fromString("6527546e-925d-413a-ad97-e8bf9142ea51");
+  public static final String version = "1.0.0";
 
   public OWLParser() {
     setId(SemanticIdentifier.newId(id,version));
   }
 
   @Override
-  public Optional<KnowledgeCarrier> innerAbstract(KnowledgeCarrier carrier) {
+  public Optional<KnowledgeCarrier> innerAbstract(KnowledgeCarrier carrier, Properties properties) {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier) {
+  public Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier, Properties properties) {
     return carrier.asBinary()
         .map(String::new)
         .map(str -> DeserializeApiOperator.newVerticalCarrier(
@@ -89,12 +90,12 @@ public class OWLParser extends AbstractDeSerializer {
   }
 
   @Override
-  public Optional<KnowledgeCarrier> innerDeserialize(KnowledgeCarrier carrier) {
+  public Optional<KnowledgeCarrier> innerDeserialize(KnowledgeCarrier carrier, Properties properties) {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public Optional<KnowledgeCarrier> innerParse(KnowledgeCarrier carrier) {
+  public Optional<KnowledgeCarrier> innerParse(KnowledgeCarrier carrier, Properties properties) {
     try {
       OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
       OWLOntologyLoaderConfiguration conf = new OWLOntologyLoaderConfiguration()
@@ -121,13 +122,14 @@ public class OWLParser extends AbstractDeSerializer {
   }
 
   @Override
-  public Optional<KnowledgeCarrier> innerConcretize(KnowledgeCarrier carrier, SyntacticRepresentation into) {
+  public Optional<KnowledgeCarrier> innerConcretize(KnowledgeCarrier carrier,
+      SyntacticRepresentation into, Properties properties) {
     throw new UnsupportedOperationException();
   }
 
   @Override
   public Optional<KnowledgeCarrier> innerEncode(KnowledgeCarrier carrier,
-      SyntacticRepresentation into) {
+      SyntacticRepresentation into, Properties properties) {
     return carrier.asBinary()
         .map(bytes -> DeserializeApiOperator.newVerticalCarrier(
             carrier,
@@ -139,7 +141,8 @@ public class OWLParser extends AbstractDeSerializer {
   }
 
   @Override
-  public Optional<KnowledgeCarrier> innerExternalize(KnowledgeCarrier carrier, SyntacticRepresentation into) {
+  public Optional<KnowledgeCarrier> innerExternalize(KnowledgeCarrier carrier,
+      SyntacticRepresentation into, Properties properties) {
     try {
       Optional<OWLOntology> onto = carrier.as(OWLOntology.class);
       if (!onto.isPresent()) {
@@ -162,7 +165,7 @@ public class OWLParser extends AbstractDeSerializer {
 
   @Override
   public Optional<KnowledgeCarrier> innerSerialize(KnowledgeCarrier carrier,
-      SyntacticRepresentation into) {
+      SyntacticRepresentation into, Properties properties) {
     throw new UnsupportedOperationException();
   }
 

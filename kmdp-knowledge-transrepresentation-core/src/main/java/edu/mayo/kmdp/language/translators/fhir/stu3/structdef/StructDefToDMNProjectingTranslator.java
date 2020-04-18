@@ -10,6 +10,7 @@ import edu.mayo.kmdp.language.translators.AbstractSimpleTranslator;
 import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguage;
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.UUID;
 import javax.inject.Named;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
@@ -50,7 +51,8 @@ public class StructDefToDMNProjectingTranslator extends AbstractSimpleTranslator
 
   @Override
   protected Optional<TDefinitions> transformAst(ResourceIdentifier assetId,
-      StructureDefinition expression, SyntacticRepresentation tgtRep) {
+      StructureDefinition expression, SyntacticRepresentation tgtRep,
+      Properties config) {
     return Optional.ofNullable(new StructDefToDMN().transformRootElementToFrame(expression));
   }
 

@@ -43,12 +43,14 @@ import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 @KPSupport(Knowledge_Asset_Surrogate)
 public class SurrogateParser extends MultiFormatParser<KnowledgeAsset> {
 
+  public static final UUID id = UUID.fromString("0ba08bad-4b1d-46c1-a177-5393eb2e6c10");
+  public static final String version = "1.0.0";
+
   private final List<SyntacticRepresentation> supportedRepresentations = Arrays.asList(
+      rep(Knowledge_Asset_Surrogate),
       rep(Knowledge_Asset_Surrogate, SerializationFormatSeries.XML_1_1, getDefaultCharset()),
       rep(Knowledge_Asset_Surrogate, SerializationFormatSeries.JSON, getDefaultCharset()));
 
-  static UUID id = UUID.randomUUID();
-  static String version = "1.0.0";
 
   public SurrogateParser() {
     super(new XMLSurrogateParser(), new JSONSurrogateParser());

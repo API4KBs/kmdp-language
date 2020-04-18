@@ -24,7 +24,7 @@ public class DetectorTest {
         + "</html>";
 
     HTMLDetector htmlDetector = new HTMLDetector();
-    Answer<SyntacticRepresentation> rep = htmlDetector.applyDetect(of(html))
+    Answer<SyntacticRepresentation> rep = htmlDetector.applyDetect(of(html), null)
         .map(KnowledgeCarrier::getRepresentation);
     assertTrue(rep.isSuccess());
   }
@@ -34,7 +34,7 @@ public class DetectorTest {
     String html = "<foo></foo>";
 
     HTMLDetector htmlDetector = new HTMLDetector();
-    Answer<SyntacticRepresentation> rep = htmlDetector.applyDetect(of(html))
+    Answer<SyntacticRepresentation> rep = htmlDetector.applyDetect(of(html), null)
         .map(KnowledgeCarrier::getRepresentation);
     assertTrue(rep.isFailure());
   }
@@ -44,7 +44,7 @@ public class DetectorTest {
     String html = "blah blah blah";
 
     HTMLDetector htmlDetector = new HTMLDetector();
-    Answer<SyntacticRepresentation> rep = htmlDetector.applyDetect(of(html))
+    Answer<SyntacticRepresentation> rep = htmlDetector.applyDetect(of(html), null)
         .map(KnowledgeCarrier::getRepresentation);
     assertTrue(rep.isFailure());
   }
@@ -59,7 +59,7 @@ public class DetectorTest {
         + "</ns5:knowledgeAsset>";
 
     Surrogate2Detector surrDetector = new Surrogate2Detector();
-    Answer<SyntacticRepresentation> rep = surrDetector.applyDetect(of(xml))
+    Answer<SyntacticRepresentation> rep = surrDetector.applyDetect(of(xml), null)
         .map(KnowledgeCarrier::getRepresentation);
     assertTrue(rep.isSuccess());
   }

@@ -27,6 +27,7 @@ import edu.mayo.kmdp.language.translators.AbstractSimpleTranslator;
 import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguage;
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.UUID;
 import javax.inject.Named;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
@@ -65,7 +66,8 @@ public class CmmnToPlanDefTranslator
   @Override
   protected Optional<PlanDefinition> transformAst(
       ResourceIdentifier assetId, TDefinitions expression,
-      SyntacticRepresentation tgtRep) {
+      SyntacticRepresentation tgtRep,
+      Properties config) {
     return Optional.ofNullable(new CmmnToPlanDef().transform(assetId, expression));
   }
 

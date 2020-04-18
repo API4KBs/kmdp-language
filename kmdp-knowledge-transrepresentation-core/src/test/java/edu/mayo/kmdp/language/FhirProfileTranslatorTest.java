@@ -58,7 +58,7 @@ public class FhirProfileTranslatorTest {
   void testTranslator() {
     KnowledgeCarrier kc = readProfile("FHIRObservationStructureDefinitionFullList.json");
     Answer<KnowledgeCarrier> ast = new StructDefToDMNProjectingTranslator()
-        .applyTransrepresent(kc, ModelMIMECoder.encode(rep(DMN_1_2)));
+        .applyTransrepresent(kc, ModelMIMECoder.encode(rep(DMN_1_2)), null);
 
     assertTrue(ast.isSuccess());
     validate(ast.get());
@@ -295,7 +295,7 @@ public class FhirProfileTranslatorTest {
 
   private void printout(Answer<KnowledgeCarrier> ast) {
     ast.flatMap(ans -> new DMN12Parser()
-        .applyLower(ans, ParsingLevelSeries.Parsed_Knowedge_Expression, null))
+        .applyLower(ans, ParsingLevelSeries.Parsed_Knowedge_Expression, null, null))
         .flatOpt(AbstractCarrier::asString)
         .ifPresent(System.out::print);
   }

@@ -16,23 +16,15 @@
 package edu.mayo.kmdp.language;
 
 
-import edu.mayo.kmdp.tranx.v4.server.DeserializeApiDelegate;
-import edu.mayo.kmdp.tranx.v4.server.DetectApiDelegate;
-import edu.mayo.kmdp.tranx.v4.server.TransxionApiDelegate;
-import edu.mayo.kmdp.tranx.v4.server.ValidateApiDelegate;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 @Configuration
 @ComponentScan(basePackageClasses = {
-    TransxionApiDelegate.class,
     TransrepresentationExecutor.class,
-    DeserializeApiDelegate.class,
     LanguageDeSerializer.class,
-    DetectApiDelegate.class,
     LanguageDetector.class,
-    ValidateApiDelegate.class,
     LanguageValidator.class})
 @PropertySource(value = {"classpath:application.properties"})
 public class LanguageConfig {

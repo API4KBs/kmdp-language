@@ -19,6 +19,7 @@ import edu.mayo.kmdp.tranx.v4.server.DeserializeApiInternal._applyLift;
 import edu.mayo.kmdp.tranx.v4.server.DeserializeApiInternal._applyNamedLift;
 import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevel;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.UUID;
 import org.omg.spec.api4kp._1_0.Answer;
 import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
@@ -29,9 +30,9 @@ public interface Lifter extends _applyLift, _applyNamedLift {
 
   @Override
   default Answer<KnowledgeCarrier> applyNamedLift(UUID uuid, KnowledgeCarrier knowledgeCarrier,
-      ParsingLevel parsingLevel, String xAccept) {
+      ParsingLevel parsingLevel, String xAccept, String props) {
     return uuid.equals(getOperatorId().getUuid())
-        ? applyLift(knowledgeCarrier, parsingLevel, xAccept)
+        ? applyLift(knowledgeCarrier, parsingLevel, xAccept, props)
         : Answer.unsupported();
   }
 
@@ -45,7 +46,7 @@ public interface Lifter extends _applyLift, _applyNamedLift {
    * @param carrier A binary carrier
    * @return A string carrier
    */
-  Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier);
+  Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier, Properties config);
 
   /**
    * Lifts a concrete expression (String)
@@ -53,7 +54,7 @@ public interface Lifter extends _applyLift, _applyNamedLift {
    * @param carrier A string carrier
    * @return A parse tree carrier
    */
-  Optional<KnowledgeCarrier> innerDeserialize(KnowledgeCarrier carrier);
+  Optional<KnowledgeCarrier> innerDeserialize(KnowledgeCarrier carrier, Properties config);
 
   /**
    * Lifts a concrete expression (String)
@@ -61,7 +62,7 @@ public interface Lifter extends _applyLift, _applyNamedLift {
    * @param carrier A string carrier
    * @return An abstract syntax tree carrier
    */
-  Optional<KnowledgeCarrier> innerParse(KnowledgeCarrier carrier);
+  Optional<KnowledgeCarrier> innerParse(KnowledgeCarrier carrier, Properties config);
 
 
   /**
@@ -70,5 +71,5 @@ public interface Lifter extends _applyLift, _applyNamedLift {
    * @param carrier A parse tree carrier
    * @return An abstract syntax tree carrier
    */
-  Optional<KnowledgeCarrier> innerAbstract(KnowledgeCarrier carrier);
+  Optional<KnowledgeCarrier> innerAbstract(KnowledgeCarrier carrier, Properties config);
 }

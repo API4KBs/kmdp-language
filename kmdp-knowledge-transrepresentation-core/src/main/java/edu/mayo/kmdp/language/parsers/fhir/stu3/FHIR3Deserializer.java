@@ -7,12 +7,13 @@ import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.XM
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.FHIR_STU3;
 
 import ca.uhn.fhir.context.FhirContext;
-import edu.mayo.kmdp.language.parsers.AbstractDeSerializer;
+import edu.mayo.kmdp.language.parsers.AbstractDeSerializeOperator;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;
 import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguage;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.UUID;
 import javax.inject.Named;
 import org.omg.spec.api4kp._1_0.AbstractCarrier;
@@ -26,10 +27,10 @@ import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 @KPOperation(Lifting_Task)
 @KPOperation(Lowering_Task)
 @KPSupport(FHIR_STU3)
-public class FHIR3Deserializer extends AbstractDeSerializer {
+public class FHIR3Deserializer extends AbstractDeSerializeOperator {
 
-  static UUID id = UUID.randomUUID();
-  static String version = "1.0.0";
+  public static final UUID id = UUID.fromString("606717df-3f8d-49ee-9d1b-5d2cc1edff55");
+  public static final String version = "1.0.0";
 
   public FHIR3Deserializer() {
     setId(SemanticIdentifier.newId(id,version));
@@ -49,18 +50,21 @@ public class FHIR3Deserializer extends AbstractDeSerializer {
   }
 
   @Override
-  public Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier) {
+  public Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier,
+      Properties properties) {
     return carrier.asString()
         .map(AbstractCarrier::of);
   }
 
   @Override
-  public Optional<KnowledgeCarrier> innerDeserialize(KnowledgeCarrier carrier) {
+  public Optional<KnowledgeCarrier> innerDeserialize(KnowledgeCarrier carrier,
+      Properties properties) {
     return Optional.empty();
   }
 
   @Override
-  public Optional<KnowledgeCarrier> innerParse(KnowledgeCarrier carrier) {
+  public Optional<KnowledgeCarrier> innerParse(KnowledgeCarrier carrier,
+      Properties properties) {
     switch (carrier.getRepresentation().getFormat().asEnum()) {
       case JSON:
         return carrier.asString()
@@ -76,30 +80,34 @@ public class FHIR3Deserializer extends AbstractDeSerializer {
   }
 
   @Override
-  public Optional<KnowledgeCarrier> innerAbstract(KnowledgeCarrier carrier) {
+  public Optional<KnowledgeCarrier> innerAbstract(KnowledgeCarrier carrier,
+      Properties properties) {
     return Optional.empty();
   }
 
 
 
   @Override
-  public Optional<KnowledgeCarrier> innerEncode(KnowledgeCarrier carrier, SyntacticRepresentation into) {
+  public Optional<KnowledgeCarrier> innerEncode(KnowledgeCarrier carrier,
+      SyntacticRepresentation into, Properties properties) {
     return Optional.empty();
   }
 
   @Override
-  public Optional<KnowledgeCarrier> innerExternalize(KnowledgeCarrier carrier, SyntacticRepresentation into) {
+  public Optional<KnowledgeCarrier> innerExternalize(KnowledgeCarrier carrier,
+      SyntacticRepresentation into, Properties properties) {
     return Optional.empty();
   }
 
   @Override
   public Optional<KnowledgeCarrier> innerSerialize(KnowledgeCarrier carrier,
-      SyntacticRepresentation into) {
+      SyntacticRepresentation into, Properties properties) {
     return Optional.empty();
   }
 
   @Override
-  public Optional<KnowledgeCarrier> innerConcretize(KnowledgeCarrier carrier, SyntacticRepresentation into) {
+  public Optional<KnowledgeCarrier> innerConcretize(KnowledgeCarrier carrier,
+      SyntacticRepresentation into, Properties properties) {
     return Optional.empty();
   }
 

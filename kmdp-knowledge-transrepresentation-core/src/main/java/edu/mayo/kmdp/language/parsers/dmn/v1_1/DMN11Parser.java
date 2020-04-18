@@ -17,22 +17,16 @@ package edu.mayo.kmdp.language.parsers.dmn.v1_1;
 
 import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Lifting_Task;
 import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Lowering_Task;
-import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.XML_1_1;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.DMN_1_1;
-import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.DeserializeApiOperator;
 import edu.mayo.kmdp.language.parsers.XMLBasedLanguageParser;
-import edu.mayo.kmdp.language.validators.dmn.v1_2.DMN12Validator;
 import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguage;
-import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
 import javax.inject.Named;
 import org.omg.spec.api4kp._1_0.id.SemanticIdentifier;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
 import org.omg.spec.api4kp._1_0.services.KPSupport;
-import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 import org.omg.spec.dmn._20151101.dmn.ObjectFactory;
 import org.omg.spec.dmn._20151101.dmn.TDefinitions;
 
@@ -43,8 +37,8 @@ import org.omg.spec.dmn._20151101.dmn.TDefinitions;
 public class DMN11Parser extends XMLBasedLanguageParser<TDefinitions>
     implements DeserializeApiOperator {
 
-  static UUID id = UUID.randomUUID();
-  static String version = "1.0.0";
+  public static final UUID id = UUID.fromString("ceff7f77-3b3d-4fb2-824d-cea3d2301efe");
+  public static final String version = "1.0.0";
 
   public DMN11Parser() {
     setId(SemanticIdentifier.newId(id,version));

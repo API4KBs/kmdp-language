@@ -35,8 +35,8 @@ public class DMN12Validator
     _applyValidate,
     _applyNamedValidate {
 
-  static UUID id = UUID.randomUUID();
-  static String version = "1.0.0";
+  public static final UUID id = UUID.fromString("1a43a134-0cb9-4ac5-a468-241744f89fcb");
+  public static final String version = "1.0.0";
 
   private ResourceIdentifier operatorId;
   
@@ -45,14 +45,14 @@ public class DMN12Validator
   }
   
   @Override
-  public Answer<Void> applyNamedValidate(UUID uuid, KnowledgeCarrier knowledgeCarrier) {
+  public Answer<Void> applyNamedValidate(UUID uuid, KnowledgeCarrier knowledgeCarrier, String config) {
     return uuid.equals(getOperatorId().getUuid())
-        ? applyValidate(knowledgeCarrier)
+        ? applyValidate(knowledgeCarrier, config)
         : Answer.unsupported();
   }
 
   @Override
-  public Answer<Void> applyValidate(KnowledgeCarrier sourceArtifact) {
+  public Answer<Void> applyValidate(KnowledgeCarrier sourceArtifact, String config) {
     try {
       return validate(sourceArtifact)
           ? Answer.succeed()
@@ -128,5 +128,15 @@ public class DMN12Validator
   @Override
   public KnowledgeRepresentationLanguage getSupportedLanguage() {
     return DMN_1_2;
+  }
+
+  @Override
+  public boolean can_applyNamedValidate() {
+    return true;
+  }
+
+  @Override
+  public boolean can_applyValidate() {
+    return true;
   }
 }

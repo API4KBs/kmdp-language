@@ -27,6 +27,7 @@ import static edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentati
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.config.LocalTestConfig;
 import edu.mayo.kmdp.tranx.v4.DetectApi;
@@ -111,7 +112,8 @@ public class DetectorTest {
     Optional<String> surr = FileUtil
         .read(DetectorTest.class.getResource("/artifacts/sample.surr.xml"));
     assertTrue(surr.isPresent());
-    KnowledgeCarrier carrier = AbstractCarrier.of(surr.get());
+    KnowledgeCarrier carrier = AbstractCarrier.of(surr.get())
+        .withRepresentation(rep(Knowledge_Asset_Surrogate));
 
     Optional<SyntacticRepresentation> rep = detector.applyDetect(carrier)
         .map(KnowledgeCarrier::getRepresentation)
@@ -126,7 +128,7 @@ public class DetectorTest {
     assertTrue(jsonSurr.isPresent());
     KnowledgeCarrier carrier2 = AbstractCarrier.of(jsonSurr.get());
 
-    Optional<SyntacticRepresentation> rep2 = detector.applyDetect(carrier)
+    Optional<SyntacticRepresentation> rep2 = detector.applyDetect(carrier2)
         .map(KnowledgeCarrier::getRepresentation)
         .getOptionalValue();
 
@@ -138,7 +140,8 @@ public class DetectorTest {
   @Test
   public void testOWLDetector() {
     InputStream is = DetectorTest.class.getResourceAsStream("/artifacts/test.ofn");
-    KnowledgeCarrier carrier = AbstractCarrier.of(is);
+    KnowledgeCarrier carrier = AbstractCarrier.of(is)
+        .withRepresentation(rep(OWL_2,OWL_Functional_Syntax,TXT));
 
     Optional<SyntacticRepresentation> orep = detector.applyDetect(carrier)
         .map(KnowledgeCarrier::getRepresentation)

@@ -32,7 +32,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.codedRep;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
-import static org.omg.spec.api4kp._1_0.services.tranx.ModelMIMECoder.encode;
 
 import edu.mayo.kmdp.language.config.LocalTestConfig;
 import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
@@ -78,7 +77,7 @@ public class DeserializationTest {
 
     KnowledgeCarrier bin = AbstractCarrier.of(dmn.get())
         .withRepresentation(
-            rep(DMN_1_1, XML_1_1, Charset.defaultCharset(), "TODO"));
+            rep(DMN_1_1, XML_1_1, Charset.defaultCharset(), "default"));
 
     Optional<KnowledgeCarrier> expr = parser
         .applyLift(bin, Concrete_Knowledge_Expression)
@@ -234,7 +233,8 @@ public class DeserializationTest {
     Answer<String> ser = parser.applyLower(
         ast,
         Concrete_Knowledge_Expression,
-        codedRep(ast.getRepresentation().getLanguage(), JSON, Charset.defaultCharset()))
+        codedRep(ast.getRepresentation().getLanguage(), JSON, Charset.defaultCharset()),
+        null)
         .flatOpt(AbstractCarrier::asString);
 
     assertEquals(serializedAsset, ser.orElse("Fail"));
@@ -242,7 +242,7 @@ public class DeserializationTest {
     Answer<String> ser2 = parser.applyLower(
         ast,
         Concrete_Knowledge_Expression,
-        codedRep(ast.getRepresentation().getLanguage(), JSON, Charset.defaultCharset()))
+        codedRep(ast.getRepresentation().getLanguage(), JSON, Charset.defaultCharset()), null)
         .flatOpt(AbstractCarrier::asString);
 
     assertEquals(serializedAsset, ser2.orElse("Fail"));

@@ -29,6 +29,8 @@ import edu.mayo.ontology.taxonomies.lexicon.LexiconSeries;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
@@ -57,40 +59,40 @@ public class OWLtoSKOSTranscreator extends AbstractSimpleTranslator<String,Strin
 
   @Override
   public List<SyntacticRepresentation> getFrom() {
-    return singletonList(rep(OWL_2,
-        RDF_XML_Syntax,
-        XML_1_1));
+    return Arrays.asList(
+        rep(OWL_2, RDF_XML_Syntax, XML_1_1, Charset.defaultCharset()),
+        rep(OWL_2, RDF_XML_Syntax, XML_1_1,Charset.defaultCharset(),"default")
+        );
   }
 
   @Override
   public List<SyntacticRepresentation> getInto() {
     return singletonList(rep(OWL_2,
         RDF_XML_Syntax,
-        XML_1_1)
+        XML_1_1,
+        Charset.defaultCharset())
         .withLexicon(LexiconSeries.SKOS));
   }
 
   @Override
   protected Optional<String> transformString(ResourceIdentifier assetId, String str,
-      SyntacticRepresentation tgtRep) {
-    return doTransform(new ByteArrayInputStream(str.getBytes()), new Owl2SkosConfig());
+      SyntacticRepresentation tgtRep, Properties config) {
+    return doTransform(new ByteArrayInputStream(str.getBytes()), config);
   }
 
   @Override
   protected Optional<String> transformBinary(ResourceIdentifier assetId, byte[] bytes,
-      SyntacticRepresentation tgtRep) {
-    return doTransform(new ByteArrayInputStream(bytes), new Owl2SkosConfig());
+      SyntacticRepresentation tgtRep, Properties config) {
+    return doTransform(new ByteArrayInputStream(bytes), config);
   }
 
   protected Optional<String> doTransform(InputStream is, Properties params) {
-    Owl2SkosConfig config = new Owl2SkosConfig(params);
-
     Model model = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
     model = model.read(is, null);
 
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     new Owl2SkosConverter()
-        .apply(model, config)
+        .apply(model, (Owl2SkosConfig) params)
         .ifPresent(m -> m.write(baos));
 
     String skos = new String(baos.toByteArray());
@@ -100,6 +102,9 @@ public class OWLtoSKOSTranscreator extends AbstractSimpleTranslator<String,Strin
     return Optional.of(skos);
   }
 
+  protected Owl2SkosConfig readProperties(String properties) {
+    return new Owl2SkosConfig().from(super.readProperties(properties));
+  }
 
   @Override
   public KnowledgeRepresentationLanguage getSupportedLanguage() {

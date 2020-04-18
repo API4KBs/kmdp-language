@@ -2,9 +2,9 @@ package edu.mayo.kmdp.language.detectors;
 
 import static org.omg.spec.api4kp._1_0.contrastors.SyntacticRepresentationContrastor.theRepContrastor;
 
+import edu.mayo.kmdp.language.DetectApiOperator;
 import edu.mayo.kmdp.tranx.v4.server.DetectApiInternal._applyDetect;
 import edu.mayo.kmdp.tranx.v4.server.DetectApiInternal._applyNamedDetect;
-import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguage;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -14,19 +14,19 @@ import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 
 public abstract class AbstractLanguageDetector
-    implements _applyDetect, _applyNamedDetect {
+    implements DetectApiOperator, _applyDetect, _applyNamedDetect {
 
   protected ResourceIdentifier operatorId;
 
   @Override
-  public Answer<KnowledgeCarrier> applyNamedDetect(UUID uuid, KnowledgeCarrier knowledgeCarrier) {
+  public Answer<KnowledgeCarrier> applyNamedDetect(UUID uuid, KnowledgeCarrier knowledgeCarrier, String config) {
     return uuid.equals(getOperatorId().getUuid())
-        ? applyDetect(knowledgeCarrier)
+        ? applyDetect(knowledgeCarrier, config)
         : Answer.unsupported();
   }
 
   @Override
-  public Answer<KnowledgeCarrier> applyDetect(KnowledgeCarrier sourceArtifact) {
+  public Answer<KnowledgeCarrier> applyDetect(KnowledgeCarrier sourceArtifact, String config) {
     try {
       return Answer.of(
           detect(sourceArtifact)
@@ -34,6 +34,11 @@ public abstract class AbstractLanguageDetector
     } catch (Exception e) {
       return Answer.failed(e);
     }
+  }
+
+  @Override
+  public List<SyntacticRepresentation> getInto() {
+    return getSupportedRepresentations();
   }
 
   protected Optional<SyntacticRepresentation> detect(KnowledgeCarrier sourceArtifact) {
@@ -78,8 +83,6 @@ public abstract class AbstractLanguageDetector
     }
   }
 
-  public abstract KnowledgeRepresentationLanguage getSupportedLanguage();
-
   public abstract List<SyntacticRepresentation> getSupportedRepresentations();
 
   protected abstract Optional<SyntacticRepresentation> detectBinary(byte[] bytes);
@@ -99,4 +102,13 @@ public abstract class AbstractLanguageDetector
     this.operatorId = id;
   }
 
+  @Override
+  public boolean can_applyDetect() {
+    return true;
+  }
+
+  @Override
+  public boolean can_applyNamedDetect() {
+    return true;
+  }
 }

@@ -18,23 +18,16 @@ package edu.mayo.kmdp.language.parsers.cmmn.v1_1;
 
 import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Lifting_Task;
 import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Lowering_Task;
-import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.XML_1_1;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.CMMN_1_1;
-import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.DeserializeApiOperator;
 import edu.mayo.kmdp.language.parsers.XMLBasedLanguageParser;
-import edu.mayo.kmdp.tranx.v4.server.DeserializeApiInternal;
-import edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries;
 import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguage;
-import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
 import javax.inject.Named;
 import org.omg.spec.api4kp._1_0.id.SemanticIdentifier;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
 import org.omg.spec.api4kp._1_0.services.KPSupport;
-import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 import org.omg.spec.cmmn._20151109.model.ObjectFactory;
 import org.omg.spec.cmmn._20151109.model.TDefinitions;
 
@@ -45,8 +38,8 @@ import org.omg.spec.cmmn._20151109.model.TDefinitions;
 public class CMMN11Parser extends XMLBasedLanguageParser<TDefinitions>
     implements DeserializeApiOperator {
 
-  static UUID id = UUID.randomUUID();
-  static String version = "1.0.0";
+  public static final UUID id = UUID.fromString("8994de01-11dc-483c-b29e-5fc093567a4b");
+  public static final String version = "1.0.0";
 
   public CMMN11Parser() {
     setId(SemanticIdentifier.newId(id,version));

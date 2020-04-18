@@ -14,7 +14,7 @@
 package edu.mayo.kmdp.language;
 
 import static java.util.Collections.singletonList;
-import static org.omg.spec.api4kp._1_0.Answer.anyAble;
+import static org.omg.spec.api4kp._1_0.Answer.anyDo;
 
 import edu.mayo.kmdp.tranx.v4.server.DetectApiInternal;
 import edu.mayo.kmdp.tranx.v4.server.DiscoveryApiInternal;
@@ -39,7 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Named
 @KPServer
 public class LanguageDetector implements KnowledgePlatformComponent<Detector>,
-    DetectApiInternal, DiscoveryApiInternal {
+    DetectApiInternal, DiscoveryApiInternal._getDetectComponent, DiscoveryApiInternal._listDetectComponents {
 
   private UUID id = UUID.randomUUID();
   private Detector descriptor;
@@ -66,24 +66,26 @@ public class LanguageDetector implements KnowledgePlatformComponent<Detector>,
   }
 
   @Override
-  public Answer<List<Detector>> listDetectComponents() {
+  public Answer<List<Detector>> listDetectComponents(String into, String method) {
     return Answer.of(singletonList(getDescriptor()));
   }
 
   @Override
-  public Answer<KnowledgeCarrier> applyDetect(KnowledgeCarrier sourceArtifact) {
-    return Answer.of(anyAble(detectors.values(),
-        DetectApiOperator::can_applyDetect))
-        .flatOpt(DetectApiOperator::as_applyDetect)
-        .flatMap(a -> a.applyDetect(sourceArtifact));
+  public Answer<KnowledgeCarrier> applyDetect(KnowledgeCarrier sourceArtifact, String config) {
+    return anyDo(
+        getOperations(
+            detectors.values(),
+            Operator::can_applyDetect,
+            DetectApiOperator::as_applyDetect),
+        a -> a.applyDetect(sourceArtifact, config));
   }
 
   @Override
   public Answer<KnowledgeCarrier> applyNamedDetect(UUID operatorId,
-      KnowledgeCarrier sourceArtifact) {
+      KnowledgeCarrier sourceArtifact, String config) {
     return Answer.of(getDetector(operatorId))
         .flatOpt(DetectApiOperator::as_applyNamedDetect)
-        .flatMap(a -> a.applyNamedDetect(operatorId, sourceArtifact));
+        .flatMap(a -> a.applyNamedDetect(operatorId, sourceArtifact, config));
   }
 
   @Override
@@ -93,8 +95,9 @@ public class LanguageDetector implements KnowledgePlatformComponent<Detector>,
   }
 
   @Override
-  public Answer<List<DetectionOperator>> listDetectionOperators() {
+  public Answer<List<DetectionOperator>> listDetectionOperators(String into) {
     return Answer.of(detectors.values().stream()
+        .filter(op -> op.produces(into))
         .map(DetectApiOperator::getDescriptor)
         .collect(Collectors.toList()));
   }

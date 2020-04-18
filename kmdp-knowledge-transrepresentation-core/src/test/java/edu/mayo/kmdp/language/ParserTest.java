@@ -143,7 +143,7 @@ class ParserTest {
     assertEquals(language, carrier.getRepresentation().getLanguage());
 
     Answer<KnowledgeCarrier> parsed =
-        parser.applyLift(carrier, level, null);
+        parser.applyLift(carrier, level, null, null);
 
     assertTrue(parsed.isSuccess());
     KnowledgeCarrier KnowledgeCarrier = parsed.get();

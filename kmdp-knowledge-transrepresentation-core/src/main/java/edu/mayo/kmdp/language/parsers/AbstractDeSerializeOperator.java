@@ -15,31 +15,29 @@ package edu.mayo.kmdp.language.parsers;
 
 import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Abstract_Knowledge_Expression;
 import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Parsed_Knowedge_Expression;
-import static org.omg.spec.api4kp._1_0.AbstractCarrier.of;
-import static org.omg.spec.api4kp._1_0.AbstractCarrier.ofAst;
-import static org.omg.spec.api4kp._1_0.AbstractCarrier.ofTree;
 import static org.omg.spec.api4kp._1_0.contrastors.ParsingLevelContrastor.detectLevel;
+import static org.omg.spec.api4kp._1_0.contrastors.ParsingLevelContrastor.theLevelContrastor;
 
-import edu.mayo.kmdp.comparator.Contrastor.Comparison;
 import edu.mayo.kmdp.language.DeserializeApiOperator;
+import edu.mayo.kmdp.util.PropertiesUtil;
 import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevel;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
+import java.util.Properties;
+import java.util.function.BiPredicate;
 import org.omg.spec.api4kp._1_0.Answer;
-import org.omg.spec.api4kp._1_0.contrastors.ParsingLevelContrastor;
 import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 import org.omg.spec.api4kp._1_0.services.tranx.ModelMIMECoder;
 
 /**
- * Abstract class that implements a generic parser/serializer for a Knowledge Representation Language
- * and its serializations
+ * Abstract class that implements a generic parser/serializer for a Knowledge Representation
+ * Language and its serializations
  */
-public abstract class AbstractDeSerializer
+public abstract class AbstractDeSerializeOperator
     implements DeserializeApiOperator, Lifter, Lowerer {
 
   private static final Charset CHARSET = Charset.defaultCharset();
@@ -66,36 +64,48 @@ public abstract class AbstractDeSerializer
 
   @Override
   public Answer<KnowledgeCarrier> applyLift(KnowledgeCarrier knowledgeCarrier,
-      ParsingLevel parsingLevel, String s) {
-    return Answer.of(
-        lift(knowledgeCarrier, parsingLevel,
-            ModelMIMECoder.decode(s).orElse(null)));
+      ParsingLevel parsingLevel, String into, String properties) {
+    try {
+      return Answer.of(
+          lift(knowledgeCarrier,
+              parsingLevel,
+              ModelMIMECoder.decode(into).orElse(getSupportedRepresentations().get(0)),
+              PropertiesUtil.doParse(properties)
+          ));
+    } catch (UnsupportedOperationException e) {
+      return Answer.failed(e);
+    }
   }
 
   @Override
   public Answer<KnowledgeCarrier> applyLower(KnowledgeCarrier knowledgeCarrier,
-      ParsingLevel parsingLevel, String s) {
-    return Answer.of(
-        lower(knowledgeCarrier, parsingLevel,
-            ModelMIMECoder.decode(s).orElse(null)));
+      ParsingLevel parsingLevel, String into, String properties) {
+    try {
+      return Answer.of(
+          lower(knowledgeCarrier, parsingLevel,
+              ModelMIMECoder.decode(into).orElse(getSupportedRepresentations().get(0)),
+              PropertiesUtil.doParse(properties)));
+    } catch (UnsupportedOperationException e) {
+      return Answer.failed(e);
+    }
   }
 
 
   public Optional<KnowledgeCarrier> lift(KnowledgeCarrier sourceArtifact,
-      ParsingLevel into, SyntacticRepresentation targetRepresentation) {
+      ParsingLevel into, SyntacticRepresentation targetRepresentation, Properties config) {
     checkLiftConsistency(sourceArtifact, into, targetRepresentation);
 
     switch (sourceArtifact.getLevel().asEnum()) {
       case Encoded_Knowledge_Expression:
         switch (into.asEnum()) {
           case Abstract_Knowledge_Expression:
-            return this.innerDecode(sourceArtifact)
-                .flatMap(this::innerParse);
+            return this.innerDecode(sourceArtifact, config)
+                .flatMap(str -> innerParse(str, config));
           case Parsed_Knowedge_Expression:
-            return this.innerDecode(sourceArtifact)
-                .flatMap(this::innerDeserialize);
+            return this.innerDecode(sourceArtifact, config)
+                .flatMap(str -> innerDeserialize(str, config));
           case Concrete_Knowledge_Expression:
-            return this.innerDecode((sourceArtifact));
+            return this.innerDecode(sourceArtifact, config);
           case Encoded_Knowledge_Expression:
             return Optional.of(sourceArtifact);
           default:
@@ -104,9 +114,9 @@ public abstract class AbstractDeSerializer
       case Concrete_Knowledge_Expression:
         switch (into.asEnum()) {
           case Abstract_Knowledge_Expression:
-            return this.innerParse(sourceArtifact);
+            return this.innerParse(sourceArtifact, config);
           case Parsed_Knowedge_Expression:
-            return this.innerDeserialize(sourceArtifact);
+            return this.innerDeserialize(sourceArtifact, config);
           case Concrete_Knowledge_Expression:
             return Optional.of(sourceArtifact);
           default:
@@ -115,7 +125,7 @@ public abstract class AbstractDeSerializer
       case Parsed_Knowedge_Expression:
         switch (into.asEnum()) {
           case Abstract_Knowledge_Expression:
-            return this.innerAbstract(sourceArtifact);
+            return this.innerAbstract(sourceArtifact, config);
           case Parsed_Knowedge_Expression:
             return Optional.of(sourceArtifact);
           default:
@@ -130,16 +140,16 @@ public abstract class AbstractDeSerializer
 
 
   protected Optional<KnowledgeCarrier> lower(KnowledgeCarrier sourceArtifact,
-      ParsingLevel toLevel, SyntacticRepresentation into) {
-    checkLowerConsistency(sourceArtifact,toLevel,into);
+      ParsingLevel toLevel, SyntacticRepresentation into, Properties config) {
+    checkLowerConsistency(sourceArtifact, toLevel, into);
 
     switch (sourceArtifact.getLevel().asEnum()) {
       case Abstract_Knowledge_Expression:
-        return serializeAST(sourceArtifact, toLevel, into);
+        return serializeAST(sourceArtifact, toLevel, into, config);
       case Parsed_Knowedge_Expression:
-        return serializeDoc(sourceArtifact, toLevel, into);
+        return serializeDoc(sourceArtifact, toLevel, into, config);
       case Concrete_Knowledge_Expression:
-        return serializeExpression(sourceArtifact, toLevel, into);
+        return serializeExpression(sourceArtifact, toLevel, into, config);
       case Encoded_Knowledge_Expression:
       default:
         return Optional.of(sourceArtifact);
@@ -150,16 +160,19 @@ public abstract class AbstractDeSerializer
 
   protected void checkLiftConsistency(KnowledgeCarrier sourceArtifact, ParsingLevel into,
       SyntacticRepresentation targetRepresentation) {
-    checkConsistency(sourceArtifact, into, targetRepresentation, Comparison.BROADER);
+    checkConsistency(sourceArtifact, into, targetRepresentation,
+        theLevelContrastor::isNarrowerOrEqual);
   }
 
   protected void checkLowerConsistency(KnowledgeCarrier sourceArtifact, ParsingLevel into,
       SyntacticRepresentation targetRepresentation) {
-    checkConsistency(sourceArtifact, into, targetRepresentation, Comparison.NARROWER);
+    checkConsistency(sourceArtifact, into, targetRepresentation,
+        theLevelContrastor::isBroaderOrEqual);
   }
 
   protected void checkConsistency(KnowledgeCarrier sourceArtifact, ParsingLevel into,
-      SyntacticRepresentation targetRepresentation, Comparison test) {
+      SyntacticRepresentation targetRepresentation,
+      BiPredicate<ParsingLevel,ParsingLevel> levelTest) {
 
     if (!getSupportedLanguage().sameAs(sourceArtifact.getRepresentation().getLanguage())) {
       throw new UnsupportedOperationException(
@@ -173,59 +186,57 @@ public abstract class AbstractDeSerializer
     }
 
     ParsingLevel sourceLevel = detectLevel(sourceArtifact);
-    if (ParsingLevelContrastor.singleton.contrast(sourceLevel, into) == test) {
+    if (!levelTest.test(sourceLevel, into)) {
       // parsing must lift to a higher level <=> sourceLevel must be lower
       throw new UnsupportedOperationException(
-          "Cannot lift to a lower level : " + sourceArtifact.getLevel());
+          "Cannot lift/lower between : " + sourceArtifact.getLevel() + " and " + into);
     }
 
   }
 
 
-
-
-
-  private Optional<KnowledgeCarrier> serializeExpression(KnowledgeCarrier expr, ParsingLevel toLevel,
-      SyntacticRepresentation into) {
+  private Optional<KnowledgeCarrier> serializeExpression(KnowledgeCarrier expr,
+      ParsingLevel toLevel,
+      SyntacticRepresentation into,
+      Properties config) {
     switch (toLevel.asEnum()) {
       case Concrete_Knowledge_Expression:
         return Optional.ofNullable(expr);
       case Encoded_Knowledge_Expression:
       default:
-        return this.innerEncode(expr, into);
+        return this.innerEncode(expr, into, config);
     }
   }
 
   private Optional<KnowledgeCarrier> serializeDoc(KnowledgeCarrier doc, ParsingLevel toLevel,
-      SyntacticRepresentation into) {
+      SyntacticRepresentation into, Properties config) {
     switch (toLevel.asEnum()) {
       case Parsed_Knowedge_Expression:
         return Optional.ofNullable(doc);
       case Concrete_Knowledge_Expression:
-        return this.innerSerialize(doc, into);
+        return this.innerSerialize(doc, into, config);
       case Encoded_Knowledge_Expression:
       default:
-        return this.innerSerialize(doc, into)
-            .flatMap(this::innerEncode);
+        return this.innerSerialize(doc, into, config)
+            .flatMap(str -> innerEncode(str, config));
     }
   }
 
   protected Optional<KnowledgeCarrier> serializeAST(KnowledgeCarrier ast, ParsingLevel toLevel,
-      SyntacticRepresentation into) {
+      SyntacticRepresentation into, Properties config) {
     switch (toLevel.asEnum()) {
       case Abstract_Knowledge_Expression:
         return Optional.ofNullable(ast);
       case Parsed_Knowedge_Expression:
-        return this.innerConcretize(ast, into);
+        return this.innerConcretize(ast, into, config);
       case Concrete_Knowledge_Expression:
-        return this.innerExternalize(ast, into);
+        return this.innerExternalize(ast, into, config);
       case Encoded_Knowledge_Expression:
       default:
-        return this.innerExternalize(ast, into)
-            .flatMap(this::innerEncode);
+        return this.innerExternalize(ast, into, config)
+            .flatMap(str -> innerEncode(str, config));
     }
   }
-
 
 
   protected SyntacticRepresentation getParseResultRepresentation(
@@ -301,7 +312,7 @@ public abstract class AbstractDeSerializer
 
   protected SyntacticRepresentation newRepresentation(KnowledgeCarrier source,
       ParsingLevel targetLevel) {
-    return ParsingLevelContrastor.singleton.compare(source.getLevel(), targetLevel) < 0
+    return theLevelContrastor.compare(source.getLevel(), targetLevel) < 0
         ? getParseResultRepresentation(source, Abstract_Knowledge_Expression)
         : getSerializeResultRepresentation(source, Parsed_Knowedge_Expression);
   }
@@ -313,9 +324,29 @@ public abstract class AbstractDeSerializer
     return DeserializeApiOperator.newVerticalCarrier(
         source,
         targetLevel,
-        newRepresentation(source,targetLevel),
+        newRepresentation(source, targetLevel),
         targetArtifact);
   }
 
+
+  @Override
+  public boolean can_applyLift() {
+    return true;
+  }
+
+  @Override
+  public boolean can_applyLower() {
+    return true;
+  }
+
+  @Override
+  public boolean can_applyNamedLift() {
+    return true;
+  }
+
+  @Override
+  public boolean can_applyNamedLower() {
+    return true;
+  }
 
 }

@@ -26,11 +26,13 @@ import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.DeserializeApiOperator;
 import edu.mayo.kmdp.language.parsers.Lifter;
+import edu.mayo.kmdp.util.PropertiesUtil;
 import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevel;
 import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguage;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.UUID;
 import javax.inject.Named;
 import org.apache.jena.query.ParameterizedSparqlString;
@@ -49,10 +51,10 @@ import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 public class SparqlLifter
     implements DeserializeApiOperator, Lifter {
 
-  static UUID id = UUID.randomUUID();
-  static String version = "1.0.0";
+  public static final UUID id = UUID.fromString("21652a7d-c5c8-4c57-b483-2af561ba778e");
+  public static final String version = "1.0.0";
 
-  private ResourceIdentifier operatorId;
+  private final ResourceIdentifier operatorId;
 
   public SparqlLifter() {
     this.operatorId = SemanticIdentifier.newId(id,version);
@@ -60,14 +62,15 @@ public class SparqlLifter
 
   @Override
   public Answer<KnowledgeCarrier> applyLift(KnowledgeCarrier knowledgeCarrier,
-      ParsingLevel parsingLevel, String xAccept) {
+      ParsingLevel parsingLevel, String xAccept, String config) {
+    Properties props = PropertiesUtil.doParse(config);
     //TODO should check for consistency between source level and targetLevel;
 
     switch (parsingLevel.asEnum()) {
       case Concrete_Knowledge_Expression:
         switch (knowledgeCarrier.getLevel().asEnum()) {
           case Encoded_Knowledge_Expression:
-            return Answer.of(innerDecode(knowledgeCarrier));
+            return Answer.of(innerDecode(knowledgeCarrier, props));
           default:
             return Answer.unsupported();
         }
@@ -75,11 +78,11 @@ public class SparqlLifter
         switch (knowledgeCarrier.getLevel().asEnum()) {
           case Encoded_Knowledge_Expression:
             return Answer.of(
-                innerDecode(knowledgeCarrier)
-                .flatMap(this::innerDeserialize));
+                innerDecode(knowledgeCarrier, props)
+                .flatMap( str -> innerDeserialize(str, props)));
           case Concrete_Knowledge_Expression:
             return Answer.of(
-                innerDeserialize(knowledgeCarrier));
+                innerDeserialize(knowledgeCarrier, props));
           case Parsed_Knowedge_Expression:
             return Answer.of(knowledgeCarrier);
           default:
@@ -89,13 +92,13 @@ public class SparqlLifter
         switch (knowledgeCarrier.getLevel().asEnum()) {
           case Encoded_Knowledge_Expression:
             return Answer.of(
-                innerDecode(knowledgeCarrier)
-                    .flatMap(this::innerParse));
+                innerDecode(knowledgeCarrier, props)
+                    .flatMap(str -> innerParse(str, props)));
           case Concrete_Knowledge_Expression:
             return Answer.of(
-                innerParse(knowledgeCarrier));
+                innerParse(knowledgeCarrier, props));
           case Parsed_Knowedge_Expression:
-            return Answer.of(innerAbstract(knowledgeCarrier));
+            return Answer.of(innerAbstract(knowledgeCarrier, props));
           default:
             return Answer.of(knowledgeCarrier);
         }
@@ -122,7 +125,7 @@ public class SparqlLifter
   }
 
   @Override
-  public Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier) {
+  public Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier, Properties props) {
     String sparql = carrier.asString()
         .orElseThrow(UnsupportedOperationException::new);
     return Optional.of(
@@ -131,7 +134,7 @@ public class SparqlLifter
   }
 
   @Override
-  public Optional<KnowledgeCarrier> innerDeserialize(KnowledgeCarrier carrier) {
+  public Optional<KnowledgeCarrier> innerDeserialize(KnowledgeCarrier carrier, Properties props) {
     ParameterizedSparqlString sparql = carrier.asString()
         .map(ParameterizedSparqlString::new)
         .orElseThrow(UnsupportedOperationException::new);
@@ -141,7 +144,7 @@ public class SparqlLifter
   }
 
   @Override
-  public Optional<KnowledgeCarrier> innerParse(KnowledgeCarrier carrier) {
+  public Optional<KnowledgeCarrier> innerParse(KnowledgeCarrier carrier, Properties props) {
     Query sparql = carrier.asString()
         .map(ParameterizedSparqlString::new)
         .map(ParameterizedSparqlString::asQuery)
@@ -152,7 +155,7 @@ public class SparqlLifter
   }
 
   @Override
-  public Optional<KnowledgeCarrier> innerAbstract(KnowledgeCarrier carrier) {
+  public Optional<KnowledgeCarrier> innerAbstract(KnowledgeCarrier carrier, Properties props) {
     Query sparql = carrier.as(ParameterizedSparqlString.class)
         .map(ParameterizedSparqlString::asQuery)
         .orElseThrow(UnsupportedOperationException::new);

@@ -6,7 +6,6 @@ import static java.util.Collections.singletonList;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.translators.AbstractSimpleTranslator;
-import edu.mayo.kmdp.language.translators.fhir.stu3.structdef.StructDefToDMN;
 import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguage;
@@ -16,15 +15,11 @@ import java.util.Properties;
 import java.util.UUID;
 import javax.inject.Named;
 import org.hl7.fhir.dstu3.model.Library;
-import org.hl7.fhir.dstu3.model.StructureDefinition;
-import org.omg.spec.api4kp._1_0.AbstractCarrier;
 import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
 import org.omg.spec.api4kp._1_0.id.SemanticIdentifier;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
 import org.omg.spec.api4kp._1_0.services.KPSupport;
-import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
-import org.omg.spec.dmn._20180521.model.TDefinitions;
 
 @Named
 @KPOperation(KnowledgeProcessingOperationSeries.Transcreation_Task)
@@ -50,7 +45,7 @@ public class SurrogateToLibraryTranslator extends AbstractSimpleTranslator<Knowl
 
   @Override
   protected Optional<Library> transformAst(ResourceIdentifier assetId,
-      KnowledgeAsset expression, SyntacticRepresentation tgtRep) {
+      KnowledgeAsset expression, SyntacticRepresentation tgtRep, Properties config) {
     return Optional.ofNullable(new SurrogateToLibrary().transform(expression));
   }
 

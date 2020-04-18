@@ -26,7 +26,7 @@ import static edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentati
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.DeserializeApiOperator;
-import edu.mayo.kmdp.language.parsers.AbstractDeSerializer;
+import edu.mayo.kmdp.language.parsers.AbstractDeSerializeOperator;
 import edu.mayo.kmdp.language.parsers.Lifter;
 import edu.mayo.kmdp.language.parsers.Lowerer;
 import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevel;
@@ -39,6 +39,7 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.UUID;
 import javax.inject.Named;
 import org.apache.jena.rdf.model.Model;
@@ -53,10 +54,10 @@ import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 @KPOperation(Lowering_Task)
 @KPOperation(Lifting_Task)
 @KPSupport(OWL_2)
-public class JenaOwlParser extends AbstractDeSerializer {
+public class JenaOwlParser extends AbstractDeSerializeOperator {
 
-  static UUID id = UUID.randomUUID();
-  static String version = "1.0.0";
+  public static final UUID id = UUID.fromString("1e912b84-f08f-4d9c-a2ae-30f6f09a27a4");
+  public static final String version = "1.0.0";
 
   public JenaOwlParser() {
     setId(SemanticIdentifier.newId(id,version));
@@ -80,10 +81,10 @@ public class JenaOwlParser extends AbstractDeSerializer {
    *
    * @param carrier A binary carrier
    * @return A string carrier
-   * @see Lowerer#innerEncode(KnowledgeCarrier)
+   * @see Lowerer#innerEncode(KnowledgeCarrier, Properties)
    */
   @Override
-  public Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier) {
+  public Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier, Properties properties) {
     SyntacticRepresentation tgtRep =
         getTargetLiftRepresentation(carrier.getRepresentation(), Concrete_Knowledge_Expression);
     return Optional.of(
@@ -100,7 +101,7 @@ public class JenaOwlParser extends AbstractDeSerializer {
    * @return A parse tree carrier
    */
   @Override
-  public Optional<KnowledgeCarrier> innerDeserialize(KnowledgeCarrier carrier) {
+  public Optional<KnowledgeCarrier> innerDeserialize(KnowledgeCarrier carrier, Properties properties) {
     SyntacticRepresentation tgtRep =
         getTargetLiftRepresentation(carrier.getRepresentation(), Parsed_Knowedge_Expression);
     return Optional.of(
@@ -117,7 +118,7 @@ public class JenaOwlParser extends AbstractDeSerializer {
    * @return An abstract syntax tree carrier
    */
   @Override
-  public Optional<KnowledgeCarrier> innerParse(KnowledgeCarrier carrier) {
+  public Optional<KnowledgeCarrier> innerParse(KnowledgeCarrier carrier, Properties properties) {
     return Optional.empty();
   }
 
@@ -128,7 +129,7 @@ public class JenaOwlParser extends AbstractDeSerializer {
    * @return An abstract syntax tree carrier
    */
   @Override
-  public Optional<KnowledgeCarrier> innerAbstract(KnowledgeCarrier carrier) {
+  public Optional<KnowledgeCarrier> innerAbstract(KnowledgeCarrier carrier, Properties properties) {
     return Optional.empty();
   }
 
@@ -139,11 +140,11 @@ public class JenaOwlParser extends AbstractDeSerializer {
    * @param into    A representation that provides the details of encoding Must be compatible with
    *                the source representation at the language/syntax/serialization level
    * @return A string carrier
-   * @see Lifter#innerDecode(KnowledgeCarrier)
+   * @see Lifter#innerDecode(KnowledgeCarrier, Properties)
    */
   @Override
   public Optional<KnowledgeCarrier> innerEncode(KnowledgeCarrier carrier,
-      SyntacticRepresentation into) {
+      SyntacticRepresentation into, Properties properties) {
     SyntacticRepresentation tgtRep =
         getTargetLowerRepresentation(carrier.getRepresentation(), into, Encoded_Knowledge_Expression);
     return Optional.of(
@@ -161,11 +162,11 @@ public class JenaOwlParser extends AbstractDeSerializer {
    *                Must be compatible with the source representation at the language level (Note:
    *                only String is currently supported)
    * @return A string carrier
-   * @see Lifter#innerParse(KnowledgeCarrier)
+   * @see Lifter#innerParse(KnowledgeCarrier, Properties)
    */
   @Override
   public Optional<KnowledgeCarrier> innerExternalize(KnowledgeCarrier carrier,
-      SyntacticRepresentation into) {
+      SyntacticRepresentation into, Properties properties) {
     SyntacticRepresentation tgtRep =
         getTargetLowerRepresentation(carrier.getRepresentation(), into,
             Concrete_Knowledge_Expression);
@@ -185,11 +186,11 @@ public class JenaOwlParser extends AbstractDeSerializer {
    *                Must be compatible with the source representation at the language/syntax level
    *                (Note: only String is currently supported)
    * @return A string carrier
-   * @see Lifter#innerDeserialize(KnowledgeCarrier)
+   * @see Lifter#innerDeserialize(KnowledgeCarrier, Properties)
    */
   @Override
   public Optional<KnowledgeCarrier> innerSerialize(KnowledgeCarrier carrier,
-      SyntacticRepresentation into) {
+      SyntacticRepresentation into, Properties properties) {
     return Optional.empty();
   }
 
@@ -201,11 +202,11 @@ public class JenaOwlParser extends AbstractDeSerializer {
    * @param into    A representation that defines how to derive the concrete expression in a given
    *                syntax Must be compatible with the source representation at the language level
    * @return A string carrier
-   * @see Lifter#innerAbstract(KnowledgeCarrier)
+   * @see Lifter#innerAbstract(KnowledgeCarrier, Properties)
    */
   @Override
   public Optional<KnowledgeCarrier> innerConcretize(KnowledgeCarrier carrier,
-      SyntacticRepresentation into) {
+      SyntacticRepresentation into, Properties properties) {
     return Optional.empty();
   }
 

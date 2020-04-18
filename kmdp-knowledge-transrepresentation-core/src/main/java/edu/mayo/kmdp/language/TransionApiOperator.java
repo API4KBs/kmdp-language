@@ -3,14 +3,14 @@ package edu.mayo.kmdp.language;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.of;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.ofAst;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.ofTree;
+import static org.omg.spec.api4kp._1_0.contrastors.SyntacticRepresentationContrastor.theRepContrastor;
 
 import edu.mayo.kmdp.tranx.v4.server.TransxionApiInternal;
+import edu.mayo.kmdp.util.Util;
 import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevel;
 import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguage;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
 import org.omg.spec.api4kp._1_0.KnowledgePlatformOperator;
 import org.omg.spec.api4kp._1_0.contrastors.ParsingLevelContrastor;
 import org.omg.spec.api4kp._1_0.id.IdentifierConstants;
@@ -18,6 +18,7 @@ import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
 import org.omg.spec.api4kp._1_0.id.SemanticIdentifier;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
+import org.omg.spec.api4kp._1_0.services.tranx.ModelMIMECoder;
 import org.omg.spec.api4kp._1_0.services.tranx.TransrepresentationOperator;
 
 public interface TransionApiOperator
@@ -38,6 +39,21 @@ public interface TransionApiOperator
     return assetId;
   }
 
+  default boolean consumes(String from) {
+    return Util.isEmpty(from) ||
+        ModelMIMECoder.decode(from)
+        .map(fromRep -> getFrom().stream()
+            .anyMatch(supported -> theRepContrastor.isBroaderOrEqual(supported, fromRep)))
+        .orElse(false);
+  }
+
+  default boolean produces(String into) {
+    return Util.isEmpty(into) ||
+        ModelMIMECoder.decode(into)
+            .map(intoRep -> getInto().stream()
+                .anyMatch(supported -> theRepContrastor.isNarrowerOrEqual(supported, intoRep)))
+            .orElse(false);
+  }
 
   @Override
   default TransrepresentationOperator getDescriptor() {
@@ -76,5 +92,4 @@ public interface TransionApiOperator
         .withLevel(targetLevel)
         .withRepresentation(targetRepresentation);
   }
-
 }

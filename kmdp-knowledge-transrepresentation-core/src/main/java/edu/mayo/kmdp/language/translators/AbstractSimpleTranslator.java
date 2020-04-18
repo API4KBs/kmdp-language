@@ -7,13 +7,14 @@ import edu.mayo.kmdp.language.TransionApiOperator;
 import edu.mayo.kmdp.tranx.v4.server.TransxionApiInternal._applyNamedTransrepresent;
 import edu.mayo.kmdp.tranx.v4.server.TransxionApiInternal._applyTransrepresent;
 import edu.mayo.kmdp.util.Util;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.UUID;
 import org.omg.spec.api4kp._1_0.Answer;
 import org.omg.spec.api4kp._1_0.contrastors.ParsingLevelContrastor;
-import org.omg.spec.api4kp._1_0.id.IdentifierConstants;
 import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
-import org.omg.spec.api4kp._1_0.id.SemanticIdentifier;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 import org.omg.spec.api4kp._1_0.services.tranx.ModelMIMECoder;
@@ -33,18 +34,18 @@ public abstract class AbstractSimpleTranslator<S,T>
 
   @Override
   public Answer<KnowledgeCarrier> applyTransrepresent(KnowledgeCarrier knowledgeCarrier,
-      String xAccept) {
+      String xAccept, String properties) {
     SyntacticRepresentation targetRep = checkTargetRepresentation(knowledgeCarrier,
         toTargetRepresentation(xAccept));
     return Answer.of(
-        applyTransrepresentation(knowledgeCarrier, targetRep));
+        applyTransrepresentation(knowledgeCarrier, targetRep, readProperties(properties)));
   }
 
   @Override
   public Answer<KnowledgeCarrier> applyNamedTransrepresent(UUID uuid,
-      KnowledgeCarrier knowledgeCarrier, String xAccept) {
+      KnowledgeCarrier knowledgeCarrier, String xAccept, String properties) {
     return uuid.equals(getOperatorId().getUuid())
-        ? applyTransrepresent(knowledgeCarrier, xAccept)
+        ? applyTransrepresent(knowledgeCarrier, xAccept, properties)
         : Answer.unsupported();
   }
 
@@ -68,24 +69,25 @@ public abstract class AbstractSimpleTranslator<S,T>
 
   protected Optional<KnowledgeCarrier> applyTransrepresentation(
       KnowledgeCarrier src,
-      SyntacticRepresentation tgtRep) {
+      SyntacticRepresentation tgtRep,
+      Properties config) {
     switch (src.getLevel().asEnum()) {
       case Encoded_Knowledge_Expression:
         return src.asBinary()
-            .flatMap(bytes -> transformBinary(src.getAssetId(), bytes,tgtRep))
+            .flatMap(bytes -> transformBinary(src.getAssetId(), bytes, tgtRep, config))
             .map(out -> TransionApiOperator.newHorizontalCarrier(
                 tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getArtifactId())));
       case Concrete_Knowledge_Expression:
         return src.asString()
-            .flatMap(str -> transformString(src.getAssetId(), str,tgtRep))
+            .flatMap(str -> transformString(src.getAssetId(), str, tgtRep, config))
             .map(out -> TransionApiOperator.newHorizontalCarrier(
                 tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getArtifactId())));
       case Parsed_Knowedge_Expression:
-        return transformTree(src.getAssetId(), src.getExpression(), tgtRep)
+        return transformTree(src.getAssetId(), src.getExpression(), tgtRep, config)
             .map(out -> TransionApiOperator.newHorizontalCarrier(
                 tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getArtifactId())));
       case Abstract_Knowledge_Expression:
-        return transformAst(src.getAssetId(), (S) src.getExpression(), tgtRep)
+        return transformAst(src.getAssetId(), (S) src.getExpression(), tgtRep, config)
             .map(out -> TransionApiOperator.newHorizontalCarrier(
                 tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getArtifactId())));
       default:
@@ -95,25 +97,29 @@ public abstract class AbstractSimpleTranslator<S,T>
 
   protected Optional<T> transformAst(
       ResourceIdentifier assetId, S expression,
-      SyntacticRepresentation tgtRep) {
+      SyntacticRepresentation tgtRep,
+      Properties config) {
     throw new UnsupportedOperationException();
   }
 
   protected Optional<T> transformTree(
       ResourceIdentifier assetId, Object tree,
-      SyntacticRepresentation tgtRep) {
+      SyntacticRepresentation tgtRep,
+      Properties config) {
     throw new UnsupportedOperationException();
   }
 
   protected Optional<T> transformString(
       ResourceIdentifier assetId, String str,
-      SyntacticRepresentation tgtRep) {
+      SyntacticRepresentation tgtRep,
+      Properties config) {
     throw new UnsupportedOperationException();
   }
 
   protected Optional<T> transformBinary(
       ResourceIdentifier assetId, byte[] bytes,
-      SyntacticRepresentation tgtRep) {
+      SyntacticRepresentation tgtRep,
+      Properties config) {
     throw new UnsupportedOperationException();
   }
 
@@ -129,5 +135,26 @@ public abstract class AbstractSimpleTranslator<S,T>
     return tgtRep;
   }
 
+  protected Properties readProperties(String properties) {
+    Properties config = new Properties();
+    if (!Util.isEmpty(properties)) {
+      try {
+        config.load(new ByteArrayInputStream(properties.getBytes()));
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+    return config;
+  }
 
+
+  @Override
+  public boolean can_applyNamedTransrepresent() {
+    return true;
+  }
+
+  @Override
+  public boolean can_applyTransrepresent() {
+    return true;
+  }
 }

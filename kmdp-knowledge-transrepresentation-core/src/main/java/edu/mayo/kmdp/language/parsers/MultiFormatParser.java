@@ -21,12 +21,13 @@ import static edu.mayo.kmdp.comparator.Contrastor.isNarrowerOrEqual;
 import static org.omg.spec.api4kp._1_0.contrastors.SyntacticRepresentationContrastor.theRepContrastor;
 
 import edu.mayo.kmdp.util.StreamUtil;
+import edu.mayo.kmdp.util.TriFunction;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.BiFunction;
+import java.util.Properties;
 import java.util.function.Predicate;
 import javax.inject.Named;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
@@ -36,9 +37,9 @@ import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 @Named
 @KPOperation(KnowledgeProcessingOperationSeries.Lowering_Task)
 @KPOperation(KnowledgeProcessingOperationSeries.Lifting_Task)
-public abstract class MultiFormatParser<T> extends AbstractDeSerializer {
+public abstract class MultiFormatParser<T> extends AbstractDeSerializeOperator {
 
-  private List<AbstractDeSerializer> parserSet;
+  private List<AbstractDeSerializeOperator> parserSet;
 
   protected MultiFormatParser(XMLBasedLanguageParser<T> xmlParser,
       JSONBasedLanguageParser<T> jsonParser) {
@@ -46,98 +47,116 @@ public abstract class MultiFormatParser<T> extends AbstractDeSerializer {
   }
 
   @Override
-  public Optional<KnowledgeCarrier> innerAbstract(KnowledgeCarrier carrier) {
+  public Optional<KnowledgeCarrier> innerAbstract(KnowledgeCarrier carrier, Properties config) {
     return processLift(
         carrier,
-        Lifter::innerAbstract);
+        Lifter::innerAbstract,
+        config);
   }
 
   @Override
-  public Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier) {
+  public Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier, Properties config) {
     return processLift(
         carrier,
-        Lifter::innerDecode);
+        Lifter::innerDecode,
+        config);
   }
 
   @Override
-  public Optional<KnowledgeCarrier> innerDeserialize(KnowledgeCarrier carrier) {
+  public Optional<KnowledgeCarrier> innerDeserialize(KnowledgeCarrier carrier, Properties config) {
     return processLift(
         carrier,
-        Lifter::innerDeserialize);
+        Lifter::innerDeserialize,
+        config);
   }
 
   @Override
-  public Optional<KnowledgeCarrier> innerParse(KnowledgeCarrier carrier) {
+  public Optional<KnowledgeCarrier> innerParse(KnowledgeCarrier carrier, Properties config) {
     return processLift(
         carrier,
-        Lifter::innerParse);
+        Lifter::innerParse,
+        config);
   }
 
 
-  private boolean isLiftCandidate(AbstractDeSerializer candidate, SyntacticRepresentation argumentRep) {
+  private boolean isLiftCandidate(AbstractDeSerializeOperator candidate, SyntacticRepresentation argumentRep) {
     return candidate.getSupportedRepresentations().stream()
         .anyMatch(supportedRep -> isNarrowerOrEqual(theRepContrastor.contrast(supportedRep,argumentRep)));
   }
 
-  private boolean isLowerCandidate(AbstractDeSerializer candidate, SyntacticRepresentation argumentRep) {
+  private boolean isLowerCandidate(AbstractDeSerializeOperator candidate, SyntacticRepresentation argumentRep) {
     return candidate.getSupportedRepresentations().stream()
         .anyMatch(supportedRep -> isBroaderOrEqual(theRepContrastor.contrast(supportedRep,argumentRep)));
   }
 
   protected Optional<KnowledgeCarrier> processLift(KnowledgeCarrier source,
-      BiFunction<AbstractDeSerializer,KnowledgeCarrier,Optional<KnowledgeCarrier>> mapper) {
+      TriFunction<AbstractDeSerializeOperator,KnowledgeCarrier,Properties,Optional<KnowledgeCarrier>> mapper,
+      Properties config) {
     return process(
         source,
         mapper,
-        parser -> isLiftCandidate(parser, source.getRepresentation()));
+        parser -> isLiftCandidate(parser, source.getRepresentation()),
+        config);
   }
 
   protected Optional<KnowledgeCarrier> processLower(KnowledgeCarrier source,
-      BiFunction<AbstractDeSerializer,KnowledgeCarrier,Optional<KnowledgeCarrier>> mapper) {
+      SyntacticRepresentation into,
+      TriFunction<AbstractDeSerializeOperator,KnowledgeCarrier,Properties,Optional<KnowledgeCarrier>> mapper,
+      Properties config) {
     return process(
         source,
         mapper,
-        parser -> isLowerCandidate(parser, source.getRepresentation()));
+        parser -> isLowerCandidate(parser, source.getRepresentation()) && checkTargetCompatibility(into,parser.getDefaultFormat()),
+        config);
   }
 
   protected Optional<KnowledgeCarrier> process(KnowledgeCarrier source,
-      BiFunction<AbstractDeSerializer,KnowledgeCarrier,Optional<KnowledgeCarrier>> mapper,
-      Predicate<AbstractDeSerializer> test) {
+      TriFunction<AbstractDeSerializeOperator,KnowledgeCarrier,Properties,Optional<KnowledgeCarrier>> mapper,
+      Predicate<AbstractDeSerializeOperator> test,
+      Properties config) {
     return parserSet.stream()
         .filter(test)
-        .map(l -> mapper.apply(l,source))
+        .map(l -> mapper.apply(l,source, config))
         .flatMap(StreamUtil::trimStream)
         .findFirst();
   }
 
 
   @Override
-  public Optional<KnowledgeCarrier> innerConcretize(KnowledgeCarrier carrier, SyntacticRepresentation into) {
+  public Optional<KnowledgeCarrier> innerConcretize(KnowledgeCarrier carrier, SyntacticRepresentation into, Properties config) {
     return processLower(
         carrier,
-        Lowerer::innerConcretize);
+        into,
+        (ser,kc,cfg) -> ser.innerConcretize(kc,into,cfg),
+        config);
   }
 
   @Override
-  public Optional<KnowledgeCarrier> innerEncode(KnowledgeCarrier carrier, SyntacticRepresentation into) {
+  public Optional<KnowledgeCarrier> innerEncode(KnowledgeCarrier carrier, SyntacticRepresentation into, Properties config) {
     return processLower(
         carrier,
-        Lowerer::innerEncode);
+        into,
+        (ser,kc, cfg) -> ser.innerEncode(kc,into,cfg),
+        config);
   }
 
   @Override
-  public Optional<KnowledgeCarrier> innerExternalize(KnowledgeCarrier carrier, SyntacticRepresentation into) {
+  public Optional<KnowledgeCarrier> innerExternalize(KnowledgeCarrier carrier, SyntacticRepresentation into, Properties config) {
     return processLower(
         carrier,
-        Lowerer::innerExternalize);
+        into,
+        (ser,kc,cfg) -> ser.innerExternalize(kc,into,cfg),
+        config);
   }
 
   @Override
   public Optional<KnowledgeCarrier> innerSerialize(KnowledgeCarrier carrier,
-      SyntacticRepresentation into) {
+      SyntacticRepresentation into, Properties config) {
     return processLower(
         carrier,
-        Lowerer::innerSerialize);
+        into,
+        (ser,kc,cfg) -> ser.innerSerialize(kc,into,config),
+        config);
   }
 
   @Override
@@ -145,4 +164,10 @@ public abstract class MultiFormatParser<T> extends AbstractDeSerializer {
     return null;
   }
 
+  protected boolean checkTargetCompatibility(SyntacticRepresentation into, SerializationFormat format) {
+    return
+        into.getLanguage().sameAs(getSupportedLanguage())
+            &&
+            (into.getFormat() == null || into.getFormat().sameAs(format));
+  }
 }

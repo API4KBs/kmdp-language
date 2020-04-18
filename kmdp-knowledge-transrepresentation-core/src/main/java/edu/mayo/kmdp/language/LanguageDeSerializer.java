@@ -14,7 +14,7 @@
 package edu.mayo.kmdp.language;
 
 import static java.util.Collections.singletonList;
-import static org.omg.spec.api4kp._1_0.Answer.anyAble;
+import static org.omg.spec.api4kp._1_0.Answer.anyDo;
 
 import edu.mayo.kmdp.tranx.v4.server.DeserializeApiInternal;
 import edu.mayo.kmdp.tranx.v4.server.DiscoveryApiInternal;
@@ -40,7 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Named
 @KPServer
 public class LanguageDeSerializer implements KnowledgePlatformComponent<Deserializer>,
-    DeserializeApiInternal, DiscoveryApiInternal {
+    DeserializeApiInternal, DiscoveryApiInternal._getDeserializationComponent, DiscoveryApiInternal._listDeserializationComponents {
 
   private UUID id = UUID.randomUUID();
   private Deserializer descriptor;
@@ -68,38 +68,46 @@ public class LanguageDeSerializer implements KnowledgePlatformComponent<Deserial
   }
 
   @Override
-  public Answer<List<Deserializer>> listDeserializationComponents() {
+  public Answer<List<Deserializer>> listDeserializationComponents(String from, String into, String method) {
     return Answer.of(singletonList(getDescriptor()));
   }
 
   @Override
-  public Answer<KnowledgeCarrier> applyLift(KnowledgeCarrier sourceArtifact, ParsingLevel levelTag, String xAccept) {
-    return Answer.of(anyAble(deserializers.values(),
-        DeserializeApiOperator::can_applyLift))
-        .flatOpt(DeserializeApiOperator::as_applyLift)
-        .flatMap(a -> a.applyLift(sourceArtifact, levelTag, xAccept));
+  public Answer<KnowledgeCarrier> applyLift(KnowledgeCarrier sourceArtifact,
+      ParsingLevel levelTag, String xAccept, String config) {
+    return anyDo(
+        getOperations(
+            deserializers.values(),
+            DeserializeApiOperator::can_applyLift,
+            DeserializeApiOperator::as_applyLift),
+        a -> a.applyLift(sourceArtifact, levelTag, xAccept, config));
   }
 
   @Override
-  public Answer<KnowledgeCarrier> applyLower(KnowledgeCarrier sourceArtifact, ParsingLevel levelTag, String xAccept) {
-    return Answer.of(anyAble(deserializers.values(),
-        DeserializeApiOperator::can_applyLower))
-        .flatOpt(DeserializeApiOperator::as_applyLower)
-        .flatMap(a -> a.applyLower(sourceArtifact, levelTag, xAccept));
+  public Answer<KnowledgeCarrier> applyLower(KnowledgeCarrier sourceArtifact,
+      ParsingLevel levelTag, String xAccept, String config) {
+    return anyDo(
+        getOperations(
+            deserializers.values(),
+            DeserializeApiOperator::can_applyLower,
+            DeserializeApiOperator::as_applyLower),
+        a -> a.applyLower(sourceArtifact, levelTag, xAccept, config));
   }
 
   @Override
-  public Answer<KnowledgeCarrier> applyNamedLift(UUID operatorId, KnowledgeCarrier sourceArtifact, ParsingLevel levelTag, String xAccept) {
+  public Answer<KnowledgeCarrier> applyNamedLift(UUID operatorId, KnowledgeCarrier sourceArtifact,
+      ParsingLevel levelTag, String xAccept, String config) {
     return Answer.of(getDeserializer(operatorId))
         .flatOpt(DeserializeApiOperator::as_applyNamedLift)
-        .flatMap(a -> a.applyNamedLift(operatorId, sourceArtifact, levelTag, xAccept));
+        .flatMap(a -> a.applyNamedLift(operatorId, sourceArtifact, levelTag, xAccept, config));
   }
 
   @Override
-  public Answer<KnowledgeCarrier> applyNamedLower(UUID operatorId, KnowledgeCarrier sourceArtifact, ParsingLevel levelTag, String xAccept) {
+  public Answer<KnowledgeCarrier> applyNamedLower(UUID operatorId, KnowledgeCarrier sourceArtifact,
+      ParsingLevel levelTag, String xAccept, String config) {
     return Answer.of(getDeserializer(operatorId))
         .flatOpt(DeserializeApiOperator::as_applyNamedLower)
-        .flatMap(a -> a.applyNamedLower(operatorId, sourceArtifact, levelTag, xAccept));
+        .flatMap(a -> a.applyNamedLower(operatorId, sourceArtifact, levelTag, xAccept, config));
   }
 
 
@@ -123,19 +131,23 @@ public class LanguageDeSerializer implements KnowledgePlatformComponent<Deserial
   }
 
   @Override
-  public Answer<List<DeserializationOperator>> listLiftOperators() {
+  public Answer<List<DeserializationOperator>> listLiftOperators(String from, String into) {
     return Answer.of(
         deserializers.values().stream()
             .filter(op -> op instanceof _applyLift)
+            .filter(op -> op.consumes(from))
+            .filter(op -> op.produces(into))
             .map(DeserializeApiOperator::getDescriptor)
             .collect(Collectors.toList()));
   }
 
   @Override
-  public Answer<List<DeserializationOperator>> listLowerOperators() {
+  public Answer<List<DeserializationOperator>> listLowerOperators(String from, String into) {
     return Answer.of(
         deserializers.values().stream()
             .filter(op -> op instanceof _applyLower)
+            .filter(op -> op.consumes(from))
+            .filter(op -> op.produces(into))
             .map(DeserializeApiOperator::getDescriptor)
             .collect(Collectors.toList()));
   }

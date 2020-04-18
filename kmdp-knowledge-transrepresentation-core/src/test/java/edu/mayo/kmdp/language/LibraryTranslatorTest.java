@@ -70,7 +70,8 @@ public class LibraryTranslatorTest {
             .flatMap(kc -> translator.as_applyTransrepresent().get().applyTransrepresent(
                 kc,
                 encode(new SyntacticRepresentation()
-                    .withLanguage(FHIR_STU3))));
+                    .withLanguage(FHIR_STU3)),
+                null));
 
     assertTrue(fhir.isSuccess());
     Library lib = fhir

@@ -3,18 +3,18 @@ package edu.mayo.kmdp.language;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.of;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.ofAst;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.ofTree;
+import static org.omg.spec.api4kp._1_0.contrastors.SyntacticRepresentationContrastor.theRepContrastor;
 
 import edu.mayo.kmdp.tranx.v4.server.DeserializeApiInternal;
+import edu.mayo.kmdp.util.Util;
 import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevel;
 import java.util.List;
-import java.util.UUID;
 import org.omg.spec.api4kp._1_0.KnowledgePlatformOperator;
-import org.omg.spec.api4kp._1_0.id.IdentifierConstants;
 import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
-import org.omg.spec.api4kp._1_0.id.SemanticIdentifier;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 import org.omg.spec.api4kp._1_0.services.tranx.DeserializationOperator;
+import org.omg.spec.api4kp._1_0.services.tranx.ModelMIMECoder;
 
 public interface DeserializeApiOperator
     extends DeserializeApiInternal.Operator, KnowledgePlatformOperator<DeserializationOperator> {
@@ -38,6 +38,21 @@ public interface DeserializeApiOperator
     return assetId;
   }
 
+  default boolean consumes(String from) {
+    return Util.isEmpty(from) ||
+        ModelMIMECoder.decode(from)
+        .map(fromRep -> getFrom().stream()
+            .anyMatch(supported -> theRepContrastor.isBroaderOrEqual(supported, fromRep)))
+        .orElse(false);
+  }
+
+  default boolean produces(String into) {
+    return Util.isEmpty(into) ||
+        ModelMIMECoder.decode(into)
+        .map(intoRep -> getInto().stream()
+            .anyMatch(supported -> theRepContrastor.isNarrowerOrEqual(supported, intoRep)))
+        .orElse(false);
+  }
 
   static KnowledgeCarrier newVerticalCarrier(
       KnowledgeCarrier source,

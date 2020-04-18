@@ -14,9 +14,10 @@
 package edu.mayo.kmdp.language;
 
 import static java.util.Collections.singletonList;
-import static org.omg.spec.api4kp._1_0.Answer.anyAble;
+import static org.omg.spec.api4kp._1_0.Answer.anyDo;
 
-import edu.mayo.kmdp.tranx.v4.server.DiscoveryApiInternal;
+import edu.mayo.kmdp.tranx.v4.server.DiscoveryApiInternal._getTxComponent;
+import edu.mayo.kmdp.tranx.v4.server.DiscoveryApiInternal._listTxComponents;
 import edu.mayo.kmdp.tranx.v4.server.TransxionApiInternal;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import java.util.List;
@@ -39,7 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Named
 @KPServer
 public class TransrepresentationExecutor implements KnowledgePlatformComponent<Transrepresentator>,
-    TransxionApiInternal, DiscoveryApiInternal {
+    TransxionApiInternal, _getTxComponent, _listTxComponents {
 
   private UUID id = UUID.randomUUID();
   private Transrepresentator descriptor;
@@ -68,24 +69,26 @@ public class TransrepresentationExecutor implements KnowledgePlatformComponent<T
   }
 
   @Override
-  public Answer<List<Transrepresentator>> listTxComponents() {
+  public Answer<List<Transrepresentator>> listTxComponents(String from, String into, String method) {
     return Answer.of(singletonList(getDescriptor()));
   }
 
   @Override
-  public Answer<KnowledgeCarrier> applyTransrepresent(KnowledgeCarrier sourceArtifact, String xAccept) {
-    return Answer.of(anyAble(translators.values(),
-        TransionApiOperator::can_applyTransrepresent))
-        .flatOpt(TransionApiOperator::as_applyTransrepresent)
-        .flatMap(a -> a.applyTransrepresent(sourceArtifact, xAccept));
+  public Answer<KnowledgeCarrier> applyTransrepresent(KnowledgeCarrier sourceArtifact, String xAccept, String cfg) {
+    return anyDo(
+        getOperations(
+            translators.values(),
+            TransionApiOperator::can_applyTransrepresent,
+            TransionApiOperator::as_applyTransrepresent),
+        a -> a.applyTransrepresent(sourceArtifact, xAccept, cfg));
   }
 
   @Override
   public Answer<KnowledgeCarrier> applyNamedTransrepresent(UUID operatorId,
-      KnowledgeCarrier sourceArtifact, String xAccept) {
+      KnowledgeCarrier sourceArtifact, String xAccept, String cfg) {
     return Answer.of(getTransrepresentator(operatorId))
         .flatOpt(TransionApiOperator::as_applyNamedTransrepresent)
-        .flatMap(a -> a.applyNamedTransrepresent(operatorId, sourceArtifact, xAccept));
+        .flatMap(a -> a.applyNamedTransrepresent(operatorId, sourceArtifact, xAccept, cfg));
   }
 
   @Override
@@ -95,8 +98,10 @@ public class TransrepresentationExecutor implements KnowledgePlatformComponent<T
   }
 
   @Override
-  public Answer<List<TransrepresentationOperator>> listTxionOperators() {
+  public Answer<List<TransrepresentationOperator>> listTxionOperators(String from, String into) {
     return Answer.of(translators.values().stream()
+        .filter(op -> op.consumes(from))
+        .filter(op -> op.produces(into))
         .map(TransionApiOperator::getDescriptor)
         .collect(Collectors.toList()));
   }

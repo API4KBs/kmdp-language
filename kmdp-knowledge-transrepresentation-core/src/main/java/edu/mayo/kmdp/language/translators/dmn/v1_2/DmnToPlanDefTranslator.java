@@ -31,12 +31,10 @@ import java.util.Properties;
 import java.util.UUID;
 import javax.inject.Named;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
-import org.omg.spec.api4kp._1_0.AbstractCarrier;
 import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
 import org.omg.spec.api4kp._1_0.id.SemanticIdentifier;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
 import org.omg.spec.api4kp._1_0.services.KPSupport;
-import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 import org.omg.spec.dmn._20180521.model.TDefinitions;
 
@@ -66,7 +64,7 @@ public class DmnToPlanDefTranslator extends AbstractSimpleTranslator<TDefinition
 
   @Override
   protected Optional<PlanDefinition> transformAst(ResourceIdentifier assetId,
-      TDefinitions expression, SyntacticRepresentation tgtRep) {
+      TDefinitions expression, SyntacticRepresentation tgtRep, Properties config) {
     return Optional.ofNullable(new DmnToPlanDef().transform(assetId, expression));
   }
 

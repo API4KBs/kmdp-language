@@ -68,7 +68,8 @@ public class FormatTest {
                     codedRep(OWL_2,
                         RDF_XML_Syntax,
                         XML_1_1,
-                        Charset.defaultCharset())));
+                        Charset.defaultCharset())
+                    , null));
 
     assertTrue(ans.isSuccess());
     try {

@@ -107,7 +107,7 @@ class LifterTest {
     Answer<KnowledgeCarrier> parsed =
         parser.as_applyLift()
             .orElseGet(Assertions::fail)
-            .applyLift(carrier, Abstract_Knowledge_Expression, null);
+            .applyLift(carrier, Abstract_Knowledge_Expression, null, null);
 
     assertTrue(parsed.isSuccess());
     KnowledgeCarrier KnowledgeCarrier = parsed.get();

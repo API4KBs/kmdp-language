@@ -16,7 +16,7 @@
 package edu.mayo.kmdp.language;
 
 import static java.util.Collections.singletonList;
-import static org.omg.spec.api4kp._1_0.Answer.anyAble;
+import static org.omg.spec.api4kp._1_0.Answer.anyDo;
 
 import edu.mayo.kmdp.tranx.v4.server.DiscoveryApiInternal;
 import edu.mayo.kmdp.tranx.v4.server.ValidateApiInternal;
@@ -41,7 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Named
 @KPServer
 public class LanguageValidator implements KnowledgePlatformComponent<Validator>,
-    ValidateApiInternal, DiscoveryApiInternal {
+    ValidateApiInternal, DiscoveryApiInternal._getValidationComponent, DiscoveryApiInternal._listValidationComponents {
 
   private UUID id = UUID.randomUUID();
   private Validator descriptor;
@@ -69,7 +69,7 @@ public class LanguageValidator implements KnowledgePlatformComponent<Validator>,
   }
 
   @Override
-  public Answer<List<Validator>> listValidationComponents() {
+  public Answer<List<Validator>> listValidationComponents(String from, String methodTag) {
     return Answer.of(singletonList(getDescriptor()));
   }
 
@@ -80,26 +80,29 @@ public class LanguageValidator implements KnowledgePlatformComponent<Validator>,
   }
 
   @Override
-  public Answer<List<ValidationOperator>> listValidationOperators() {
+  public Answer<List<ValidationOperator>> listValidationOperators(String from) {
     return Answer.of(validators.values().stream()
+        .filter(op -> op.consumes(from))
         .map(ValidateApiOperator::getDescriptor)
         .collect(Collectors.toList()));
   }
 
   @Override
-  public Answer<Void> applyValidate(KnowledgeCarrier sourceArtifact) {
-    return Answer.of(anyAble(validators.values(),
-        ValidateApiOperator::can_applyValidate))
-        .flatOpt(ValidateApiOperator::as_applyValidate)
-        .flatMap(v -> v.applyValidate(sourceArtifact));
+  public Answer<Void> applyValidate(KnowledgeCarrier sourceArtifact, String config) {
+    return anyDo(
+        getOperations(
+            validators.values(),
+            ValidateApiOperator::can_applyValidate,
+            ValidateApiOperator::as_applyValidate),
+        a -> a.applyValidate(sourceArtifact, config));
   }
 
   @Override
   public Answer<Void> applyNamedValidate(UUID operatorId,
-      KnowledgeCarrier sourceArtifact) {
+      KnowledgeCarrier sourceArtifact, String config) {
     return Answer.of(getValidator(operatorId))
         .flatOpt(ValidateApiOperator::as_applyNamedValidate)
-        .flatMap(v -> v.applyNamedValidate(operatorId, sourceArtifact));
+        .flatMap(v -> v.applyNamedValidate(operatorId, sourceArtifact, config));
   }
 
 

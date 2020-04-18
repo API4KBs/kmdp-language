@@ -27,7 +27,7 @@ class LowerTest {
 
     String str = new DMN12Parser()
         .applyLower( ofAst(dmnModel).withRepresentation(rep(DMN_1_2)),
-            Concrete_Knowledge_Expression, null)
+            Concrete_Knowledge_Expression, null, null)
     .flatOpt(KnowledgeCarrier::asString)
         .orElse("");
 
@@ -43,7 +43,7 @@ class LowerTest {
 
     String str = new SurrogateParser()
         .applyLower( ofAst(surrogate).withRepresentation(rep(Knowledge_Asset_Surrogate)),
-            Concrete_Knowledge_Expression, null)
+            Concrete_Knowledge_Expression, null, null)
     .flatOpt(KnowledgeCarrier::asString)
         .orElse("");
 
@@ -60,7 +60,7 @@ class LowerTest {
 
     String str = new edu.mayo.kmdp.language.parsers.surrogate.v2.Surrogate2Parser()
         .applyLower( ofAst(surrogate2).withRepresentation(rep(Knowledge_Asset_Surrogate_2_0)),
-            Concrete_Knowledge_Expression, null)
+            Concrete_Knowledge_Expression, null, null)
     .flatOpt(KnowledgeCarrier::asString)
         .orElse("");
 
