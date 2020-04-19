@@ -191,7 +191,15 @@ public class JenaOwlParser extends AbstractDeSerializeOperator {
   @Override
   public Optional<KnowledgeCarrier> innerSerialize(KnowledgeCarrier carrier,
       SyntacticRepresentation into, Properties properties) {
-    return Optional.empty();
+    SyntacticRepresentation tgtRep =
+        getTargetLowerRepresentation(carrier.getRepresentation(), into,
+            Concrete_Knowledge_Expression);
+    return carrier.as(Model.class)
+        .map(model -> writeModel(model, tgtRep))
+        .map(str -> DeserializeApiOperator.newVerticalCarrier(carrier,
+            Concrete_Knowledge_Expression,
+            tgtRep,
+            str));
   }
 
   /**
