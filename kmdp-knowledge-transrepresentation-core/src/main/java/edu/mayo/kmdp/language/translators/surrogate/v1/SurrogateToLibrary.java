@@ -15,6 +15,7 @@ import edu.mayo.kmdp.metadata.surrogate.Derivative;
 import edu.mayo.kmdp.metadata.surrogate.KnowledgeArtifact;
 import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
 import edu.mayo.kmdp.metadata.surrogate.Publication;
+import edu.mayo.kmdp.metadata.surrogate.Representation;
 import edu.mayo.kmdp.metadata.surrogate.Version;
 import edu.mayo.kmdp.registry.Registry;
 import edu.mayo.kmdp.util.StreamUtil;
@@ -96,7 +97,12 @@ public class SurrogateToLibrary {
 
     artifact.setTitle(cka.getTitle());
 
-    artifact.setContentType(ModelMIMECoder.encode(rep(cka.getRepresentation())));
+    if (cka.getRepresentation() != null) {
+      Representation r = cka.getRepresentation();
+      artifact.setContentType(ModelMIMECoder.encode(
+          rep(r.getLanguage(), r.getProfile(), r.getSerialization(), r.getFormat(),
+              null, null, r.getLexicon())));
+    }
 
     if (cka.getLifecycle() != null) {
       artifact.setCreation(cka.getLifecycle().getCreatedOn());

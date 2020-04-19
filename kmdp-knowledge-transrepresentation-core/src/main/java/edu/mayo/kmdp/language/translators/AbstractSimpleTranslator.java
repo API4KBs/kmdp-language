@@ -6,9 +6,8 @@ import static org.omg.spec.api4kp._1_0.contrastors.SyntacticRepresentationContra
 import edu.mayo.kmdp.language.TransionApiOperator;
 import edu.mayo.kmdp.tranx.v4.server.TransxionApiInternal._applyNamedTransrepresent;
 import edu.mayo.kmdp.tranx.v4.server.TransxionApiInternal._applyTransrepresent;
+import edu.mayo.kmdp.util.PropertiesUtil;
 import edu.mayo.kmdp.util.Util;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.UUID;
@@ -136,15 +135,7 @@ public abstract class AbstractSimpleTranslator<S,T>
   }
 
   protected Properties readProperties(String properties) {
-    Properties config = new Properties();
-    if (!Util.isEmpty(properties)) {
-      try {
-        config.load(new ByteArrayInputStream(properties.getBytes()));
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-    }
-    return config;
+    return PropertiesUtil.doParse(properties);
   }
 
 

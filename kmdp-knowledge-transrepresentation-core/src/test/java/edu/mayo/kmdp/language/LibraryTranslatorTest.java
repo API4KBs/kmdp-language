@@ -67,11 +67,7 @@ public class LibraryTranslatorTest {
     Answer<KnowledgeCarrier> fhir =
         Answer.of(AbstractCarrier.ofAst(meta)
             .withRepresentation(rep(Knowledge_Asset_Surrogate)))
-            .flatMap(kc -> translator.as_applyTransrepresent().get().applyTransrepresent(
-                kc,
-                encode(new SyntacticRepresentation()
-                    .withLanguage(FHIR_STU3)),
-                null));
+            .flatMap(kc -> translator.try_applyTransrepresent(kc, encode(rep(FHIR_STU3)), null));
 
     assertTrue(fhir.isSuccess());
     Library lib = fhir
@@ -100,7 +96,7 @@ public class LibraryTranslatorTest {
     Attachment artifact = lib.getContentFirstRep();
     assertTrue(artifact.getUrl().contains("f2b9828d-f84c-4d09-9c88-413c7f1439a4"));
     assertEquals("it", artifact.getLanguage());
-    assertEquals("model/dmn-v11+xml", artifact.getContentType());
+    assertEquals("model/dmn-v11[cql-exx]+xml;lex={sct}", artifact.getContentType());
     assertEquals("A mock example", artifact.getTitle());
 
   }
