@@ -52,7 +52,7 @@ public abstract class AbstractSimpleTranslator<S,T>
       SyntacticRepresentation tgtRep) {
     if (knowledgeCarrier.getRepresentation() == null ||
         !knowledgeCarrier.getRepresentation().getLanguage().sameAs(getSupportedLanguage())) {
-      throw new UnsupportedOperationException();
+      throw new UnsupportedOperationException("Unable to handle " + knowledgeCarrier.getRepresentation().getLanguage());
     }
     if (getFrom().stream()
         .noneMatch(
@@ -60,7 +60,7 @@ public abstract class AbstractSimpleTranslator<S,T>
       throw new UnsupportedOperationException();
     }
     if (getInto().stream()
-        .noneMatch(into -> isNarrowerOrEqual(theRepContrastor.contrast(into, tgtRep)))) {
+        .noneMatch(into -> theRepContrastor.isNarrowerOrEqual(into, tgtRep))) {
       throw new UnsupportedOperationException("Requested narrower reprsentation than supported");
     }
     return tgtRep;

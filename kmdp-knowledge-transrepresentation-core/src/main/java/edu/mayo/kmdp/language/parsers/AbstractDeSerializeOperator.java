@@ -14,7 +14,10 @@
 package edu.mayo.kmdp.language.parsers;
 
 import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Abstract_Knowledge_Expression;
+import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Concrete_Knowledge_Expression;
+import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Encoded_Knowledge_Expression;
 import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Parsed_Knowedge_Expression;
+import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 import static org.omg.spec.api4kp._1_0.contrastors.ParsingLevelContrastor.detectLevel;
 import static org.omg.spec.api4kp._1_0.contrastors.ParsingLevelContrastor.theLevelContrastor;
 
@@ -27,6 +30,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.function.BiPredicate;
+import org.omg.spec.api4kp._1_0.AbstractCarrier.Encodings;
 import org.omg.spec.api4kp._1_0.Answer;
 import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
@@ -69,7 +73,8 @@ public abstract class AbstractDeSerializeOperator
       return Answer.of(
           lift(knowledgeCarrier,
               parsingLevel,
-              ModelMIMECoder.decode(into).orElse(getSupportedRepresentations().get(0)),
+              ModelMIMECoder.decode(into)
+                  .orElse(inferRepresentationForLevel(getSupportedRepresentations(),parsingLevel)),
               PropertiesUtil.doParse(properties)
           ));
     } catch (UnsupportedOperationException e) {
@@ -83,7 +88,8 @@ public abstract class AbstractDeSerializeOperator
     try {
       return Answer.of(
           lower(knowledgeCarrier, parsingLevel,
-              ModelMIMECoder.decode(into).orElse(getSupportedRepresentations().get(0)),
+              ModelMIMECoder.decode(into)
+                  .orElse(inferRepresentationForLevel(getSupportedRepresentations(),parsingLevel)),
               PropertiesUtil.doParse(properties)));
     } catch (UnsupportedOperationException e) {
       return Answer.failed(e);
@@ -234,7 +240,7 @@ public abstract class AbstractDeSerializeOperator
       case Encoded_Knowledge_Expression:
       default:
         return this.innerExternalize(ast, into, config)
-            .flatMap(str -> innerEncode(str, config));
+            .flatMap(str -> innerEncode(str, into, config));
     }
   }
 
@@ -310,22 +316,40 @@ public abstract class AbstractDeSerializeOperator
 
   protected abstract SerializationFormat getDefaultFormat();
 
-  protected SyntacticRepresentation newRepresentation(KnowledgeCarrier source,
-      ParsingLevel targetLevel) {
-    return theLevelContrastor.compare(source.getLevel(), targetLevel) < 0
-        ? getParseResultRepresentation(source, Abstract_Knowledge_Expression)
-        : getSerializeResultRepresentation(source, Parsed_Knowedge_Expression);
-  }
-
   protected KnowledgeCarrier newVerticalCarrier(
       KnowledgeCarrier source,
       ParsingLevel targetLevel,
+      SyntacticRepresentation into,
       Object targetArtifact) {
     return DeserializeApiOperator.newVerticalCarrier(
         source,
         targetLevel,
-        newRepresentation(source, targetLevel),
+        into != null ? into : inferRepresentationForLevel(getSupportedRepresentations(),targetLevel),
         targetArtifact);
+  }
+
+
+  private SyntacticRepresentation inferRepresentationForLevel(
+      List<SyntacticRepresentation> supportedRepresentations, ParsingLevel parsingLevel) {
+    Optional<SyntacticRepresentation> tgtRep = supportedRepresentations.stream()
+        .filter(rep -> detectLevel(rep).sameAs(parsingLevel))
+        .findFirst();
+    if (tgtRep.isPresent()) {
+      return tgtRep.get();
+    }
+    switch (parsingLevel.asEnum()) {
+      case Encoded_Knowledge_Expression:
+        return rep(getSupportedLanguage(),getDefaultFormat(),Charset.defaultCharset(), Encodings.DEFAULT);
+      case Concrete_Knowledge_Expression:
+        return rep(getSupportedLanguage(),getDefaultFormat(),Charset.defaultCharset());
+      case Parsed_Knowedge_Expression:
+        return rep(getSupportedLanguage(),getDefaultFormat());
+      case Abstract_Knowledge_Expression:
+        return rep(getSupportedLanguage());
+      default:
+        throw new IllegalArgumentException("Unable to provide a SyntacticRepresentation "
+            + "for level " + parsingLevel.getName());
+    }
   }
 
 

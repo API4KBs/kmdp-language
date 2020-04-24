@@ -16,8 +16,6 @@
 package edu.mayo.kmdp.language.parsers;
 
 
-import static edu.mayo.kmdp.comparator.Contrastor.isBroaderOrEqual;
-import static edu.mayo.kmdp.comparator.Contrastor.isNarrowerOrEqual;
 import static org.omg.spec.api4kp._1_0.contrastors.SyntacticRepresentationContrastor.theRepContrastor;
 
 import edu.mayo.kmdp.util.StreamUtil;
@@ -79,14 +77,24 @@ public abstract class MultiFormatParser<T> extends AbstractDeSerializeOperator {
   }
 
 
-  private boolean isLiftCandidate(AbstractDeSerializeOperator candidate, SyntacticRepresentation argumentRep) {
-    return candidate.getSupportedRepresentations().stream()
-        .anyMatch(supportedRep -> isNarrowerOrEqual(theRepContrastor.contrast(supportedRep,argumentRep)));
+  private boolean isLiftCandidate(AbstractDeSerializeOperator candidate,
+      SyntacticRepresentation argumentRep) {
+    return supportsFormat(candidate, argumentRep)
+        && candidate.getSupportedRepresentations()
+        .stream()
+        .anyMatch(supportedRep -> theRepContrastor.isNarrowerOrEqual(supportedRep, argumentRep));
   }
 
-  private boolean isLowerCandidate(AbstractDeSerializeOperator candidate, SyntacticRepresentation argumentRep) {
-    return candidate.getSupportedRepresentations().stream()
-        .anyMatch(supportedRep -> isBroaderOrEqual(theRepContrastor.contrast(supportedRep,argumentRep)));
+  private boolean isLowerCandidate(AbstractDeSerializeOperator candidate,
+      SyntacticRepresentation argumentRep) {
+    return supportsFormat(candidate, argumentRep)
+        && candidate.getSupportedRepresentations()
+        .stream()
+        .anyMatch(supportedRep -> theRepContrastor.isNarrowerOrEqual(supportedRep, argumentRep));
+  }
+
+  private boolean supportsFormat(AbstractDeSerializeOperator candidate, SyntacticRepresentation argumentRep) {
+    return argumentRep.getFormat() == null || argumentRep.getFormat().sameAs(candidate.getDefaultFormat());
   }
 
   protected Optional<KnowledgeCarrier> processLift(KnowledgeCarrier source,

@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
+import org.omg.spec.api4kp._1_0.AbstractCarrier.Encodings;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 
@@ -42,21 +43,21 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializeOper
   @Override
   public Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier, Properties config) {
     return carrier.asString()
-        .map(str -> newVerticalCarrier(carrier, Concrete_Knowledge_Expression, str));
+        .map(str -> newVerticalCarrier(carrier, Concrete_Knowledge_Expression, null, str));
   }
 
   @Override
   public Optional<KnowledgeCarrier> innerDeserialize(KnowledgeCarrier carrier, Properties config) {
     return carrier.asString()
         .flatMap(JSonUtil::readJson)
-        .map(json -> newVerticalCarrier(carrier, Parsed_Knowedge_Expression, json));
+        .map(json -> newVerticalCarrier(carrier, Parsed_Knowedge_Expression, null, json));
   }
 
   @Override
   public Optional<KnowledgeCarrier> innerParse(KnowledgeCarrier carrier, Properties config) {
     return carrier.asString()
         .flatMap(str -> JSonUtil.parseJson(str, root))
-        .map(ast -> newVerticalCarrier(carrier, Abstract_Knowledge_Expression, ast));
+        .map(ast -> newVerticalCarrier(carrier, Abstract_Knowledge_Expression, null, ast));
   }
 
 
@@ -64,7 +65,7 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializeOper
   public Optional<KnowledgeCarrier> innerAbstract(KnowledgeCarrier carrier, Properties config) {
     return carrier.as(JsonNode.class)
         .flatMap(jNode -> JSonUtil.parseJson(jNode, root))
-        .map(ast -> newVerticalCarrier(carrier, Abstract_Knowledge_Expression, ast));
+        .map(ast -> newVerticalCarrier(carrier, Abstract_Knowledge_Expression, null, ast));
   }
 
 
@@ -72,7 +73,7 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializeOper
   public Optional<KnowledgeCarrier> innerEncode(KnowledgeCarrier carrier,
       SyntacticRepresentation into, Properties config) {
     return carrier.asBinary()
-        .map(bytes -> newVerticalCarrier(carrier, Encoded_Knowledge_Expression, bytes));
+        .map(bytes -> newVerticalCarrier(carrier, Encoded_Knowledge_Expression, into, bytes));
   }
 
   @Override
@@ -81,7 +82,7 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializeOper
     return carrier.as(root)
         .flatMap(JSonUtil::writeJson)
         .flatMap(Util::asString)
-        .map(str -> newVerticalCarrier(carrier, Concrete_Knowledge_Expression, str));
+        .map(str -> newVerticalCarrier(carrier, Concrete_Knowledge_Expression, into, str));
   }
 
   @Override
@@ -89,7 +90,7 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializeOper
       SyntacticRepresentation into, Properties config) {
     return carrier.as(JsonNode.class)
         .map(JsonNode::toString)
-        .map(str -> newVerticalCarrier(carrier, Concrete_Knowledge_Expression, str));
+        .map(str -> newVerticalCarrier(carrier, Concrete_Knowledge_Expression, into, str));
   }
 
   @Override
@@ -97,7 +98,7 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializeOper
       SyntacticRepresentation into, Properties config) {
     return carrier.as(root)
         .flatMap(JSonUtil::toJsonNode)
-        .map(json -> newVerticalCarrier(carrier, Parsed_Knowedge_Expression, json));
+        .map(json -> newVerticalCarrier(carrier, Parsed_Knowedge_Expression, into, json));
   }
 
 
@@ -107,7 +108,7 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializeOper
         rep(getSupportedLanguage()),
         rep(getSupportedLanguage(), JSON),
         rep(getSupportedLanguage(), JSON, Charset.defaultCharset()),
-        rep(getSupportedLanguage(), JSON, Charset.defaultCharset(), "default"));
+        rep(getSupportedLanguage(), JSON, Charset.defaultCharset(), Encodings.DEFAULT));
   }
 
   @Override

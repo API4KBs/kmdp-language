@@ -39,6 +39,7 @@ import javax.inject.Named;
 import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.omg.spec.api4kp._1_0.AbstractCarrier.Encodings;
 import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
 import org.omg.spec.api4kp._1_0.id.SemanticIdentifier;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
@@ -61,7 +62,7 @@ public class OWLtoSKOSTranscreator extends AbstractSimpleTranslator<String,Strin
   public List<SyntacticRepresentation> getFrom() {
     return Arrays.asList(
         rep(OWL_2, RDF_XML_Syntax, XML_1_1, Charset.defaultCharset()),
-        rep(OWL_2, RDF_XML_Syntax, XML_1_1,Charset.defaultCharset(),"default")
+        rep(OWL_2, RDF_XML_Syntax, XML_1_1,Charset.defaultCharset(), Encodings.DEFAULT)
         );
   }
 

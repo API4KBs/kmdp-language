@@ -44,6 +44,7 @@ import java.util.UUID;
 import javax.inject.Named;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.omg.spec.api4kp._1_0.AbstractCarrier.Encodings;
 import org.omg.spec.api4kp._1_0.id.SemanticIdentifier;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
 import org.omg.spec.api4kp._1_0.services.KPSupport;
@@ -67,7 +68,9 @@ public class JenaOwlParser extends AbstractDeSerializeOperator {
   protected List<SyntacticRepresentation> getSupportedRepresentations() {
     return Arrays.asList(
         rep(OWL_2, Turtle, TXT),
-        rep(OWL_2, RDF_XML_Syntax, XML_1_1)
+        rep(OWL_2, Turtle, TXT, Charset.defaultCharset()),
+        rep(OWL_2, RDF_XML_Syntax, XML_1_1),
+        rep(OWL_2, RDF_XML_Syntax, XML_1_1, Charset.defaultCharset())
     );
   }
 
@@ -108,7 +111,8 @@ public class JenaOwlParser extends AbstractDeSerializeOperator {
         DeserializeApiOperator.newVerticalCarrier(carrier,
             Parsed_Knowedge_Expression,
             tgtRep,
-            readModel(carrier.asString().orElseThrow(UnsupportedOperationException::new))));
+            readModel(carrier.asString().orElseThrow(UnsupportedOperationException::new),
+                carrier.getRepresentation())));
   }
 
   /**
@@ -225,13 +229,19 @@ public class JenaOwlParser extends AbstractDeSerializeOperator {
     return OWL_2;
   }
 
-  private Model readModel(String str) {
+  private Model readModel(String str, SyntacticRepresentation tgtRep) {
     Model m = ModelFactory.createOntologyModel();
-    return m.read(new ByteArrayInputStream(str.getBytes()), null);
+    return m.read(new ByteArrayInputStream(str.getBytes()), null, toJenaLangCode(tgtRep));
   }
 
   private String writeModel(Model model, SyntacticRepresentation tgtRep) {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    String lang = toJenaLangCode(tgtRep);
+    model.write(baos, lang);
+    return new String(baos.toByteArray());
+  }
+
+  private String toJenaLangCode(SyntacticRepresentation tgtRep) {
     String lang = "RDF/XML";
     if (tgtRep.getSerialization() != null) {
       switch (tgtRep.getSerialization().asEnum()) {
@@ -243,8 +253,7 @@ public class JenaOwlParser extends AbstractDeSerializeOperator {
           lang = "RDF/XML";
       }
     }
-    model.write(baos, lang);
-    return new String(baos.toByteArray());
+    return lang;
   }
 
   private SyntacticRepresentation getTargetLowerRepresentation(
@@ -271,7 +280,7 @@ public class JenaOwlParser extends AbstractDeSerializeOperator {
               srcRep.getLanguage(), srcRep.getProfile(),
               srcRep.getSerialization(), srcRep.getFormat(),
               Charset.forName(srcRep.getCharset()),
-              srcRep.getEncoding());
+              Encodings.valueOf(srcRep.getEncoding()));
         case Concrete_Knowledge_Expression:
           return rep(srcRep.getLanguage(), srcRep.getProfile(),
               srcRep.getSerialization(), srcRep.getFormat());

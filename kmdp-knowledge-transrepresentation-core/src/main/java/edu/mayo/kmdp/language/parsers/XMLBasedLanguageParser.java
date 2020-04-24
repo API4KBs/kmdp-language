@@ -34,6 +34,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.function.Function;
 import javax.xml.bind.JAXBElement;
+import org.omg.spec.api4kp._1_0.AbstractCarrier.Encodings;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 import org.w3c.dom.Document;
@@ -54,35 +55,35 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializeOpera
   @Override
   public Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier, Properties config) {
     return carrier.asString()
-        .map(str -> newVerticalCarrier(carrier, Concrete_Knowledge_Expression, str));
+        .map(str -> newVerticalCarrier(carrier, Concrete_Knowledge_Expression, null, str));
   }
 
   @Override
   public Optional<KnowledgeCarrier> innerDeserialize(KnowledgeCarrier carrier, Properties config) {
     return carrier.asBinary()
         .flatMap(XMLUtil::loadXMLDocument)
-        .map(dox -> newVerticalCarrier(carrier, Parsed_Knowedge_Expression, dox));
+        .map(dox -> newVerticalCarrier(carrier, Parsed_Knowedge_Expression, null, dox));
   }
 
   @Override
   public Optional<KnowledgeCarrier> innerParse(KnowledgeCarrier carrier, Properties config) {
     return carrier.asString()
         .flatMap(str -> JaxbUtil.unmarshall(getClassContext(), root, str))
-        .map(ast -> newVerticalCarrier(carrier, Abstract_Knowledge_Expression, ast));
+        .map(ast -> newVerticalCarrier(carrier, Abstract_Knowledge_Expression, null, ast));
   }
 
   @Override
   public Optional<KnowledgeCarrier> innerAbstract(KnowledgeCarrier carrier, Properties config) {
     return carrier.as(Document.class)
         .flatMap(dox -> JaxbUtil.unmarshall(getClassContext(), root, dox))
-        .map(ast -> newVerticalCarrier(carrier, Abstract_Knowledge_Expression, ast));
+        .map(ast -> newVerticalCarrier(carrier, Abstract_Knowledge_Expression, null, ast));
   }
 
   @Override
   public Optional<KnowledgeCarrier> innerEncode(KnowledgeCarrier carrier,
       SyntacticRepresentation into, Properties config) {
     return carrier.asBinary()
-        .map(str -> newVerticalCarrier(carrier, Encoded_Knowledge_Expression, str));
+        .map(str -> newVerticalCarrier(carrier, Encoded_Knowledge_Expression, into, str));
   }
 
   @Override
@@ -94,7 +95,7 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializeOpera
     return carrier.as(root)
         .flatMap(obj -> JaxbUtil.marshall(getClassContext(), obj, mapper))
         .flatMap(Util::asString)
-        .map(str -> newVerticalCarrier(carrier, Concrete_Knowledge_Expression, str));
+        .map(str -> newVerticalCarrier(carrier, Concrete_Knowledge_Expression, into, str));
   }
 
   @Override
@@ -102,7 +103,7 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializeOpera
       SyntacticRepresentation into, Properties config) {
     return carrier.as(Document.class)
         .map(dox -> new String(XMLUtil.toByteArray(dox)))
-        .map(str -> newVerticalCarrier(carrier, Concrete_Knowledge_Expression, str));
+        .map(str -> newVerticalCarrier(carrier, Concrete_Knowledge_Expression, into, str));
   }
 
 
@@ -111,7 +112,7 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializeOpera
       SyntacticRepresentation into, Properties config) {
     return carrier.as(root)
         .flatMap(obj -> JaxbUtil.marshallDox(getClassContext(), obj, mapper))
-        .map(dox -> newVerticalCarrier(carrier, Parsed_Knowedge_Expression, dox));
+        .map(dox -> newVerticalCarrier(carrier, Parsed_Knowedge_Expression, into, dox));
   }
 
 
@@ -121,7 +122,7 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializeOpera
         rep(getSupportedLanguage()),
         rep(getSupportedLanguage(), XML_1_1),
         rep(getSupportedLanguage(), XML_1_1, Charset.defaultCharset()),
-        rep(getSupportedLanguage(), XML_1_1, Charset.defaultCharset(), "default"));
+        rep(getSupportedLanguage(), XML_1_1, Charset.defaultCharset(), Encodings.DEFAULT));
   }
 
   @Override

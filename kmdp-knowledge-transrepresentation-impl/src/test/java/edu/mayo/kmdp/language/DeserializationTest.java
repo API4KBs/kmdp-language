@@ -50,6 +50,7 @@ import javax.inject.Inject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.omg.spec.api4kp._1_0.AbstractCarrier;
+import org.omg.spec.api4kp._1_0.AbstractCarrier.Encodings;
 import org.omg.spec.api4kp._1_0.Answer;
 import org.omg.spec.api4kp._1_0.identifiers.URIIdentifier;
 import org.omg.spec.api4kp._1_0.services.KPComponent;
@@ -77,7 +78,7 @@ public class DeserializationTest {
 
     KnowledgeCarrier bin = AbstractCarrier.of(dmn.get())
         .withRepresentation(
-            rep(DMN_1_1, XML_1_1, Charset.defaultCharset(), "default"));
+            rep(DMN_1_1, XML_1_1, Charset.defaultCharset(), Encodings.DEFAULT));
 
     Optional<KnowledgeCarrier> expr = parser
         .applyLift(bin, Concrete_Knowledge_Expression)
@@ -133,7 +134,7 @@ public class DeserializationTest {
         .withRepresentation(rep(DMN_1_1,
             XML_1_1,
             Charset.defaultCharset(),
-            "TODO"));
+            Encodings.DEFAULT));
 
     Answer<KnowledgeCarrier> ast = parser.applyLift(bin, Abstract_Knowledge_Expression);
 
