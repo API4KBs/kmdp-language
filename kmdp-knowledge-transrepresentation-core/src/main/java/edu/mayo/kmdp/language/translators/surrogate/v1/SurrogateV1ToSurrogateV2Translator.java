@@ -1,16 +1,27 @@
 package edu.mayo.kmdp.language.translators.surrogate.v1;
 
 import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.JSON;
-import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.*;
+import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate;
+import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate_2_0;
+import static java.nio.charset.Charset.defaultCharset;
 import static java.util.Collections.singletonList;
+import static org.omg.spec.api4kp._1_0.AbstractCarrier.Encodings.DEFAULT;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
+import edu.mayo.kmdp.language.parsers.surrogate.v1.SurrogateParser;
 import edu.mayo.kmdp.language.translators.AbstractSimpleTranslator;
 import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
 import edu.mayo.kmdp.metadata.v2.surrogate.SurrogateHelper;
+import edu.mayo.kmdp.tranx.v4.server.DeserializeApiInternal._applyLift;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
+import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries;
 import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguage;
-import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.UUID;
 import org.omg.spec.api4kp._1_0.AbstractCarrier;
 import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
 import org.omg.spec.api4kp._1_0.id.SemanticIdentifier;
@@ -19,14 +30,14 @@ import org.omg.spec.api4kp._1_0.services.KPSupport;
 import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 
-import java.util.*;
-
 @KPOperation(KnowledgeProcessingOperationSeries.Transcreation_Task)
-@KPSupport(Knowledge_Asset_Surrogate_2_0)
+@KPSupport(Knowledge_Asset_Surrogate)
 public class SurrogateV1ToSurrogateV2Translator extends
     AbstractSimpleTranslator<KnowledgeAsset, Collection<edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset>> {
   public static final UUID id = UUID.fromString("ca69756f-6ba6-439f-88a0-ca957f5454e0");
   public static final String version = "1.0.0";
+
+  private _applyLift parser = new SurrogateParser();
 
   public SurrogateV1ToSurrogateV2Translator() {
     setId(SemanticIdentifier.newId(id, version));
@@ -34,7 +45,11 @@ public class SurrogateV1ToSurrogateV2Translator extends
 
   @Override
   public List<SyntacticRepresentation> getFrom() {
-    return singletonList(rep(Knowledge_Asset_Surrogate));
+    return Arrays.asList(
+        rep(Knowledge_Asset_Surrogate),
+        rep(Knowledge_Asset_Surrogate, JSON),
+        rep(Knowledge_Asset_Surrogate, JSON, defaultCharset()),
+        rep(Knowledge_Asset_Surrogate, JSON, defaultCharset(), DEFAULT));
   }
 
   @Override
@@ -51,6 +66,40 @@ public class SurrogateV1ToSurrogateV2Translator extends
   public KnowledgeRepresentationLanguage getTargetLanguage() {
     return Knowledge_Asset_Surrogate_2_0;
   }
+
+
+  @Override
+  protected Optional<KnowledgeCarrier> applyTransrepresentation(
+      KnowledgeCarrier src,
+      SyntacticRepresentation tgtRep,
+      Properties config) {
+    Optional<Collection<edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset>> legacySurr;
+
+    switch (src.getLevel().asEnum()) {
+      case Encoded_Knowledge_Expression:
+      case Concrete_Knowledge_Expression:
+      case Parsed_Knowedge_Expression:
+        legacySurr = parser
+            .applyLift(src, ParsingLevelSeries.Abstract_Knowledge_Expression, null, null)
+            .flatOpt(kc -> transformAst(
+                src.getAssetId(),
+                (KnowledgeAsset) kc.getExpression(),
+                tgtRep, config)).getOptionalValue();
+        break;
+      case Abstract_Knowledge_Expression:
+        legacySurr = transformAst(
+            src.getAssetId(),
+            (KnowledgeAsset) src.getExpression(),
+            tgtRep, config);
+        break;
+      default:
+        throw new UnsupportedOperationException();
+    }
+
+    return legacySurr.map(out -> wrap(
+        tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getArtifactId())));
+  }
+
 
   @Override
   protected Optional<Collection<edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset>> transformAst(

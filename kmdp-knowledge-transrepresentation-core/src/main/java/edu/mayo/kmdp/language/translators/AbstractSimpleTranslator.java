@@ -52,7 +52,7 @@ public abstract class AbstractSimpleTranslator<S,T>
       SyntacticRepresentation tgtRep) {
     if (knowledgeCarrier.getRepresentation() == null ||
         !knowledgeCarrier.getRepresentation().getLanguage().sameAs(getSupportedLanguage())) {
-      throw new UnsupportedOperationException("Unable to handle " + knowledgeCarrier.getRepresentation().getLanguage());
+      throw new UnsupportedOperationException("Unable to handle representation " + knowledgeCarrier.getRepresentation());
     }
     if (getFrom().stream()
         .noneMatch(
