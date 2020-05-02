@@ -74,24 +74,33 @@ public abstract class AbstractSimpleTranslator<S,T>
       case Encoded_Knowledge_Expression:
         return src.asBinary()
             .flatMap(bytes -> transformBinary(src.getAssetId(), bytes, tgtRep, config))
-            .map(out -> TransionApiOperator.newHorizontalCarrier(
+            .map(out -> wrap(
                 tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getArtifactId())));
       case Concrete_Knowledge_Expression:
         return src.asString()
             .flatMap(str -> transformString(src.getAssetId(), str, tgtRep, config))
-            .map(out -> TransionApiOperator.newHorizontalCarrier(
+            .map(out -> wrap(
                 tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getArtifactId())));
       case Parsed_Knowedge_Expression:
         return transformTree(src.getAssetId(), src.getExpression(), tgtRep, config)
-            .map(out -> TransionApiOperator.newHorizontalCarrier(
+            .map(out -> wrap(
                 tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getArtifactId())));
       case Abstract_Knowledge_Expression:
         return transformAst(src.getAssetId(), (S) src.getExpression(), tgtRep, config)
-            .map(out -> TransionApiOperator.newHorizontalCarrier(
+            .map(out -> wrap(
                 tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getArtifactId())));
       default:
         throw new UnsupportedOperationException();
     }
+  }
+
+  protected KnowledgeCarrier wrap(
+      SyntacticRepresentation tgtRep,
+      T translatedArtifact,
+      ResourceIdentifier mappedAssetId,
+      ResourceIdentifier mappedArtifactId) {
+    return TransionApiOperator.newHorizontalCarrier(
+        tgtRep, translatedArtifact, mappedAssetId, mappedArtifactId);
   }
 
   protected Optional<T> transformAst(

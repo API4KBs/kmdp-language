@@ -1,49 +1,53 @@
 package edu.mayo.kmdp.language;
 
-import edu.mayo.kmdp.language.translators.surrogate.v1.SurrogateToLibraryTranslator;
-import edu.mayo.kmdp.language.translators.surrogate.v1.SurrogateV1ToSurrogateV2Translator;
-import edu.mayo.kmdp.language.translators.surrogate.v2.SurrogateV2toSurrogateV1Translator;
-import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
-import org.hl7.fhir.dstu3.model.Attachment;
-import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
-import org.hl7.fhir.dstu3.model.Library;
-import org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType;
-import org.junit.jupiter.api.Test;
-import org.omg.spec.api4kp._1_0.AbstractCarrier;
-import org.omg.spec.api4kp._1_0.Answer;
-import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
-
-import static edu.mayo.ontology.taxonomies.kao.knowledgeassettype.KnowledgeAssetTypeSeries.Clinical_Rule;
-import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.FHIR_STU3;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate_2_0;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 import static org.omg.spec.api4kp._1_0.services.tranx.ModelMIMECoder.encode;
+
+import edu.mayo.kmdp.id.helper.DatatypeHelper;
+import edu.mayo.kmdp.language.translators.surrogate.v1.SurrogateV1ToSurrogateV2Translator;
+import edu.mayo.kmdp.language.translators.surrogate.v2.SurrogateV2toSurrogateV1Translator;
+import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
+import edu.mayo.kmdp.metadata.v2.surrogate.SurrogateBuilder;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.omg.spec.api4kp._1_0.AbstractCarrier;
+import org.omg.spec.api4kp._1_0.Answer;
+import org.omg.spec.api4kp._1_0.services.CompositeKnowledgeCarrier;
+import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 
 public class SurrogateTranslatorTest {
 
   KnowledgeAsset meta = new MockSurrogateKnowledgeAsset().buildMetadata();
   TransionApiOperator v1ToV2Translator = new SurrogateV1ToSurrogateV2Translator();
-  TransionApiOperator v2Translator = new SurrogateV2toSurrogateV1Translator();
 
   @Test
   void TestSurrogateV1toV2Translation() {
-    Answer<KnowledgeCarrier> knowledgeCarrier = translateKnowledgeAssetToSurrogateV2();
+    KnowledgeCarrier knowledgeCarrier = translateKnowledgeAssetToSurrogateV2()
+        .orElseGet(Assertions::fail);
+    assertTrue(knowledgeCarrier instanceof CompositeKnowledgeCarrier);
 
-    assertTrue(knowledgeCarrier.isSuccess());
+    edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset surrogateV2 =
+        knowledgeCarrier.mainComponent()
+            .as(edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset.class)
+            .orElseGet(Assertions::fail);
 
-    edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset surrogateV2 = knowledgeCarrier
-        .flatOpt(kc -> kc.as(
-            edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset.class))
-            .orElse(new edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset());
+    assertNotNull(surrogateV2.getAssetId());
+    assertFalse(surrogateV2.getFormalCategory().isEmpty());
+    assertFalse(surrogateV2.getFormalType().isEmpty());
 
-    //TODO: do any assertions needed on Knowledge Asset Surrogate V2
+    assertEquals(1,surrogateV2.getCarriers().size());
+
   }
 
   Answer<KnowledgeCarrier> translateKnowledgeAssetToSurrogateV2() {
     return Answer.of(AbstractCarrier.ofAst(meta)
+        .withAssetId(DatatypeHelper.toSemanticIdentifier(meta.getAssetId()))
         .withRepresentation(rep(Knowledge_Asset_Surrogate)))
         .flatMap(kc -> v1ToV2Translator
             .try_applyTransrepresent(kc, encode(rep(Knowledge_Asset_Surrogate_2_0)), null));

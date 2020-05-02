@@ -1,17 +1,22 @@
 package edu.mayo.kmdp.language.translators.surrogate.v1;
 
+import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.JSON;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.*;
 import static java.util.Collections.singletonList;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
 import edu.mayo.kmdp.language.translators.AbstractSimpleTranslator;
 import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
+import edu.mayo.kmdp.metadata.v2.surrogate.SurrogateHelper;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguage;
+import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries;
+import org.omg.spec.api4kp._1_0.AbstractCarrier;
 import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
 import org.omg.spec.api4kp._1_0.id.SemanticIdentifier;
 import org.omg.spec.api4kp._1_0.services.KPOperation;
 import org.omg.spec.api4kp._1_0.services.KPSupport;
+import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
 
 import java.util.*;
@@ -54,4 +59,16 @@ public class SurrogateV1ToSurrogateV2Translator extends
     return Optional.ofNullable(new SurrogateV1ToSurrogateV2().transform(expression));
   }
 
+  @Override
+  protected KnowledgeCarrier wrap(SyntacticRepresentation tgtRep,
+      Collection<edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset> translatedArtifact,
+      ResourceIdentifier mappedAssetId, ResourceIdentifier mappedArtifactId) {
+    return AbstractCarrier.ofIdentifiableSet(
+        rep(getTargetLanguage()),
+        edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset::getAssetId,
+        ka -> SurrogateHelper.getSurrogateId(ka, Knowledge_Asset_Surrogate_2_0,JSON)
+            .orElse(SemanticIdentifier.randomId()),
+        translatedArtifact
+    ).withRootId(mappedAssetId);
+  }
 }
