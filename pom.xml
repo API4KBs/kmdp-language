@@ -9,7 +9,7 @@
   </parent>
 
   <artifactId>kmdp-knowledge-transrepresentation</artifactId>
-  <version>3.7.1-SNAPSHOT</version>
+  <version>3.7.2-SNAPSHOT</version>
 
   <name>KMDP :: Server :: Knowledge Transrepresentation Service</name>
 
