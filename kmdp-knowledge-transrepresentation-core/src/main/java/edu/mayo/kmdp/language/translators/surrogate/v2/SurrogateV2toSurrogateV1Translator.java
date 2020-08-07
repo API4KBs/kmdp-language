@@ -7,7 +7,7 @@ import static java.nio.charset.Charset.defaultCharset;
 import static java.util.Collections.singletonList;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
-import edu.mayo.kmdp.id.helper.DatatypeHelper;
+import edu.mayo.kmdp.SurrogateHelper;
 import edu.mayo.kmdp.language.parsers.surrogate.v2.Surrogate2Parser;
 import edu.mayo.kmdp.language.translators.AbstractSimpleTranslator;
 import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
@@ -105,7 +105,7 @@ public class SurrogateV2toSurrogateV1Translator extends
       edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset expression, SyntacticRepresentation tgtRep,
       Properties config) {
     return Optional.ofNullable(
-        new KnowledgeAsset().withAssetId(DatatypeHelper.toURIIdentifier(expression.getAssetId()))
+        new KnowledgeAsset().withAssetId(SurrogateHelper.toURIIdentifier(expression.getAssetId()))
     );
   }
 

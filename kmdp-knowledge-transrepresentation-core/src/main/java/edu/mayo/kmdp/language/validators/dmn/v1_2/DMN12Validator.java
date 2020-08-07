@@ -108,7 +108,7 @@ public class DMN12Validator
       throw new UnsupportedOperationException("DMN12 Validator unable to validate "
           + sourceArtifact.getRepresentation().getLanguage());
     }
-    return XMLUtil.getSchemas(DMN_1_2.getRef())
+    return XMLUtil.getSchemas(DMN_1_2.getReferentId())
         .orElseThrow(() -> new UnsupportedOperationException("Unable to retrieve schema for DMN12"));
   }
 

@@ -2,7 +2,7 @@ package edu.mayo.kmdp.language.translators.surrogate.v1;
 
 import static edu.mayo.kmdp.util.StreamUtil.filterAs;
 
-import edu.mayo.kmdp.id.helper.DatatypeHelper;
+import edu.mayo.kmdp.SurrogateHelper;
 import edu.mayo.kmdp.metadata.annotations.SimpleAnnotation;
 import edu.mayo.kmdp.metadata.surrogate.Association;
 import edu.mayo.kmdp.metadata.surrogate.Component;
@@ -10,6 +10,7 @@ import edu.mayo.kmdp.metadata.surrogate.ComputableKnowledgeArtifact;
 import edu.mayo.kmdp.metadata.surrogate.Dependency;
 import edu.mayo.kmdp.metadata.surrogate.Derivative;
 import edu.mayo.kmdp.metadata.surrogate.InlinedRepresentation;
+>>>>>>> [#130470] Restrict the use of legacy identifiers to Surrogate v1
 import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
 import edu.mayo.kmdp.metadata.surrogate.KnowledgeResource;
 import edu.mayo.kmdp.metadata.surrogate.Publication;

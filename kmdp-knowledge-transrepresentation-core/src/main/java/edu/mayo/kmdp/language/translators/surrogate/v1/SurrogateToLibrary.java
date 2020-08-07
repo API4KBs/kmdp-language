@@ -2,9 +2,7 @@ package edu.mayo.kmdp.language.translators.surrogate.v1;
 
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 
-import edu.mayo.kmdp.id.Term;
-import edu.mayo.kmdp.id.VersionedIdentifier;
-import edu.mayo.kmdp.id.helper.DatatypeHelper;
+import edu.mayo.kmdp.SurrogateHelper;
 import edu.mayo.kmdp.metadata.annotations.SimpleAnnotation;
 import edu.mayo.kmdp.metadata.annotations.SimpleApplicability;
 import edu.mayo.kmdp.metadata.surrogate.Association;
@@ -38,7 +36,9 @@ import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.Period;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType;
+import org.omg.spec.api4kp._1_0.identifiers.ConceptIdentifier;
 import org.omg.spec.api4kp._1_0.identifiers.NamespaceIdentifier;
+import org.omg.spec.api4kp._1_0.identifiers.URIIdentifier;
 import org.omg.spec.api4kp._1_0.services.tranx.ModelMIMECoder;
 
 public class SurrogateToLibrary {
@@ -272,7 +272,8 @@ public class SurrogateToLibrary {
       return;
     }
     // No more than one type is supported..
-    lib.setType(toCode(knowledgeAsset.getFormalType().get(0)));
+    lib.setType(toCode(
+        SurrogateHelper.toLegacyConceptIdentifier(knowledgeAsset.getFormalType().get(0))));
   }
 
 
@@ -310,15 +311,15 @@ public class SurrogateToLibrary {
     if (knowledgeAsset.getAssetId() == null) {
       throw new IllegalArgumentException("Surrogates MUST have an asset ID - none found");
     }
-    VersionedIdentifier vid = DatatypeHelper.toVersionIdentifier(knowledgeAsset.getAssetId());
+    URIIdentifier vid = knowledgeAsset.getAssetId();
     Identifier assetId = new Identifier()
-        .setValue(vid.getTag())
+        .setValue(SurrogateHelper.getTag(vid))
         .setSystem(Registry.MAYO_ASSETS_BASE_URI)
         .setPeriod(new Period().setStart(knowledgeAsset.getAssetId().getEstablishedOn()))
         .setUse(IdentifierUse.OFFICIAL);
 
     lib.setIdentifier(Collections.singletonList(assetId));
-    lib.setVersion(vid.getVersion());
+    lib.setVersion(SurrogateHelper.getVersionTag(vid));
   }
 
   private void mapSurrogateId(KnowledgeAsset knowledgeAsset, Library lib) {
@@ -327,13 +328,13 @@ public class SurrogateToLibrary {
     }
     KnowledgeArtifact surrogate = knowledgeAsset.getSurrogate().get(0);
     if (surrogate != null) {
-      lib.setId(surrogate.getArtifactId().getTag() + ":" + surrogate.getArtifactId().getVersion());
+      lib.setId(SurrogateHelper.getTag(surrogate.getArtifactId()) + ":" + SurrogateHelper.getVersionTag(surrogate.getArtifactId()));
       lib.setUrl(surrogate.getArtifactId().getVersionId().toString());
     }
   }
 
 
-  private CodeableConcept toCode(Term cid) {
+  private CodeableConcept toCode(ConceptIdentifier cid) {
     return new CodeableConcept()
         .setCoding(Collections.singletonList(
             new Coding()

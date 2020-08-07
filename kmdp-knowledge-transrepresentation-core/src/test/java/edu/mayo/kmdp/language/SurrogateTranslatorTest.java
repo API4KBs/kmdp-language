@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 import static org.omg.spec.api4kp._1_0.services.tranx.ModelMIMECoder.encode;
 
-import edu.mayo.kmdp.id.helper.DatatypeHelper;
+import edu.mayo.kmdp.SurrogateHelper;
 import edu.mayo.kmdp.language.translators.surrogate.v1.SurrogateV1ToSurrogateV2Translator;
 import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
 import edu.mayo.kmdp.metadata.v2.surrogate.Dependency;

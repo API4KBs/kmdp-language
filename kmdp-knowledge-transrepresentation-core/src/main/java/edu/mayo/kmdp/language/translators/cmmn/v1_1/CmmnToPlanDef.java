@@ -13,8 +13,7 @@
  */
 package edu.mayo.kmdp.language.translators.cmmn.v1_1;
 
-import edu.mayo.kmdp.id.Term;
-import edu.mayo.kmdp.metadata.annotations.SimpleAnnotation;
+import edu.mayo.kmdp.metadata.v2.surrogate.annotations.Annotation;
 import edu.mayo.kmdp.util.StreamUtil;
 import edu.mayo.ontology.taxonomies.kao.knowledgeassettype.KnowledgeAssetTypeSeries;
 import edu.mayo.ontology.taxonomies.kmdo.annotationreltype.AnnotationRelTypeSeries;
@@ -41,9 +40,9 @@ import org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionComponent;
 import org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionRelatedActionComponent;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
+import org.omg.spec.api4kp._1_0.id.ConceptIdentifier;
 import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
-import org.omg.spec.api4kp._1_0.identifiers.ConceptIdentifier;
-import org.omg.spec.api4kp._1_0.identifiers.NamespaceIdentifier;
+import org.omg.spec.api4kp._1_0.id.Term;
 import org.omg.spec.cmmn._20151109.model.TAssociation;
 import org.omg.spec.cmmn._20151109.model.TCase;
 import org.omg.spec.cmmn._20151109.model.TCaseFileItem;
@@ -110,7 +109,7 @@ public class CmmnToPlanDef {
   ) {
     // TODO Need formal "Asset ID" and "Artifact ID" roles
     Identifier fhirAssetId = new Identifier()
-        .setType(toCode(AnnotationRelTypeSeries.Is_Identified_By.asConcept()))
+        .setType(toCode(AnnotationRelTypeSeries.Is_Identified_By))
         .setValue(assetId.toString());
 
     cpm.setIdentifier(Collections.singletonList(fhirAssetId))
@@ -257,12 +256,8 @@ public class CmmnToPlanDef {
             new Coding()
                 .setCode(cid.getTag())
                 .setDisplay(cid.getLabel())
-                .setSystem(cid.getNamespace() != null
-                    ? ((NamespaceIdentifier)cid.getNamespace()).getId().toString()
-                    : null)
-                .setVersion(cid.getNamespace() != null
-                    ? ((NamespaceIdentifier)cid.getNamespace()).getVersion()
-                    : null)));
+                .setSystem(cid.getNamespaceUri().toString())
+                .setVersion(cid.getVersionTag())));
   }
 
   private void mapName(PlanDefinition cpm, TDefinitions tCase) {
@@ -449,9 +444,9 @@ public class CmmnToPlanDef {
     }
 
     return extensionElements.stream()
-        .flatMap(StreamUtil.filterAs(SimpleAnnotation.class))
+        .flatMap(StreamUtil.filterAs(Annotation.class))
         .filter(ann -> AnnotationRelTypeSeries.Captures.getTag().equals(ann.getRel().getTag()))
-        .map(SimpleAnnotation::getExpr)
+        .map(Annotation::getRef)
         .map(Term.class::cast)
         .collect(Collectors.toList());
   }
@@ -463,8 +458,8 @@ public class CmmnToPlanDef {
 
   private Optional<ConceptIdentifier> findSubject(List<Object> extensionElements) {
     if (extensionElements != null) {
-      List<SimpleAnnotation> annotations = extensionElements.stream()
-          .flatMap(StreamUtil.filterAs(SimpleAnnotation.class))
+      List<Annotation> annotations = extensionElements.stream()
+          .flatMap(StreamUtil.filterAs(Annotation.class))
           .filter(annotation -> annotation.getRel().getConceptId()
               .equals(AnnotationRelTypeSeries.Has_Primary_Subject.getConceptId()))
           .collect(Collectors.toList());
@@ -474,8 +469,8 @@ public class CmmnToPlanDef {
       }
 
       if (annotations.size() == 1) {
-        SimpleAnnotation annotation = annotations.get(0);
-        return Optional.of(annotation.getExpr());
+        Annotation annotation = annotations.get(0);
+        return Optional.of(annotation.getRef());
       }
     }
     return Optional.empty();

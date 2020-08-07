@@ -1,15 +1,10 @@
 package edu.mayo.kmdp.language;
 
-import edu.mayo.kmdp.id.helper.DatatypeHelper;
-import edu.mayo.kmdp.metadata.annotations.SimpleAnnotation;
-import edu.mayo.kmdp.metadata.surrogate.*;
-import edu.mayo.ontology.taxonomies.iso639_2_languagecodes.LanguageSeries;
-import edu.mayo.ontology.taxonomies.kmdo.annotationreltype.AnnotationRelTypeSeries;
-import java.util.UUID;
-import org.omg.spec.api4kp._1_0.id.Term;
-
-import static edu.mayo.kmdp.id.helper.DatatypeHelper.uri;
+import static edu.mayo.kmdp.SurrogateHelper.toLegacyConceptIdentifier;
+import static edu.mayo.kmdp.SurrogateHelper.toURIIdentifier;
+import static edu.mayo.kmdp.SurrogateHelper.uri;
 import static edu.mayo.kmdp.registry.Registry.BASE_UUID_URN;
+import static edu.mayo.kmdp.registry.Registry.BASE_UUID_URN_URI;
 import static edu.mayo.ontology.taxonomies.kao.knowledgeartifactcategory.KnowledgeArtifactCategorySeries.Software;
 import static edu.mayo.ontology.taxonomies.kao.knowledgeassetcategory.KnowledgeAssetCategorySeries.Rules_Policies_And_Guidelines;
 import static edu.mayo.ontology.taxonomies.kao.knowledgeassetrole.KnowledgeAssetRoleSeries.Operational_Concept_Definition;
@@ -31,6 +26,27 @@ import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLan
 import static edu.mayo.ontology.taxonomies.krprofile.KnowledgeRepresentationLanguageProfileSeries.CQL_Essentials;
 import static edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentationLanguageSerializationSeries.DMN_1_1_XML_Syntax;
 import static edu.mayo.ontology.taxonomies.lexicon.LexiconSeries.SNOMED_CT;
+import static org.omg.spec.api4kp._1_0.id.SemanticIdentifier.newId;
+
+import edu.mayo.kmdp.metadata.annotations.SimpleAnnotation;
+import edu.mayo.kmdp.metadata.surrogate.Citation;
+import edu.mayo.kmdp.metadata.surrogate.Component;
+import edu.mayo.kmdp.metadata.surrogate.ComputableKnowledgeArtifact;
+import edu.mayo.kmdp.metadata.surrogate.Dependency;
+import edu.mayo.kmdp.metadata.surrogate.Derivative;
+import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
+import edu.mayo.kmdp.metadata.surrogate.KnowledgeResource;
+import edu.mayo.kmdp.metadata.surrogate.Party;
+import edu.mayo.kmdp.metadata.surrogate.Publication;
+import edu.mayo.kmdp.metadata.surrogate.Representation;
+import edu.mayo.kmdp.metadata.surrogate.SubLanguage;
+import edu.mayo.kmdp.metadata.surrogate.Summary;
+import edu.mayo.kmdp.metadata.surrogate.Variant;
+import edu.mayo.kmdp.metadata.surrogate.Version;
+import edu.mayo.ontology.taxonomies.iso639_2_languagecodes.LanguageSeries;
+import edu.mayo.ontology.taxonomies.kmdo.annotationreltype.AnnotationRelTypeSeries;
+import java.util.UUID;
+import org.omg.spec.api4kp._1_0.id.Term;
 
 public class MockSurrogateKnowledgeAsset {
 
@@ -44,9 +60,9 @@ public class MockSurrogateKnowledgeAsset {
         .withName("Diabetes Treatment Plan")
         .withDescription("Description of Diabetes...")
         .withSubject(new SimpleAnnotation().withExpr(
-            DatatypeHelper.toConceptIdentifier(Term.mock("mock", "12345").asConceptIdentifier()))
+            toLegacyConceptIdentifier(Term.mock("mock", "12345").asConceptIdentifier()))
             .withRel(
-                AnnotationRelTypeSeries.Has_Focus.asConcept()))
+                toLegacyConceptIdentifier(AnnotationRelTypeSeries.Has_Focus)))
         .withRelated(
             new Component()
                 .withRel(Has_Part)
@@ -89,7 +105,8 @@ public class MockSurrogateKnowledgeAsset {
                     .withLexicon(SNOMED_CT)
                     .withSerialization(DMN_1_1_XML_Syntax)
                     .withWith(
-                        new SubLanguage().withRole(Schema_Language))
+                        new SubLanguage()
+                            .withRole(Schema_Language))
                 )
         )
         .withSurrogate(
@@ -104,6 +121,6 @@ public class MockSurrogateKnowledgeAsset {
 
   private KnowledgeResource ref(UUID randomUUID, String version) {
     return new KnowledgeAsset()
-        .withAssetId(DatatypeHelper.uri(BASE_UUID_URN, randomUUID.toString(), version));
+        .withAssetId(toURIIdentifier(newId(BASE_UUID_URN_URI, randomUUID.toString(), version)));
   }
 }

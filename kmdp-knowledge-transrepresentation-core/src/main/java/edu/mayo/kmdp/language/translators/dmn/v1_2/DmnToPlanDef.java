@@ -15,8 +15,7 @@
  */
 package edu.mayo.kmdp.language.translators.dmn.v1_2;
 
-import edu.mayo.kmdp.id.Term;
-import edu.mayo.kmdp.metadata.annotations.SimpleAnnotation;
+import edu.mayo.kmdp.metadata.v2.surrogate.annotations.Annotation;
 import edu.mayo.kmdp.util.StreamUtil;
 import edu.mayo.kmdp.util.URIUtil;
 import edu.mayo.kmdp.util.Util;
@@ -43,9 +42,9 @@ import org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionComponent;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.dstu3.model.UriType;
+import org.omg.spec.api4kp._1_0.id.ConceptIdentifier;
 import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
-import org.omg.spec.api4kp._1_0.identifiers.ConceptIdentifier;
-import org.omg.spec.api4kp._1_0.identifiers.NamespaceIdentifier;
+import org.omg.spec.api4kp._1_0.id.Term;
 import org.omg.spec.dmn._20180521.model.TAuthorityRequirement;
 import org.omg.spec.dmn._20180521.model.TDMNElement.ExtensionElements;
 import org.omg.spec.dmn._20180521.model.TDMNElementReference;
@@ -131,7 +130,7 @@ public class DmnToPlanDef {
 
   private void mapIdentity(PlanDefinition cpm, URI assetId, TDefinitions decisionModel) {
     Identifier fhirAssetId = new Identifier()
-        .setType(toCode(AnnotationRelTypeSeries.Is_Identified_By.asConcept()))
+        .setType(toCode(AnnotationRelTypeSeries.Is_Identified_By))
         .setValue(assetId.toString());
 
     cpm.setIdentifier(Collections.singletonList(fhirAssetId))
@@ -229,12 +228,8 @@ public class DmnToPlanDef {
             new Coding()
                 .setCode(cid.getTag())
                 .setDisplay(cid.getLabel())
-                .setSystem(cid.getNamespace() != null
-                    ? ((NamespaceIdentifier)cid.getNamespace()).getId().toString()
-                    : null)
-                .setVersion(cid.getNamespace() != null
-                    ? ((NamespaceIdentifier)cid.getNamespace()).getVersion()
-                    : null)));
+                .setSystem(cid.getNamespaceUri().toString())
+                .setVersion(cid.getVersionTag())));
   }
 
   private void mapName(PlanDefinition cpm, TDefinitions tCase) {
@@ -255,14 +250,14 @@ public class DmnToPlanDef {
     }
 
     return extensionElements.stream()
-        .flatMap(StreamUtil.filterAs(SimpleAnnotation.class))
+        .flatMap(StreamUtil.filterAs(Annotation.class))
         .filter(ann ->
                 ann.getRel() == null
                     || AnnotationRelTypeSeries.Defines.getTag().equals(ann.getRel().getTag())
                     || AnnotationRelTypeSeries.Captures.getTag().equals(ann.getRel().getTag())
                     || AnnotationRelTypeSeries.In_Terms_Of.getTag().equals(ann.getRel().getTag())
         )
-        .map(SimpleAnnotation::getExpr)
+        .map(Annotation::getRef)
         .map(Term.class::cast)
         .collect(Collectors.toList());
   }
@@ -274,13 +269,13 @@ public class DmnToPlanDef {
 
   private Optional<ConceptIdentifier> findSubject(List<Object> extensionElements) {
     if (extensionElements != null) {
-      List<SimpleAnnotation> annotations = extensionElements.stream()
-          .filter(e -> e instanceof SimpleAnnotation)
-          .map(e -> (SimpleAnnotation) e)
+      List<Annotation> annotations = extensionElements.stream()
+          .filter(e -> e instanceof Annotation)
+          .map(e -> (Annotation) e)
           .filter(
-              annotation -> annotation.getRel() != null && annotation.getRel().getRef() != null)
-          .filter(annotation -> annotation.getRel().getRef()
-              .equals(AnnotationRelTypeSeries.Has_Primary_Subject.getRef()))
+              annotation -> annotation.getRel() != null && annotation.getRel().getReferentId() != null)
+          .filter(annotation -> annotation.getRel().getReferentId()
+              .equals(AnnotationRelTypeSeries.Has_Primary_Subject.getReferentId()))
           .collect(Collectors.toList());
 
       if (annotations.size() > 1) {
@@ -288,8 +283,8 @@ public class DmnToPlanDef {
       }
 
       if (annotations.size() == 1) {
-        SimpleAnnotation annotation = annotations.get(0);
-        return Optional.of(annotation.getExpr());
+        Annotation annotation = annotations.get(0);
+        return Optional.of(annotation.getRef());
       }
     }
 
