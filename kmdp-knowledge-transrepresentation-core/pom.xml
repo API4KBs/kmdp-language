@@ -12,7 +12,7 @@
 
   <artifactId>kmdp-knowledge-transrepresentation-core</artifactId>
 
-  <name>KMDP :: Server :: Knowledge Transrepresentation Service (Internal)</name>
+  <name>KMDP :: Service :: Knowledge Transrepresentation Service :: Impl</name>
 
   <dependencies>
 

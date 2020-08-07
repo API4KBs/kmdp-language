@@ -15,7 +15,7 @@
 
   <packaging>war</packaging>
 
-  <name>KMDP :: Server :: Knowledge Transrepresentation Service (Web)</name>
+  <name>KMDP :: Service :: Knowledge Transrepresentation Service :: Impl</name>
 
 
   <build>

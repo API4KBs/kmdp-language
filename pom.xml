@@ -11,7 +11,7 @@
   <artifactId>kmdp-knowledge-transrepresentation</artifactId>
   <version>3.7.2-SNAPSHOT</version>
 
-  <name>KMDP :: Server :: Knowledge Transrepresentation Service</name>
+  <name>KMDP :: Service :: Knowledge Transrepresentation Service</name>
 
 
   <packaging>pom</packaging>
