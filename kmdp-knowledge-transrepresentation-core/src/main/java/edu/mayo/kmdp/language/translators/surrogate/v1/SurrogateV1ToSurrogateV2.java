@@ -34,6 +34,9 @@ public class SurrogateV1ToSurrogateV2 {
     surrogateV2.withRole(surrogateV1.getRole());
     surrogateV2.withName(surrogateV1.getName());
     surrogateV2.withDescription(surrogateV1.getDescription());
+    if (Optional.ofNullable(surrogateV1.getLifecycle()).isEmpty()) {
+      throw new IllegalArgumentException("Source surrogate must have lifecycle - none found");
+    }
     mapLifecycleToSurrogateV2(surrogateV1.getLifecycle(), surrogateV2);
     surrogateV1.getCitations().forEach(cit -> mapCitationToSurrogateV2(cit, surrogateV2));
     surrogateV1.getRelated().forEach(assoc -> mapRelatedItemToLinkList(assoc, surrogateV2));

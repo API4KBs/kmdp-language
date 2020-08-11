@@ -2,10 +2,7 @@ package edu.mayo.kmdp.language;
 
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate_2_0;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 import static org.omg.spec.api4kp._1_0.services.tranx.ModelMIMECoder.encode;
 
@@ -42,6 +39,40 @@ public class SurrogateTranslatorTest {
     assertFalse(surrogateV2.getFormalType().isEmpty());
 
     assertEquals(1,surrogateV2.getCarriers().size());
+
+  }
+
+  @Test
+  void TestSurrogateV1toV2Translation_noLifecycle_ThrowsException() {
+
+    meta.setLifecycle(null);
+
+    SurrogateV1ToSurrogateV2Translator v1ToV2Translator = new SurrogateV1ToSurrogateV2Translator();
+    KnowledgeCarrier kc = AbstractCarrier.ofAst(meta)
+            .withAssetId(DatatypeHelper.toSemanticIdentifier(meta.getAssetId()))
+            .withRepresentation(rep(Knowledge_Asset_Surrogate));
+
+    Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+      v1ToV2Translator.applyTransrepresent(kc, encode(rep(Knowledge_Asset_Surrogate_2_0)), null);
+    });
+    assertEquals("Source surrogate must have lifecycle", exception.getMessage());
+
+  }
+
+  @Test
+  void TestSurrogateV1toV2Translation_noSummary_ThrowsException() {
+
+    meta.setLifecycle(null);
+
+    SurrogateV1ToSurrogateV2Translator v1ToV2Translator = new SurrogateV1ToSurrogateV2Translator();
+    KnowledgeCarrier kc = AbstractCarrier.ofAst(meta)
+            .withAssetId(DatatypeHelper.toSemanticIdentifier(meta.getAssetId()))
+            .withRepresentation(rep(Knowledge_Asset_Surrogate));
+
+    Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+      v1ToV2Translator.applyTransrepresent(kc, encode(rep(Knowledge_Asset_Surrogate_2_0)), null);
+    });
+    assertEquals("Source surrogate must have lifecycle", exception.getMessage());
 
   }
 
