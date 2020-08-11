@@ -1,5 +1,6 @@
 package edu.mayo.kmdp.language;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate;
 import static org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate_2_0;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -9,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
 import static org.omg.spec.api4kp._20200801.services.transrepresentation.ModelMIMECoder.encode;
 
-import edu.mayo.kmdp.SurrogateHelper;
+import edu.mayo.kmdp.id.helper.LegacyDatatypeHelper;
 import edu.mayo.kmdp.language.translators.surrogate.v1.SurrogateV1ToSurrogateV2Translator;
 import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
 import edu.mayo.kmdp.metadata.v2.surrogate.Dependency;
@@ -67,6 +68,40 @@ public class SurrogateTranslatorTest {
     List<Link> links = getImmediateChildren.apply(surrogate);
     assertEquals(links.get(0).getHref().getUuid(), uuid);
     assertEquals(links.get(1).getHref().getUuid(), uuid1);
+  }
+
+  @Test
+  void TestSurrogateV1toV2Translation_noLifecycle_ThrowsException() {
+
+    meta.setLifecycle(null);
+
+    SurrogateV1ToSurrogateV2Translator v1ToV2Translator = new SurrogateV1ToSurrogateV2Translator();
+    KnowledgeCarrier kc = AbstractCarrier.ofAst(meta)
+            .withAssetId(fromURIIdentifier(meta.getAssetId()))
+            .withRepresentation(rep(Knowledge_Asset_Surrogate));
+
+    Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+      v1ToV2Translator.applyTransrepresent(kc, encode(rep(Knowledge_Asset_Surrogate_2_0)), null);
+    });
+    assertEquals("Source surrogate must have lifecycle", exception.getMessage());
+
+  }
+
+  @Test
+  void TestSurrogateV1toV2Translation_noSummary_ThrowsException() {
+
+    meta.setLifecycle(null);
+
+    SurrogateV1ToSurrogateV2Translator v1ToV2Translator = new SurrogateV1ToSurrogateV2Translator();
+    KnowledgeCarrier kc = AbstractCarrier.ofAst(meta)
+            .withAssetId(fromURIIdentifier(meta.getAssetId()))
+            .withRepresentation(rep(Knowledge_Asset_Surrogate));
+
+    Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+      v1ToV2Translator.applyTransrepresent(kc, encode(rep(Knowledge_Asset_Surrogate_2_0)), null);
+    });
+    assertEquals("Source surrogate must have lifecycle", exception.getMessage());
+
   }
 
   Answer<KnowledgeCarrier> translateKnowledgeAssetToSurrogateV2() {
