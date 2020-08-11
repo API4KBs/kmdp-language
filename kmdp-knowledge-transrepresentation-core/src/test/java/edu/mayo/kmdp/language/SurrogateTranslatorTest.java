@@ -55,24 +55,7 @@ public class SurrogateTranslatorTest {
     Exception exception = assertThrows(IllegalArgumentException.class, () -> {
       v1ToV2Translator.applyTransrepresent(kc, encode(rep(Knowledge_Asset_Surrogate_2_0)), null);
     });
-    assertEquals("Source surrogate must have lifecycle", exception.getMessage());
-
-  }
-
-  @Test
-  void TestSurrogateV1toV2Translation_noSummary_ThrowsException() {
-
-    meta.setLifecycle(null);
-
-    SurrogateV1ToSurrogateV2Translator v1ToV2Translator = new SurrogateV1ToSurrogateV2Translator();
-    KnowledgeCarrier kc = AbstractCarrier.ofAst(meta)
-            .withAssetId(DatatypeHelper.toSemanticIdentifier(meta.getAssetId()))
-            .withRepresentation(rep(Knowledge_Asset_Surrogate));
-
-    Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-      v1ToV2Translator.applyTransrepresent(kc, encode(rep(Knowledge_Asset_Surrogate_2_0)), null);
-    });
-    assertEquals("Source surrogate must have lifecycle", exception.getMessage());
+    assertEquals("Source surrogate must have lifecycle - none found", exception.getMessage());
 
   }
 
