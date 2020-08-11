@@ -10,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
 import static org.omg.spec.api4kp._20200801.services.transrepresentation.ModelMIMECoder.encode;
 
-import edu.mayo.kmdp.id.helper.LegacyDatatypeHelper;
 import edu.mayo.kmdp.language.translators.surrogate.v1.SurrogateV1ToSurrogateV2Translator;
 import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
 import edu.mayo.kmdp.metadata.v2.surrogate.Dependency;
@@ -29,7 +28,7 @@ import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
 import org.omg.spec.api4kp._20200801.services.CompositeKnowledgeCarrier;
 import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
 
-public class SurrogateTranslatorTest {
+class SurrogateTranslatorTest {
 
   KnowledgeAsset meta = new MockSurrogateKnowledgeAsset().buildMetadata();
   SurrogateV1ToSurrogateV2Translator v1ToV2Translator = new SurrogateV1ToSurrogateV2Translator();
@@ -80,11 +79,9 @@ public class SurrogateTranslatorTest {
             .withAssetId(fromURIIdentifier(meta.getAssetId()))
             .withRepresentation(rep(Knowledge_Asset_Surrogate));
 
-    Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+    assertThrows(IllegalArgumentException.class, () -> {
       v1ToV2Translator.applyTransrepresent(kc, encode(rep(Knowledge_Asset_Surrogate_2_0)), null);
     });
-    assertEquals("Source surrogate must have lifecycle", exception.getMessage());
-
   }
 
   @Test
@@ -97,11 +94,9 @@ public class SurrogateTranslatorTest {
             .withAssetId(fromURIIdentifier(meta.getAssetId()))
             .withRepresentation(rep(Knowledge_Asset_Surrogate));
 
-    Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+    assertThrows(IllegalArgumentException.class, () -> {
       v1ToV2Translator.applyTransrepresent(kc, encode(rep(Knowledge_Asset_Surrogate_2_0)), null);
     });
-    assertEquals("Source surrogate must have lifecycle", exception.getMessage());
-
   }
 
   Answer<KnowledgeCarrier> translateKnowledgeAssetToSurrogateV2() {
