@@ -1,14 +1,14 @@
 package edu.mayo.kmdp.language;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.omg.spec.api4kp._1_0.AbstractCarrier.of;
+import static org.omg.spec.api4kp._20200801.AbstractCarrier.of;
 
 import edu.mayo.kmdp.language.detectors.html.HTMLDetector;
 import edu.mayo.kmdp.language.detectors.surrogate.v2.Surrogate2Detector;
 import org.junit.jupiter.api.Test;
-import org.omg.spec.api4kp._1_0.Answer;
-import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
-import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
+import org.omg.spec.api4kp._20200801.Answer;
+import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
+import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
 
 public class DetectorTest {
 
@@ -51,12 +51,9 @@ public class DetectorTest {
 
   @Test
   void testSurr2Detector() {
-    String xml = "<ns5:knowledgeAsset "
-        + "xmlns:id=\"http://www.omg.org/spec/API4KP/1.0/id\"\n"
-        + "  xmlns:api=\"http://www.omg.org/spec/API4KP/1.0/services\"\n"
-        + "  xmlns:ann=\"http://kmdp.mayo.edu/metadata/annotations\"\n"
-        + "  xmlns:ns5=\"http://kmdp.mayo.edu/metadata/v2/surrogate\"\n>"
-        + "</ns5:knowledgeAsset>";
+    String xml = "<surr:knowledgeAsset "
+        + "  xmlns:surr=\"https://www.omg.org/spec/API4KP/20200801/surrogate\"\n>"
+        + "</surr:knowledgeAsset>";
 
     Surrogate2Detector surrDetector = new Surrogate2Detector();
     Answer<SyntacticRepresentation> rep = surrDetector.applyDetect(of(xml), null)

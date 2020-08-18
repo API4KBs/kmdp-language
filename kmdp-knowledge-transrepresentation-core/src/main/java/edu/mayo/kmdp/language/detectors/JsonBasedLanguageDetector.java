@@ -15,8 +15,8 @@
  */
 package edu.mayo.kmdp.language.detectors;
 
-import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.JSON;
-import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
+import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
+import static org.omg.spec.api4kp.taxonomy.krformat.SerializationFormatSeries.JSON;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import edu.mayo.kmdp.util.JSonUtil;
@@ -24,7 +24,7 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
+import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
 
 
 public abstract class JsonBasedLanguageDetector<T>

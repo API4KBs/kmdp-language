@@ -15,33 +15,33 @@
  */
 package edu.mayo.kmdp.language.detectors.surrogate.v2;
 
-import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Detect_Language_Information_Task;
-import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.JSON;
-import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.XML_1_1;
-import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate_2_0;
-import static edu.mayo.ontology.taxonomies.lexicon.LexiconSeries.Asset_Relationships_Dependencies;
-import static edu.mayo.ontology.taxonomies.lexicon.LexiconSeries.Asset_Relationships_Derivations;
-import static edu.mayo.ontology.taxonomies.lexicon.LexiconSeries.Asset_Relationships_Structural;
-import static edu.mayo.ontology.taxonomies.lexicon.LexiconSeries.Asset_Relationships_Variants;
-import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
+import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
+import static org.omg.spec.api4kp.taxonomy.krformat.SerializationFormatSeries.JSON;
+import static org.omg.spec.api4kp.taxonomy.krformat.SerializationFormatSeries.XML_1_1;
+import static org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate_2_0;
+import static org.omg.spec.api4kp.taxonomy.lexicon.LexiconSeries.Asset_Relationships_Dependencies;
+import static org.omg.spec.api4kp.taxonomy.lexicon.LexiconSeries.Asset_Relationships_Derivations;
+import static org.omg.spec.api4kp.taxonomy.lexicon.LexiconSeries.Asset_Relationships_Structural;
+import static org.omg.spec.api4kp.taxonomy.lexicon.LexiconSeries.Asset_Relationships_Variants;
 
 import edu.mayo.kmdp.language.detectors.JsonBasedLanguageDetector;
 import edu.mayo.kmdp.language.detectors.MultiFormatLanguageDetector;
 import edu.mayo.kmdp.language.detectors.XMLBasedLanguageDetector;
-import edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset;
-import edu.mayo.kmdp.tranx.v4.server.DetectApiInternal;
-import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguage;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import javax.inject.Named;
-import org.omg.spec.api4kp._1_0.id.SemanticIdentifier;
-import org.omg.spec.api4kp._1_0.services.KPOperation;
-import org.omg.spec.api4kp._1_0.services.KPSupport;
-import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
+import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.DetectApiInternal;
+import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
+import org.omg.spec.api4kp._20200801.services.KPOperation;
+import org.omg.spec.api4kp._20200801.services.KPSupport;
+import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
+import org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset;
+import org.omg.spec.api4kp.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries;
+import org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
 
 @Named
-@KPOperation(Detect_Language_Information_Task)
+@KPOperation(KnowledgeProcessingOperationSeries.Language_Information_Detection_Task)
 @KPSupport(Knowledge_Asset_Surrogate_2_0)
 public class Surrogate2Detector
     extends MultiFormatLanguageDetector<KnowledgeAsset>

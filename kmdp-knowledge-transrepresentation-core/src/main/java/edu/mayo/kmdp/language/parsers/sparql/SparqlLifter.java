@@ -16,19 +16,17 @@
 package edu.mayo.kmdp.language.parsers.sparql;
 
 
-import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Lifting_Task;
-import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Abstract_Knowledge_Expression;
-import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Concrete_Knowledge_Expression;
-import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Parsed_Knowedge_Expression;
-import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.TXT;
-import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.SPARQL_1_1;
-import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
+import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
+import static org.omg.spec.api4kp.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Lifting_Task;
+import static org.omg.spec.api4kp.taxonomy.krformat.SerializationFormatSeries.TXT;
+import static org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.SPARQL_1_1;
+import static org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevelSeries.Abstract_Knowledge_Expression;
+import static org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevelSeries.Concrete_Knowledge_Expression;
+import static org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevelSeries.Serialized_Knowledge_Expression;
 
 import edu.mayo.kmdp.language.DeserializeApiOperator;
 import edu.mayo.kmdp.language.parsers.Lifter;
 import edu.mayo.kmdp.util.PropertiesUtil;
-import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevel;
-import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguage;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -37,13 +35,17 @@ import java.util.UUID;
 import javax.inject.Named;
 import org.apache.jena.query.ParameterizedSparqlString;
 import org.apache.jena.query.Query;
-import org.omg.spec.api4kp._1_0.Answer;
-import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
-import org.omg.spec.api4kp._1_0.id.SemanticIdentifier;
-import org.omg.spec.api4kp._1_0.services.KPOperation;
-import org.omg.spec.api4kp._1_0.services.KPSupport;
-import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
-import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
+import org.omg.spec.api4kp._20200801.Answer;
+import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
+import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
+import org.omg.spec.api4kp._20200801.services.KPOperation;
+import org.omg.spec.api4kp._20200801.services.KPSupport;
+import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
+import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
+import org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
+import org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevel;
+
+;
 
 @Named
 @KPOperation(Lifting_Task)
@@ -67,23 +69,23 @@ public class SparqlLifter
     //TODO should check for consistency between source level and targetLevel;
 
     switch (parsingLevel.asEnum()) {
-      case Concrete_Knowledge_Expression:
+      case Serialized_Knowledge_Expression:
         switch (knowledgeCarrier.getLevel().asEnum()) {
           case Encoded_Knowledge_Expression:
             return Answer.of(innerDecode(knowledgeCarrier, props));
           default:
             return Answer.unsupported();
         }
-      case Parsed_Knowedge_Expression:
+      case Concrete_Knowledge_Expression:
         switch (knowledgeCarrier.getLevel().asEnum()) {
           case Encoded_Knowledge_Expression:
             return Answer.of(
                 innerDecode(knowledgeCarrier, props)
                 .flatMap( str -> innerDeserialize(str, props)));
-          case Concrete_Knowledge_Expression:
+          case Serialized_Knowledge_Expression:
             return Answer.of(
                 innerDeserialize(knowledgeCarrier, props));
-          case Parsed_Knowedge_Expression:
+          case Concrete_Knowledge_Expression:
             return Answer.of(knowledgeCarrier);
           default:
             return Answer.unsupported();
@@ -94,10 +96,10 @@ public class SparqlLifter
             return Answer.of(
                 innerDecode(knowledgeCarrier, props)
                     .flatMap(str -> innerParse(str, props)));
-          case Concrete_Knowledge_Expression:
+          case Serialized_Knowledge_Expression:
             return Answer.of(
                 innerParse(knowledgeCarrier, props));
-          case Parsed_Knowedge_Expression:
+          case Concrete_Knowledge_Expression:
             return Answer.of(innerAbstract(knowledgeCarrier, props));
           default:
             return Answer.of(knowledgeCarrier);
@@ -130,7 +132,7 @@ public class SparqlLifter
         .orElseThrow(UnsupportedOperationException::new);
     return Optional.of(
         DeserializeApiOperator
-            .newVerticalCarrier(carrier, Concrete_Knowledge_Expression, rep(SPARQL_1_1,TXT), sparql));
+            .newVerticalCarrier(carrier, Serialized_Knowledge_Expression, rep(SPARQL_1_1,TXT), sparql));
   }
 
   @Override
@@ -140,7 +142,7 @@ public class SparqlLifter
         .orElseThrow(UnsupportedOperationException::new);
     return Optional.of(
         DeserializeApiOperator
-            .newVerticalCarrier(carrier, Parsed_Knowedge_Expression, rep(SPARQL_1_1), sparql));
+            .newVerticalCarrier(carrier, Concrete_Knowledge_Expression, rep(SPARQL_1_1), sparql));
   }
 
   @Override

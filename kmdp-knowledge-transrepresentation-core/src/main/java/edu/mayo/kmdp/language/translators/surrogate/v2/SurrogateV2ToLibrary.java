@@ -1,7 +1,7 @@
 package edu.mayo.kmdp.language.translators.surrogate.v2;
 
 import org.hl7.fhir.dstu3.model.Library;
-import edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset;
+import org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset;
 
 public class SurrogateV2ToLibrary {
 

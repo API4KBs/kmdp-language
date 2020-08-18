@@ -1,20 +1,22 @@
 package edu.mayo.kmdp.language;
 
-import static org.omg.spec.api4kp._1_0.AbstractCarrier.of;
-import static org.omg.spec.api4kp._1_0.AbstractCarrier.ofAst;
-import static org.omg.spec.api4kp._1_0.AbstractCarrier.ofTree;
-import static org.omg.spec.api4kp._1_0.contrastors.SyntacticRepresentationContrastor.theRepContrastor;
+import static org.omg.spec.api4kp._20200801.AbstractCarrier.of;
+import static org.omg.spec.api4kp._20200801.AbstractCarrier.ofAst;
+import static org.omg.spec.api4kp._20200801.AbstractCarrier.ofTree;
+import static org.omg.spec.api4kp._20200801.contrastors.SyntacticRepresentationContrastor.theRepContrastor;
 
-import edu.mayo.kmdp.tranx.v4.server.DeserializeApiInternal;
 import edu.mayo.kmdp.util.Util;
-import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevel;
 import java.util.List;
-import org.omg.spec.api4kp._1_0.KnowledgePlatformOperator;
-import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
-import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
-import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
-import org.omg.spec.api4kp._1_0.services.tranx.DeserializationOperator;
-import org.omg.spec.api4kp._1_0.services.tranx.ModelMIMECoder;
+import org.omg.spec.api4kp._20200801.KnowledgePlatformOperator;
+import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.DeserializeApiInternal;
+import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
+import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
+import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
+import org.omg.spec.api4kp._20200801.services.transrepresentation.DeserializationOperator;
+import org.omg.spec.api4kp._20200801.services.transrepresentation.ModelMIMECoder;
+import org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevel;
+
+;
 
 public interface DeserializeApiOperator
     extends DeserializeApiInternal.Operator, KnowledgePlatformOperator<DeserializationOperator> {
@@ -65,10 +67,10 @@ public interface DeserializeApiOperator
       case Abstract_Knowledge_Expression:
         newCarrier = ofAst(targetArtifact);
         break;
-      case Parsed_Knowedge_Expression:
+      case Concrete_Knowledge_Expression:
         newCarrier = ofTree(targetArtifact);
         break;
-      case Concrete_Knowledge_Expression:
+      case Serialized_Knowledge_Expression:
         newCarrier = of(targetArtifact.toString());
         break;
       case Encoded_Knowledge_Expression:

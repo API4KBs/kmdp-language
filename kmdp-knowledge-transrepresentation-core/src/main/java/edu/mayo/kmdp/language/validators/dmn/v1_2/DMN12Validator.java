@@ -1,15 +1,12 @@
 package edu.mayo.kmdp.language.validators.dmn.v1_2;
 
-import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Well_Formedness_Check_Task;
-import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.XML_1_1;
-import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.DMN_1_2;
-import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
+import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
+import static org.omg.spec.api4kp.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Well_Formedness_Check_Task;
+import static org.omg.spec.api4kp.taxonomy.krformat.SerializationFormatSeries.XML_1_1;
+import static org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.DMN_1_2;
 
 import edu.mayo.kmdp.language.ValidateApiOperator;
-import edu.mayo.kmdp.tranx.v4.server.ValidateApiInternal._applyNamedValidate;
-import edu.mayo.kmdp.tranx.v4.server.ValidateApiInternal._applyValidate;
 import edu.mayo.kmdp.util.XMLUtil;
-import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguage;
 import java.io.ByteArrayInputStream;
 import java.util.Arrays;
 import java.util.List;
@@ -17,13 +14,16 @@ import java.util.UUID;
 import javax.inject.Named;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
-import org.omg.spec.api4kp._1_0.Answer;
-import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
-import org.omg.spec.api4kp._1_0.id.SemanticIdentifier;
-import org.omg.spec.api4kp._1_0.services.KPOperation;
-import org.omg.spec.api4kp._1_0.services.KPSupport;
-import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
-import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
+import org.omg.spec.api4kp._20200801.Answer;
+import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.ValidateApiInternal._applyNamedValidate;
+import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.ValidateApiInternal._applyValidate;
+import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
+import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
+import org.omg.spec.api4kp._20200801.services.KPOperation;
+import org.omg.spec.api4kp._20200801.services.KPSupport;
+import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
+import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
+import org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
 import org.omg.spec.dmn._20180521.model.TDefinitions;
 import org.w3c.dom.Document;
 
@@ -69,9 +69,9 @@ public class DMN12Validator
     switch (sourceArtifact.getLevel().asEnum()) {
       case Abstract_Knowledge_Expression:
         return validateAST(sourceArtifact.getExpression(),dmn12Schema);
-      case Parsed_Knowedge_Expression:
-        return validateTree(sourceArtifact.getExpression(),dmn12Schema);
       case Concrete_Knowledge_Expression:
+        return validateTree(sourceArtifact.getExpression(),dmn12Schema);
+      case Serialized_Knowledge_Expression:
         return sourceArtifact.asString()
             .map(str -> validateString(str, dmn12Schema))
             .orElse(false);

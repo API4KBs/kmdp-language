@@ -15,16 +15,16 @@
  */
 package edu.mayo.kmdp.language.parsers;
 
-import edu.mayo.kmdp.tranx.v4.server.DeserializeApiInternal._applyLower;
-import edu.mayo.kmdp.tranx.v4.server.DeserializeApiInternal._applyNamedLower;
-import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevel;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.UUID;
-import org.omg.spec.api4kp._1_0.Answer;
-import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
-import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
-import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
+import org.omg.spec.api4kp._20200801.Answer;
+import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.DeserializeApiInternal._applyLower;
+import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.DeserializeApiInternal._applyNamedLower;
+import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
+import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
+import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
+import org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevel;
 
 public interface Lowerer extends _applyLower, _applyNamedLower {
 

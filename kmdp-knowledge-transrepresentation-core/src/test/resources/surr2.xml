@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <ns5:knowledgeAsset
-  xmlns:ns5="http://kmdp.mayo.edu/metadata/v2/surrogate"
+  xmlns:ns5="https://www.omg.org/spec/API4KP/20200801/surrogate"
 >
 </ns5:knowledgeAsset>

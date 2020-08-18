@@ -1,8 +1,8 @@
 package edu.mayo.kmdp.language.translators.surrogate.v1;
 
-import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
+import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
 
-import edu.mayo.kmdp.SurrogateHelper;
+import edu.mayo.kmdp.id.helper.DatatypeHelper;
 import edu.mayo.kmdp.metadata.annotations.SimpleAnnotation;
 import edu.mayo.kmdp.metadata.annotations.SimpleApplicability;
 import edu.mayo.kmdp.metadata.surrogate.Association;
@@ -17,12 +17,23 @@ import edu.mayo.kmdp.metadata.surrogate.Representation;
 import edu.mayo.kmdp.metadata.surrogate.Version;
 import edu.mayo.kmdp.registry.Registry;
 import edu.mayo.kmdp.util.StreamUtil;
-import edu.mayo.ontology.taxonomies.kao.publishingrole.PublishingRoleSeries;
+import edu.mayo.kmdp.util.URIUtil;
+import edu.mayo.ontology.taxonomies.kao.knowledgeassettype.KnowledgeAssetType;
 import edu.mayo.ontology.taxonomies.kao.rel.relatedversiontype.RelatedVersionTypeSeries;
 import edu.mayo.ontology.taxonomies.kmdo.annotationreltype.AnnotationRelType;
 import edu.mayo.ontology.taxonomies.kmdo.annotationreltype.AnnotationRelTypeSeries;
+import edu.mayo.ontology.taxonomies.kmdo.publishingrole.PublishingRoleSeries;
+import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;
+import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguage;
+import edu.mayo.ontology.taxonomies.krprofile.KnowledgeRepresentationLanguageProfile;
+import edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentationLanguageSerialization;
+import edu.mayo.ontology.taxonomies.lexicon.Lexicon;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.hl7.fhir.dstu3.model.Attachment;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -39,7 +50,7 @@ import org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType;
 import org.omg.spec.api4kp._1_0.identifiers.ConceptIdentifier;
 import org.omg.spec.api4kp._1_0.identifiers.NamespaceIdentifier;
 import org.omg.spec.api4kp._1_0.identifiers.URIIdentifier;
-import org.omg.spec.api4kp._1_0.services.tranx.ModelMIMECoder;
+import org.omg.spec.api4kp._20200801.services.transrepresentation.ModelMIMECoder;
 
 public class SurrogateToLibrary {
 
@@ -47,14 +58,14 @@ public class SurrogateToLibrary {
   public Library transform(KnowledgeAsset knowledgeAsset) {
     Library lib = new Library();
 
-    mapSurrogateId(knowledgeAsset,lib);
-    mapIdentifier(knowledgeAsset,lib);
-    mapDescriptive(knowledgeAsset,lib);
+    mapSurrogateId(knowledgeAsset, lib);
+    mapIdentifier(knowledgeAsset, lib);
+    mapDescriptive(knowledgeAsset, lib);
 
-    mapType(knowledgeAsset,lib);
+    mapType(knowledgeAsset, lib);
 
-    mapPublicationStatus(knowledgeAsset,lib);
-    mapLifecycle(knowledgeAsset,lib);
+    mapPublicationStatus(knowledgeAsset, lib);
+    mapLifecycle(knowledgeAsset, lib);
 
     // FHIR and KMDP deal with applicability / domain semantics
     // in a similar but not directly compatible way.
@@ -62,20 +73,20 @@ public class SurrogateToLibrary {
     mapIntentAndApplicability(knowledgeAsset, lib);
     mapUseContext(knowledgeAsset, lib);
 
-    mapPolicies(knowledgeAsset,lib);
+    mapPolicies(knowledgeAsset, lib);
 
     mapTopics(knowledgeAsset, lib);
 
     mapContributors(knowledgeAsset, lib);
 
     mapRelateds(knowledgeAsset, lib);
-    mapBiblio(knowledgeAsset,lib);
+    mapBiblio(knowledgeAsset, lib);
 
     // in KMDP data dependencies are 'semantic', i.e. defined just in terms of a concept
     // The service "Concept Glossary Library' allows to map concepts to data definitions,
     // including FHIR profiles, etc..
     // This 'weaving' happens at a later stage, after the Library has been translated into
-    mapDataRequirements(knowledgeAsset,lib);
+    mapDataRequirements(knowledgeAsset, lib);
 
     // For each artifact, map it..
     knowledgeAsset.getCarriers().stream()
@@ -91,7 +102,7 @@ public class SurrogateToLibrary {
     // (Version) URI are supposed to be dereferenceable
     artifact.setUrl(cka.getArtifactId().getVersionId().toString());
 
-    if (! cka.getLocalization().isEmpty()) {
+    if (!cka.getLocalization().isEmpty()) {
       artifact.setLanguage(cka.getLocalization().get(0).getTag());
     }
 
@@ -100,8 +111,15 @@ public class SurrogateToLibrary {
     if (cka.getRepresentation() != null) {
       Representation r = cka.getRepresentation();
       artifact.setContentType(ModelMIMECoder.encode(
-          rep(r.getLanguage(), r.getProfile(), r.getSerialization(), r.getFormat(),
-              null, null, r.getLexicon())));
+          rep(
+              mapLanguage(r.getLanguage()),
+              mapProfile(r.getProfile()),
+              mapSerialization(r.getSerialization()),
+              mapFormat(r.getFormat()),
+              null,
+              null,
+              mapLexicon(r.getLexicon())
+          )));
     }
 
     if (cka.getLifecycle() != null) {
@@ -115,10 +133,59 @@ public class SurrogateToLibrary {
     return artifact;
   }
 
+  private org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguage mapLanguage(
+      KnowledgeRepresentationLanguage language) {
+    if (language == null) {
+      return null;
+    }
+    return org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries
+        .resolveUUID(language.getUuid()).orElse(null);
+  }
+
+  private org.omg.spec.api4kp.taxonomy.krprofile.KnowledgeRepresentationLanguageProfile mapProfile(
+      KnowledgeRepresentationLanguageProfile profile) {
+    if (profile == null) {
+      return null;
+    }
+    return org.omg.spec.api4kp.taxonomy.krprofile.KnowledgeRepresentationLanguageProfileSeries
+        .resolveUUID(profile.getUuid()).orElse(null);
+  }
+
+  private org.omg.spec.api4kp.taxonomy.krserialization.KnowledgeRepresentationLanguageSerialization mapSerialization(
+      KnowledgeRepresentationLanguageSerialization serialization) {
+    if (serialization == null) {
+      return null;
+    }
+    return org.omg.spec.api4kp.taxonomy.krserialization.KnowledgeRepresentationLanguageSerializationSeries
+        .resolveUUID(serialization.getUuid()).orElse(null);
+  }
+
+  private org.omg.spec.api4kp.taxonomy.krformat.SerializationFormat mapFormat(
+      SerializationFormat format) {
+    if (format == null) {
+      return null;
+    }
+    return org.omg.spec.api4kp.taxonomy.krformat.SerializationFormatSeries
+        .resolveUUID(format.getUuid()).orElse(null);
+  }
+
+  private List<org.omg.spec.api4kp.taxonomy.lexicon.Lexicon> mapLexicon(
+      Collection<Lexicon> lexicaList) {
+    if (lexicaList == null || lexicaList.isEmpty()) {
+      return Collections.emptyList();
+    }
+    return lexicaList.stream()
+        .map(lexicon -> org.omg.spec.api4kp.taxonomy.lexicon.LexiconSeries
+            .resolveUUID(lexicon.getUuid()).orElse(null))
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList());
+  }
+
+
   private void mapDataRequirements(KnowledgeAsset knowledgeAsset, Library lib) {
     knowledgeAsset.getSubject().stream()
         .flatMap(StreamUtil.filterAs(SimpleAnnotation.class))
-        .forEach(ann -> mapInputAnnotations(ann,lib));
+        .forEach(ann -> mapInputAnnotations(ann, lib));
   }
 
   private void mapInputAnnotations(SimpleAnnotation ann, Library lib) {
@@ -169,9 +236,9 @@ public class SurrogateToLibrary {
     }
     if (assoc instanceof Version) {
       Version v = (Version) assoc;
-      if (RelatedVersionTypeSeries.Has_Prior_Version.sameAs(v.getRel())
-          || RelatedVersionTypeSeries.Has_Previous_Version.sameAs(v.getRel())
-          || RelatedVersionTypeSeries.Has_Original.sameAs(v.getRel())
+      if (RelatedVersionTypeSeries.Has_Prior_Version.getUuid().equals(v.getRel().getUuid())
+          || RelatedVersionTypeSeries.Has_Previous_Version.getUuid().equals(v.getRel().getUuid())
+          || RelatedVersionTypeSeries.Has_Original.getUuid().equals(v.getRel().getUuid())
       ) {
         return RelatedArtifactType.SUCCESSOR;
       } else {
@@ -187,7 +254,8 @@ public class SurrogateToLibrary {
     // name or reference?
     // what about all the other various roles?
     pub.getAssociatedTo().stream()
-        .filter(party -> PublishingRoleSeries.Contributor.sameAs(party.getPublishingRole()))
+        .filter(party -> PublishingRoleSeries.Contributor.getUuid()
+            .equals(party.getPublishingRole().getUuid()))
         .forEach(contri -> lib.getContributor().add(
             new Contributor()
                 .setName(contri.getIdentifier().getUri().toString())));
@@ -196,11 +264,12 @@ public class SurrogateToLibrary {
   private void mapTopics(KnowledgeAsset knowledgeAsset, Library lib) {
     knowledgeAsset.getSubject().stream()
         .flatMap(StreamUtil.filterAs(SimpleAnnotation.class))
-        .forEach(ann -> mapSubjectAnnotation(ann,lib));
+        .forEach(ann -> mapSubjectAnnotation(ann, lib));
   }
 
   private void mapSubjectAnnotation(SimpleAnnotation ann, Library lib) {
-    Optional<AnnotationRelType> rel = AnnotationRelTypeSeries.resolveUUID(ann.getRel().getConceptUUID());
+    Optional<AnnotationRelType> rel = AnnotationRelTypeSeries
+        .resolveUUID(ann.getRel().getConceptUUID());
     if (rel.isPresent()) {
       switch (rel.get().asEnum()) {
         case Has_Primary_Subject:
@@ -223,11 +292,12 @@ public class SurrogateToLibrary {
   private void mapUseContext(KnowledgeAsset knowledgeAsset, Library lib) {
     knowledgeAsset.getSubject().stream()
         .flatMap(StreamUtil.filterAs(SimpleAnnotation.class))
-        .forEach(ann -> mapUsageAnnotation(ann,lib));
+        .forEach(ann -> mapUsageAnnotation(ann, lib));
   }
 
   private void mapUsageAnnotation(SimpleAnnotation ann, Library lib) {
-    Optional<AnnotationRelType> rel = AnnotationRelTypeSeries.resolveUUID(ann.getRel().getConceptUUID());
+    Optional<AnnotationRelType> rel = AnnotationRelTypeSeries
+        .resolveUUID(ann.getRel().getConceptUUID());
     if (rel.isPresent()) {
       // Mayo has some annotations for 'Usage Context', but they are not yet implemented in KMDP
     }
@@ -254,16 +324,17 @@ public class SurrogateToLibrary {
 
     // by name or identifier?
     pub.getAssociatedTo().stream()
-        .filter(party -> PublishingRoleSeries.Publisher.sameAs(party.getPublishingRole()))
+        .filter(party -> PublishingRoleSeries.Publisher.getUuid()
+            .equals(party.getPublishingRole().getUuid()))
         .findFirst()
         .ifPresent(publisher -> lib.setPublisher(publisher.getIdentifier().getUri().toString()));
 
     // Are these the right mapping?
     if (pub.getIssuedOn() != null) {
-      lib.setApprovalDate(pub.getIssuedOn().toGregorianCalendar().getTime());
+      lib.setApprovalDate(pub.getIssuedOn());
     }
     if (pub.getLastReviewedOn() != null) {
-      lib.setLastReviewDate(pub.getLastReviewedOn().toGregorianCalendar().getTime());
+      lib.setLastReviewDate(pub.getLastReviewedOn());
     }
   }
 
@@ -272,8 +343,8 @@ public class SurrogateToLibrary {
       return;
     }
     // No more than one type is supported..
-    lib.setType(toCode(
-        SurrogateHelper.toLegacyConceptIdentifier(knowledgeAsset.getFormalType().get(0))));
+    KnowledgeAssetType type0 = knowledgeAsset.getFormalType().get(0);
+    lib.setType(toCode(type0.asConcept()));
   }
 
 
@@ -313,13 +384,13 @@ public class SurrogateToLibrary {
     }
     URIIdentifier vid = knowledgeAsset.getAssetId();
     Identifier assetId = new Identifier()
-        .setValue(SurrogateHelper.getTag(vid))
+        .setValue(getTag(vid))
         .setSystem(Registry.MAYO_ASSETS_BASE_URI)
         .setPeriod(new Period().setStart(knowledgeAsset.getAssetId().getEstablishedOn()))
         .setUse(IdentifierUse.OFFICIAL);
 
     lib.setIdentifier(Collections.singletonList(assetId));
-    lib.setVersion(SurrogateHelper.getVersionTag(vid));
+    lib.setVersion(getVersionTag(vid));
   }
 
   private void mapSurrogateId(KnowledgeAsset knowledgeAsset, Library lib) {
@@ -328,7 +399,7 @@ public class SurrogateToLibrary {
     }
     KnowledgeArtifact surrogate = knowledgeAsset.getSurrogate().get(0);
     if (surrogate != null) {
-      lib.setId(SurrogateHelper.getTag(surrogate.getArtifactId()) + ":" + SurrogateHelper.getVersionTag(surrogate.getArtifactId()));
+      lib.setId(getTag(surrogate.getArtifactId()) + ":" + getVersionTag(surrogate.getArtifactId()));
       lib.setUrl(surrogate.getArtifactId().getVersionId().toString());
     }
   }
@@ -341,12 +412,42 @@ public class SurrogateToLibrary {
                 .setCode(cid.getTag())
                 .setDisplay(cid.getLabel())
                 .setSystem(cid.getNamespace() != null
-                    ? ((NamespaceIdentifier)cid.getNamespace()).getId().toString()
+                    ? cid.getNamespace().getId().toString()
                     : null)
                 .setVersion(cid.getNamespace() != null
-                    ? ((NamespaceIdentifier)cid.getNamespace()).getVersion()
+                    ? cid.getNamespace().getVersion()
                     : null)));
   }
 
 
+  public static ConceptIdentifier toLegacyConceptIdentifier(
+      org.omg.spec.api4kp._20200801.id.ConceptIdentifier cId) {
+
+    org.omg.spec.api4kp._20200801.id.ResourceIdentifier nsId = org.omg.spec.api4kp._20200801.id.SemanticIdentifier
+        .newNamespaceId(cId.getNamespaceUri());
+
+    return new ConceptIdentifier()
+        .withConceptId(cId.getResourceId())
+        .withTag(cId.getTag())
+        .withLabel(cId.getName())
+        .withRef(cId.getReferentId())
+        .withConceptUUID(cId.getUuid())
+        .withNamespace(
+            new NamespaceIdentifier()
+                .withId(nsId.getResourceId())
+                .withLabel(nsId.getName())
+                .withTag(nsId.getTag())
+                .withVersion(cId.getVersionTag())
+                .withEstablishedOn(nsId.getEstablishedOn())
+        );
+  }
+
+
+  private static String getTag(URIIdentifier id) {
+    return URIUtil.detectLocalName(id.getUri());
+  }
+
+  private static String getVersionTag(URIIdentifier id) {
+    return DatatypeHelper.toVersionIdentifier(id.getVersionId()).getVersionTag();
+  }
 }

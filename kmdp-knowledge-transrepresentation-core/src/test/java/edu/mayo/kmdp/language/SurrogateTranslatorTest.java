@@ -1,13 +1,13 @@
 package edu.mayo.kmdp.language;
 
-import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate;
-import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate_2_0;
+import static org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate;
+import static org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate_2_0;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
-import static org.omg.spec.api4kp._1_0.services.tranx.ModelMIMECoder.encode;
+import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
+import static org.omg.spec.api4kp._20200801.services.transrepresentation.ModelMIMECoder.encode;
 
 import edu.mayo.kmdp.SurrogateHelper;
 import edu.mayo.kmdp.language.translators.surrogate.v1.SurrogateV1ToSurrogateV2Translator;
@@ -21,11 +21,12 @@ import java.util.UUID;
 import java.util.function.Function;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.omg.spec.api4kp._1_0.AbstractCarrier;
-import org.omg.spec.api4kp._1_0.Answer;
-import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
-import org.omg.spec.api4kp._1_0.services.CompositeKnowledgeCarrier;
-import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
+import org.omg.spec.api4kp._20200801.AbstractCarrier;
+import org.omg.spec.api4kp._20200801.Answer;
+import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
+import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
+import org.omg.spec.api4kp._20200801.services.CompositeKnowledgeCarrier;
+import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
 
 public class SurrogateTranslatorTest {
 
@@ -37,11 +38,9 @@ public class SurrogateTranslatorTest {
     KnowledgeCarrier knowledgeCarrier =
         translateKnowledgeAssetToSurrogateV2().orElseGet(Assertions::fail);
     assertTrue(knowledgeCarrier instanceof CompositeKnowledgeCarrier);
-
-    edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset surrogateV2 =
-        knowledgeCarrier
-            .mainComponent()
-            .as(edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset.class)
+    org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset surrogateV2 =
+        knowledgeCarrier.mainComponent()
+            .as(org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset.class)
             .orElseGet(Assertions::fail);
 
     assertNotNull(surrogateV2.getAssetId());
@@ -71,13 +70,17 @@ public class SurrogateTranslatorTest {
   }
 
   Answer<KnowledgeCarrier> translateKnowledgeAssetToSurrogateV2() {
-    return Answer.of(
-            AbstractCarrier.ofAst(meta)
-                .withAssetId(DatatypeHelper.toSemanticIdentifier(meta.getAssetId()))
-                .withRepresentation(rep(Knowledge_Asset_Surrogate)))
-        .flatMap(
-            kc ->
-                v1ToV2Translator.try_applyTransrepresent(
-                    kc, encode(rep(Knowledge_Asset_Surrogate_2_0)), null));
+
+    return Answer.of(AbstractCarrier.ofAst(meta)
+        .withAssetId(fromURIIdentifier(meta.getAssetId()))
+        .withRepresentation(rep(Knowledge_Asset_Surrogate)))
+        .flatMap(kc -> v1ToV2Translator
+            .try_applyTransrepresent(kc, encode(rep(Knowledge_Asset_Surrogate_2_0)), null));
+  }
+
+  private ResourceIdentifier fromURIIdentifier(URIIdentifier assetId) {
+    return assetId.getVersionId() != null
+        ? SemanticIdentifier.newVersionId(assetId.getVersionId())
+        : SemanticIdentifier.newId(assetId.getUri());
   }
 }

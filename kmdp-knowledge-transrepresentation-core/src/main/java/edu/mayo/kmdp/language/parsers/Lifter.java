@@ -15,15 +15,16 @@
  */
 package edu.mayo.kmdp.language.parsers;
 
-import edu.mayo.kmdp.tranx.v4.server.DeserializeApiInternal._applyLift;
-import edu.mayo.kmdp.tranx.v4.server.DeserializeApiInternal._applyNamedLift;
-import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevel;
+;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.UUID;
-import org.omg.spec.api4kp._1_0.Answer;
-import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
-import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
+import org.omg.spec.api4kp._20200801.Answer;
+import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.DeserializeApiInternal._applyLift;
+import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.DeserializeApiInternal._applyNamedLift;
+import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
+import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
+import org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevel;
 
 public interface Lifter extends _applyLift, _applyNamedLift {
 
@@ -40,24 +41,24 @@ public interface Lifter extends _applyLift, _applyNamedLift {
 
   /**
    * Lifts a binary-encoded expression (byte[])
-   * into a concrete expression (String)
+   * into an serialized expression (String)
    *
-   * @see Lowerer#innerEncode(KnowledgeCarrier)
+   * @see Lowerer#innerEncode(KnowledgeCarrier, Properties)
    * @param carrier A binary carrier
    * @return A string carrier
    */
   Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier, Properties config);
 
   /**
-   * Lifts a concrete expression (String)
-   * into a parsed expression (parse tree)
+   * Lifts a serialized expression (String)
+   * into a concrete expression (parse tree)
    * @param carrier A string carrier
    * @return A parse tree carrier
    */
   Optional<KnowledgeCarrier> innerDeserialize(KnowledgeCarrier carrier, Properties config);
 
   /**
-   * Lifts a concrete expression (String)
+   * Lifts a serialized expression (String)
    * into an abstract expression (abstract syntax tree)
    * @param carrier A string carrier
    * @return An abstract syntax tree carrier
@@ -66,7 +67,7 @@ public interface Lifter extends _applyLift, _applyNamedLift {
 
 
   /**
-   * Lifts a parsed expression (parse tree)
+   * Lifts a concrete expression (parse tree)
    * into an abstract expression (abstract syntax tree)
    * @param carrier A parse tree carrier
    * @return An abstract syntax tree carrier

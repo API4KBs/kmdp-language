@@ -1,22 +1,21 @@
 package edu.mayo.kmdp.language.translators;
 
-import static edu.mayo.kmdp.comparator.Contrastor.isNarrowerOrEqual;
-import static org.omg.spec.api4kp._1_0.contrastors.SyntacticRepresentationContrastor.theRepContrastor;
+import static org.omg.spec.api4kp._20200801.contrastors.SyntacticRepresentationContrastor.theRepContrastor;
 
 import edu.mayo.kmdp.language.TransionApiOperator;
-import edu.mayo.kmdp.tranx.v4.server.TransxionApiInternal._applyNamedTransrepresent;
-import edu.mayo.kmdp.tranx.v4.server.TransxionApiInternal._applyTransrepresent;
 import edu.mayo.kmdp.util.PropertiesUtil;
 import edu.mayo.kmdp.util.Util;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.UUID;
-import org.omg.spec.api4kp._1_0.Answer;
-import org.omg.spec.api4kp._1_0.contrastors.ParsingLevelContrastor;
-import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
-import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
-import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
-import org.omg.spec.api4kp._1_0.services.tranx.ModelMIMECoder;
+import org.omg.spec.api4kp._20200801.Answer;
+import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.TransxionApiInternal._applyNamedTransrepresent;
+import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.TransxionApiInternal._applyTransrepresent;
+import org.omg.spec.api4kp._20200801.contrastors.ParsingLevelContrastor;
+import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
+import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
+import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
+import org.omg.spec.api4kp._20200801.services.transrepresentation.ModelMIMECoder;
 
 public abstract class AbstractSimpleTranslator<S,T>
     implements TransionApiOperator, _applyTransrepresent, _applyNamedTransrepresent {
@@ -76,12 +75,12 @@ public abstract class AbstractSimpleTranslator<S,T>
             .flatMap(bytes -> transformBinary(src.getAssetId(), bytes, tgtRep, config))
             .map(out -> wrap(
                 tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getArtifactId())));
-      case Concrete_Knowledge_Expression:
+      case Serialized_Knowledge_Expression:
         return src.asString()
             .flatMap(str -> transformString(src.getAssetId(), str, tgtRep, config))
             .map(out -> wrap(
                 tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getArtifactId())));
-      case Parsed_Knowedge_Expression:
+      case Concrete_Knowledge_Expression:
         return transformTree(src.getAssetId(), src.getExpression(), tgtRep, config)
             .map(out -> wrap(
                 tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getArtifactId())));

@@ -15,26 +15,26 @@
  */
 package edu.mayo.kmdp.language.parsers;
 
-import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Abstract_Knowledge_Expression;
-import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Concrete_Knowledge_Expression;
-import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Encoded_Knowledge_Expression;
-import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Parsed_Knowedge_Expression;
-import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.JSON;
-import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
+import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import edu.mayo.kmdp.util.JSonUtil;
 import edu.mayo.kmdp.util.Util;
-import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;
-import edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
-import org.omg.spec.api4kp._1_0.AbstractCarrier.Encodings;
-import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
-import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
+import org.omg.spec.api4kp._20200801.AbstractCarrier.Encodings;
+import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
+import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
+import org.omg.spec.api4kp.taxonomy.krformat.SerializationFormat;
+
+import static org.omg.spec.api4kp.taxonomy.krformat.SerializationFormatSeries.JSON;
+import static org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevelSeries.Encoded_Knowledge_Expression;
+import static org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevelSeries.Abstract_Knowledge_Expression;
+import static org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevelSeries.Concrete_Knowledge_Expression;
+import static org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevelSeries.Serialized_Knowledge_Expression;
 
 public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializeOperator {
 
@@ -43,14 +43,14 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializeOper
   @Override
   public Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier, Properties config) {
     return carrier.asString()
-        .map(str -> newVerticalCarrier(carrier, Concrete_Knowledge_Expression, null, str));
+        .map(str -> newVerticalCarrier(carrier, Serialized_Knowledge_Expression, null, str));
   }
 
   @Override
   public Optional<KnowledgeCarrier> innerDeserialize(KnowledgeCarrier carrier, Properties config) {
     return carrier.asString()
         .flatMap(JSonUtil::readJson)
-        .map(json -> newVerticalCarrier(carrier, Parsed_Knowedge_Expression, null, json));
+        .map(json -> newVerticalCarrier(carrier, Concrete_Knowledge_Expression, null, json));
   }
 
   @Override
@@ -82,7 +82,7 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializeOper
     return carrier.as(root)
         .flatMap(JSonUtil::writeJson)
         .flatMap(Util::asString)
-        .map(str -> newVerticalCarrier(carrier, Concrete_Knowledge_Expression, into, str));
+        .map(str -> newVerticalCarrier(carrier, Serialized_Knowledge_Expression, into, str));
   }
 
   @Override
@@ -90,7 +90,7 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializeOper
       SyntacticRepresentation into, Properties config) {
     return carrier.as(JsonNode.class)
         .map(JsonNode::toString)
-        .map(str -> newVerticalCarrier(carrier, Concrete_Knowledge_Expression, into, str));
+        .map(str -> newVerticalCarrier(carrier, Serialized_Knowledge_Expression, into, str));
   }
 
   @Override
@@ -98,7 +98,7 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializeOper
       SyntacticRepresentation into, Properties config) {
     return carrier.as(root)
         .flatMap(JSonUtil::toJsonNode)
-        .map(json -> newVerticalCarrier(carrier, Parsed_Knowedge_Expression, into, json));
+        .map(json -> newVerticalCarrier(carrier, Concrete_Knowledge_Expression, into, json));
   }
 
 
@@ -113,7 +113,7 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializeOper
 
   @Override
   public SerializationFormat getDefaultFormat() {
-    return SerializationFormatSeries.JSON;
+    return JSON;
   }
 
 }

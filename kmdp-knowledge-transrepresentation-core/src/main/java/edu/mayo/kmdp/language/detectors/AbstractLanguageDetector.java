@@ -1,17 +1,17 @@
 package edu.mayo.kmdp.language.detectors;
 
-import static org.omg.spec.api4kp._1_0.contrastors.SyntacticRepresentationContrastor.theRepContrastor;
+import static org.omg.spec.api4kp._20200801.contrastors.SyntacticRepresentationContrastor.theRepContrastor;
 
 import edu.mayo.kmdp.language.DetectApiOperator;
-import edu.mayo.kmdp.tranx.v4.server.DetectApiInternal._applyDetect;
-import edu.mayo.kmdp.tranx.v4.server.DetectApiInternal._applyNamedDetect;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.omg.spec.api4kp._1_0.Answer;
-import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
-import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
-import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
+import org.omg.spec.api4kp._20200801.Answer;
+import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.DetectApiInternal._applyDetect;
+import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.DetectApiInternal._applyNamedDetect;
+import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
+import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
+import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
 
 public abstract class AbstractLanguageDetector
     implements DetectApiOperator, _applyDetect, _applyNamedDetect {
@@ -45,9 +45,9 @@ public abstract class AbstractLanguageDetector
     switch (sourceArtifact.getLevel().asEnum()) {
       case Encoded_Knowledge_Expression:
         return sourceArtifact.asBinary().flatMap(this::detectBinary);
-      case Concrete_Knowledge_Expression:
+      case Serialized_Knowledge_Expression:
         return sourceArtifact.asString().flatMap(this::detectString);
-      case Parsed_Knowedge_Expression:
+      case Concrete_Knowledge_Expression:
         return detectTree(sourceArtifact.getExpression());
       case Abstract_Knowledge_Expression:
         return detectAST(sourceArtifact.getExpression());

@@ -16,25 +16,26 @@
 package edu.mayo.kmdp.language.parsers;
 
 
-import static org.omg.spec.api4kp._1_0.contrastors.SyntacticRepresentationContrastor.theRepContrastor;
+import static org.omg.spec.api4kp._20200801.contrastors.SyntacticRepresentationContrastor.theRepContrastor;
+import static org.omg.spec.api4kp.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Lifting_Task;
+import static org.omg.spec.api4kp.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Lowering_Task;
 
 import edu.mayo.kmdp.util.StreamUtil;
 import edu.mayo.kmdp.util.TriFunction;
-import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
-import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.function.Predicate;
 import javax.inject.Named;
-import org.omg.spec.api4kp._1_0.services.KPOperation;
-import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
-import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
+import org.omg.spec.api4kp._20200801.services.KPOperation;
+import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
+import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
+import org.omg.spec.api4kp.taxonomy.krformat.SerializationFormat;
 
 @Named
-@KPOperation(KnowledgeProcessingOperationSeries.Lowering_Task)
-@KPOperation(KnowledgeProcessingOperationSeries.Lifting_Task)
+@KPOperation(Lowering_Task)
+@KPOperation(Lifting_Task)
 public abstract class MultiFormatParser<T> extends AbstractDeSerializeOperator {
 
   private List<AbstractDeSerializeOperator> parserSet;

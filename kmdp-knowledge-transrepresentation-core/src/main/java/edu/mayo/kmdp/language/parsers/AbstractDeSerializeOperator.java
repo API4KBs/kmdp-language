@@ -13,29 +13,25 @@
  */
 package edu.mayo.kmdp.language.parsers;
 
-import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Abstract_Knowledge_Expression;
-import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Concrete_Knowledge_Expression;
-import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Encoded_Knowledge_Expression;
-import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Parsed_Knowedge_Expression;
-import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
-import static org.omg.spec.api4kp._1_0.contrastors.ParsingLevelContrastor.detectLevel;
-import static org.omg.spec.api4kp._1_0.contrastors.ParsingLevelContrastor.theLevelContrastor;
+import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
+import static org.omg.spec.api4kp._20200801.contrastors.ParsingLevelContrastor.detectLevel;
+import static org.omg.spec.api4kp._20200801.contrastors.ParsingLevelContrastor.theLevelContrastor;
 
 import edu.mayo.kmdp.language.DeserializeApiOperator;
 import edu.mayo.kmdp.util.PropertiesUtil;
-import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevel;
-import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.function.BiPredicate;
-import org.omg.spec.api4kp._1_0.AbstractCarrier.Encodings;
-import org.omg.spec.api4kp._1_0.Answer;
-import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
-import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
-import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
-import org.omg.spec.api4kp._1_0.services.tranx.ModelMIMECoder;
+import org.omg.spec.api4kp._20200801.AbstractCarrier.Encodings;
+import org.omg.spec.api4kp._20200801.Answer;
+import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
+import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
+import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
+import org.omg.spec.api4kp._20200801.services.transrepresentation.ModelMIMECoder;
+import org.omg.spec.api4kp.taxonomy.krformat.SerializationFormat;
+import org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevel;
 
 /**
  * Abstract class that implements a generic parser/serializer for a Knowledge Representation
@@ -107,12 +103,23 @@ public abstract class AbstractDeSerializeOperator
           case Abstract_Knowledge_Expression:
             return this.innerDecode(sourceArtifact, config)
                 .flatMap(str -> innerParse(str, config));
-          case Parsed_Knowedge_Expression:
+          case Concrete_Knowledge_Expression:
             return this.innerDecode(sourceArtifact, config)
                 .flatMap(str -> innerDeserialize(str, config));
-          case Concrete_Knowledge_Expression:
+          case Serialized_Knowledge_Expression:
             return this.innerDecode(sourceArtifact, config);
           case Encoded_Knowledge_Expression:
+            return Optional.of(sourceArtifact);
+          default:
+            return Optional.empty();
+        }
+      case Serialized_Knowledge_Expression:
+        switch (into.asEnum()) {
+          case Abstract_Knowledge_Expression:
+            return this.innerParse(sourceArtifact, config);
+          case Concrete_Knowledge_Expression:
+            return this.innerDeserialize(sourceArtifact, config);
+          case Serialized_Knowledge_Expression:
             return Optional.of(sourceArtifact);
           default:
             return Optional.empty();
@@ -120,19 +127,8 @@ public abstract class AbstractDeSerializeOperator
       case Concrete_Knowledge_Expression:
         switch (into.asEnum()) {
           case Abstract_Knowledge_Expression:
-            return this.innerParse(sourceArtifact, config);
-          case Parsed_Knowedge_Expression:
-            return this.innerDeserialize(sourceArtifact, config);
-          case Concrete_Knowledge_Expression:
-            return Optional.of(sourceArtifact);
-          default:
-            return Optional.empty();
-        }
-      case Parsed_Knowedge_Expression:
-        switch (into.asEnum()) {
-          case Abstract_Knowledge_Expression:
             return this.innerAbstract(sourceArtifact, config);
-          case Parsed_Knowedge_Expression:
+          case Concrete_Knowledge_Expression:
             return Optional.of(sourceArtifact);
           default:
             return Optional.empty();
@@ -152,9 +148,9 @@ public abstract class AbstractDeSerializeOperator
     switch (sourceArtifact.getLevel().asEnum()) {
       case Abstract_Knowledge_Expression:
         return serializeAST(sourceArtifact, toLevel, into, config);
-      case Parsed_Knowedge_Expression:
-        return serializeDoc(sourceArtifact, toLevel, into, config);
       case Concrete_Knowledge_Expression:
+        return serializeDoc(sourceArtifact, toLevel, into, config);
+      case Serialized_Knowledge_Expression:
         return serializeExpression(sourceArtifact, toLevel, into, config);
       case Encoded_Knowledge_Expression:
       default:
@@ -217,9 +213,9 @@ public abstract class AbstractDeSerializeOperator
   private Optional<KnowledgeCarrier> serializeDoc(KnowledgeCarrier doc, ParsingLevel toLevel,
       SyntacticRepresentation into, Properties config) {
     switch (toLevel.asEnum()) {
-      case Parsed_Knowedge_Expression:
-        return Optional.ofNullable(doc);
       case Concrete_Knowledge_Expression:
+        return Optional.ofNullable(doc);
+      case Serialized_Knowledge_Expression:
         return this.innerSerialize(doc, into, config);
       case Encoded_Knowledge_Expression:
       default:
@@ -233,9 +229,9 @@ public abstract class AbstractDeSerializeOperator
     switch (toLevel.asEnum()) {
       case Abstract_Knowledge_Expression:
         return Optional.ofNullable(ast);
-      case Parsed_Knowedge_Expression:
-        return this.innerConcretize(ast, into, config);
       case Concrete_Knowledge_Expression:
+        return this.innerConcretize(ast, into, config);
+      case Serialized_Knowledge_Expression:
         return this.innerExternalize(ast, into, config);
       case Encoded_Knowledge_Expression:
       default:
@@ -257,12 +253,12 @@ public abstract class AbstractDeSerializeOperator
         rep.setCharset(null);
         rep.setEncoding(null);
         break;
-      case Parsed_Knowedge_Expression:
+      case Concrete_Knowledge_Expression:
         rep.setCharset(null);
         rep.setEncoding(null);
         rep.setSerialization(null);
         break;
-      case Concrete_Knowledge_Expression:
+      case Serialized_Knowledge_Expression:
         rep.setEncoding(null);
         break;
       case Encoded_Knowledge_Expression:
@@ -278,7 +274,7 @@ public abstract class AbstractDeSerializeOperator
     SyntacticRepresentation rep = (SyntacticRepresentation) sourceArtifact.getRepresentation()
         .clone();
     switch (into.asEnum()) {
-      case Concrete_Knowledge_Expression:
+      case Serialized_Knowledge_Expression:
         rep.setEncoding(null);
         if (rep.getFormat() == null) {
           rep.setFormat(getDefaultFormat());
@@ -287,7 +283,7 @@ public abstract class AbstractDeSerializeOperator
           rep.setCharset(getDefaultCharset().name());
         }
         break;
-      case Parsed_Knowedge_Expression:
+      case Concrete_Knowledge_Expression:
         rep.setCharset(null);
         rep.setEncoding(null);
         rep.setSerialization(null);
@@ -340,9 +336,9 @@ public abstract class AbstractDeSerializeOperator
     switch (parsingLevel.asEnum()) {
       case Encoded_Knowledge_Expression:
         return rep(getSupportedLanguage(),getDefaultFormat(),Charset.defaultCharset(), Encodings.DEFAULT);
-      case Concrete_Knowledge_Expression:
+      case Serialized_Knowledge_Expression:
         return rep(getSupportedLanguage(),getDefaultFormat(),Charset.defaultCharset());
-      case Parsed_Knowedge_Expression:
+      case Concrete_Knowledge_Expression:
         return rep(getSupportedLanguage(),getDefaultFormat());
       case Abstract_Knowledge_Expression:
         return rep(getSupportedLanguage());

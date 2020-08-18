@@ -15,31 +15,31 @@
  */
 package edu.mayo.kmdp.language.translators.cmmn.v1_1;
 
-import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Translation_Task;
-import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.CMMN_1_1;
-import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.FHIR_STU3;
-import static edu.mayo.ontology.taxonomies.lexicon.LexiconSeries.PCV;
-import static edu.mayo.ontology.taxonomies.lexicon.LexiconSeries.SNOMED_CT;
 import static java.util.Collections.singletonList;
-import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
+import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
+import static org.omg.spec.api4kp.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Syntactic_Translation_Task;
+import static org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.CMMN_1_1;
+import static org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.FHIR_STU3;
+import static org.omg.spec.api4kp.taxonomy.lexicon.LexiconSeries.PCV;
+import static org.omg.spec.api4kp.taxonomy.lexicon.LexiconSeries.SNOMED_CT;
 
 import edu.mayo.kmdp.language.translators.AbstractSimpleTranslator;
-import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguage;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.UUID;
 import javax.inject.Named;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
-import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
-import org.omg.spec.api4kp._1_0.id.SemanticIdentifier;
-import org.omg.spec.api4kp._1_0.services.KPOperation;
-import org.omg.spec.api4kp._1_0.services.KPSupport;
-import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
+import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
+import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
+import org.omg.spec.api4kp._20200801.services.KPOperation;
+import org.omg.spec.api4kp._20200801.services.KPSupport;
+import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
+import org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
 import org.omg.spec.cmmn._20151109.model.TDefinitions;
 
 @Named
-@KPOperation(Translation_Task)
+@KPOperation(Syntactic_Translation_Task)
 @KPSupport({FHIR_STU3,CMMN_1_1})
 public class CmmnToPlanDefTranslator
     extends AbstractSimpleTranslator<TDefinitions,PlanDefinition> {

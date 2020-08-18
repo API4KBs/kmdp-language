@@ -1,14 +1,14 @@
 package edu.mayo.kmdp.language;
 
-import static org.omg.spec.api4kp._1_0.contrastors.SyntacticRepresentationContrastor.theRepContrastor;
+import static org.omg.spec.api4kp._20200801.contrastors.SyntacticRepresentationContrastor.theRepContrastor;
 
-import edu.mayo.kmdp.tranx.v4.server.ValidateApiInternal;
 import edu.mayo.kmdp.util.Util;
 import java.util.List;
-import org.omg.spec.api4kp._1_0.KnowledgePlatformOperator;
-import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
-import org.omg.spec.api4kp._1_0.services.tranx.ModelMIMECoder;
-import org.omg.spec.api4kp._1_0.services.tranx.ValidationOperator;
+import org.omg.spec.api4kp._20200801.KnowledgePlatformOperator;
+import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.ValidateApiInternal;
+import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
+import org.omg.spec.api4kp._20200801.services.transrepresentation.ModelMIMECoder;
+import org.omg.spec.api4kp._20200801.services.transrepresentation.ValidationOperator;
 
 public interface ValidateApiOperator
     extends ValidateApiInternal.Operator, KnowledgePlatformOperator<ValidationOperator> {

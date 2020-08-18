@@ -14,26 +14,26 @@
 package edu.mayo.kmdp.language;
 
 import static java.util.Collections.singletonList;
-import static org.omg.spec.api4kp._1_0.Answer.anyDo;
+import static org.omg.spec.api4kp._20200801.Answer.anyDo;
 
-import edu.mayo.kmdp.tranx.v4.server.DetectApiInternal;
-import edu.mayo.kmdp.tranx.v4.server.DiscoveryApiInternal;
-import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.inject.Named;
-import org.omg.spec.api4kp._1_0.Answer;
-import org.omg.spec.api4kp._1_0.KnowledgePlatformComponent;
-import org.omg.spec.api4kp._1_0.id.KeyIdentifier;
-import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
-import org.omg.spec.api4kp._1_0.services.KPOperation;
-import org.omg.spec.api4kp._1_0.services.KPServer;
-import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
-import org.omg.spec.api4kp._1_0.services.tranx.DetectionOperator;
-import org.omg.spec.api4kp._1_0.services.tranx.Detector;
+import org.omg.spec.api4kp._20200801.Answer;
+import org.omg.spec.api4kp._20200801.KnowledgePlatformComponent;
+import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.DetectApiInternal;
+import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.DiscoveryApiInternal;
+import org.omg.spec.api4kp._20200801.id.KeyIdentifier;
+import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
+import org.omg.spec.api4kp._20200801.services.KPOperation;
+import org.omg.spec.api4kp._20200801.services.KPServer;
+import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
+import org.omg.spec.api4kp._20200801.services.transrepresentation.DetectionOperator;
+import org.omg.spec.api4kp._20200801.services.transrepresentation.Detector;
+import org.omg.spec.api4kp.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Named
@@ -48,7 +48,7 @@ public class LanguageDetector implements KnowledgePlatformComponent<Detector>,
 
   @Named
   public LanguageDetector(@Autowired(required = false)
-  @KPOperation(KnowledgeProcessingOperationSeries.Detect_Language_Information_Task)
+  @KPOperation(KnowledgeProcessingOperationSeries.Language_Information_Detection_Task)
       List<DetectApiOperator> detectors) {
 
     this.detectors = detectors.stream()

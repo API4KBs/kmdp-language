@@ -1,8 +1,6 @@
 package edu.mayo.kmdp.language;
 
-import static edu.mayo.kmdp.SurrogateHelper.toLegacyConceptIdentifier;
-import static edu.mayo.kmdp.SurrogateHelper.toURIIdentifier;
-import static edu.mayo.kmdp.SurrogateHelper.uri;
+import static edu.mayo.kmdp.language.translators.surrogate.v1.SurrogateToLibrary.toLegacyConceptIdentifier;
 import static edu.mayo.kmdp.registry.Registry.BASE_UUID_URN;
 import static edu.mayo.kmdp.registry.Registry.BASE_UUID_URN_URI;
 import static edu.mayo.ontology.taxonomies.kao.knowledgeartifactcategory.KnowledgeArtifactCategorySeries.Software;
@@ -15,18 +13,20 @@ import static edu.mayo.ontology.taxonomies.kao.publicationstatus.PublicationStat
 import static edu.mayo.ontology.taxonomies.kao.publishingrole.PublishingRoleSeries.Author;
 import static edu.mayo.ontology.taxonomies.kao.rel.citationreltype.BibliographicCitationTypeSeries.Cites_As_Authority;
 import static edu.mayo.ontology.taxonomies.kao.rel.dependencyreltype.DependencyTypeSeries.Depends_On;
+import static edu.mayo.ontology.taxonomies.kao.rel.derivationreltype.DerivationTypeSeries.Derived_From;
 import static edu.mayo.ontology.taxonomies.kao.rel.derivationreltype.DerivationTypeSeries.Inspired_By;
 import static edu.mayo.ontology.taxonomies.kao.rel.relatedversiontype.RelatedVersionTypeSeries.Has_Original;
+import static edu.mayo.ontology.taxonomies.kao.rel.relatedversiontype.RelatedVersionTypeSeries.Has_Previous_Version;
 import static edu.mayo.ontology.taxonomies.kao.rel.structuralreltype.StructuralPartTypeSeries.Has_Part;
 import static edu.mayo.ontology.taxonomies.kao.rel.summaryreltype.SummarizationTypeSeries.Compact_Representation_Of;
 import static edu.mayo.ontology.taxonomies.kao.rel.variantreltype.VariantTypeSeries.Adaptation_Of;
+import static edu.mayo.ontology.taxonomies.kao.rel.variantreltype.VariantTypeSeries.Translation_Of;
 import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.TXT;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.DMN_1_1;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate;
 import static edu.mayo.ontology.taxonomies.krprofile.KnowledgeRepresentationLanguageProfileSeries.CQL_Essentials;
 import static edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentationLanguageSerializationSeries.DMN_1_1_XML_Syntax;
 import static edu.mayo.ontology.taxonomies.lexicon.LexiconSeries.SNOMED_CT;
-import static org.omg.spec.api4kp._1_0.id.SemanticIdentifier.newId;
 
 import edu.mayo.kmdp.metadata.annotations.SimpleAnnotation;
 import edu.mayo.kmdp.metadata.surrogate.Citation;
@@ -44,13 +44,19 @@ import edu.mayo.kmdp.metadata.surrogate.Summary;
 import edu.mayo.kmdp.metadata.surrogate.Variant;
 import edu.mayo.kmdp.metadata.surrogate.Version;
 import edu.mayo.ontology.taxonomies.iso639_2_languagecodes.LanguageSeries;
+import edu.mayo.ontology.taxonomies.kao.knowledgeassetcategory.KnowledgeAssetCategorySeries;
+import edu.mayo.ontology.taxonomies.kao.rel.structuralreltype.StructuralPartTypeSeries;
 import edu.mayo.ontology.taxonomies.kmdo.annotationreltype.AnnotationRelTypeSeries;
+import java.net.URI;
 import java.util.UUID;
-import org.omg.spec.api4kp._1_0.id.Term;
+import org.omg.spec.api4kp._1_0.identifiers.URIIdentifier;
+import org.omg.spec.api4kp._20200801.id.Term;
 
 public class MockSurrogateKnowledgeAsset {
 
   public KnowledgeAsset buildMetadata() {
+    edu.mayo.ontology.taxonomies.kao.knowledgeassetcategory.KnowledgeAssetCategorySeries series =
+        KnowledgeAssetCategorySeries.Structured_Information_And_Data_Capture_Models;
     return new KnowledgeAsset()
         .withAssetId(uri(BASE_UUID_URN + "0c36a4a3-7645-4276-baf5-be957112717b", "142412"))
         .withFormalCategory(Rules_Policies_And_Guidelines)
@@ -62,25 +68,25 @@ public class MockSurrogateKnowledgeAsset {
         .withSubject(new SimpleAnnotation().withExpr(
             toLegacyConceptIdentifier(Term.mock("mock", "12345").asConceptIdentifier()))
             .withRel(
-                toLegacyConceptIdentifier(AnnotationRelTypeSeries.Has_Focus)))
+                toLegacyConceptIdentifier(AnnotationRelTypeSeries.Has_Focus.asConceptIdentifier())))
         .withRelated(
             new Component()
-                .withRel(Has_Part)
+                .withRel(StructuralPartTypeSeries.Has_Proper_Part)
                 .withTgt(ref(UUID.randomUUID(), "1")))
         .withRelated(
-            new Derivative().withRel(Inspired_By)
+            new Derivative().withRel(Derived_From)
                 .withTgt(ref(UUID.randomUUID(), "99").withName("Sub Assett Test")))
         .withRelated(
-            new Derivative().withRel(Inspired_By)
+            new Derivative().withRel(Derived_From)
                 .withTgt(ref(UUID.randomUUID(), "2")))
         .withRelated(
             new Dependency().withRel(Depends_On)
                 .withTgt(ref(UUID.randomUUID(), "3")))
         .withRelated(
-            new Variant().withRel(Adaptation_Of)
+            new Variant().withRel(Translation_Of)
                 .withTgt(ref(UUID.randomUUID(), "4")))
         .withRelated(
-            new Version().withRel(Has_Original)
+            new Version().withRel(Has_Previous_Version)
                 .withTgt(ref(UUID.randomUUID(), "5")))
         .withCitations(
             new Citation().withRel(Cites_As_Authority)
@@ -119,8 +125,14 @@ public class MockSurrogateKnowledgeAsset {
         );
   }
 
+  private URIIdentifier uri(String base, String version) {
+    return new URIIdentifier()
+        .withUri(URI.create(base))
+        .withVersionId(URI.create(base + ":" + version));
+  }
+
   private KnowledgeResource ref(UUID randomUUID, String version) {
     return new KnowledgeAsset()
-        .withAssetId(toURIIdentifier(newId(BASE_UUID_URN_URI, randomUUID.toString(), version)));
+        .withAssetId(uri(BASE_UUID_URN_URI + randomUUID.toString(), version));
   }
 }

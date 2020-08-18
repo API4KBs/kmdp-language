@@ -13,19 +13,16 @@
  */
 package edu.mayo.kmdp.language.parsers;
 
-import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Abstract_Knowledge_Expression;
-import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Concrete_Knowledge_Expression;
-import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Encoded_Knowledge_Expression;
-import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Parsed_Knowedge_Expression;
-import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.XML_1_1;
-import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
+import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
+import static org.omg.spec.api4kp.taxonomy.krformat.SerializationFormatSeries.XML_1_1;
+import static org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevelSeries.Concrete_Knowledge_Expression;
+import static org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevelSeries.Abstract_Knowledge_Expression;
+import static org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevelSeries.Encoded_Knowledge_Expression;
+import static org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevelSeries.Serialized_Knowledge_Expression;
 
-import edu.mayo.kmdp.metadata.annotations.Annotation;
 import edu.mayo.kmdp.util.JaxbUtil;
 import edu.mayo.kmdp.util.Util;
 import edu.mayo.kmdp.util.XMLUtil;
-import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;
-import edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collection;
@@ -34,9 +31,12 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.function.Function;
 import javax.xml.bind.JAXBElement;
-import org.omg.spec.api4kp._1_0.AbstractCarrier.Encodings;
-import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
-import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
+import org.omg.spec.api4kp._20200801.AbstractCarrier.Encodings;
+import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
+import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
+import org.omg.spec.api4kp._20200801.surrogate.Annotation;
+import org.omg.spec.api4kp.taxonomy.krformat.SerializationFormat;
+import org.omg.spec.api4kp.taxonomy.krformat.SerializationFormatSeries;
 import org.w3c.dom.Document;
 
 public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializeOperator {
@@ -47,22 +47,21 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializeOpera
   protected Collection<Class<?>> getClassContext() {
     return Arrays.asList(
         root,
-        Annotation.class,
-        edu.mayo.kmdp.metadata.v2.surrogate.annotations.Annotation.class);
+        Annotation.class);
   }
 
 
   @Override
   public Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier, Properties config) {
     return carrier.asString()
-        .map(str -> newVerticalCarrier(carrier, Concrete_Knowledge_Expression, null, str));
+        .map(str -> newVerticalCarrier(carrier, Serialized_Knowledge_Expression, null, str));
   }
 
   @Override
   public Optional<KnowledgeCarrier> innerDeserialize(KnowledgeCarrier carrier, Properties config) {
     return carrier.asBinary()
         .flatMap(XMLUtil::loadXMLDocument)
-        .map(dox -> newVerticalCarrier(carrier, Parsed_Knowedge_Expression, null, dox));
+        .map(dox -> newVerticalCarrier(carrier, Concrete_Knowledge_Expression, null, dox));
   }
 
   @Override
@@ -95,7 +94,7 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializeOpera
     return carrier.as(root)
         .flatMap(obj -> JaxbUtil.marshall(getClassContext(), obj, mapper))
         .flatMap(Util::asString)
-        .map(str -> newVerticalCarrier(carrier, Concrete_Knowledge_Expression, into, str));
+        .map(str -> newVerticalCarrier(carrier, Serialized_Knowledge_Expression, into, str));
   }
 
   @Override
@@ -103,7 +102,7 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializeOpera
       SyntacticRepresentation into, Properties config) {
     return carrier.as(Document.class)
         .map(dox -> new String(XMLUtil.toByteArray(dox)))
-        .map(str -> newVerticalCarrier(carrier, Concrete_Knowledge_Expression, into, str));
+        .map(str -> newVerticalCarrier(carrier, Serialized_Knowledge_Expression, into, str));
   }
 
 
@@ -112,7 +111,7 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializeOpera
       SyntacticRepresentation into, Properties config) {
     return carrier.as(root)
         .flatMap(obj -> JaxbUtil.marshallDox(getClassContext(), obj, mapper))
-        .map(dox -> newVerticalCarrier(carrier, Parsed_Knowedge_Expression, into, dox));
+        .map(dox -> newVerticalCarrier(carrier, Concrete_Knowledge_Expression, into, dox));
   }
 
 
@@ -127,7 +126,7 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializeOpera
 
   @Override
   protected SerializationFormat getDefaultFormat() {
-    return SerializationFormatSeries.XML_1_1;
+    return XML_1_1;
   }
 
 }

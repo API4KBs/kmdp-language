@@ -1,8 +1,6 @@
 package edu.mayo.kmdp.language;
 
 import static edu.mayo.kmdp.language.translators.fhir.stu3.structdef.StructDefToDMNHelper.isFeelPrimitive;
-import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.DMN_1_2;
-import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.FHIR_STU3;
 import static org.hl7.fhir.dstu3.model.Enumerations.FHIRAllTypes.ATTACHMENT;
 import static org.hl7.fhir.dstu3.model.Enumerations.FHIRAllTypes.CODEABLECONCEPT;
 import static org.hl7.fhir.dstu3.model.Enumerations.FHIRAllTypes.CODING;
@@ -21,7 +19,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
+import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
+import static org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.DMN_1_2;
+import static org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.FHIR_STU3;
+import static org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevelSeries.Serialized_Knowledge_Expression;
 
 import edu.mayo.kmdp.language.parsers.dmn.v1_2.DMN12Parser;
 import edu.mayo.kmdp.language.translators.fhir.stu3.structdef.StructDefToDMNProjectingTranslator;
@@ -29,7 +30,6 @@ import edu.mayo.kmdp.language.validators.dmn.v1_2.DMN12Validator;
 import edu.mayo.kmdp.util.FileUtil;
 import edu.mayo.kmdp.util.Util;
 import edu.mayo.kmdp.util.fhir.fhir3.FHIR3JsonUtil;
-import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -45,10 +45,10 @@ import org.hl7.fhir.dstu3.model.codesystems.NarrativeStatus;
 import org.hl7.fhir.dstu3.model.codesystems.ObservationStatus;
 import org.hl7.fhir.dstu3.model.codesystems.QuantityComparator;
 import org.junit.jupiter.api.Test;
-import org.omg.spec.api4kp._1_0.AbstractCarrier;
-import org.omg.spec.api4kp._1_0.Answer;
-import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
-import org.omg.spec.api4kp._1_0.services.tranx.ModelMIMECoder;
+import org.omg.spec.api4kp._20200801.AbstractCarrier;
+import org.omg.spec.api4kp._20200801.Answer;
+import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
+import org.omg.spec.api4kp._20200801.services.transrepresentation.ModelMIMECoder;
 import org.omg.spec.dmn._20180521.model.TDefinitions;
 import org.omg.spec.dmn._20180521.model.TItemDefinition;
 
@@ -295,7 +295,7 @@ public class FhirProfileTranslatorTest {
 
   private void printout(Answer<KnowledgeCarrier> ast) {
     ast.flatMap(ans -> new DMN12Parser()
-        .applyLower(ans, ParsingLevelSeries.Parsed_Knowedge_Expression, null, null))
+        .applyLower(ans, Serialized_Knowledge_Expression, null, null))
         .flatOpt(AbstractCarrier::asString)
         .ifPresent(System.out::print);
   }

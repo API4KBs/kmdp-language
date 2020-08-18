@@ -16,26 +16,26 @@
 package edu.mayo.kmdp.language;
 
 import static java.util.Collections.singletonList;
-import static org.omg.spec.api4kp._1_0.Answer.anyDo;
+import static org.omg.spec.api4kp._20200801.Answer.anyDo;
+import static org.omg.spec.api4kp.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Well_Formedness_Check_Task;
 
-import edu.mayo.kmdp.tranx.v4.server.DiscoveryApiInternal;
-import edu.mayo.kmdp.tranx.v4.server.ValidateApiInternal;
-import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.inject.Named;
-import org.omg.spec.api4kp._1_0.Answer;
-import org.omg.spec.api4kp._1_0.KnowledgePlatformComponent;
-import org.omg.spec.api4kp._1_0.id.KeyIdentifier;
-import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
-import org.omg.spec.api4kp._1_0.services.KPOperation;
-import org.omg.spec.api4kp._1_0.services.KPServer;
-import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
-import org.omg.spec.api4kp._1_0.services.tranx.ValidationOperator;
-import org.omg.spec.api4kp._1_0.services.tranx.Validator;
+import org.omg.spec.api4kp._20200801.Answer;
+import org.omg.spec.api4kp._20200801.KnowledgePlatformComponent;
+import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.DiscoveryApiInternal;
+import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.ValidateApiInternal;
+import org.omg.spec.api4kp._20200801.id.KeyIdentifier;
+import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
+import org.omg.spec.api4kp._20200801.services.KPOperation;
+import org.omg.spec.api4kp._20200801.services.KPServer;
+import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
+import org.omg.spec.api4kp._20200801.services.transrepresentation.ValidationOperator;
+import org.omg.spec.api4kp._20200801.services.transrepresentation.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Named
@@ -50,7 +50,7 @@ public class LanguageValidator implements KnowledgePlatformComponent<Validator>,
 
   @Named
   public LanguageValidator(@Autowired(required = false)
-  @KPOperation(KnowledgeProcessingOperationSeries.Well_Formedness_Check_Task)
+  @KPOperation(Well_Formedness_Check_Task)
       List<ValidateApiOperator> validators) {
 
     this.validators = validators.stream()

@@ -15,29 +15,26 @@
  */
 package edu.mayo.kmdp.language;
 
-import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Abstract_Knowledge_Expression;
-import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Concrete_Knowledge_Expression;
-import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Parsed_Knowedge_Expression;
-import static edu.mayo.ontology.taxonomies.kao.knowledgeassettype.KnowledgeAssetTypeSeries.Cognitive_Process_Model;
-import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.JSON;
-import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.XML_1_1;
-import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.DMN_1_1;
-import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate;
-import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.OWL_2;
-import static edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentationLanguageSerializationSeries.RDF_XML_Syntax;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.omg.spec.api4kp._1_0.AbstractCarrier.codedRep;
-import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
+import static org.omg.spec.api4kp._20200801.AbstractCarrier.codedRep;
+import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
+import static org.omg.spec.api4kp.taxonomy.knowledgeassettype.KnowledgeAssetTypeSeries.Cognitive_Process_Model;
+import static org.omg.spec.api4kp.taxonomy.krformat.SerializationFormatSeries.JSON;
+import static org.omg.spec.api4kp.taxonomy.krformat.SerializationFormatSeries.XML_1_1;
+import static org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.DMN_1_1;
+import static org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate_2_0;
+import static org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.OWL_2;
+import static org.omg.spec.api4kp.taxonomy.krserialization.KnowledgeRepresentationLanguageSerializationSeries.RDF_XML_Syntax;
+import static org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevelSeries.Abstract_Knowledge_Expression;
+import static org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevelSeries.Concrete_Knowledge_Expression;
+import static org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevelSeries.Serialized_Knowledge_Expression;
 
 import edu.mayo.kmdp.language.config.LocalTestConfig;
-import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
-import edu.mayo.kmdp.metadata.v2.surrogate.annotations.Annotation;
 import edu.mayo.kmdp.registry.Registry;
-import edu.mayo.kmdp.tranx.v4.DeserializeApi;
 import edu.mayo.kmdp.util.FileUtil;
 import edu.mayo.kmdp.util.JSonUtil;
 import edu.mayo.kmdp.util.JaxbUtil;
@@ -45,17 +42,20 @@ import edu.mayo.kmdp.util.XMLUtil;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 import javax.inject.Inject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.omg.spec.api4kp._1_0.AbstractCarrier;
-import org.omg.spec.api4kp._1_0.AbstractCarrier.Encodings;
-import org.omg.spec.api4kp._1_0.Answer;
-import org.omg.spec.api4kp._1_0.identifiers.URIIdentifier;
-import org.omg.spec.api4kp._1_0.services.KPComponent;
-import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
-import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
+import org.omg.spec.api4kp._20200801.AbstractCarrier;
+import org.omg.spec.api4kp._20200801.AbstractCarrier.Encodings;
+import org.omg.spec.api4kp._20200801.Answer;
+import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.DeserializeApi;
+import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
+import org.omg.spec.api4kp._20200801.services.KPComponent;
+import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
+import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
+import org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset;
 import org.omg.spec.dmn._20151101.dmn.TDefinitions;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -81,20 +81,20 @@ public class DeserializationTest {
             rep(DMN_1_1, XML_1_1, Charset.defaultCharset(), Encodings.DEFAULT));
 
     Optional<KnowledgeCarrier> expr = parser
-        .applyLift(bin, Concrete_Knowledge_Expression)
+        .applyLift(bin, Serialized_Knowledge_Expression)
         .getOptionalValue();
     assertTrue(expr.isPresent());
     assertTrue(expr.get().asString().orElse("").contains("decision name=\"a\""));
 
     KnowledgeCarrier dox = parser
-        .applyLift(bin, Parsed_Knowedge_Expression)
+        .applyLift(bin, Concrete_Knowledge_Expression)
         .getOptionalValue()
         .orElse(null);
     assertNotNull(dox);
     assertTrue(dox.is(Document.class));
 
     KnowledgeCarrier dox2 = parser
-        .applyLift(expr.get(), Parsed_Knowedge_Expression)
+        .applyLift(expr.get(), Concrete_Knowledge_Expression)
         .getOptionalValue()
         .orElse(null);
 
@@ -139,7 +139,7 @@ public class DeserializationTest {
     Answer<KnowledgeCarrier> ast = parser.applyLift(bin, Abstract_Knowledge_Expression);
 
     Answer<KnowledgeCarrier> dox = ast
-        .flatMap((a) -> parser.applyLower(a, Parsed_Knowedge_Expression));
+        .flatMap((a) -> parser.applyLower(a, Concrete_Knowledge_Expression));
 
     assertTrue(dox.isSuccess());
     assertTrue(dox.getOptionalValue().isPresent());
@@ -177,7 +177,7 @@ public class DeserializationTest {
     assertNull(ast.getRepresentation().getSerialization());
 
     Answer<SyntacticRepresentation> arep = parser
-        .applyLower(ast, Concrete_Knowledge_Expression)
+        .applyLower(ast, Serialized_Knowledge_Expression)
         .map(KnowledgeCarrier::getRepresentation);
 
     assertTrue(arep.isSuccess());
@@ -194,23 +194,22 @@ public class DeserializationTest {
   @Test
   public void testSerializeSurrogate() {
 
-    KnowledgeAsset asset = new edu.mayo.kmdp.metadata.surrogate.resources.KnowledgeAsset()
-        .withAssetId(new URIIdentifier().withUri(
+    KnowledgeAsset asset = new org.omg.spec.api4kp._20200801.surrogate.resources.KnowledgeAsset()
+        .withAssetId(SemanticIdentifier.newId(
             URI.create(Registry.MAYO_ASSETS_BASE_URI + "2c6572ea-867d-4863-963a-b4bc5357429b")))
         .withFormalType(Cognitive_Process_Model);
 
     String serializedAsset = JaxbUtil.marshallToString(
-        Arrays.asList(asset.getClass(), Annotation.class,
-            edu.mayo.kmdp.metadata.annotations.Annotation.class),
+        Collections.singletonList(asset.getClass()),
         asset,
         JaxbUtil.defaultProperties());
 
     KnowledgeCarrier ast = AbstractCarrier.ofAst(asset)
-        .withRepresentation(rep(Knowledge_Asset_Surrogate))
+        .withRepresentation(rep(Knowledge_Asset_Surrogate_2_0))
         .withLevel(Abstract_Knowledge_Expression);
 
     Answer<String> ser = parser
-        .applyLower(ast,Concrete_Knowledge_Expression)
+        .applyLower(ast,Serialized_Knowledge_Expression)
         .flatOpt(AbstractCarrier::asString);
 
     assertEquals(serializedAsset, ser.orElse("Fail"));
@@ -220,15 +219,15 @@ public class DeserializationTest {
   @Test
   public void testSerializeSurrogateJson() {
 
-    KnowledgeAsset asset = new edu.mayo.kmdp.metadata.surrogate.resources.KnowledgeAsset()
-        .withAssetId(new URIIdentifier().withUri(
+    KnowledgeAsset asset = new org.omg.spec.api4kp._20200801.surrogate.resources.KnowledgeAsset()
+        .withAssetId(SemanticIdentifier.newId(
             URI.create(Registry.MAYO_ASSETS_BASE_URI + "2c6572ea-867d-4863-963a-b4bc5357429b")))
         .withFormalType(Cognitive_Process_Model);
 
     String serializedAsset = JSonUtil.printJson(asset).orElse("");
 
     KnowledgeCarrier ast = AbstractCarrier.ofAst(asset)
-        .withRepresentation(rep(Knowledge_Asset_Surrogate))
+        .withRepresentation(rep(Knowledge_Asset_Surrogate_2_0))
         .withLevel(Abstract_Knowledge_Expression);
 
     Answer<String> ser = parser.applyLower(

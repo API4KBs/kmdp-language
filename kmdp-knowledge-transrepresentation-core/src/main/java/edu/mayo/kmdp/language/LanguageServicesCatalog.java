@@ -1,18 +1,18 @@
 package edu.mayo.kmdp.language;
 
-import edu.mayo.kmdp.tranx.v4.server.DeserializeApiInternal;
-import edu.mayo.kmdp.tranx.v4.server.DetectApiInternal;
-import edu.mayo.kmdp.tranx.v4.server.DiscoveryApiInternal;
-import edu.mayo.kmdp.tranx.v4.server.ValidateApiInternal;
 import java.util.List;
 import java.util.UUID;
 import javax.inject.Named;
-import org.omg.spec.api4kp._1_0.Answer;
-import org.omg.spec.api4kp._1_0.services.KPServer;
-import org.omg.spec.api4kp._1_0.services.tranx.Deserializer;
-import org.omg.spec.api4kp._1_0.services.tranx.Detector;
-import org.omg.spec.api4kp._1_0.services.tranx.Transrepresentator;
-import org.omg.spec.api4kp._1_0.services.tranx.Validator;
+import org.omg.spec.api4kp._20200801.Answer;
+import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.DeserializeApiInternal;
+import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.DetectApiInternal;
+import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.DiscoveryApiInternal;
+import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.ValidateApiInternal;
+import org.omg.spec.api4kp._20200801.services.KPServer;
+import org.omg.spec.api4kp._20200801.services.transrepresentation.Deserializer;
+import org.omg.spec.api4kp._20200801.services.transrepresentation.Detector;
+import org.omg.spec.api4kp._20200801.services.transrepresentation.Transrepresentator;
+import org.omg.spec.api4kp._20200801.services.transrepresentation.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @KPServer

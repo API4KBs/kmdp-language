@@ -15,29 +15,26 @@ package edu.mayo.kmdp.language;
 
 import static edu.mayo.kmdp.util.StreamUtil.filterAs;
 import static edu.mayo.kmdp.util.Util.uuid;
-import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Abstract_Knowledge_Expression;
-import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.XML_1_1;
-import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.DMN_1_1;
-import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.OWL_2;
-import static edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentationLanguageSerializationSeries.RDF_XML_Syntax;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.omg.spec.api4kp._1_0.AbstractCarrier.codedRep;
-import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
+import static org.omg.spec.api4kp._20200801.AbstractCarrier.codedRep;
+import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
+import static org.omg.spec.api4kp.taxonomy.krformat.SerializationFormatSeries.XML_1_1;
+import static org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.DMN_1_1;
+import static org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.OWL_2;
+import static org.omg.spec.api4kp.taxonomy.krserialization.KnowledgeRepresentationLanguageSerializationSeries.RDF_XML_Syntax;
+import static org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevelSeries.Abstract_Knowledge_Expression;
 
 import edu.mayo.kmdp.language.config.LocalTestConfig;
 import edu.mayo.kmdp.language.translators.owl2.OWLtoSKOSTranscreator;
 import edu.mayo.kmdp.terms.skosifier.Owl2SkosConfig;
 import edu.mayo.kmdp.terms.skosifier.Owl2SkosConfig.OWLtoSKOSTxParams;
-import edu.mayo.kmdp.tranx.v4.DeserializeApi;
-import edu.mayo.kmdp.tranx.v4.TransxionApi;
 import edu.mayo.kmdp.util.FileUtil;
 import edu.mayo.kmdp.util.NameUtils;
 import edu.mayo.kmdp.util.StreamUtil;
 import edu.mayo.kmdp.util.Util;
-import edu.mayo.ontology.taxonomies.lexicon.LexiconSeries;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -50,10 +47,13 @@ import javax.inject.Inject;
 import org.eclipse.rdf4j.model.vocabulary.SKOS;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.omg.spec.api4kp._1_0.AbstractCarrier;
-import org.omg.spec.api4kp._1_0.Answer;
-import org.omg.spec.api4kp._1_0.services.KPComponent;
-import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
+import org.omg.spec.api4kp._20200801.AbstractCarrier;
+import org.omg.spec.api4kp._20200801.Answer;
+import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.DeserializeApi;
+import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.TransxionApi;
+import org.omg.spec.api4kp._20200801.services.KPComponent;
+import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
+import org.omg.spec.api4kp.taxonomy.lexicon.LexiconSeries;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
@@ -135,9 +135,9 @@ public class TranscreationTest {
   public void testTransrepresentationFilter2() {
     Optional<Set<UUID>> ops2 = transtor
         .listTxionOperators(
-            codedRep(OWL_2,RDF_XML_Syntax,XML_1_1, Charset.defaultCharset()),
+            codedRep(OWL_2, RDF_XML_Syntax, XML_1_1, Charset.defaultCharset()),
             codedRep(OWL_2, LexiconSeries.SKOS))
-        .map((l) -> l.stream()
+        .map(l -> l.stream()
             .map(op -> op.getOperatorId().getUuid())
             .collect(Collectors.toSet()))
         .getOptionalValue();
@@ -164,9 +164,10 @@ public class TranscreationTest {
   public void testTransrepresentationDiscovery() {
     Optional<byte[]> owl = FileUtil
         .readBytes(DetectorTest.class.getResource("/artifacts/exampleHierarchy.rdf"));
-    assertTrue(owl.isPresent());
 
-    KnowledgeCarrier kc = AbstractCarrier.of(owl.get(), rep(OWL_2, RDF_XML_Syntax, XML_1_1));
+    assertTrue(owl.isPresent());
+    byte[] owlBytes = owl.get();
+    KnowledgeCarrier kc = AbstractCarrier.of(owlBytes, rep(OWL_2, RDF_XML_Syntax, XML_1_1));
 
     Owl2SkosConfig cfg = new Owl2SkosConfig()
         .with(OWLtoSKOSTxParams.TGT_NAMESPACE, "http://bar/skos-example");

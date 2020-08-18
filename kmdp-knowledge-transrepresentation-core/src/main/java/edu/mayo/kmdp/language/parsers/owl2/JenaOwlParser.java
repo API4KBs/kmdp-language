@@ -13,26 +13,22 @@
  */
 package edu.mayo.kmdp.language.parsers.owl2;
 
-import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Lifting_Task;
-import static edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries.Lowering_Task;
-import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Concrete_Knowledge_Expression;
-import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Encoded_Knowledge_Expression;
-import static edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries.Parsed_Knowedge_Expression;
-import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.TXT;
-import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.XML_1_1;
-import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.OWL_2;
-import static edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentationLanguageSerializationSeries.RDF_XML_Syntax;
-import static edu.mayo.ontology.taxonomies.krserialization.KnowledgeRepresentationLanguageSerializationSeries.Turtle;
-import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
+import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
+import static org.omg.spec.api4kp.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Lifting_Task;
+import static org.omg.spec.api4kp.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Lowering_Task;
+import static org.omg.spec.api4kp.taxonomy.krformat.SerializationFormatSeries.TXT;
+import static org.omg.spec.api4kp.taxonomy.krformat.SerializationFormatSeries.XML_1_1;
+import static org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.OWL_2;
+import static org.omg.spec.api4kp.taxonomy.krserialization.KnowledgeRepresentationLanguageSerializationSeries.RDF_XML_Syntax;
+import static org.omg.spec.api4kp.taxonomy.krserialization.KnowledgeRepresentationLanguageSerializationSeries.Turtle;
+import static org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevelSeries.Concrete_Knowledge_Expression;
+import static org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevelSeries.Encoded_Knowledge_Expression;
+import static org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevelSeries.Serialized_Knowledge_Expression;
 
 import edu.mayo.kmdp.language.DeserializeApiOperator;
 import edu.mayo.kmdp.language.parsers.AbstractDeSerializeOperator;
 import edu.mayo.kmdp.language.parsers.Lifter;
 import edu.mayo.kmdp.language.parsers.Lowerer;
-import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevel;
-import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries;
-import edu.mayo.ontology.taxonomies.krformat.SerializationFormat;
-import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;
@@ -44,12 +40,15 @@ import java.util.UUID;
 import javax.inject.Named;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.omg.spec.api4kp._1_0.AbstractCarrier.Encodings;
-import org.omg.spec.api4kp._1_0.id.SemanticIdentifier;
-import org.omg.spec.api4kp._1_0.services.KPOperation;
-import org.omg.spec.api4kp._1_0.services.KPSupport;
-import org.omg.spec.api4kp._1_0.services.KnowledgeCarrier;
-import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
+import org.omg.spec.api4kp._20200801.AbstractCarrier.Encodings;
+import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
+import org.omg.spec.api4kp._20200801.services.KPOperation;
+import org.omg.spec.api4kp._20200801.services.KPSupport;
+import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
+import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
+import org.omg.spec.api4kp.taxonomy.krformat.SerializationFormat;
+import org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
+import org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevel;
 
 @Named
 @KPOperation(Lowering_Task)
@@ -89,10 +88,10 @@ public class JenaOwlParser extends AbstractDeSerializeOperator {
   @Override
   public Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier, Properties properties) {
     SyntacticRepresentation tgtRep =
-        getTargetLiftRepresentation(carrier.getRepresentation(), Concrete_Knowledge_Expression);
+        getTargetLiftRepresentation(carrier.getRepresentation(), Serialized_Knowledge_Expression);
     return Optional.of(
         DeserializeApiOperator.newVerticalCarrier(carrier,
-            Concrete_Knowledge_Expression,
+            Serialized_Knowledge_Expression,
             tgtRep,
             carrier.asString().orElseThrow(UnsupportedOperationException::new)));
   }
@@ -106,10 +105,10 @@ public class JenaOwlParser extends AbstractDeSerializeOperator {
   @Override
   public Optional<KnowledgeCarrier> innerDeserialize(KnowledgeCarrier carrier, Properties properties) {
     SyntacticRepresentation tgtRep =
-        getTargetLiftRepresentation(carrier.getRepresentation(), Parsed_Knowedge_Expression);
+        getTargetLiftRepresentation(carrier.getRepresentation(), Concrete_Knowledge_Expression);
     return Optional.of(
         DeserializeApiOperator.newVerticalCarrier(carrier,
-            Parsed_Knowedge_Expression,
+            Concrete_Knowledge_Expression,
             tgtRep,
             readModel(carrier.asString().orElseThrow(UnsupportedOperationException::new),
                 carrier.getRepresentation())));
@@ -173,17 +172,17 @@ public class JenaOwlParser extends AbstractDeSerializeOperator {
       SyntacticRepresentation into, Properties properties) {
     SyntacticRepresentation tgtRep =
         getTargetLowerRepresentation(carrier.getRepresentation(), into,
-            Concrete_Knowledge_Expression);
+            Serialized_Knowledge_Expression);
     return carrier.as(Model.class)
         .map(model -> writeModel(model, tgtRep))
         .map(str -> DeserializeApiOperator.newVerticalCarrier(carrier,
-            Concrete_Knowledge_Expression,
+            Serialized_Knowledge_Expression,
             tgtRep,
             str));
   }
 
   /**
-   * Lowers a parsed expression (parse tree) into a concrete expression (string)
+   * Lowers a parsed expression (parse tree) into a serialized expression (string)
    *
    * @param carrier A parse tree carrier
    * @param into    A representation that defines how to derive the serialized, concrete expression
@@ -197,11 +196,11 @@ public class JenaOwlParser extends AbstractDeSerializeOperator {
       SyntacticRepresentation into, Properties properties) {
     SyntacticRepresentation tgtRep =
         getTargetLowerRepresentation(carrier.getRepresentation(), into,
-            Concrete_Knowledge_Expression);
+            Serialized_Knowledge_Expression);
     return carrier.as(Model.class)
         .map(model -> writeModel(model, tgtRep))
         .map(str -> DeserializeApiOperator.newVerticalCarrier(carrier,
-            Concrete_Knowledge_Expression,
+            Serialized_Knowledge_Expression,
             tgtRep,
             str));
   }
@@ -259,7 +258,7 @@ public class JenaOwlParser extends AbstractDeSerializeOperator {
   private SyntacticRepresentation getTargetLowerRepresentation(
       SyntacticRepresentation srcRep,
       SyntacticRepresentation into,
-      ParsingLevelSeries tgtLevel) {
+      ParsingLevel tgtLevel) {
     // TODO improve...
     return into;
   }
@@ -268,7 +267,7 @@ public class JenaOwlParser extends AbstractDeSerializeOperator {
       ParsingLevel tgtLevel) {
     if (srcRep == null) {
       if (tgtLevel.sameAs(Encoded_Knowledge_Expression)
-          || tgtLevel.sameAs(Concrete_Knowledge_Expression)) {
+          || tgtLevel.sameAs(Serialized_Knowledge_Expression)) {
         return rep(OWL_2, TXT);
       } else {
         return rep(OWL_2);
@@ -281,10 +280,10 @@ public class JenaOwlParser extends AbstractDeSerializeOperator {
               srcRep.getSerialization(), srcRep.getFormat(),
               Charset.forName(srcRep.getCharset()),
               Encodings.valueOf(srcRep.getEncoding()));
-        case Concrete_Knowledge_Expression:
+        case Serialized_Knowledge_Expression:
           return rep(srcRep.getLanguage(), srcRep.getProfile(),
               srcRep.getSerialization(), srcRep.getFormat());
-        case Parsed_Knowedge_Expression:
+        case Concrete_Knowledge_Expression:
           return rep(srcRep.getLanguage(), srcRep.getProfile(),
               srcRep.getSerialization());
         case Abstract_Knowledge_Expression:
