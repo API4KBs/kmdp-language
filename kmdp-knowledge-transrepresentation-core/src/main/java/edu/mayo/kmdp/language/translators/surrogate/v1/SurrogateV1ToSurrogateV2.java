@@ -17,8 +17,6 @@ import edu.mayo.kmdp.metadata.surrogate.Variant;
 import edu.mayo.kmdp.metadata.surrogate.Version;
 import edu.mayo.ontology.taxonomies.kmdo.citationreltype.BibliographicCitationType;
 import edu.mayo.ontology.taxonomies.kmdo.citationreltype.BibliographicCitationTypeSeries;
-import edu.mayo.ontology.taxonomies.kmdo.publicationstatus.PublicationStatus;
-import edu.mayo.ontology.taxonomies.kmdo.publicationstatus.PublicationStatusSeries;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -29,18 +27,12 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.omg.spec.api4kp._1_0.id.ScopedIdentifier;
-import org.omg.spec.api4kp._1_0.id.Term;
 import org.omg.spec.api4kp._1_0.identifiers.ConceptIdentifier;
-import org.omg.spec.api4kp._1_0.identifiers.NamespaceIdentifier;
 import org.omg.spec.api4kp._1_0.identifiers.URIIdentifier;
 import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
 import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
 import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
 import org.omg.spec.api4kp._20200801.surrogate.Citation;
-import org.omg.spec.api4kp.taxonomy.dependencyreltype.DependencyType;
-import org.omg.spec.api4kp.taxonomy.dependencyreltype.DependencyTypeSeries;
-import org.omg.spec.api4kp.taxonomy.derivationreltype.DerivationType;
-import org.omg.spec.api4kp.taxonomy.derivationreltype.DerivationTypeSeries;
 import org.omg.spec.api4kp.taxonomy.iso639_2_languagecode.Language;
 import org.omg.spec.api4kp.taxonomy.iso639_2_languagecode.LanguageSeries;
 import org.omg.spec.api4kp.taxonomy.knowledgeartifactcategory.IKnowledgeArtifactCategory;
@@ -65,14 +57,8 @@ import org.omg.spec.api4kp.taxonomy.languagerole.KnowledgeRepresentationLanguage
 import org.omg.spec.api4kp.taxonomy.languagerole.KnowledgeRepresentationLanguageRoleSeries;
 import org.omg.spec.api4kp.taxonomy.lexicon.Lexicon;
 import org.omg.spec.api4kp.taxonomy.lexicon.LexiconSeries;
-import org.omg.spec.api4kp.taxonomy.relatedversiontype.RelatedVersionType;
-import org.omg.spec.api4kp.taxonomy.relatedversiontype.RelatedVersionTypeSeries;
-import org.omg.spec.api4kp.taxonomy.structuralreltype.StructuralPartType;
-import org.omg.spec.api4kp.taxonomy.structuralreltype.StructuralPartTypeSeries;
-import org.omg.spec.api4kp.taxonomy.summaryreltype.SummarizationType;
-import org.omg.spec.api4kp.taxonomy.summaryreltype.SummarizationTypeSeries;
-import org.omg.spec.api4kp.taxonomy.variantreltype.VariantType;
-import org.omg.spec.api4kp.taxonomy.variantreltype.VariantTypeSeries;
+import org.omg.spec.api4kp.taxonomy.publicationstatus.PublicationStatus;
+import org.omg.spec.api4kp.taxonomy.publicationstatus.PublicationStatusSeries;
 
 public class SurrogateV1ToSurrogateV2 {
 
