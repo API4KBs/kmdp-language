@@ -225,7 +225,7 @@ public class SurrogateV1ToSurrogateV2 {
     surrogateV2.withCitations(
         new Citation().withBibliography(cit.getBibliography())
             .withRel(mapTerm(cit.getRel(), BibliographicCitationTypeSeries::resolveUUID,
-                BibliographicCitationType.class)));
+                BibliographicCitationType.class).asConceptIdentifier()));
   }
 
   private void mapAnnotationToSurrogate(SimpleAnnotation ann,
