@@ -22,12 +22,12 @@ import static org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLan
 
 import edu.mayo.kmdp.language.DeserializeApiOperator;
 import edu.mayo.kmdp.language.parsers.XMLBasedLanguageParser;
-import org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
 import java.util.UUID;
 import javax.inject.Named;
 import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
 import org.omg.spec.api4kp._20200801.services.KPOperation;
 import org.omg.spec.api4kp._20200801.services.KPSupport;
+import org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
 import org.omg.spec.bpmn._20100524.model.ObjectFactory;
 import org.omg.spec.bpmn._20100524.model.TDefinitions;
 

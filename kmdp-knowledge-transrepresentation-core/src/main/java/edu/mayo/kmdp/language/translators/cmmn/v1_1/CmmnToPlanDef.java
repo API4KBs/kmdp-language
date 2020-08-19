@@ -15,6 +15,7 @@ package edu.mayo.kmdp.language.translators.cmmn.v1_1;
 
 import edu.mayo.kmdp.util.StreamUtil;
 import edu.mayo.ontology.taxonomies.kmdo.annotationreltype.AnnotationRelTypeSeries;
+import edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -109,7 +110,7 @@ public class CmmnToPlanDef {
   ) {
     // TODO Need formal "Asset ID" and "Artifact ID" roles
     Identifier fhirAssetId = new Identifier()
-        .setType(toCode(AnnotationRelTypeSeries.Is_Identified_By))
+        .setType(toCode(SemanticAnnotationRelTypeSeries.Is_Identified_By))
         .setValue(assetId.toString());
 
     cpm.setIdentifier(Collections.singletonList(fhirAssetId))

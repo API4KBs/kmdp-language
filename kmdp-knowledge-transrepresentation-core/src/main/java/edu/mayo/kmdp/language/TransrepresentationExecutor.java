@@ -15,7 +15,6 @@ package edu.mayo.kmdp.language;
 
 import static java.util.Collections.singletonList;
 import static org.omg.spec.api4kp._20200801.Answer.anyDo;
-import static org.omg.spec.api4kp.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Semantic_Translation_Task;
 import static org.omg.spec.api4kp.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Syntactic_Translation_Task;
 import static org.omg.spec.api4kp.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Transcreation_Task;
 

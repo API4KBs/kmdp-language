@@ -19,6 +19,7 @@ import edu.mayo.kmdp.util.StreamUtil;
 import edu.mayo.kmdp.util.URIUtil;
 import edu.mayo.kmdp.util.Util;
 import edu.mayo.ontology.taxonomies.kmdo.annotationreltype.AnnotationRelTypeSeries;
+import edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
@@ -130,7 +131,7 @@ public class DmnToPlanDef {
 
   private void mapIdentity(PlanDefinition cpm, URI assetId, TDefinitions decisionModel) {
     Identifier fhirAssetId = new Identifier()
-        .setType(toCode(AnnotationRelTypeSeries.Is_Identified_By))
+        .setType(toCode(SemanticAnnotationRelTypeSeries.Is_Identified_By))
         .setValue(assetId.toString());
 
     cpm.setIdentifier(Collections.singletonList(fhirAssetId))

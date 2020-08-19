@@ -26,7 +26,6 @@ import static org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevelSeries.Seria
 
 import edu.mayo.kmdp.language.config.LocalTestConfig;
 import edu.mayo.kmdp.util.FileUtil;
-;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -44,6 +43,8 @@ import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
 import org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevel;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
+
+;
 
 @SpringBootTest
 @ContextConfiguration(classes = LocalTestConfig.class)

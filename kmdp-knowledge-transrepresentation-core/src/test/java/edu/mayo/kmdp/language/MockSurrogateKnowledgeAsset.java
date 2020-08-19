@@ -14,13 +14,10 @@ import static edu.mayo.ontology.taxonomies.kao.publishingrole.PublishingRoleSeri
 import static edu.mayo.ontology.taxonomies.kao.rel.citationreltype.BibliographicCitationTypeSeries.Cites_As_Authority;
 import static edu.mayo.ontology.taxonomies.kao.rel.dependencyreltype.DependencyTypeSeries.Depends_On;
 import static edu.mayo.ontology.taxonomies.kao.rel.derivationreltype.DerivationTypeSeries.Derived_From;
-import static edu.mayo.ontology.taxonomies.kao.rel.derivationreltype.DerivationTypeSeries.Inspired_By;
-import static edu.mayo.ontology.taxonomies.kao.rel.relatedversiontype.RelatedVersionTypeSeries.Has_Original;
 import static edu.mayo.ontology.taxonomies.kao.rel.relatedversiontype.RelatedVersionTypeSeries.Has_Previous_Version;
-import static edu.mayo.ontology.taxonomies.kao.rel.structuralreltype.StructuralPartTypeSeries.Has_Part;
 import static edu.mayo.ontology.taxonomies.kao.rel.summaryreltype.SummarizationTypeSeries.Compact_Representation_Of;
-import static edu.mayo.ontology.taxonomies.kao.rel.variantreltype.VariantTypeSeries.Adaptation_Of;
 import static edu.mayo.ontology.taxonomies.kao.rel.variantreltype.VariantTypeSeries.Translation_Of;
+import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.snapshot.SemanticAnnotationRelType.Has_Focus;
 import static edu.mayo.ontology.taxonomies.krformat.SerializationFormatSeries.TXT;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.DMN_1_1;
 import static edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate;
@@ -46,7 +43,6 @@ import edu.mayo.kmdp.metadata.surrogate.Version;
 import edu.mayo.ontology.taxonomies.iso639_2_languagecodes.LanguageSeries;
 import edu.mayo.ontology.taxonomies.kao.knowledgeassetcategory.KnowledgeAssetCategorySeries;
 import edu.mayo.ontology.taxonomies.kao.rel.structuralreltype.StructuralPartTypeSeries;
-import edu.mayo.ontology.taxonomies.kmdo.annotationreltype.AnnotationRelTypeSeries;
 import java.net.URI;
 import java.util.UUID;
 import org.omg.spec.api4kp._1_0.identifiers.URIIdentifier;
@@ -68,7 +64,7 @@ public class MockSurrogateKnowledgeAsset {
         .withSubject(new SimpleAnnotation().withExpr(
             toLegacyConceptIdentifier(Term.mock("mock", "12345").asConceptIdentifier()))
             .withRel(
-                toLegacyConceptIdentifier(AnnotationRelTypeSeries.Has_Focus.asConceptIdentifier())))
+                toLegacyConceptIdentifier(Has_Focus.asConceptIdentifier())))
         .withRelated(
             new Component()
                 .withRel(StructuralPartTypeSeries.Has_Proper_Part)
