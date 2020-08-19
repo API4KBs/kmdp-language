@@ -2,9 +2,9 @@ package edu.mayo.kmdp.language.translators.surrogate.v2;
 
 import static java.util.Collections.singletonList;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
-import static org.omg.spec.api4kp.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Syntactic_Translation_Task;
-import static org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.FHIR_STU3;
-import static org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate_2_0;
+import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Syntactic_Translation_Task;
+import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.FHIR_STU3;
+import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate_2_0;
 
 import edu.mayo.kmdp.language.translators.AbstractSimpleTranslator;
 import java.util.List;
@@ -18,7 +18,7 @@ import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
 import org.omg.spec.api4kp._20200801.services.KPOperation;
 import org.omg.spec.api4kp._20200801.services.KPSupport;
 import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
-import org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
+import org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
 
 @Named
 @KPOperation(Syntactic_Translation_Task)

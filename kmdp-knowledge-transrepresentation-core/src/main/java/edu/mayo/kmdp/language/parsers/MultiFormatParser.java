@@ -17,8 +17,8 @@ package edu.mayo.kmdp.language.parsers;
 
 
 import static org.omg.spec.api4kp._20200801.contrastors.SyntacticRepresentationContrastor.theRepContrastor;
-import static org.omg.spec.api4kp.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Lifting_Task;
-import static org.omg.spec.api4kp.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Lowering_Task;
+import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Lifting_Task;
+import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Lowering_Task;
 
 import edu.mayo.kmdp.util.StreamUtil;
 import edu.mayo.kmdp.util.TriFunction;
@@ -31,7 +31,7 @@ import javax.inject.Named;
 import org.omg.spec.api4kp._20200801.services.KPOperation;
 import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
-import org.omg.spec.api4kp.taxonomy.krformat.SerializationFormat;
+import org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormat;
 
 @Named
 @KPOperation(Lowering_Task)

@@ -18,8 +18,8 @@ import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
 import org.omg.spec.api4kp._20200801.services.transrepresentation.ModelMIMECoder;
 import org.omg.spec.api4kp._20200801.services.transrepresentation.TransrepresentationOperator;
-import org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
-import org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevel;
+import org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
+import org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevel;
 
 ;
 

@@ -17,7 +17,7 @@ package edu.mayo.kmdp.language;
 
 import static java.util.Collections.singletonList;
 import static org.omg.spec.api4kp._20200801.Answer.anyDo;
-import static org.omg.spec.api4kp.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Well_Formedness_Check_Task;
+import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Well_Formedness_Check_Task;
 
 import java.util.List;
 import java.util.Map;

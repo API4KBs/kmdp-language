@@ -17,12 +17,12 @@ package edu.mayo.kmdp.language.parsers.sparql;
 
 
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
-import static org.omg.spec.api4kp.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Lifting_Task;
-import static org.omg.spec.api4kp.taxonomy.krformat.SerializationFormatSeries.TXT;
-import static org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.SPARQL_1_1;
-import static org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevelSeries.Abstract_Knowledge_Expression;
-import static org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevelSeries.Concrete_Knowledge_Expression;
-import static org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevelSeries.Serialized_Knowledge_Expression;
+import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Lifting_Task;
+import static org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormatSeries.TXT;
+import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.SPARQL_1_1;
+import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.Abstract_Knowledge_Expression;
+import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.Concrete_Knowledge_Expression;
+import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.Serialized_Knowledge_Expression;
 
 import edu.mayo.kmdp.language.DeserializeApiOperator;
 import edu.mayo.kmdp.language.parsers.Lifter;
@@ -42,8 +42,8 @@ import org.omg.spec.api4kp._20200801.services.KPOperation;
 import org.omg.spec.api4kp._20200801.services.KPSupport;
 import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
-import org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
-import org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevel;
+import org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
+import org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevel;
 
 ;
 

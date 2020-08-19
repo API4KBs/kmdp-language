@@ -1,17 +1,17 @@
 package edu.mayo.kmdp.language.translators.surrogate.v1;
 
-import org.omg.spec.api4kp.taxonomy.dependencyreltype.DependencyType;
-import org.omg.spec.api4kp.taxonomy.dependencyreltype.DependencyTypeSeries;
-import org.omg.spec.api4kp.taxonomy.derivationreltype.DerivationType;
-import org.omg.spec.api4kp.taxonomy.derivationreltype.DerivationTypeSeries;
-import org.omg.spec.api4kp.taxonomy.relatedversiontype.RelatedVersionType;
-import org.omg.spec.api4kp.taxonomy.relatedversiontype.RelatedVersionTypeSeries;
-import org.omg.spec.api4kp.taxonomy.structuralreltype.StructuralPartType;
-import org.omg.spec.api4kp.taxonomy.structuralreltype.StructuralPartTypeSeries;
-import org.omg.spec.api4kp.taxonomy.summaryreltype.SummarizationType;
-import org.omg.spec.api4kp.taxonomy.summaryreltype.SummarizationTypeSeries;
-import org.omg.spec.api4kp.taxonomy.variantreltype.VariantType;
-import org.omg.spec.api4kp.taxonomy.variantreltype.VariantTypeSeries;
+import org.omg.spec.api4kp._20200801.taxonomy.dependencyreltype.DependencyType;
+import org.omg.spec.api4kp._20200801.taxonomy.dependencyreltype.DependencyTypeSeries;
+import org.omg.spec.api4kp._20200801.taxonomy.derivationreltype.DerivationType;
+import org.omg.spec.api4kp._20200801.taxonomy.derivationreltype.DerivationTypeSeries;
+import org.omg.spec.api4kp._20200801.taxonomy.relatedversiontype.RelatedVersionType;
+import org.omg.spec.api4kp._20200801.taxonomy.relatedversiontype.RelatedVersionTypeSeries;
+import org.omg.spec.api4kp._20200801.taxonomy.structuralreltype.StructuralPartType;
+import org.omg.spec.api4kp._20200801.taxonomy.structuralreltype.StructuralPartTypeSeries;
+import org.omg.spec.api4kp._20200801.taxonomy.summaryreltype.SummarizationType;
+import org.omg.spec.api4kp._20200801.taxonomy.summaryreltype.SummarizationTypeSeries;
+import org.omg.spec.api4kp._20200801.taxonomy.variantreltype.VariantType;
+import org.omg.spec.api4kp._20200801.taxonomy.variantreltype.VariantTypeSeries;
 
 public class TermMapper {
 

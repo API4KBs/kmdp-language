@@ -4,11 +4,11 @@ import static java.nio.charset.Charset.defaultCharset;
 import static java.util.Collections.singletonList;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.Encodings.DEFAULT;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
-import static org.omg.spec.api4kp.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Transcreation_Task;
-import static org.omg.spec.api4kp.taxonomy.krformat.SerializationFormatSeries.JSON;
-import static org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate;
-import static org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate_2_0;
-import static org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevelSeries.Abstract_Knowledge_Expression;
+import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Transcreation_Task;
+import static org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormatSeries.JSON;
+import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate;
+import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate_2_0;
+import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.Abstract_Knowledge_Expression;
 
 import edu.mayo.kmdp.language.parsers.surrogate.v1.SurrogateParser;
 import edu.mayo.kmdp.language.translators.AbstractSimpleTranslator;
@@ -29,7 +29,7 @@ import org.omg.spec.api4kp._20200801.services.KPSupport;
 import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
 import org.omg.spec.api4kp._20200801.surrogate.SurrogateHelper;
-import org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
+import org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
 
 @KPOperation(Transcreation_Task)
 @KPSupport(Knowledge_Asset_Surrogate)

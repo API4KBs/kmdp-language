@@ -15,8 +15,8 @@ package edu.mayo.kmdp.language;
 
 import static java.util.Collections.singletonList;
 import static org.omg.spec.api4kp._20200801.Answer.anyDo;
-import static org.omg.spec.api4kp.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Lifting_Task;
-import static org.omg.spec.api4kp.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Lowering_Task;
+import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Lifting_Task;
+import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Lowering_Task;
 
 import java.util.List;
 import java.util.Map;
@@ -35,7 +35,7 @@ import org.omg.spec.api4kp._20200801.services.KPServer;
 import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._20200801.services.transrepresentation.DeserializationOperator;
 import org.omg.spec.api4kp._20200801.services.transrepresentation.Deserializer;
-import org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevel;
+import org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 
 ;

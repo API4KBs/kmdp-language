@@ -16,11 +16,11 @@
 package edu.mayo.kmdp.language.parsers;
 
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
-import static org.omg.spec.api4kp.taxonomy.krformat.SerializationFormatSeries.JSON;
-import static org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevelSeries.Abstract_Knowledge_Expression;
-import static org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevelSeries.Concrete_Knowledge_Expression;
-import static org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevelSeries.Encoded_Knowledge_Expression;
-import static org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevelSeries.Serialized_Knowledge_Expression;
+import static org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormatSeries.JSON;
+import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.Abstract_Knowledge_Expression;
+import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.Concrete_Knowledge_Expression;
+import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.Encoded_Knowledge_Expression;
+import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.Serialized_Knowledge_Expression;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import edu.mayo.kmdp.util.JSonUtil;
@@ -33,7 +33,7 @@ import java.util.Properties;
 import org.omg.spec.api4kp._20200801.AbstractCarrier.Encodings;
 import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
-import org.omg.spec.api4kp.taxonomy.krformat.SerializationFormat;
+import org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormat;
 
 public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializeOperator {
 

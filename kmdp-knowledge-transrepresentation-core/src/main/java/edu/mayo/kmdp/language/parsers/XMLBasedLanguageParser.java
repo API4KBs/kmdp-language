@@ -14,11 +14,11 @@
 package edu.mayo.kmdp.language.parsers;
 
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
-import static org.omg.spec.api4kp.taxonomy.krformat.SerializationFormatSeries.XML_1_1;
-import static org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevelSeries.Abstract_Knowledge_Expression;
-import static org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevelSeries.Concrete_Knowledge_Expression;
-import static org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevelSeries.Encoded_Knowledge_Expression;
-import static org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevelSeries.Serialized_Knowledge_Expression;
+import static org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormatSeries.XML_1_1;
+import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.Abstract_Knowledge_Expression;
+import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.Concrete_Knowledge_Expression;
+import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.Encoded_Knowledge_Expression;
+import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.Serialized_Knowledge_Expression;
 
 import edu.mayo.kmdp.util.JaxbUtil;
 import edu.mayo.kmdp.util.Util;
@@ -35,7 +35,7 @@ import org.omg.spec.api4kp._20200801.AbstractCarrier.Encodings;
 import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
 import org.omg.spec.api4kp._20200801.surrogate.Annotation;
-import org.omg.spec.api4kp.taxonomy.krformat.SerializationFormat;
+import org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormat;
 import org.w3c.dom.Document;
 
 public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializeOperator {

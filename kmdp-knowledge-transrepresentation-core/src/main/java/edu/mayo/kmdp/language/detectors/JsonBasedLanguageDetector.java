@@ -16,7 +16,7 @@
 package edu.mayo.kmdp.language.detectors;
 
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
-import static org.omg.spec.api4kp.taxonomy.krformat.SerializationFormatSeries.JSON;
+import static org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormatSeries.JSON;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import edu.mayo.kmdp.util.JSonUtil;

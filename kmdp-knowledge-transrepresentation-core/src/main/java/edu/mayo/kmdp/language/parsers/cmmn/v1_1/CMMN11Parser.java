@@ -16,9 +16,9 @@
 package edu.mayo.kmdp.language.parsers.cmmn.v1_1;
 
 
-import static org.omg.spec.api4kp.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Lifting_Task;
-import static org.omg.spec.api4kp.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Lowering_Task;
-import static org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.CMMN_1_1;
+import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Lifting_Task;
+import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Lowering_Task;
+import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.CMMN_1_1;
 
 import edu.mayo.kmdp.language.DeserializeApiOperator;
 import edu.mayo.kmdp.language.parsers.XMLBasedLanguageParser;
@@ -27,7 +27,7 @@ import javax.inject.Named;
 import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
 import org.omg.spec.api4kp._20200801.services.KPOperation;
 import org.omg.spec.api4kp._20200801.services.KPSupport;
-import org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
+import org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
 import org.omg.spec.cmmn._20151109.model.ObjectFactory;
 import org.omg.spec.cmmn._20151109.model.TDefinitions;
 

@@ -1,10 +1,10 @@
 package edu.mayo.kmdp.language.parsers.fhir.stu3;
 
-import static org.omg.spec.api4kp.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Lifting_Task;
-import static org.omg.spec.api4kp.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Lowering_Task;
-import static org.omg.spec.api4kp.taxonomy.krformat.SerializationFormatSeries.JSON;
-import static org.omg.spec.api4kp.taxonomy.krformat.SerializationFormatSeries.XML_1_1;
-import static org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.FHIR_STU3;
+import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Lifting_Task;
+import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Lowering_Task;
+import static org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormatSeries.JSON;
+import static org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormatSeries.XML_1_1;
+import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.FHIR_STU3;
 
 import ca.uhn.fhir.context.FhirContext;
 import edu.mayo.kmdp.language.parsers.AbstractDeSerializeOperator;
@@ -20,8 +20,8 @@ import org.omg.spec.api4kp._20200801.services.KPOperation;
 import org.omg.spec.api4kp._20200801.services.KPSupport;
 import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
-import org.omg.spec.api4kp.taxonomy.krformat.SerializationFormat;
-import org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
+import org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormat;
+import org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
 
 @Named
 @KPOperation(Lifting_Task)

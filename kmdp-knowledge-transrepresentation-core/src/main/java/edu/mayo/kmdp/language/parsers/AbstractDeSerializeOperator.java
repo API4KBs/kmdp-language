@@ -30,8 +30,8 @@ import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
 import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
 import org.omg.spec.api4kp._20200801.services.transrepresentation.ModelMIMECoder;
-import org.omg.spec.api4kp.taxonomy.krformat.SerializationFormat;
-import org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevel;
+import org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormat;
+import org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevel;
 
 /**
  * Abstract class that implements a generic parser/serializer for a Knowledge Representation

@@ -33,7 +33,7 @@ import org.omg.spec.api4kp._20200801.services.KPServer;
 import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._20200801.services.transrepresentation.DetectionOperator;
 import org.omg.spec.api4kp._20200801.services.transrepresentation.Detector;
-import org.omg.spec.api4kp.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries;
+import org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Named

@@ -14,7 +14,7 @@
 package edu.mayo.kmdp.language.detectors;
 
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
-import static org.omg.spec.api4kp.taxonomy.krformat.SerializationFormatSeries.XML_1_1;
+import static org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormatSeries.XML_1_1;
 
 import edu.mayo.kmdp.util.JaxbUtil;
 import edu.mayo.kmdp.util.Util;

@@ -16,9 +16,9 @@
 package edu.mayo.kmdp.language.detectors.html;
 
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
-import static org.omg.spec.api4kp.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Language_Information_Detection_Task;
-import static org.omg.spec.api4kp.taxonomy.krformat.SerializationFormatSeries.TXT;
-import static org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.HTML;
+import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Language_Information_Detection_Task;
+import static org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormatSeries.TXT;
+import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.HTML;
 
 import edu.mayo.kmdp.language.DetectApiOperator;
 import edu.mayo.kmdp.language.detectors.AbstractLanguageDetector;
@@ -35,7 +35,7 @@ import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
 import org.omg.spec.api4kp._20200801.services.KPOperation;
 import org.omg.spec.api4kp._20200801.services.KPSupport;
 import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
-import org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
+import org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

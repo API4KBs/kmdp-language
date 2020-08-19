@@ -16,13 +16,13 @@
 package edu.mayo.kmdp.language.detectors.surrogate.v2;
 
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
-import static org.omg.spec.api4kp.taxonomy.krformat.SerializationFormatSeries.JSON;
-import static org.omg.spec.api4kp.taxonomy.krformat.SerializationFormatSeries.XML_1_1;
-import static org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate_2_0;
-import static org.omg.spec.api4kp.taxonomy.lexicon.LexiconSeries.Asset_Relationships_Dependencies;
-import static org.omg.spec.api4kp.taxonomy.lexicon.LexiconSeries.Asset_Relationships_Derivations;
-import static org.omg.spec.api4kp.taxonomy.lexicon.LexiconSeries.Asset_Relationships_Structural;
-import static org.omg.spec.api4kp.taxonomy.lexicon.LexiconSeries.Asset_Relationships_Variants;
+import static org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormatSeries.JSON;
+import static org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormatSeries.XML_1_1;
+import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate_2_0;
+import static org.omg.spec.api4kp._20200801.taxonomy.lexicon.LexiconSeries.Asset_Relationships_Dependencies;
+import static org.omg.spec.api4kp._20200801.taxonomy.lexicon.LexiconSeries.Asset_Relationships_Derivations;
+import static org.omg.spec.api4kp._20200801.taxonomy.lexicon.LexiconSeries.Asset_Relationships_Structural;
+import static org.omg.spec.api4kp._20200801.taxonomy.lexicon.LexiconSeries.Asset_Relationships_Variants;
 
 import edu.mayo.kmdp.language.detectors.JsonBasedLanguageDetector;
 import edu.mayo.kmdp.language.detectors.MultiFormatLanguageDetector;
@@ -37,8 +37,8 @@ import org.omg.spec.api4kp._20200801.services.KPOperation;
 import org.omg.spec.api4kp._20200801.services.KPSupport;
 import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
 import org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset;
-import org.omg.spec.api4kp.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries;
-import org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
+import org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries;
+import org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
 
 @Named
 @KPOperation(KnowledgeProcessingOperationSeries.Language_Information_Detection_Task)

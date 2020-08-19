@@ -45,7 +45,7 @@ import org.omg.spec.api4kp._20200801.id.ConceptIdentifier;
 import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
 import org.omg.spec.api4kp._20200801.id.Term;
 import org.omg.spec.api4kp._20200801.surrogate.Annotation;
-import org.omg.spec.api4kp.taxonomy.knowledgeassettype.KnowledgeAssetTypeSeries;
+import org.omg.spec.api4kp._20200801.taxonomy.knowledgeassettype.KnowledgeAssetTypeSeries;
 import org.omg.spec.dmn._20180521.model.TAuthorityRequirement;
 import org.omg.spec.dmn._20180521.model.TDMNElement.ExtensionElements;
 import org.omg.spec.dmn._20180521.model.TDMNElementReference;

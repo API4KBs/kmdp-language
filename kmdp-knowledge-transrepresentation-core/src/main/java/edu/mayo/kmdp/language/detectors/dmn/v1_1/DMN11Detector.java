@@ -13,8 +13,8 @@
  */
 package edu.mayo.kmdp.language.detectors.dmn.v1_1;
 
-import static org.omg.spec.api4kp.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Language_Information_Detection_Task;
-import static org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.DMN_1_1;
+import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Language_Information_Detection_Task;
+import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.DMN_1_1;
 
 import edu.mayo.kmdp.language.DetectApiOperator;
 import edu.mayo.kmdp.language.detectors.XMLBasedLanguageDetector;
@@ -25,7 +25,7 @@ import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
 import org.omg.spec.api4kp._20200801.services.KPOperation;
 import org.omg.spec.api4kp._20200801.services.KPSupport;
 import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
-import org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
+import org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
 import org.omg.spec.dmn._20151101.dmn.TDefinitions;
 
 @Named

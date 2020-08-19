@@ -23,9 +23,7 @@ import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.Deseriali
 import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.DeserializeApiInternal._applyNamedLift;
 import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
 import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
-import org.omg.spec.api4kp.taxonomy.parsinglevel.ParsingLevel;
-
-;
+import org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevel;
 
 public interface Lifter extends _applyLift, _applyNamedLift {
 

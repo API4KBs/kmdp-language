@@ -17,11 +17,11 @@ package edu.mayo.kmdp.language.translators.dmn.v1_2;
 
 import static java.util.Collections.singletonList;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
-import static org.omg.spec.api4kp.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Syntactic_Translation_Task;
-import static org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.DMN_1_2;
-import static org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.FHIR_STU3;
-import static org.omg.spec.api4kp.taxonomy.lexicon.LexiconSeries.PCV;
-import static org.omg.spec.api4kp.taxonomy.lexicon.LexiconSeries.SNOMED_CT;
+import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Syntactic_Translation_Task;
+import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.DMN_1_2;
+import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.FHIR_STU3;
+import static org.omg.spec.api4kp._20200801.taxonomy.lexicon.LexiconSeries.PCV;
+import static org.omg.spec.api4kp._20200801.taxonomy.lexicon.LexiconSeries.SNOMED_CT;
 
 import edu.mayo.kmdp.language.translators.AbstractSimpleTranslator;
 import java.util.List;
@@ -35,7 +35,7 @@ import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
 import org.omg.spec.api4kp._20200801.services.KPOperation;
 import org.omg.spec.api4kp._20200801.services.KPSupport;
 import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
-import org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
+import org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
 import org.omg.spec.dmn._20180521.model.TDefinitions;
 
 @Named

@@ -133,49 +133,49 @@ public class SurrogateToLibrary {
     return artifact;
   }
 
-  private org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguage mapLanguage(
+  private org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguage mapLanguage(
       KnowledgeRepresentationLanguage language) {
     if (language == null) {
       return null;
     }
-    return org.omg.spec.api4kp.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries
+    return org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries
         .resolveUUID(language.getUuid()).orElse(null);
   }
 
-  private org.omg.spec.api4kp.taxonomy.krprofile.KnowledgeRepresentationLanguageProfile mapProfile(
+  private org.omg.spec.api4kp._20200801.taxonomy.krprofile.KnowledgeRepresentationLanguageProfile mapProfile(
       KnowledgeRepresentationLanguageProfile profile) {
     if (profile == null) {
       return null;
     }
-    return org.omg.spec.api4kp.taxonomy.krprofile.KnowledgeRepresentationLanguageProfileSeries
+    return org.omg.spec.api4kp._20200801.taxonomy.krprofile.KnowledgeRepresentationLanguageProfileSeries
         .resolveUUID(profile.getUuid()).orElse(null);
   }
 
-  private org.omg.spec.api4kp.taxonomy.krserialization.KnowledgeRepresentationLanguageSerialization mapSerialization(
+  private org.omg.spec.api4kp._20200801.taxonomy.krserialization.KnowledgeRepresentationLanguageSerialization mapSerialization(
       KnowledgeRepresentationLanguageSerialization serialization) {
     if (serialization == null) {
       return null;
     }
-    return org.omg.spec.api4kp.taxonomy.krserialization.KnowledgeRepresentationLanguageSerializationSeries
+    return org.omg.spec.api4kp._20200801.taxonomy.krserialization.KnowledgeRepresentationLanguageSerializationSeries
         .resolveUUID(serialization.getUuid()).orElse(null);
   }
 
-  private org.omg.spec.api4kp.taxonomy.krformat.SerializationFormat mapFormat(
+  private org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormat mapFormat(
       SerializationFormat format) {
     if (format == null) {
       return null;
     }
-    return org.omg.spec.api4kp.taxonomy.krformat.SerializationFormatSeries
+    return org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormatSeries
         .resolveUUID(format.getUuid()).orElse(null);
   }
 
-  private List<org.omg.spec.api4kp.taxonomy.lexicon.Lexicon> mapLexicon(
+  private List<org.omg.spec.api4kp._20200801.taxonomy.lexicon.Lexicon> mapLexicon(
       Collection<Lexicon> lexicaList) {
     if (lexicaList == null || lexicaList.isEmpty()) {
       return Collections.emptyList();
     }
     return lexicaList.stream()
-        .map(lexicon -> org.omg.spec.api4kp.taxonomy.lexicon.LexiconSeries
+        .map(lexicon -> org.omg.spec.api4kp._20200801.taxonomy.lexicon.LexiconSeries
             .resolveUUID(lexicon.getUuid()).orElse(null))
         .filter(Objects::nonNull)
         .collect(Collectors.toList());
