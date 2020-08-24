@@ -34,9 +34,6 @@ public class SurrogateV1ToSurrogateV2 {
     surrogateV2.withRole(surrogateV1.getRole());
     surrogateV2.withName(surrogateV1.getName());
     surrogateV2.withDescription(surrogateV1.getDescription());
-    if (Optional.ofNullable(surrogateV1.getLifecycle()).isEmpty()) {
-      throw new IllegalArgumentException("Source surrogate must have lifecycle - none found");
-    }
     mapLifecycleToSurrogateV2(surrogateV1.getLifecycle(), surrogateV2);
     surrogateV1.getCitations().forEach(cit -> mapCitationToSurrogateV2(cit, surrogateV2));
     surrogateV1.getRelated().forEach(assoc -> mapRelatedItemToLinkList(assoc, surrogateV2));
@@ -62,9 +59,11 @@ public class SurrogateV1ToSurrogateV2 {
   private void mapLifecycleToSurrogateV2(Publication lifecycle,
       edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset surrogateV2) {
     edu.mayo.kmdp.metadata.v2.surrogate.Publication newPublication = new edu.mayo.kmdp.metadata.v2.surrogate.Publication();
-    //TODO: missing .withAssociatedTo(new Party().withPublishingRole(Author))
-    newPublication.withPublicationStatus(lifecycle.getPublicationStatus());
-    surrogateV2.withLifecycle(newPublication);
+    if (Optional.ofNullable(lifecycle).isPresent()) {
+      //TODO: missing .withAssociatedTo(new Party().withPublishingRole(Author))
+      newPublication.withPublicationStatus(lifecycle.getPublicationStatus());
+      surrogateV2.withLifecycle(newPublication);
+    }
   }
 
   private void mapCarrierToSurrogateV2(edu.mayo.kmdp.metadata.surrogate.KnowledgeArtifact car,
@@ -81,10 +80,14 @@ public class SurrogateV1ToSurrogateV2 {
       newCarrier.withExpressionCategory(oldCarrier.getExpressionCategory());
       newCarrier.withTitle(oldCarrier.getTitle());
       edu.mayo.kmdp.metadata.v2.surrogate.Summary newSummary = new edu.mayo.kmdp.metadata.v2.surrogate.Summary();
-      newSummary.withRel(oldCarrier.getSummary().getRel());
-      newCarrier.withSummary(newSummary);
-
-      //TODO: Should be representation and syntacticRepresentation from V1 mapped to syntacticRepresentation on V2.
+      if(Optional.ofNullable(oldCarrier.getSummary()).isPresent()) {
+        newSummary.withRel(oldCarrier.getSummary().getRel());
+        newCarrier.withSummary(newSummary);
+      }
+      if(Optional.ofNullable(oldCarrier.getInlined()).isPresent()) {
+        InlinedRepresentation inlinedRepresentation = oldCarrier.getInlined();
+        newCarrier.setInlinedExpression(inlinedRepresentation.getExpr());
+      }
       Representation oldCarrierRepresentation = oldCarrier.getRepresentation();
       SyntacticRepresentation newRep = new SyntacticRepresentation();
 
@@ -93,17 +96,14 @@ public class SurrogateV1ToSurrogateV2 {
       newRep.withFormat(oldCarrierRepresentation.getFormat());
       newRep.withLexicon(oldCarrierRepresentation.getLexicon());
       newRep.withSerialization(oldCarrierRepresentation.getSerialization());
-      //sub language logic... I think...
       List<SyntacticRepresentation> subLanguages = new ArrayList<>();
       oldCarrierRepresentation.getWith()
           .forEach(sl -> subLanguages.add(new SyntacticRepresentation().withRole(sl.getRole())));
       newRep.withSubLanguage(subLanguages);
-      //TODO: how to add to newCarrier... not seeing withRepresentation or withSyntacticRepresentation.
       newCarrier.withRepresentation(newRep);
       surrogateV2.withCarriers(newCarrier);
     } else {
-      throw new UnsupportedOperationException(
-          "Knowledge Artifact isn't a ComputableKnowledgeArtifact so no mapping at this level can be done.");
+      throw new UnsupportedOperationException("Knowledge Artifact isn't a ComputableKnowledgeArtifact so no mapping at this level can be done.");
     }
   }
 
@@ -121,15 +121,14 @@ public class SurrogateV1ToSurrogateV2 {
     surrogateV2.withAnnotation(newAnnotation);
   }
 
-
   private ResourceIdentifier getResourceIdFromOldAssociation(KnowledgeResource resource) {
-    if (resource instanceof KnowledgeAsset) {
-      KnowledgeAsset targetAsset = (KnowledgeAsset) resource;
+    if (resource instanceof edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset) {
+      edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset targetAsset = (edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset)resource;
       URIIdentifier oldAssetId = targetAsset.getAssetId();
       return SemanticIdentifier.newVersionId(oldAssetId.getVersionId());
+    } else {
+      throw new IllegalStateException("Knowledge Resource is not a Knowledge Asset.");
     }
-
-    throw new IllegalStateException("Knowledge Resource is not a Knowledge Asset.");
   }
 
   private void mapRelatedItemToLinkList(Association assoc,
@@ -138,9 +137,11 @@ public class SurrogateV1ToSurrogateV2 {
     //create the new ResourceId
     ResourceIdentifier resourceId = getResourceIdFromOldAssociation(assoc.getTgt());
     KnowledgeResource resource = assoc.getTgt();
-
-    if (resource instanceof KnowledgeAsset && isFullResource((KnowledgeAsset) resource)) {
-      transformKnowledgeAsset((KnowledgeAsset) resource);
+    if (resource instanceof edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset && this.isFullResource((edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset)resource)) {
+      edu.mayo.kmdp.metadata.v2.surrogate.Dependency dependencyLink = (new edu.mayo.kmdp.metadata.v2.surrogate.Dependency()).withHref(resourceId);
+      dependencyLink.setRel(((Dependency)assoc).getRel());
+      surrogateV2.getLinks().add(dependencyLink);
+      this.transformKnowledgeAsset((edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset)resource);
     } else if (assoc instanceof Derivative) {
       //need to create the new knowledge asset and add to list.
       edu.mayo.kmdp.metadata.v2.surrogate.Derivative newDerivative = new edu.mayo.kmdp.metadata.v2.surrogate.Derivative()
@@ -157,6 +158,7 @@ public class SurrogateV1ToSurrogateV2 {
           .withHref(resourceId);
       dependencyLink.setRel(((Dependency) assoc).getRel());
       surrogateV2.getLinks().add(dependencyLink);
+      this.transformKnowledgeAsset((edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset)resource);
     } else if (assoc instanceof Component) {
       edu.mayo.kmdp.metadata.v2.surrogate.Component dependencyLink = new edu.mayo.kmdp.metadata.v2.surrogate.Component()
           .withHref(resourceId);

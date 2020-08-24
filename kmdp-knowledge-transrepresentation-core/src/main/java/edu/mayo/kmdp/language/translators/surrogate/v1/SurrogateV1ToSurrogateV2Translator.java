@@ -11,17 +11,17 @@ import static org.omg.spec.api4kp._1_0.AbstractCarrier.rep;
 import edu.mayo.kmdp.language.parsers.surrogate.v1.SurrogateParser;
 import edu.mayo.kmdp.language.translators.AbstractSimpleTranslator;
 import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
+import edu.mayo.kmdp.metadata.v2.surrogate.Link;
 import edu.mayo.kmdp.metadata.v2.surrogate.SurrogateHelper;
 import edu.mayo.kmdp.tranx.v4.server.DeserializeApiInternal._applyLift;
 import edu.mayo.ontology.taxonomies.api4kp.knowledgeoperations.KnowledgeProcessingOperationSeries;
 import edu.mayo.ontology.taxonomies.api4kp.parsinglevel.ParsingLevelSeries;
 import edu.mayo.ontology.taxonomies.krlanguage.KnowledgeRepresentationLanguage;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.UUID;
+
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import org.omg.spec.api4kp._1_0.AbstractCarrier;
 import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
 import org.omg.spec.api4kp._1_0.id.SemanticIdentifier;
@@ -112,12 +112,22 @@ public class SurrogateV1ToSurrogateV2Translator extends
   protected KnowledgeCarrier wrap(SyntacticRepresentation tgtRep,
       Collection<edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset> translatedArtifact,
       ResourceIdentifier mappedAssetId, ResourceIdentifier mappedArtifactId) {
-    return AbstractCarrier.ofIdentifiableSet(
+
+    Function getImmediateChildren = getImmediateChildrenFunction();
+
+    return AbstractCarrier.ofIdentifiableTree(
         rep(getTargetLanguage()),
         edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset::getAssetId,
         ka -> SurrogateHelper.getSurrogateId(ka, Knowledge_Asset_Surrogate_2_0,JSON)
             .orElse(SemanticIdentifier.randomId()),
-        translatedArtifact
+        getImmediateChildren,
+        mappedAssetId,
+        translatedArtifact.stream()
+            .collect(Collectors.toMap(edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset::getAssetId, knowledgeAsset -> knowledgeAsset))
     ).withRootId(mappedAssetId);
+  }
+
+  public Function<edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset, List<Link>> getImmediateChildrenFunction() {
+    return edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset::getLinks;
   }
 }
