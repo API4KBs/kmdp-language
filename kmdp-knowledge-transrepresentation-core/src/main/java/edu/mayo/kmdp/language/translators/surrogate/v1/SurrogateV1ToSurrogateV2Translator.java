@@ -113,21 +113,19 @@ public class SurrogateV1ToSurrogateV2Translator extends
       Collection<edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset> translatedArtifact,
       ResourceIdentifier mappedAssetId, ResourceIdentifier mappedArtifactId) {
 
-    Function getImmediateChildren = getImmediateChildrenFunction();
-
     return AbstractCarrier.ofIdentifiableTree(
         rep(getTargetLanguage()),
         edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset::getAssetId,
         ka -> SurrogateHelper.getSurrogateId(ka, Knowledge_Asset_Surrogate_2_0,JSON)
             .orElse(SemanticIdentifier.randomId()),
-        getImmediateChildren,
+        getImmediateChildrenFunction(),
         mappedAssetId,
         translatedArtifact.stream()
             .collect(Collectors.toMap(edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset::getAssetId, knowledgeAsset -> knowledgeAsset))
     ).withRootId(mappedAssetId);
   }
 
-  public Function<edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset, List<Link>> getImmediateChildrenFunction() {
-    return edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset::getLinks;
+  public Function getImmediateChildrenFunction() {
+    return ka -> ((edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset) ka).getLinks();
   }
 }
