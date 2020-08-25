@@ -4,15 +4,29 @@ import static edu.mayo.kmdp.util.StreamUtil.filterAs;
 
 import edu.mayo.kmdp.id.helper.DatatypeHelper;
 import edu.mayo.kmdp.metadata.annotations.SimpleAnnotation;
-import edu.mayo.kmdp.metadata.surrogate.*;
+import edu.mayo.kmdp.metadata.surrogate.Association;
+import edu.mayo.kmdp.metadata.surrogate.Component;
+import edu.mayo.kmdp.metadata.surrogate.ComputableKnowledgeArtifact;
+import edu.mayo.kmdp.metadata.surrogate.Dependency;
+import edu.mayo.kmdp.metadata.surrogate.Derivative;
+import edu.mayo.kmdp.metadata.surrogate.InlinedRepresentation;
+import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
+import edu.mayo.kmdp.metadata.surrogate.KnowledgeResource;
+import edu.mayo.kmdp.metadata.surrogate.Publication;
+import edu.mayo.kmdp.metadata.surrogate.Representation;
+import edu.mayo.kmdp.metadata.surrogate.Variant;
+import edu.mayo.kmdp.metadata.surrogate.Version;
 import edu.mayo.kmdp.metadata.v2.surrogate.Citation;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import org.omg.spec.api4kp._1_0.id.ResourceIdentifier;
 import org.omg.spec.api4kp._1_0.id.SemanticIdentifier;
 import org.omg.spec.api4kp._1_0.identifiers.URIIdentifier;
 import org.omg.spec.api4kp._1_0.services.SyntacticRepresentation;
-
-import java.util.*;
-import java.util.Collection;
 
 public class SurrogateV1ToSurrogateV2 {
 
