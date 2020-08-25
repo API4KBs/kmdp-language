@@ -32,12 +32,13 @@ public class SurrogateTranslatorTest {
 
   @Test
   void TestSurrogateV1toV2Translation() {
-    KnowledgeCarrier knowledgeCarrier = translateKnowledgeAssetToSurrogateV2()
-        .orElseGet(Assertions::fail);
+    KnowledgeCarrier knowledgeCarrier =
+        translateKnowledgeAssetToSurrogateV2().orElseGet(Assertions::fail);
     assertTrue(knowledgeCarrier instanceof CompositeKnowledgeCarrier);
 
     edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset surrogateV2 =
-        knowledgeCarrier.mainComponent()
+        knowledgeCarrier
+            .mainComponent()
             .as(edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset.class)
             .orElseGet(Assertions::fail);
 
@@ -45,8 +46,7 @@ public class SurrogateTranslatorTest {
     assertFalse(surrogateV2.getFormalCategory().isEmpty());
     assertFalse(surrogateV2.getFormalType().isEmpty());
 
-    assertEquals(1,surrogateV2.getCarriers().size());
-
+    assertEquals(1, surrogateV2.getCarriers().size());
   }
 
   @Test
@@ -58,22 +58,24 @@ public class SurrogateTranslatorTest {
     Dependency dependency1 = new Dependency();
     UUID uuid1 = UUID.randomUUID();
     dependency1.setHref(new ResourceIdentifier().withUuid(uuid1).withVersionTag("0.0.0"));
-    Function<edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset, List<Link>> getImmediateChildren = v1ToV2Translator.getImmediateChildrenFunction();
+    Function<edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset, List<Link>> getImmediateChildren =
+        v1ToV2Translator.getImmediateChildrenFunction();
     edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset surrogate =
-            new edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset()
+        new edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset()
             .withLinks(Arrays.asList(dependency, dependency1));
     List<Link> links = getImmediateChildren.apply(surrogate);
     assertEquals(links.get(0).getHref().getUuid(), uuid);
     assertEquals(links.get(1).getHref().getUuid(), uuid1);
-
   }
 
   Answer<KnowledgeCarrier> translateKnowledgeAssetToSurrogateV2() {
-    return Answer.of(AbstractCarrier.ofAst(meta)
-        .withAssetId(DatatypeHelper.toSemanticIdentifier(meta.getAssetId()))
-        .withRepresentation(rep(Knowledge_Asset_Surrogate)))
-        .flatMap(kc -> v1ToV2Translator
-            .try_applyTransrepresent(kc, encode(rep(Knowledge_Asset_Surrogate_2_0)), null));
-
+    return Answer.of(
+            AbstractCarrier.ofAst(meta)
+                .withAssetId(DatatypeHelper.toSemanticIdentifier(meta.getAssetId()))
+                .withRepresentation(rep(Knowledge_Asset_Surrogate)))
+        .flatMap(
+            kc ->
+                v1ToV2Translator.try_applyTransrepresent(
+                    kc, encode(rep(Knowledge_Asset_Surrogate_2_0)), null));
   }
 }

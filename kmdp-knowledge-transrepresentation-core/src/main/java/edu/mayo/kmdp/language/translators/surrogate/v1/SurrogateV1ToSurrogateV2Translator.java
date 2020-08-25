@@ -109,20 +109,26 @@ public class SurrogateV1ToSurrogateV2Translator extends
   }
 
   @Override
-  protected KnowledgeCarrier wrap(SyntacticRepresentation tgtRep,
+  protected KnowledgeCarrier wrap(
+      SyntacticRepresentation tgtRep,
       Collection<edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset> translatedArtifact,
-      ResourceIdentifier mappedAssetId, ResourceIdentifier mappedArtifactId) {
+      ResourceIdentifier mappedAssetId,
+      ResourceIdentifier mappedArtifactId) {
 
     return AbstractCarrier.ofIdentifiableTree(
-        rep(getTargetLanguage()),
-        edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset::getAssetId,
-        ka -> SurrogateHelper.getSurrogateId(ka, Knowledge_Asset_Surrogate_2_0,JSON)
-            .orElse(SemanticIdentifier.randomId()),
-        getImmediateChildrenFunction(),
-        mappedAssetId,
-        translatedArtifact.stream()
-            .collect(Collectors.toMap(edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset::getAssetId, knowledgeAsset -> knowledgeAsset))
-    ).withRootId(mappedAssetId);
+            rep(getTargetLanguage()),
+            edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset::getAssetId,
+            ka ->
+                SurrogateHelper.getSurrogateId(ka, Knowledge_Asset_Surrogate_2_0, JSON)
+                    .orElse(SemanticIdentifier.randomId()),
+            getImmediateChildrenFunction(),
+            mappedAssetId,
+            translatedArtifact.stream()
+                .collect(
+                    Collectors.toMap(
+                        edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset::getAssetId,
+                        knowledgeAsset -> knowledgeAsset)))
+        .withRootId(mappedAssetId);
   }
 
   public Function getImmediateChildrenFunction() {
