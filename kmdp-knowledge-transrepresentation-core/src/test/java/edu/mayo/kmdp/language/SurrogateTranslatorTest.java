@@ -7,26 +7,27 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
 import static org.omg.spec.api4kp._20200801.services.transrepresentation.ModelMIMECoder.encode;
+import static org.omg.spec.api4kp._20200801.taxonomy.dependencyreltype.DependencyTypeSeries.Imports;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate_2_0;
 
 import edu.mayo.kmdp.language.translators.surrogate.v1.SurrogateV1ToSurrogateV2Translator;
 import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
-import edu.mayo.kmdp.metadata.v2.surrogate.Dependency;
-import edu.mayo.kmdp.metadata.v2.surrogate.Link;
-import edu.mayo.ontology.taxonomies.kao.rel.dependencyreltype.DependencyTypeSeries;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.omg.spec.api4kp._1_0.identifiers.URIIdentifier;
 import org.omg.spec.api4kp._20200801.AbstractCarrier;
 import org.omg.spec.api4kp._20200801.Answer;
 import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
 import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
 import org.omg.spec.api4kp._20200801.services.CompositeKnowledgeCarrier;
 import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
+import org.omg.spec.api4kp._20200801.surrogate.Dependency;
+import org.omg.spec.api4kp._20200801.surrogate.Link;
 
 class SurrogateTranslatorTest {
 
@@ -53,16 +54,16 @@ class SurrogateTranslatorTest {
   @Test
   void TestGetImmediateChildrenFunction() {
     Dependency dependency = new Dependency();
-    dependency.setRel(DependencyTypeSeries.Imports);
+    dependency.setRel(Imports);
     UUID uuid = UUID.randomUUID();
     dependency.setHref(new ResourceIdentifier().withUuid(uuid).withVersionTag("0.0.0"));
     Dependency dependency1 = new Dependency();
     UUID uuid1 = UUID.randomUUID();
     dependency1.setHref(new ResourceIdentifier().withUuid(uuid1).withVersionTag("0.0.0"));
-    Function<edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset, List<Link>> getImmediateChildren =
-        v1ToV2Translator.getImmediateChildrenFunction();
-    edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset surrogate =
-        new edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset()
+    Function<org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset, List<Link>> getImmediateChildren =
+        org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset::getLinks;
+    org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset surrogate =
+        new org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset()
             .withLinks(Arrays.asList(dependency, dependency1));
     List<Link> links = getImmediateChildren.apply(surrogate);
     assertEquals(links.get(0).getHref().getUuid(), uuid);

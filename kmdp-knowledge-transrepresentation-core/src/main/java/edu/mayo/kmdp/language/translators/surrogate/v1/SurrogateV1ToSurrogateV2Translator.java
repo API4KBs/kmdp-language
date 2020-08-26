@@ -13,13 +13,16 @@ import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSe
 import edu.mayo.kmdp.language.parsers.surrogate.v1.SurrogateParser;
 import edu.mayo.kmdp.language.translators.AbstractSimpleTranslator;
 import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.UUID;
-
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.omg.spec.api4kp._20200801.AbstractCarrier;
 import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.DeserializeApiInternal._applyLift;
 import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
@@ -35,6 +38,7 @@ import org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentation
 @KPSupport(Knowledge_Asset_Surrogate)
 public class SurrogateV1ToSurrogateV2Translator extends
     AbstractSimpleTranslator<KnowledgeAsset, Collection<org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset>> {
+
   public static final UUID id = UUID.fromString("ca69756f-6ba6-439f-88a0-ca957f5454e0");
   public static final String version = "1.0.0";
 
@@ -117,18 +121,20 @@ public class SurrogateV1ToSurrogateV2Translator extends
       ResourceIdentifier mappedArtifactId) {
 
     return AbstractCarrier.ofIdentifiableTree(
-            rep(getTargetLanguage()),
-        org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset.KnowledgeAsset::getAssetId,
-            ka ->
-                SurrogateHelper.getSurrogateId(ka, Knowledge_Asset_Surrogate_2_0, JSON)
-                    .orElse(SemanticIdentifier.randomId()),
-            getImmediateChildrenFunction(),
-            mappedAssetId,
-            translatedArtifact.stream()
-                .collect(
-                    Collectors.toMap(
-                        edu.mayo.kmdp.metadata.v2.surrogate.KnowledgeAsset::getAssetId,
-                        knowledgeAsset -> knowledgeAsset)))
-        .withRootId(mappedAssetId);
+        rep(getTargetLanguage()),
+        org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset::getAssetId,
+        ka -> SurrogateHelper.getSurrogateId(
+            ka, Knowledge_Asset_Surrogate_2_0, JSON)
+            .orElseGet(SemanticIdentifier::randomId),
+        org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset::getLinks,
+        mappedAssetId,
+        translatedArtifact.stream()
+            .collect(
+                Collectors.toMap(
+                    org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset::getAssetId,
+                    knowledgeAsset -> knowledgeAsset))
+    ).withRootId(mappedAssetId);
   }
+
+
 }

@@ -8,7 +8,6 @@ import edu.mayo.kmdp.metadata.surrogate.Component;
 import edu.mayo.kmdp.metadata.surrogate.ComputableKnowledgeArtifact;
 import edu.mayo.kmdp.metadata.surrogate.Dependency;
 import edu.mayo.kmdp.metadata.surrogate.Derivative;
-import edu.mayo.kmdp.metadata.surrogate.InlinedRepresentation;
 import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
 import edu.mayo.kmdp.metadata.surrogate.KnowledgeResource;
 import edu.mayo.kmdp.metadata.surrogate.Publication;
@@ -128,7 +127,6 @@ public class SurrogateV1ToSurrogateV2 {
       ComputableKnowledgeArtifact oldCarrier = (ComputableKnowledgeArtifact) car;
       org.omg.spec.api4kp._20200801.surrogate.KnowledgeArtifact newCarrier = new org.omg.spec.api4kp._20200801.surrogate.KnowledgeArtifact();
 
-
       newCarrier.withArtifactId(
           SemanticIdentifier.newVersionId(oldCarrier.getArtifactId().getUri()));
       newCarrier.withAlternativeTitle(oldCarrier.getAlternativeTitle());
@@ -149,7 +147,7 @@ public class SurrogateV1ToSurrogateV2 {
       newRep.withLanguage(
           mapTerm(oldCarrierRepresentation.getLanguage(),
               KnowledgeRepresentationLanguageSeries::resolveUUID,
-          KnowledgeRepresentationLanguage.class));
+              KnowledgeRepresentationLanguage.class));
       newRep.withProfile(
           mapTerm(oldCarrierRepresentation.getProfile(),
               KnowledgeRepresentationLanguageProfileSeries::resolveUUID,
@@ -169,8 +167,9 @@ public class SurrogateV1ToSurrogateV2 {
       List<SyntacticRepresentation> subLanguages = new ArrayList<>();
       oldCarrierRepresentation.getWith()
           .forEach(sl -> subLanguages.add(new SyntacticRepresentation()
-              .withRole(mapTerm(sl.getRole(), KnowledgeRepresentationLanguageRoleSeries::resolveUUID,
-                  KnowledgeRepresentationLanguageRole.class))));
+              .withRole(
+                  mapTerm(sl.getRole(), KnowledgeRepresentationLanguageRoleSeries::resolveUUID,
+                      KnowledgeRepresentationLanguageRole.class))));
       newRep.withSubLanguage(subLanguages);
       newCarrier.withRepresentation(newRep);
       surrogateV2.withCarriers(newCarrier);
@@ -181,7 +180,7 @@ public class SurrogateV1ToSurrogateV2 {
   }
 
   // Should be more elegant, but the tangled type hierarchies confuse the resolution of the parametric types
-  private <N,T> N mapTerm(T oldTerm, Function<UUID,?> mapper, Class<N> ret) {
+  private <N, T> N mapTerm(T oldTerm, Function<UUID, ?> mapper, Class<N> ret) {
     return Optional.ofNullable(oldTerm)
         .map(ScopedIdentifier.class::cast)
         .map(ScopedIdentifier::getUuid)
@@ -194,7 +193,8 @@ public class SurrogateV1ToSurrogateV2 {
   }
 
   // Should be more elegant, but the tangled type hierarchies confuse the resolution of the parametric types
-  private <N,T> Collection<N> mapTerm(Collection<T> oldTerm, Function<UUID,?> mapper, Class<N> ret) {
+  private <N, T> Collection<N> mapTerm(Collection<T> oldTerm, Function<UUID, ?> mapper,
+      Class<N> ret) {
     return oldTerm.stream()
         .map(ScopedIdentifier.class::cast)
         .map(ScopedIdentifier::getUuid)
@@ -232,52 +232,68 @@ public class SurrogateV1ToSurrogateV2 {
       throw new IllegalStateException("Knowledge Resource is not a Knowledge Asset.");
     }
   }
+
   private void mapRelatedItemToLinkList(Association assoc,
       org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset surrogateV2) {
 
     // create the new ResourceId
     ResourceIdentifier resourceId = getResourceIdFromOldAssociation(assoc.getTgt());
+
     KnowledgeResource resource = assoc.getTgt();
-    if (resource instanceof edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset
-        && this.isFullResource((edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset) resource)) {
-      edu.mayo.kmdp.metadata.v2.surrogate.Dependency dependencyLink =
-          (new edu.mayo.kmdp.metadata.v2.surrogate.Dependency()).withHref(resourceId);
-      dependencyLink.setRel(((Dependency) assoc).getRel());
-      surrogateV2.getLinks().add(dependencyLink);
+    if (isFullAssetResource(resource)) {
       this.transformKnowledgeAsset((edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset) resource);
-    } else if (assoc instanceof Derivative) {
-     //need to create the new knowledge asset and add to list.
-      org.omg.spec.api4kp._20200801.surrogate.Derivative newDerivative = new org.omg.spec.api4kp._20200801.surrogate.Derivative()
-          .withHref(resourceId);
+    }
+
+    if (assoc instanceof Derivative) {
+      //need to create the new knowledge asset and add to list.
+      org.omg.spec.api4kp._20200801.surrogate.Derivative newDerivative
+          = new org.omg.spec.api4kp._20200801.surrogate.Derivative().withHref(resourceId);
       newDerivative.setRel(TermMapper.mapDerivative(((Derivative) assoc).getRel()));
       surrogateV2.getLinks().add(newDerivative);
     } else if (assoc instanceof Version) {
-      org.omg.spec.api4kp._20200801.surrogate.Version newVersionLink = new org.omg.spec.api4kp._20200801.surrogate.Version()
-          .withHref(resourceId);
+      org.omg.spec.api4kp._20200801.surrogate.Version newVersionLink
+          = new org.omg.spec.api4kp._20200801.surrogate.Version().withHref(resourceId);
       newVersionLink.setRel(TermMapper.mapRelatedVersion(((Version) assoc).getRel()));
       surrogateV2.getLinks().add(newVersionLink);
     } else if (assoc instanceof Dependency) {
-      org.omg.spec.api4kp._20200801.surrogate.Dependency dependencyLink = new org.omg.spec.api4kp._20200801.surrogate.Dependency()
-          .withHref(resourceId);
+      org.omg.spec.api4kp._20200801.surrogate.Dependency dependencyLink
+          = new org.omg.spec.api4kp._20200801.surrogate.Dependency().withHref(resourceId);
       dependencyLink.setRel(TermMapper.mapDependency(((Dependency) assoc).getRel()));
       surrogateV2.getLinks().add(dependencyLink);
-      this.transformKnowledgeAsset((edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset) resource);
     } else if (assoc instanceof Component) {
-      org.omg.spec.api4kp._20200801.surrogate.Component dependencyLink = new org.omg.spec.api4kp._20200801.surrogate.Component()
-          .withHref(resourceId);
+      org.omg.spec.api4kp._20200801.surrogate.Component dependencyLink
+          = new org.omg.spec.api4kp._20200801.surrogate.Component().withHref(resourceId);
       dependencyLink.setRel(TermMapper.mapComponentRels(((Component) assoc).getRel()));
       surrogateV2.getLinks().add(dependencyLink);
     } else if (assoc instanceof Variant) {
-      org.omg.spec.api4kp._20200801.surrogate.Variant variantLink = new org.omg.spec.api4kp._20200801.surrogate.Variant()
-          .withHref(resourceId);
+      org.omg.spec.api4kp._20200801.surrogate.Variant variantLink =
+          new org.omg.spec.api4kp._20200801.surrogate.Variant().withHref(resourceId);
       variantLink.setRel(TermMapper.mapVariant(((Variant) assoc).getRel()));
       surrogateV2.getLinks().add(variantLink);
     }
   }
 
-  private boolean isFullResource(KnowledgeAsset resource) {
-    return !resource.getFormalCategory().isEmpty()
-        || !resource.getRelated().isEmpty()
-        || !resource.getCarriers().isEmpty();
+  private boolean isFullAssetResource(KnowledgeResource resource) {
+    if (!(resource instanceof KnowledgeAsset)) {
+      return false;
+    }
+    KnowledgeAsset axx = (KnowledgeAsset) resource;
+    return !axx.getFormalCategory().isEmpty()
+        || !axx.getRelated().isEmpty()
+        || !axx.getCarriers().isEmpty();
+  }
+
+  public static org.omg.spec.api4kp._20200801.id.ConceptIdentifier fromLegacyConceptIdentifier(
+      ConceptIdentifier v) {
+    if (v == null) {
+      return null;
+    }
+    return new org.omg.spec.api4kp._20200801.id.ConceptIdentifier()
+        .withUuid(v.getConceptUUID())
+        .withResourceId(v.getConceptId())
+        .withTag(v.getTag())
+        .withNamespaceUri(v.getNamespace().getId())
+        .withName(v.getLabel())
+        .withReferentId(v.getRef());
   }
 }
