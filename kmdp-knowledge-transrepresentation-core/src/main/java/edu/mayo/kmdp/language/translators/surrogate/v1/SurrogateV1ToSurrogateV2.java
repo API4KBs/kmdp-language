@@ -84,10 +84,9 @@ public class SurrogateV1ToSurrogateV2 {
         KnowledgeAssetRoleSeries::resolveUUID, KnowledgeAssetRole.class));
     surrogateV2.withName(surrogateV1.getName());
     surrogateV2.withDescription(surrogateV1.getDescription());
-    if (Optional.ofNullable(surrogateV1.getLifecycle()).isEmpty()) {
-      throw new IllegalArgumentException("Source surrogate must have lifecycle - none found");
+    if (Optional.ofNullable(surrogateV1.getLifecycle()).isPresent()) {
+      mapLifecycleToSurrogateV2(surrogateV1.getLifecycle(), surrogateV2);
     }
-    mapLifecycleToSurrogateV2(surrogateV1.getLifecycle(), surrogateV2);
     surrogateV1.getCitations().forEach(cit -> mapCitationToSurrogateV2(cit, surrogateV2));
     surrogateV1.getRelated().forEach(assoc -> mapRelatedItemToLinkList(assoc, surrogateV2));
 
@@ -132,13 +131,17 @@ public class SurrogateV1ToSurrogateV2 {
       newCarrier.withAlternativeTitle(oldCarrier.getAlternativeTitle());
       newCarrier.withLocalization(mapTerm(oldCarrier.getLocalization(), LanguageSeries::resolveUUID,
           Language.class));
-      newCarrier.withExpressionCategory(mapTerm(oldCarrier.getExpressionCategory(),
-          KnowledgeArtifactCategorySeries::resolveUUID, IKnowledgeArtifactCategory.class));
+      if(Optional.ofNullable(oldCarrier.getExpressionCategory()).isPresent()) {
+        newCarrier.withExpressionCategory(mapTerm(oldCarrier.getExpressionCategory(),
+            KnowledgeArtifactCategorySeries::resolveUUID, IKnowledgeArtifactCategory.class));
+      }
       newCarrier.withTitle(oldCarrier.getTitle());
 
       org.omg.spec.api4kp._20200801.surrogate.Summary newSummary = new org.omg.spec.api4kp._20200801.surrogate.Summary();
-      newSummary.withRel(TermMapper.mapSummarization(oldCarrier.getSummary().getRel()));
-      newCarrier.withSummary(newSummary);
+      if (Optional.ofNullable(oldCarrier.getSummary()).isPresent()) {
+        newSummary.withRel(TermMapper.mapSummarization(oldCarrier.getSummary().getRel()));
+        newCarrier.withSummary(newSummary);
+      }
 
       //TODO: Should be representation and syntacticRepresentation from V1 mapped to syntacticRepresentation on V2.
       Representation oldCarrierRepresentation = oldCarrier.getRepresentation();
@@ -148,10 +151,13 @@ public class SurrogateV1ToSurrogateV2 {
           mapTerm(oldCarrierRepresentation.getLanguage(),
               KnowledgeRepresentationLanguageSeries::resolveUUID,
               KnowledgeRepresentationLanguage.class));
-      newRep.withProfile(
-          mapTerm(oldCarrierRepresentation.getProfile(),
-              KnowledgeRepresentationLanguageProfileSeries::resolveUUID,
-              KnowledgeRepresentationLanguageProfile.class));
+      if (Optional.ofNullable(oldCarrierRepresentation.getProfile()).isPresent()) {
+        newRep.withProfile(
+            mapTerm(
+                oldCarrierRepresentation.getProfile(),
+                KnowledgeRepresentationLanguageProfileSeries::resolveUUID,
+                KnowledgeRepresentationLanguageProfile.class));
+      }
       newRep.withFormat(
           mapTerm(oldCarrierRepresentation.getFormat(),
               SerializationFormatSeries::resolveUUID,
@@ -159,10 +165,13 @@ public class SurrogateV1ToSurrogateV2 {
       newRep.withLexicon(
           mapTerm(oldCarrierRepresentation.getLexicon(),
               LexiconSeries::resolveUUID, Lexicon.class));
-      newRep.withSerialization(
-          mapTerm(oldCarrierRepresentation.getSerialization(),
-              KnowledgeRepresentationLanguageSerializationSeries::resolveUUID,
-              KnowledgeRepresentationLanguageSerialization.class));
+      if (Optional.ofNullable(oldCarrierRepresentation.getSerialization()).isPresent()) {
+        newRep.withSerialization(
+            mapTerm(
+                oldCarrierRepresentation.getSerialization(),
+                KnowledgeRepresentationLanguageSerializationSeries::resolveUUID,
+                KnowledgeRepresentationLanguageSerialization.class));
+      }
       //sub language logic... I think...
       List<SyntacticRepresentation> subLanguages = new ArrayList<>();
       oldCarrierRepresentation.getWith()

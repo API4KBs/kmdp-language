@@ -70,35 +70,35 @@ class SurrogateTranslatorTest {
     assertEquals(links.get(1).getHref().getUuid(), uuid1);
   }
 
-  @Test
-  void TestSurrogateV1toV2Translation_noLifecycle_ThrowsException() {
-
-    meta.setLifecycle(null);
-
-    SurrogateV1ToSurrogateV2Translator v1ToV2Translator = new SurrogateV1ToSurrogateV2Translator();
-    KnowledgeCarrier kc = AbstractCarrier.ofAst(meta)
-            .withAssetId(fromURIIdentifier(meta.getAssetId()))
-            .withRepresentation(rep(Knowledge_Asset_Surrogate));
-
-    assertThrows(IllegalArgumentException.class, () -> {
-      v1ToV2Translator.applyTransrepresent(kc, encode(rep(Knowledge_Asset_Surrogate_2_0)), null);
-    });
-  }
-
-  @Test
-  void TestSurrogateV1toV2Translation_noSummary_ThrowsException() {
-
-    meta.setLifecycle(null);
-
-    SurrogateV1ToSurrogateV2Translator v1ToV2Translator = new SurrogateV1ToSurrogateV2Translator();
-    KnowledgeCarrier kc = AbstractCarrier.ofAst(meta)
-            .withAssetId(fromURIIdentifier(meta.getAssetId()))
-            .withRepresentation(rep(Knowledge_Asset_Surrogate));
-
-    assertThrows(IllegalArgumentException.class, () -> {
-      v1ToV2Translator.applyTransrepresent(kc, encode(rep(Knowledge_Asset_Surrogate_2_0)), null);
-    });
-  }
+//  @Test
+//  void TestSurrogateV1toV2Translation_noLifecycle_ThrowsException() {
+//
+//    meta.setLifecycle(null);
+//
+//    SurrogateV1ToSurrogateV2Translator v1ToV2Translator = new SurrogateV1ToSurrogateV2Translator();
+//    KnowledgeCarrier kc = AbstractCarrier.ofAst(meta)
+//            .withAssetId(fromURIIdentifier(meta.getAssetId()))
+//            .withRepresentation(rep(Knowledge_Asset_Surrogate));
+//
+//    assertThrows(IllegalArgumentException.class, () -> {
+//      v1ToV2Translator.applyTransrepresent(kc, encode(rep(Knowledge_Asset_Surrogate_2_0)), null);
+//    });
+//  }
+//
+//  @Test
+//  void TestSurrogateV1toV2Translation_noSummary_ThrowsException() {
+//
+//    meta.setLifecycle(null);
+//
+//    SurrogateV1ToSurrogateV2Translator v1ToV2Translator = new SurrogateV1ToSurrogateV2Translator();
+//    KnowledgeCarrier kc = AbstractCarrier.ofAst(meta)
+//            .withAssetId(fromURIIdentifier(meta.getAssetId()))
+//            .withRepresentation(rep(Knowledge_Asset_Surrogate));
+//
+//    assertThrows(IllegalArgumentException.class, () -> {
+//      v1ToV2Translator.applyTransrepresent(kc, encode(rep(Knowledge_Asset_Surrogate_2_0)), null);
+//    });
+//  }
 
   Answer<KnowledgeCarrier> translateKnowledgeAssetToSurrogateV2() {
 
