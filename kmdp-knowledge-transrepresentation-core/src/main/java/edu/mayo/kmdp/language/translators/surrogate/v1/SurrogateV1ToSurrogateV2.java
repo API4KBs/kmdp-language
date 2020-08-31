@@ -84,7 +84,7 @@ public class SurrogateV1ToSurrogateV2 {
         KnowledgeAssetRoleSeries::resolveUUID, KnowledgeAssetRole.class));
     surrogateV2.withName(surrogateV1.getName());
     surrogateV2.withDescription(surrogateV1.getDescription());
-    if (Optional.ofNullable(surrogateV1.getLifecycle()).isPresent()) {
+    if (surrogateV1.getLifecycle() != null) {
       mapLifecycleToSurrogateV2(surrogateV1.getLifecycle(), surrogateV2);
     }
     surrogateV1.getCitations().forEach(cit -> mapCitationToSurrogateV2(cit, surrogateV2));
@@ -131,14 +131,14 @@ public class SurrogateV1ToSurrogateV2 {
       newCarrier.withAlternativeTitle(oldCarrier.getAlternativeTitle());
       newCarrier.withLocalization(mapTerm(oldCarrier.getLocalization(), LanguageSeries::resolveUUID,
           Language.class));
-      if(Optional.ofNullable(oldCarrier.getExpressionCategory()).isPresent()) {
+      if(oldCarrier.getExpressionCategory() != null) {
         newCarrier.withExpressionCategory(mapTerm(oldCarrier.getExpressionCategory(),
             KnowledgeArtifactCategorySeries::resolveUUID, IKnowledgeArtifactCategory.class));
       }
       newCarrier.withTitle(oldCarrier.getTitle());
 
       org.omg.spec.api4kp._20200801.surrogate.Summary newSummary = new org.omg.spec.api4kp._20200801.surrogate.Summary();
-      if (Optional.ofNullable(oldCarrier.getSummary()).isPresent()) {
+      if (oldCarrier.getSummary() != null) {
         newSummary.withRel(TermMapper.mapSummarization(oldCarrier.getSummary().getRel()));
         newCarrier.withSummary(newSummary);
       }
@@ -151,7 +151,7 @@ public class SurrogateV1ToSurrogateV2 {
           mapTerm(oldCarrierRepresentation.getLanguage(),
               KnowledgeRepresentationLanguageSeries::resolveUUID,
               KnowledgeRepresentationLanguage.class));
-      if (Optional.ofNullable(oldCarrierRepresentation.getProfile()).isPresent()) {
+      if (oldCarrierRepresentation.getProfile() != null) {
         newRep.withProfile(
             mapTerm(
                 oldCarrierRepresentation.getProfile(),
@@ -165,7 +165,7 @@ public class SurrogateV1ToSurrogateV2 {
       newRep.withLexicon(
           mapTerm(oldCarrierRepresentation.getLexicon(),
               LexiconSeries::resolveUUID, Lexicon.class));
-      if (Optional.ofNullable(oldCarrierRepresentation.getSerialization()).isPresent()) {
+      if (oldCarrierRepresentation.getSerialization() != null) {
         newRep.withSerialization(
             mapTerm(
                 oldCarrierRepresentation.getSerialization(),
