@@ -173,6 +173,10 @@ public class SurrogateV1ToSurrogateV2 {
       newRep.withSubLanguage(subLanguages);
       newCarrier.withRepresentation(newRep);
       surrogateV2.withCarriers(newCarrier);
+
+      if (car.getInlined() != null) {
+        newCarrier.setInlinedExpression(car.getInlined().getExpr());
+      }
     } else {
       throw new UnsupportedOperationException(
           "Knowledge Artifact isn't a ComputableKnowledgeArtifact so no mapping at this level can be done.");

@@ -202,7 +202,7 @@ public abstract class AbstractDeSerializeOperator
       SyntacticRepresentation into,
       Properties config) {
     switch (toLevel.asEnum()) {
-      case Concrete_Knowledge_Expression:
+      case Serialized_Knowledge_Expression:
         return Optional.ofNullable(expr);
       case Encoded_Knowledge_Expression:
       default:
