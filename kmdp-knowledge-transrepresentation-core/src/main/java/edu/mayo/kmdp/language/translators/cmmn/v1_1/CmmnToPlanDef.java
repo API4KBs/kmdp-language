@@ -13,6 +13,8 @@
  */
 package edu.mayo.kmdp.language.translators.cmmn.v1_1;
 
+import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.snapshot.SemanticAnnotationRelType.Captures;
+
 import edu.mayo.kmdp.util.StreamUtil;
 import edu.mayo.ontology.taxonomies.kmdo.annotationreltype.AnnotationRelTypeSeries;
 import edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries;
@@ -99,8 +101,12 @@ public class CmmnToPlanDef {
     mapName(cpm, caseModel);
     mapSubject(cpm, caseModel);
 
-    processStage(tCase.getCasePlanModel(), assetId, caseModel)
-        .forEach(cpm::addAction);
+    try {
+      processStage(tCase.getCasePlanModel(), assetId, caseModel)
+          .forEach(cpm::addAction);
+    } catch (Throwable t) {
+      t.printStackTrace();
+    }
 
     return cpm;
   }
@@ -185,6 +191,8 @@ public class CmmnToPlanDef {
         // Implement mapping of TEventListener
       } else if (definition instanceof THumanTask) {
         mappedPlanElements.add(this.processHumanTask(planItem, (THumanTask) definition, caseModel));
+      } else if (definition instanceof TTask) {
+        mappedPlanElements.add(this.processGenericTask(planItem, (TTask) definition, caseModel));
       } else {
         throw new UnsupportedOperationException(
             "Cannot process " + definition.getClass().getName());
@@ -334,6 +342,20 @@ public class CmmnToPlanDef {
     return planAction;
   }
 
+  private PlanDefinition.PlanDefinitionActionComponent processGenericTask(
+      TPlanItem planItem,
+      TTask task,
+      TDefinitions caseModel) {
+    PlanDefinition.PlanDefinitionActionComponent planAction
+        = processTask(task, caseModel, planItem);
+
+    planAction.setType(new Coding()
+        .setSystem("TODO")
+        .setCode("Generic Task")
+    );
+    return planAction;
+  }
+
   private PlanDefinition.PlanDefinitionActionComponent processDecisionTask(
       TPlanItem planItem,
       TDecisionTask tDecisionTask,
@@ -436,6 +458,9 @@ public class CmmnToPlanDef {
 
 
   private static Collection<Term> getTypeCode(TExtensionElements extensionElements) {
+    if (extensionElements == null) {
+      return Collections.emptyList();
+    }
     return getTypeCode(extensionElements.getAny());
   }
 
@@ -446,7 +471,7 @@ public class CmmnToPlanDef {
 
     return extensionElements.stream()
         .flatMap(StreamUtil.filterAs(Annotation.class))
-        .filter(ann -> AnnotationRelTypeSeries.Captures.getTag().equals(ann.getRel().getTag()))
+        .filter(ann -> Captures.sameAs(ann.getRel()))
         .map(Annotation::getRef)
         .map(Term.class::cast)
         .collect(Collectors.toList());

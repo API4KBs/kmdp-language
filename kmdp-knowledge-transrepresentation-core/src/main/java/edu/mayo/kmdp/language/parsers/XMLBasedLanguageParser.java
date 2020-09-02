@@ -25,6 +25,7 @@ import edu.mayo.kmdp.util.Util;
 import edu.mayo.kmdp.util.XMLUtil;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -52,8 +53,18 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializeOpera
 
   @Override
   public Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier, Properties config) {
-    return carrier.asString()
-        .map(str -> newVerticalCarrier(carrier, Serialized_Knowledge_Expression, null, str));
+    // This probably needs to be generalized based on the actual encoding type
+    Object expr = carrier.getExpression();
+    String serializedExpr;
+    if (expr instanceof String) {
+      serializedExpr = new String(Base64.getDecoder().decode((String)expr));
+    } else if (expr instanceof byte[]) {
+      serializedExpr = new String((byte[]) expr);
+    } else {
+      serializedExpr = null;
+    }
+    return Optional.ofNullable(serializedExpr)
+        .map(s -> newVerticalCarrier(carrier, Serialized_Knowledge_Expression, null, s));
   }
 
   @Override
