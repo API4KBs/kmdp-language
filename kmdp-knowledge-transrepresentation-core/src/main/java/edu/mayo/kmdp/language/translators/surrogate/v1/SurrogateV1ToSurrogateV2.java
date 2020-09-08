@@ -178,7 +178,11 @@ public class SurrogateV1ToSurrogateV2 {
           .forEach(sl -> subLanguages.add(new SyntacticRepresentation()
               .withRole(
                   mapTerm(sl.getRole(), KnowledgeRepresentationLanguageRoleSeries::resolveUUID,
-                      KnowledgeRepresentationLanguageRole.class))));
+                      KnowledgeRepresentationLanguageRole.class))
+              .withLanguage(
+                  mapTerm(sl.getSubLanguage().getLanguage(), KnowledgeRepresentationLanguageSeries::resolveUUID,
+                      KnowledgeRepresentationLanguage.class)
+              )));
       newRep.withSubLanguage(subLanguages);
       newCarrier.withRepresentation(newRep);
       surrogateV2.withCarriers(newCarrier);
