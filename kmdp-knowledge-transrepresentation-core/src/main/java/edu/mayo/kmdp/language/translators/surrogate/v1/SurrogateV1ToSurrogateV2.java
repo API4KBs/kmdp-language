@@ -142,48 +142,7 @@ public class SurrogateV1ToSurrogateV2 {
         newSummary.withRel(TermMapper.mapSummarization(oldCarrier.getSummary().getRel()));
         newCarrier.withSummary(newSummary);
       }
-
-      //TODO: Should be representation and syntacticRepresentation from V1 mapped to syntacticRepresentation on V2.
-      Representation oldCarrierRepresentation = oldCarrier.getRepresentation();
-      SyntacticRepresentation newRep = new SyntacticRepresentation();
-
-      newRep.withLanguage(
-          mapTerm(oldCarrierRepresentation.getLanguage(),
-              KnowledgeRepresentationLanguageSeries::resolveUUID,
-              KnowledgeRepresentationLanguage.class));
-      if (oldCarrierRepresentation.getProfile() != null) {
-        newRep.withProfile(
-            mapTerm(
-                oldCarrierRepresentation.getProfile(),
-                KnowledgeRepresentationLanguageProfileSeries::resolveUUID,
-                KnowledgeRepresentationLanguageProfile.class));
-      }
-      newRep.withFormat(
-          mapTerm(oldCarrierRepresentation.getFormat(),
-              SerializationFormatSeries::resolveUUID,
-              SerializationFormat.class));
-      newRep.withLexicon(
-          mapTerm(oldCarrierRepresentation.getLexicon(),
-              LexiconSeries::resolveUUID, Lexicon.class));
-      if (oldCarrierRepresentation.getSerialization() != null) {
-        newRep.withSerialization(
-            mapTerm(
-                oldCarrierRepresentation.getSerialization(),
-                KnowledgeRepresentationLanguageSerializationSeries::resolveUUID,
-                KnowledgeRepresentationLanguageSerialization.class));
-      }
-      //sub language logic... I think...
-      List<SyntacticRepresentation> subLanguages = new ArrayList<>();
-      oldCarrierRepresentation.getWith()
-          .forEach(sl -> subLanguages.add(new SyntacticRepresentation()
-              .withRole(
-                  mapTerm(sl.getRole(), KnowledgeRepresentationLanguageRoleSeries::resolveUUID,
-                      KnowledgeRepresentationLanguageRole.class))
-              .withLanguage(
-                  mapTerm(sl.getSubLanguage().getLanguage(), KnowledgeRepresentationLanguageSeries::resolveUUID,
-                      KnowledgeRepresentationLanguage.class)
-              )));
-      newRep.withSubLanguage(subLanguages);
+      SyntacticRepresentation newRep = mapRepresentation(oldCarrier.getRepresentation());
       newCarrier.withRepresentation(newRep);
       surrogateV2.withCarriers(newCarrier);
 
@@ -194,6 +153,44 @@ public class SurrogateV1ToSurrogateV2 {
       throw new UnsupportedOperationException(
           "Knowledge Artifact isn't a ComputableKnowledgeArtifact so no mapping at this level can be done.");
     }
+  }
+
+  public SyntacticRepresentation mapRepresentation(Representation sourceRepresentation) {
+    SyntacticRepresentation targetSyntacticRepresentation = new SyntacticRepresentation();
+    targetSyntacticRepresentation.withLanguage(
+        mapTerm(sourceRepresentation.getLanguage(),
+            KnowledgeRepresentationLanguageSeries::resolveUUID,
+            KnowledgeRepresentationLanguage.class));
+    if (sourceRepresentation.getProfile() != null) {
+      targetSyntacticRepresentation.withProfile(
+          mapTerm(
+              sourceRepresentation.getProfile(),
+              KnowledgeRepresentationLanguageProfileSeries::resolveUUID,
+              KnowledgeRepresentationLanguageProfile.class));
+    }
+    targetSyntacticRepresentation.withFormat(
+        mapTerm(sourceRepresentation.getFormat(),
+            SerializationFormatSeries::resolveUUID,
+            SerializationFormat.class));
+    targetSyntacticRepresentation.withLexicon(
+        mapTerm(sourceRepresentation.getLexicon(),
+            LexiconSeries::resolveUUID, Lexicon.class));
+    if (sourceRepresentation.getSerialization() != null) {
+      targetSyntacticRepresentation.withSerialization(
+          mapTerm(
+              sourceRepresentation.getSerialization(),
+              KnowledgeRepresentationLanguageSerializationSeries::resolveUUID,
+              KnowledgeRepresentationLanguageSerialization.class));
+    }
+    List<SyntacticRepresentation> subLanguages = new ArrayList<>();
+    sourceRepresentation.getWith()
+        .forEach(sl -> subLanguages.add(mapRepresentation(sl.getSubLanguage())
+            .withRole(
+                mapTerm(sl.getRole(), KnowledgeRepresentationLanguageRoleSeries::resolveUUID,
+                    KnowledgeRepresentationLanguageRole.class))
+        ));
+    targetSyntacticRepresentation.withSubLanguage(subLanguages);
+    return targetSyntacticRepresentation;
   }
 
   // Should be more elegant, but the tangled type hierarchies confuse the resolution of the parametric types

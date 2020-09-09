@@ -61,64 +61,60 @@ public class MockSurrogateKnowledgeAsset {
         .withRole(Operational_Concept_Definition)
         .withName("Diabetes Treatment Plan")
         .withDescription("Description of Diabetes...")
-        .withSubject(new SimpleAnnotation().withExpr(
-            toLegacyConceptIdentifier(Term.mock("mock", "12345").asConceptIdentifier()))
-            .withRel(
-                toLegacyConceptIdentifier(Has_Focus.asConceptIdentifier())))
+        .withSubject(
+            new SimpleAnnotation()
+                .withExpr(
+                    toLegacyConceptIdentifier(Term.mock("mock", "12345").asConceptIdentifier()))
+                .withRel(toLegacyConceptIdentifier(Has_Focus.asConceptIdentifier())))
         .withRelated(
             new Component()
                 .withRel(StructuralPartTypeSeries.Has_Proper_Part)
                 .withTgt(ref(UUID.randomUUID(), "1")))
         .withRelated(
-            new Derivative().withRel(Derived_From)
+            new Derivative()
+                .withRel(Derived_From)
                 .withTgt(ref(UUID.randomUUID(), "99").withName("Sub Assett Test")))
+        .withRelated(new Derivative().withRel(Derived_From).withTgt(ref(UUID.randomUUID(), "2")))
+        .withRelated(new Dependency().withRel(Depends_On).withTgt(ref(UUID.randomUUID(), "3")))
+        .withRelated(new Variant().withRel(Translation_Of).withTgt(ref(UUID.randomUUID(), "4")))
         .withRelated(
-            new Derivative().withRel(Derived_From)
-                .withTgt(ref(UUID.randomUUID(), "2")))
-        .withRelated(
-            new Dependency().withRel(Depends_On)
-                .withTgt(ref(UUID.randomUUID(), "3")))
-        .withRelated(
-            new Variant().withRel(Translation_Of)
-                .withTgt(ref(UUID.randomUUID(), "4")))
-        .withRelated(
-            new Version().withRel(Has_Previous_Version)
-                .withTgt(ref(UUID.randomUUID(), "5")))
+            new Version().withRel(Has_Previous_Version).withTgt(ref(UUID.randomUUID(), "5")))
         .withCitations(
-            new Citation().withRel(Cites_As_Authority)
+            new Citation()
+                .withRel(Cites_As_Authority)
                 .withBibliography("F.F. Very Important Paper."))
         .withLifecycle(
             new Publication()
                 .withPublicationStatus(Published)
-                .withAssociatedTo(new Party().withPublishingRole(Author))
-        )
+                .withAssociatedTo(new Party().withPublishingRole(Author)))
         .withCarriers(
             new ComputableKnowledgeArtifact()
                 .withArtifactId(uri(BASE_UUID_URN + "f2b9828d-f84c-4d09-9c88-413c7f1439a4", "000"))
                 .withLocalization(LanguageSeries.Italian)
                 .withExpressionCategory(Software)
                 .withTitle("A mock example")
-                .withSummary(
-                    new Summary().withRel(Compact_Representation_Of))
-                .withRepresentation(new Representation()
-                    .withLanguage(DMN_1_1)
-                    .withProfile(CQL_Essentials)
-                    .withFormat(TXT)
-                    .withLexicon(SNOMED_CT)
-                    .withSerialization(DMN_1_1_XML_Syntax)
-                    .withWith(
-                        new SubLanguage()
-                            .withRole(Schema_Language))
-                )
-        )
+                .withSummary(new Summary().withRel(Compact_Representation_Of))
+                .withRepresentation(
+                    new Representation()
+                        .withLanguage(DMN_1_1)
+                        .withProfile(CQL_Essentials)
+                        .withFormat(TXT)
+                        .withLexicon(SNOMED_CT)
+                        .withSerialization(DMN_1_1_XML_Syntax)
+                        .withWith(
+                            new SubLanguage()
+                                .withRole(Schema_Language)
+                                .withSubLanguage(
+                                    new Representation()
+                                        .withLanguage(DMN_1_1)
+                                        .withProfile(CQL_Essentials)
+                                        .withFormat(TXT)
+                                        .withLexicon(SNOMED_CT)))))
         .withSurrogate(
             new ComputableKnowledgeArtifact()
                 .withArtifactId(
                     uri(BASE_UUID_URN + "a42e2cef-be7f-4aab-82ba-fe6f12495e3f", "65464"))
-                .withRepresentation(new Representation()
-                    .withLanguage(Knowledge_Asset_Surrogate)
-                )
-        );
+                .withRepresentation(new Representation().withLanguage(Knowledge_Asset_Surrogate)));
   }
 
   private URIIdentifier uri(String base, String version) {
