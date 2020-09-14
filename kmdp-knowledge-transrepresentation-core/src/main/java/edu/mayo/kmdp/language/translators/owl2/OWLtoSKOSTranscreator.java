@@ -49,7 +49,7 @@ import org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentation
 @Named
 @KPOperation(Transcreation_Task)
 @KPSupport(OWL_2)
-public class OWLtoSKOSTranscreator extends AbstractSimpleTranslator<String,String> {
+public class OWLtoSKOSTranscreator extends AbstractSimpleTranslator<Model,Model> {
 
   public static final UUID id = UUID.fromString("57869ee0-304c-40a4-8759-40ea667c328d");
   public static final String version = "1.0.0";
@@ -61,9 +61,10 @@ public class OWLtoSKOSTranscreator extends AbstractSimpleTranslator<String,Strin
   @Override
   public List<SyntacticRepresentation> getFrom() {
     return Arrays.asList(
+        rep(OWL_2),
+        rep(OWL_2, RDF_XML_Syntax),
         rep(OWL_2, RDF_XML_Syntax, XML_1_1, Charset.defaultCharset()),
-        rep(OWL_2, RDF_XML_Syntax, XML_1_1,Charset.defaultCharset(), Encodings.DEFAULT)
-        );
+        rep(OWL_2, RDF_XML_Syntax, XML_1_1,Charset.defaultCharset(), Encodings.DEFAULT));
   }
 
   @Override
@@ -75,32 +76,39 @@ public class OWLtoSKOSTranscreator extends AbstractSimpleTranslator<String,Strin
         .withLexicon(SKOS));
   }
 
+  protected Optional<Model> transformAst(
+      ResourceIdentifier assetId, Model model,
+      SyntacticRepresentation tgtRep,
+      Properties config) {
+    return new Owl2SkosConverter()
+        .apply(model, new Owl2SkosConfig().from(config));
+  }
+
+  protected Optional<Model> transformTree(
+      ResourceIdentifier assetId, Object tree,
+      SyntacticRepresentation tgtRep,
+      Properties config) {
+    throw new UnsupportedOperationException();
+  }
+
   @Override
-  protected Optional<String> transformString(ResourceIdentifier assetId, String str,
+  protected Optional<Model> transformString(ResourceIdentifier assetId, String str,
       SyntacticRepresentation tgtRep, Properties config) {
     return doTransform(new ByteArrayInputStream(str.getBytes()), config);
   }
 
   @Override
-  protected Optional<String> transformBinary(ResourceIdentifier assetId, byte[] bytes,
+  protected Optional<Model> transformBinary(ResourceIdentifier assetId, byte[] bytes,
       SyntacticRepresentation tgtRep, Properties config) {
     return doTransform(new ByteArrayInputStream(bytes), config);
   }
 
-  protected Optional<String> doTransform(InputStream is, Properties params) {
+  protected Optional<Model> doTransform(InputStream is, Properties params) {
     Model model = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
     model = model.read(is, null);
 
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    new Owl2SkosConverter()
-        .apply(model, (Owl2SkosConfig) params)
-        .ifPresent(m -> m.write(baos));
-
-    String skos = new String(baos.toByteArray());
-    if (Util.isEmpty(skos)) {
-      throw new UnsupportedOperationException();
-    }
-    return Optional.of(skos);
+    return new Owl2SkosConverter()
+        .apply(model, (Owl2SkosConfig) params);
   }
 
   protected Owl2SkosConfig readProperties(String properties) {

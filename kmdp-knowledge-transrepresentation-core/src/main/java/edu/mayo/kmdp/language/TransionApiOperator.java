@@ -69,7 +69,7 @@ public interface TransionApiOperator
       SyntacticRepresentation targetRepresentation,
       Object targetArtifact,
       ResourceIdentifier mappedAssetId,
-      ResourceIdentifier mappedArtifactId) {
+      ResourceIdentifier mappedArtifactId, String label) {
 
     ParsingLevel targetLevel = ParsingLevelContrastor.detectLevel(targetRepresentation);
 
@@ -92,6 +92,7 @@ public interface TransionApiOperator
     return newCarrier.withAssetId(mappedAssetId)
         .withArtifactId(mappedArtifactId)
         .withLevel(targetLevel)
+        .withLabel(label)
         .withRepresentation(targetRepresentation);
   }
 }

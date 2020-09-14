@@ -13,7 +13,6 @@
  */
 package edu.mayo.kmdp.language;
 
-import static edu.mayo.kmdp.util.StreamUtil.filterAs;
 import static edu.mayo.kmdp.util.Util.uuid;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -32,8 +31,8 @@ import edu.mayo.kmdp.language.translators.owl2.OWLtoSKOSTranscreator;
 import edu.mayo.kmdp.terms.skosifier.Owl2SkosConfig;
 import edu.mayo.kmdp.terms.skosifier.Owl2SkosConfig.OWLtoSKOSTxParams;
 import edu.mayo.kmdp.util.FileUtil;
+import edu.mayo.kmdp.util.JenaUtil;
 import edu.mayo.kmdp.util.NameUtils;
-import edu.mayo.kmdp.util.StreamUtil;
 import edu.mayo.kmdp.util.Util;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -44,7 +43,11 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import org.eclipse.rdf4j.model.vocabulary.SKOS;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.SKOS;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.omg.spec.api4kp._20200801.AbstractCarrier;
@@ -53,12 +56,8 @@ import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.DeserializeApi;
 import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.TransxionApi;
 import org.omg.spec.api4kp._20200801.services.KPComponent;
 import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
+import org.omg.spec.api4kp._20200801.services.transrepresentation.ModelMIMECoder;
 import org.omg.spec.api4kp._20200801.taxonomy.lexicon.LexiconSeries;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLNamedIndividual;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.search.EntitySearcher;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -87,7 +86,11 @@ public class TranscreationTest {
         Answer.of(owl)
             .map(o -> AbstractCarrier.of(o, rep(OWL_2,RDF_XML_Syntax,XML_1_1)))
             .flatMap(
-                kc -> transtor.applyNamedTransrepresent(OWLtoSKOSTranscreator.id, kc, null, cfg.encode()))
+                kc -> transtor.applyNamedTransrepresent(
+                    OWLtoSKOSTranscreator.id,
+                    kc,
+                    ModelMIMECoder.encode(rep(OWL_2)),
+                    cfg.encode()))
             .flatMap(kc -> parser.applyLift(kc, Abstract_Knowledge_Expression));
 
     assertTrue(ans.isSuccess());
@@ -96,18 +99,18 @@ public class TranscreationTest {
 
   private void checkSKOS(KnowledgeCarrier ac) {
     assertNotNull(ac);
-    OWLOntology onto = ac.as(OWLOntology.class)
+    OntModel onto = ac.as(OntModel.class)
         .orElseGet(Assertions::fail);
 
-    OWLDataFactory f = onto.getOWLOntologyManager().getOWLDataFactory();
-    List<UUID> names = EntitySearcher.getIndividuals(f.getOWLClass(SKOS.CONCEPT.toString()), onto)
-        .flatMap(filterAs(OWLNamedIndividual.class))
-        .map(OWLNamedIndividual::getIRI)
-        .map(IRI::toString)
-        .map(NameUtils::getTrailingPart)
-        .map(Util::ensureUUID)
-        .flatMap(StreamUtil::trimStream)
-        .collect(Collectors.toList());
+    List<UUID> names = onto.listIndividuals()
+        .filterKeep(ind -> ind.hasOntClass(SKOS.Concept))
+        .mapWith(Resource::getURI)
+        .mapWith(NameUtils::getTrailingPart)
+        .mapWith(Util::ensureUUID)
+        .filterKeep(Optional::isPresent)
+        .mapWith(Optional::get)
+        .toList();
+
     assertEquals(new HashSet<>(Arrays.asList(
         uuid("A"),
         uuid("B"),
@@ -175,7 +178,11 @@ public class TranscreationTest {
     Answer<KnowledgeCarrier> ac = transtor
         .listTxionOperators(codedRep(kc.getRepresentation()), codedRep(OWL_2,LexiconSeries.SKOS))
         .flatMap(Answer::first)
-        .flatMap(op -> transtor.applyNamedTransrepresent(op.getOperatorId().getUuid(), kc, null, cfg.encode()))
+        .flatMap(op -> transtor.applyNamedTransrepresent(
+            op.getOperatorId().getUuid(),
+            kc,
+            ModelMIMECoder.encode(rep(OWL_2)),
+            cfg.encode()))
         .flatMap(out -> parser.applyLift(out, Abstract_Knowledge_Expression));
 
     assertTrue(ac.isSuccess());

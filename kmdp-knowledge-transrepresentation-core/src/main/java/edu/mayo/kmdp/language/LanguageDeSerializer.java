@@ -38,8 +38,6 @@ import org.omg.spec.api4kp._20200801.services.transrepresentation.Deserializer;
 import org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 
-;
-
 @Named
 @KPServer
 public class LanguageDeSerializer implements KnowledgePlatformComponent<Deserializer>,

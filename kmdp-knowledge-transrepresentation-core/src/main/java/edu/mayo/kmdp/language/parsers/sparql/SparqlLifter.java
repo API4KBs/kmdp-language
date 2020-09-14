@@ -65,7 +65,7 @@ public class SparqlLifter
   @Override
   public Answer<KnowledgeCarrier> applyLift(KnowledgeCarrier knowledgeCarrier,
       ParsingLevel parsingLevel, String xAccept, String config) {
-    Properties props = PropertiesUtil.doParse(config);
+    Properties props = PropertiesUtil.parseProperties(config);
     //TODO should check for consistency between source level and targetLevel;
 
     switch (parsingLevel.asEnum()) {

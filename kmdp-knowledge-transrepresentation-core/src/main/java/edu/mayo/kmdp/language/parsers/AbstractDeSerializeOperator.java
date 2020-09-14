@@ -71,7 +71,7 @@ public abstract class AbstractDeSerializeOperator
               parsingLevel,
               ModelMIMECoder.decode(into)
                   .orElse(inferRepresentationForLevel(getSupportedRepresentations(),parsingLevel)),
-              PropertiesUtil.doParse(properties)
+              PropertiesUtil.parseProperties(properties)
           ));
     } catch (UnsupportedOperationException e) {
       return Answer.failed(e);
@@ -86,7 +86,7 @@ public abstract class AbstractDeSerializeOperator
           lower(knowledgeCarrier, parsingLevel,
               ModelMIMECoder.decode(into)
                   .orElse(inferRepresentationForLevel(getSupportedRepresentations(),parsingLevel)),
-              PropertiesUtil.doParse(properties)));
+              PropertiesUtil.parseProperties(properties)));
     } catch (UnsupportedOperationException e) {
       return Answer.failed(e);
     }

@@ -74,20 +74,20 @@ public abstract class AbstractSimpleTranslator<S,T>
         return src.asBinary()
             .flatMap(bytes -> transformBinary(src.getAssetId(), bytes, tgtRep, config))
             .map(out -> wrap(
-                tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getArtifactId())));
+                tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getArtifactId()), src.getLabel()));
       case Serialized_Knowledge_Expression:
         return src.asString()
             .flatMap(str -> transformString(src.getAssetId(), str, tgtRep, config))
             .map(out -> wrap(
-                tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getArtifactId())));
+                tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getArtifactId()), src.getLabel()));
       case Concrete_Knowledge_Expression:
         return transformTree(src.getAssetId(), src.getExpression(), tgtRep, config)
             .map(out -> wrap(
-                tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getArtifactId())));
+                tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getArtifactId()), src.getLabel()));
       case Abstract_Knowledge_Expression:
         return transformAst(src.getAssetId(), (S) src.getExpression(), tgtRep, config)
             .map(out -> wrap(
-                tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getArtifactId())));
+                tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getArtifactId()), src.getLabel()));
       default:
         throw new UnsupportedOperationException();
     }
@@ -97,9 +97,10 @@ public abstract class AbstractSimpleTranslator<S,T>
       SyntacticRepresentation tgtRep,
       T translatedArtifact,
       ResourceIdentifier mappedAssetId,
-      ResourceIdentifier mappedArtifactId) {
+      ResourceIdentifier mappedArtifactId,
+      String label) {
     return TransionApiOperator.newHorizontalCarrier(
-        tgtRep, translatedArtifact, mappedAssetId, mappedArtifactId);
+        tgtRep, translatedArtifact, mappedAssetId, mappedArtifactId, label);
   }
 
   protected Optional<T> transformAst(
@@ -143,7 +144,7 @@ public abstract class AbstractSimpleTranslator<S,T>
   }
 
   protected Properties readProperties(String properties) {
-    return PropertiesUtil.doParse(properties);
+    return PropertiesUtil.parseProperties(properties);
   }
 
 

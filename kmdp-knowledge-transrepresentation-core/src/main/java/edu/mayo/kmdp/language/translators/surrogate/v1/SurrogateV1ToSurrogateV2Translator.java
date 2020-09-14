@@ -13,15 +13,12 @@ import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSe
 import edu.mayo.kmdp.language.parsers.surrogate.v1.SurrogateParser;
 import edu.mayo.kmdp.language.translators.AbstractSimpleTranslator;
 import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.omg.spec.api4kp._20200801.AbstractCarrier;
 import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.DeserializeApiInternal._applyLift;
@@ -102,7 +99,8 @@ public class SurrogateV1ToSurrogateV2Translator extends
     }
 
     return legacySurr.map(out -> wrap(
-        tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getArtifactId())));
+        tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getArtifactId()),
+        src.getLabel()));
   }
 
 
@@ -118,7 +116,7 @@ public class SurrogateV1ToSurrogateV2Translator extends
       SyntacticRepresentation tgtRep,
       Collection<org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset> translatedArtifact,
       ResourceIdentifier mappedAssetId,
-      ResourceIdentifier mappedArtifactId) {
+      ResourceIdentifier mappedArtifactId, String label) {
 
     return AbstractCarrier.ofIdentifiableTree(
         rep(getTargetLanguage()),
@@ -126,6 +124,7 @@ public class SurrogateV1ToSurrogateV2Translator extends
         ka -> SurrogateHelper.getSurrogateId(
             ka, Knowledge_Asset_Surrogate_2_0, JSON)
             .orElseGet(SemanticIdentifier::randomId),
+        org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset::getName,
         org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset::getLinks,
         mappedAssetId,
         translatedArtifact.stream()

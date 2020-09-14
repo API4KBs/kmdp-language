@@ -97,7 +97,8 @@ public class SurrogateV2toSurrogateV1Translator extends
     }
 
     return legacySurr.map(out -> wrap(
-        tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getArtifactId())));
+        tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getArtifactId()),
+        src.getLabel()));
   }
 
   @Override
