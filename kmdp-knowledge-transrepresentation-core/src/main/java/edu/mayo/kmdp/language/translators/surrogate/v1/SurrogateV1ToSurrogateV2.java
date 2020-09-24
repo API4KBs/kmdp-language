@@ -34,7 +34,7 @@ import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
 import org.omg.spec.api4kp._20200801.surrogate.Citation;
 import org.omg.spec.api4kp._20200801.taxonomy.iso639_2_languagecode.Language;
 import org.omg.spec.api4kp._20200801.taxonomy.iso639_2_languagecode.LanguageSeries;
-import org.omg.spec.api4kp._20200801.taxonomy.knowledgeartifactcategory.IKnowledgeArtifactCategory;
+import org.omg.spec.api4kp._20200801.taxonomy.knowledgeartifactcategory.KnowledgeArtifactCategory;
 import org.omg.spec.api4kp._20200801.taxonomy.knowledgeartifactcategory.KnowledgeArtifactCategorySeries;
 import org.omg.spec.api4kp._20200801.taxonomy.knowledgeassetcategory.KnowledgeAssetCategory;
 import org.omg.spec.api4kp._20200801.taxonomy.knowledgeassetcategory.KnowledgeAssetCategorySeries;
@@ -133,7 +133,7 @@ public class SurrogateV1ToSurrogateV2 {
           Language.class));
       if(oldCarrier.getExpressionCategory() != null) {
         newCarrier.withExpressionCategory(mapTerm(oldCarrier.getExpressionCategory(),
-            KnowledgeArtifactCategorySeries::resolveUUID, IKnowledgeArtifactCategory.class));
+            KnowledgeArtifactCategorySeries::resolveUUID, KnowledgeArtifactCategory.class));
       }
       newCarrier.withTitle(oldCarrier.getTitle());
 
