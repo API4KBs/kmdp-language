@@ -102,7 +102,7 @@ public class JenaOwlParser extends JenaRdfParser {
         carrier.getRepresentation());
     String name = detectOntologyName(model);
     KnowledgeCarrier kc =
-        DeserializeApiOperator.newVerticalCarrier(carrier,
+        newVerticalCarrier(carrier,
             Abstract_Knowledge_Expression,
             tgtRep,
             model)

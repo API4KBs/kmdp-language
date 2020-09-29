@@ -80,7 +80,7 @@ public class OWLParser extends AbstractDeSerializeOperator {
   public Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier, Properties properties) {
     return carrier.asBinary()
         .map(String::new)
-        .map(str -> DeserializeApiOperator.newVerticalCarrier(
+        .map(str -> newVerticalCarrier(
             carrier,
             Serialized_Knowledge_Expression,
             getParseResultRepresentation(carrier,
@@ -104,14 +104,14 @@ public class OWLParser extends AbstractDeSerializeOperator {
       manager.setOntologyLoaderConfiguration(conf);
 
       Optional<byte[]> bytes = carrier.asBinary();
-      if (!bytes.isPresent()) {
+      if (bytes.isEmpty()) {
         return Optional.empty();
       }
       OWLOntology onto = manager.loadOntologyFromOntologyDocument(
           new ByteArrayInputStream(bytes.get()));
 
       return Optional.ofNullable(
-          DeserializeApiOperator.newVerticalCarrier(
+          newVerticalCarrier(
               carrier,
               Abstract_Knowledge_Expression,
               rep(OWL_2),
@@ -131,7 +131,7 @@ public class OWLParser extends AbstractDeSerializeOperator {
   public Optional<KnowledgeCarrier> innerEncode(KnowledgeCarrier carrier,
       SyntacticRepresentation into, Properties properties) {
     return carrier.asBinary()
-        .map(bytes -> DeserializeApiOperator.newVerticalCarrier(
+        .map(bytes -> newVerticalCarrier(
             carrier,
             Encoded_Knowledge_Expression,
             getParseResultRepresentation(carrier,
@@ -153,7 +153,7 @@ public class OWLParser extends AbstractDeSerializeOperator {
       OWLManager.createOWLOntologyManager()
           .saveOntology(onto.get(), new RDFXMLDocumentFormat(), baos);
       return Optional.ofNullable(
-          DeserializeApiOperator.newVerticalCarrier(
+          newVerticalCarrier(
               carrier,
               Serialized_Knowledge_Expression,
               rep(OWL_2, RDF_XML_Syntax, XML_1_1),

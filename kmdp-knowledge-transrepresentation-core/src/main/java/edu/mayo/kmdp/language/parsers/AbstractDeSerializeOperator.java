@@ -312,18 +312,11 @@ public abstract class AbstractDeSerializeOperator
 
   protected abstract SerializationFormat getDefaultFormat();
 
-  protected KnowledgeCarrier newVerticalCarrier(
-      KnowledgeCarrier source,
-      ParsingLevel targetLevel,
-      SyntacticRepresentation into,
-      Object targetArtifact) {
-    return DeserializeApiOperator.newVerticalCarrier(
-        source,
-        targetLevel,
-        into != null ? into : inferRepresentationForLevel(getSupportedRepresentations(),targetLevel),
-        targetArtifact);
+  @Override
+  public Optional<SyntacticRepresentation> inferRepresentationForLevel(ParsingLevel targetLevel) {
+    return Optional
+        .ofNullable(inferRepresentationForLevel(getSupportedRepresentations(), targetLevel));
   }
-
 
   private SyntacticRepresentation inferRepresentationForLevel(
       List<SyntacticRepresentation> supportedRepresentations, ParsingLevel parsingLevel) {

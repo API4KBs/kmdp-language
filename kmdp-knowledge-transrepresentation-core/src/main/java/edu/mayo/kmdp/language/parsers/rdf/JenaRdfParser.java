@@ -91,7 +91,7 @@ public class JenaRdfParser extends AbstractDeSerializeOperator {
     SyntacticRepresentation tgtRep =
         getTargetLiftRepresentation(carrier.getRepresentation(), Serialized_Knowledge_Expression);
     return Optional.of(
-        DeserializeApiOperator.newVerticalCarrier(carrier,
+        newVerticalCarrier(carrier,
             Serialized_Knowledge_Expression,
             tgtRep,
             carrier.asString().orElseThrow(UnsupportedOperationException::new)));
@@ -108,7 +108,7 @@ public class JenaRdfParser extends AbstractDeSerializeOperator {
     SyntacticRepresentation tgtRep =
         getTargetLiftRepresentation(carrier.getRepresentation(), Concrete_Knowledge_Expression);
     return Optional.of(
-        DeserializeApiOperator.newVerticalCarrier(carrier,
+        newVerticalCarrier(carrier,
             Concrete_Knowledge_Expression,
             tgtRep,
             readModel(carrier.asString().orElseThrow(UnsupportedOperationException::new),
@@ -129,7 +129,7 @@ public class JenaRdfParser extends AbstractDeSerializeOperator {
         carrier.asString().orElseThrow(UnsupportedOperationException::new),
         carrier.getRepresentation());
     KnowledgeCarrier kc =
-        DeserializeApiOperator.newVerticalCarrier(carrier,
+        newVerticalCarrier(carrier,
             Abstract_Knowledge_Expression,
             tgtRep,
             model)
@@ -165,7 +165,7 @@ public class JenaRdfParser extends AbstractDeSerializeOperator {
     SyntacticRepresentation tgtRep =
         getTargetLowerRepresentation(carrier.getRepresentation(), into, Encoded_Knowledge_Expression);
     return Optional.of(
-        DeserializeApiOperator.newVerticalCarrier(carrier,
+        newVerticalCarrier(carrier,
             Encoded_Knowledge_Expression,
             tgtRep,
             carrier.asBinary().orElseThrow(UnsupportedOperationException::new)));
@@ -189,7 +189,7 @@ public class JenaRdfParser extends AbstractDeSerializeOperator {
             Serialized_Knowledge_Expression);
     return carrier.as(Model.class)
         .map(model -> writeModel(model, tgtRep))
-        .map(str -> DeserializeApiOperator.newVerticalCarrier(carrier,
+        .map(str -> newVerticalCarrier(carrier,
             Serialized_Knowledge_Expression,
             tgtRep,
             str));
@@ -213,7 +213,7 @@ public class JenaRdfParser extends AbstractDeSerializeOperator {
             Serialized_Knowledge_Expression);
     return carrier.as(Model.class)
         .map(model -> writeModel(model, tgtRep))
-        .map(str -> DeserializeApiOperator.newVerticalCarrier(carrier,
+        .map(str -> newVerticalCarrier(carrier,
             Serialized_Knowledge_Expression,
             tgtRep,
             str));

@@ -7,6 +7,7 @@ import static org.omg.spec.api4kp._20200801.contrastors.SyntacticRepresentationC
 
 import edu.mayo.kmdp.util.Util;
 import java.util.List;
+import java.util.Optional;
 import org.omg.spec.api4kp._20200801.KnowledgePlatformOperator;
 import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.DeserializeApiInternal;
 import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
@@ -15,8 +16,6 @@ import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
 import org.omg.spec.api4kp._20200801.services.transrepresentation.DeserializationOperator;
 import org.omg.spec.api4kp._20200801.services.transrepresentation.ModelMIMECoder;
 import org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevel;
-
-;
 
 public interface DeserializeApiOperator
     extends DeserializeApiInternal.Operator, KnowledgePlatformOperator<DeserializationOperator> {
@@ -40,6 +39,10 @@ public interface DeserializeApiOperator
     return assetId;
   }
 
+  default Optional<SyntacticRepresentation> inferRepresentationForLevel(ParsingLevel targetLevel) {
+    return Optional.empty();
+  }
+
   default boolean consumes(String from) {
     return Util.isEmpty(from) ||
         ModelMIMECoder.decode(from)
@@ -56,7 +59,7 @@ public interface DeserializeApiOperator
         .orElse(false);
   }
 
-  static KnowledgeCarrier newVerticalCarrier(
+  default KnowledgeCarrier newVerticalCarrier(
       KnowledgeCarrier source,
       ParsingLevel targetLevel,
       SyntacticRepresentation targetRepresentation,
@@ -78,11 +81,15 @@ public interface DeserializeApiOperator
         newCarrier = of((byte[]) targetArtifact);
     }
 
-    return newCarrier.withAssetId(source.getAssetId())
-        .withArtifactId(source.getArtifactId())
+    return newCarrier
+        .withAssetId(mapAssetId(source.getAssetId()))
+        .withArtifactId(mapArtifactId(source.getArtifactId()))
         .withLevel(targetLevel)
-        .withRepresentation(targetRepresentation);
-  }
+        .withRepresentation(targetRepresentation != null
+            ? targetRepresentation
+            : inferRepresentationForLevel(targetLevel).orElse(null));
+    }
+
 
 
 }

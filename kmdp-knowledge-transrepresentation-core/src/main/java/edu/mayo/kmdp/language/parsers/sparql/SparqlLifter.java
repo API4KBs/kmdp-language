@@ -59,7 +59,7 @@ public class SparqlLifter
   private final ResourceIdentifier operatorId;
 
   public SparqlLifter() {
-    this.operatorId = SemanticIdentifier.newId(id,version);
+    this.operatorId = SemanticIdentifier.newId(id, version);
   }
 
   @Override
@@ -81,7 +81,7 @@ public class SparqlLifter
           case Encoded_Knowledge_Expression:
             return Answer.of(
                 innerDecode(knowledgeCarrier, props)
-                .flatMap( str -> innerDeserialize(str, props)));
+                    .flatMap(str -> innerDeserialize(str, props)));
           case Serialized_Knowledge_Expression:
             return Answer.of(
                 innerDeserialize(knowledgeCarrier, props));
@@ -113,7 +113,7 @@ public class SparqlLifter
 
   @Override
   public List<SyntacticRepresentation> getFrom() {
-    return Collections.singletonList(rep(SPARQL_1_1,TXT));
+    return Collections.singletonList(rep(SPARQL_1_1, TXT));
   }
 
   @Override
@@ -131,8 +131,8 @@ public class SparqlLifter
     String sparql = carrier.asString()
         .orElseThrow(UnsupportedOperationException::new);
     return Optional.of(
-        DeserializeApiOperator
-            .newVerticalCarrier(carrier, Serialized_Knowledge_Expression, rep(SPARQL_1_1,TXT), sparql));
+        newVerticalCarrier(carrier, Serialized_Knowledge_Expression, rep(SPARQL_1_1, TXT),
+            sparql));
   }
 
   @Override
@@ -140,9 +140,8 @@ public class SparqlLifter
     ParameterizedSparqlString sparql = carrier.asString()
         .map(ParameterizedSparqlString::new)
         .orElseThrow(UnsupportedOperationException::new);
-    return Optional.of(
-        DeserializeApiOperator
-            .newVerticalCarrier(carrier, Concrete_Knowledge_Expression, rep(SPARQL_1_1), sparql));
+    return Optional
+        .of(newVerticalCarrier(carrier, Concrete_Knowledge_Expression, rep(SPARQL_1_1), sparql));
   }
 
   @Override
@@ -151,9 +150,8 @@ public class SparqlLifter
         .map(ParameterizedSparqlString::new)
         .map(ParameterizedSparqlString::asQuery)
         .orElseThrow(UnsupportedOperationException::new);
-    return Optional.of(
-        DeserializeApiOperator
-            .newVerticalCarrier(carrier, Abstract_Knowledge_Expression, rep(SPARQL_1_1), sparql));
+    return Optional
+        .of(newVerticalCarrier(carrier, Abstract_Knowledge_Expression, rep(SPARQL_1_1), sparql));
   }
 
   @Override
@@ -161,9 +159,8 @@ public class SparqlLifter
     Query sparql = carrier.as(ParameterizedSparqlString.class)
         .map(ParameterizedSparqlString::asQuery)
         .orElseThrow(UnsupportedOperationException::new);
-    return Optional.of(
-        DeserializeApiOperator
-            .newVerticalCarrier(carrier, Abstract_Knowledge_Expression, rep(SPARQL_1_1), sparql));
+    return Optional
+        .of(newVerticalCarrier(carrier, Abstract_Knowledge_Expression, rep(SPARQL_1_1), sparql));
   }
 
   @Override

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<definitions namespace="http://foo.test"
+<definitions namespace="http://foo.test/sample"
   name="SimpleDecision"
   id="id-ebe56316acc24720bcd51095b0404626"
   xmlns="http://www.omg.org/spec/DMN/20151101/dmn.xsd"
