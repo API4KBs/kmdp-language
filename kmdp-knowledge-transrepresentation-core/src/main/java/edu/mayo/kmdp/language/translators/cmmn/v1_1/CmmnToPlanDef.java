@@ -15,6 +15,7 @@ package edu.mayo.kmdp.language.translators.cmmn.v1_1;
 
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.snapshot.SemanticAnnotationRelType.Captures;
 
+import edu.mayo.kmdp.language.translators.fhir.stu3.FHIRTranslatorUtils;
 import edu.mayo.kmdp.util.StreamUtil;
 import edu.mayo.ontology.taxonomies.kmdo.annotationreltype.AnnotationRelTypeSeries;
 import edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries;
@@ -335,6 +336,8 @@ public class CmmnToPlanDef {
     PlanDefinition.PlanDefinitionActionComponent planAction
         = processTask(humanTask, caseModel, planItem);
 
+    addAnnotations(humanTask.getExtensionElements(),planAction);
+
     planAction.setType(new Coding()
         .setSystem("TODO")
         .setCode("HumanTask")
@@ -348,6 +351,8 @@ public class CmmnToPlanDef {
       TDefinitions caseModel) {
     PlanDefinition.PlanDefinitionActionComponent planAction
         = processTask(task, caseModel, planItem);
+
+    addAnnotations(task.getExtensionElements(),planAction);
 
     planAction.setType(new Coding()
         .setSystem("TODO")
@@ -366,11 +371,26 @@ public class CmmnToPlanDef {
 
     addDefinition(planAction, tDecisionTask, caseModel);
 
+    addAnnotations(tDecisionTask.getExtensionElements(),planAction);
+
     planAction.setType(new Coding()
         .setSystem("TODO")
         .setCode("DecisionTask")
     );
     return planAction;
+  }
+
+  private void addAnnotations(TExtensionElements extensionElements,
+      PlanDefinitionActionComponent planAction) {
+    if (extensionElements == null || extensionElements.getAny().isEmpty()) {
+      return;
+    }
+
+    extensionElements.getAny().stream()
+        .flatMap(StreamUtil.filterAs(Annotation.class))
+        .map(Annotation::getRef)
+        .map(FHIRTranslatorUtils::toCodeableConcept)
+        .forEach(planAction::addCode);
   }
 
   private void processAssociatedItems(TPlanItem planItem, TDefinitions caseModel,
