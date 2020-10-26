@@ -1,6 +1,6 @@
 ### Develop Pipeline
 ### Snapshot Branch Versioning Stategy: X.X.X-SNAPSHOT
-### Project :: kmdp-knowledge-artifact-repository-service
+### Project :: kmdp-knowledge-transrepresentation-service
 
 # !! Downstream Build: kmdp-knowledgebase-service; develop !! #
 
@@ -39,7 +39,7 @@ steps:
 # Outputs pipeline steps have started
 - script: |
     echo Starting Develop Branch Build Pipeline!
-    echo Project :: kmdp-knowledge-artifact-repository-service
+    echo Project :: kmdp-knowledge-transrepresentation-service
   displayName: 'Starting Pipeline Steps'
 
 # Reads Root pom.xml File
