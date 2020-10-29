@@ -91,7 +91,7 @@ public class OWLParser extends AbstractDeSerializeOperator {
 
   @Override
   public Optional<KnowledgeCarrier> innerDeserialize(KnowledgeCarrier carrier, Properties properties) {
-    throw new UnsupportedOperationException();
+    return innerParse(carrier,properties);
   }
 
   @Override
