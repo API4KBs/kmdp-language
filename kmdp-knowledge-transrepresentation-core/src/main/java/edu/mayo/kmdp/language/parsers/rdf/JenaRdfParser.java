@@ -253,18 +253,28 @@ public class JenaRdfParser extends AbstractDeSerializeOperator {
   }
 
   protected String toJenaLangCode(SyntacticRepresentation tgtRep) {
-    String lang = "RDF/XML";
     if (tgtRep.getSerialization() != null) {
       switch (tgtRep.getSerialization().asEnum()) {
         case Turtle:
-          lang = "TTL";
-          break;
+          return "TTL";
         case RDF_XML_Syntax:
         default:
-          lang = "RDF/XML";
+          return  "RDF/XML";
       }
     }
-    return lang;
+    if (tgtRep.getFormat() != null) {
+      switch (tgtRep.getFormat().asEnum()) {
+        case TXT:
+          return "TTL";
+        case JSON:
+          return "RDF/JSON";
+        case XML_1_1:
+        case RDF_1_1:
+        default:
+          return "RDF/XML";
+      }
+    }
+    return "RDF/XML";
   }
 
   protected SyntacticRepresentation getTargetLowerRepresentation(
