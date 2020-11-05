@@ -142,6 +142,10 @@ public class CmmnToPlanDef {
 
     mapControls(stage.getDefaultControl(), group);
 
+    getTypeCode(stage.getExtensionElements()).stream()
+        .map(this::toCode)
+        .forEach(group::addCode);
+
     group.setGroupingBehavior(ActionGroupingBehavior.LOGICALGROUP);
     group.setType(new Coding()
         .setSystem("TODO")
