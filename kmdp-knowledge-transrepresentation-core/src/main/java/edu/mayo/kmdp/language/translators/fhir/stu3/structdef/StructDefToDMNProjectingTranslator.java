@@ -51,7 +51,9 @@ public class StructDefToDMNProjectingTranslator extends AbstractSimpleTranslator
 
   @Override
   protected Optional<TDefinitions> transformAst(ResourceIdentifier assetId,
-      StructureDefinition expression, SyntacticRepresentation tgtRep,
+      StructureDefinition expression,
+      SyntacticRepresentation srcRep,
+      SyntacticRepresentation tgtRep,
       Properties config) {
     return Optional.ofNullable(new StructDefToDMN().transformRootElementToFrame(expression));
   }

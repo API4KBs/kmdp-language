@@ -40,12 +40,6 @@ public abstract class JSONBasedLanguageParser<T> extends AbstractDeSerializeOper
   protected Class<T> root;
 
   @Override
-  public Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier, Properties config) {
-    return carrier.asString()
-        .map(str -> newVerticalCarrier(carrier, Serialized_Knowledge_Expression, null, str));
-  }
-
-  @Override
   public Optional<KnowledgeCarrier> innerDeserialize(KnowledgeCarrier carrier, Properties config) {
     return carrier.asString()
         .flatMap(JSonUtil::readJson)

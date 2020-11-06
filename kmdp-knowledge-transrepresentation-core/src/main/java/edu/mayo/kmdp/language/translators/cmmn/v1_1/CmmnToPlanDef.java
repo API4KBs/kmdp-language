@@ -495,7 +495,7 @@ public class CmmnToPlanDef {
 
     return extensionElements.stream()
         .flatMap(StreamUtil.filterAs(Annotation.class))
-        .filter(ann -> Captures.sameAs(ann.getRel()))
+        .filter(ann -> Captures.isSameEntity(ann.getRel()))
         .map(Annotation::getRef)
         .map(Term.class::cast)
         .collect(Collectors.toList());

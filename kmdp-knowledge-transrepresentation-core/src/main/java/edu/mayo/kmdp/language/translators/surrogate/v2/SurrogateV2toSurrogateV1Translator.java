@@ -84,13 +84,13 @@ public class SurrogateV2toSurrogateV1Translator extends
             .flatOpt(kc -> transformAst(
                 src.getAssetId(),
                 (org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset) kc.getExpression(),
-                tgtRep, config)).getOptionalValue();
+                src.getRepresentation(), tgtRep, config)).getOptionalValue();
         break;
       case Abstract_Knowledge_Expression:
         legacySurr = transformAst(
             src.getAssetId(),
             (org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset) src.getExpression(),
-            tgtRep, config);
+            src.getRepresentation(), tgtRep, config);
         break;
       default:
         throw new UnsupportedOperationException();
@@ -103,7 +103,9 @@ public class SurrogateV2toSurrogateV1Translator extends
 
   @Override
   protected Optional<KnowledgeAsset> transformAst(ResourceIdentifier assetId,
-      org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset expression, SyntacticRepresentation tgtRep,
+      org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset expression,
+      SyntacticRepresentation srcRep,
+      SyntacticRepresentation tgtRep,
       Properties config) {
     return Optional.ofNullable(
         new KnowledgeAsset()

@@ -16,10 +16,12 @@ package edu.mayo.kmdp.language.parsers;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
 import static org.omg.spec.api4kp._20200801.contrastors.ParsingLevelContrastor.detectLevel;
 import static org.omg.spec.api4kp._20200801.contrastors.ParsingLevelContrastor.theLevelContrastor;
+import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.Serialized_Knowledge_Expression;
 
 import edu.mayo.kmdp.language.DeserializeApiOperator;
 import edu.mayo.kmdp.util.PropertiesUtil;
 import java.nio.charset.Charset;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
@@ -194,6 +196,22 @@ public abstract class AbstractDeSerializeOperator
           "Cannot lift/lower between : " + sourceArtifact.getLevel() + " and " + into);
     }
 
+  }
+
+  @Override
+  public Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier, Properties config) {
+    // This probably needs to be generalized based on the actual encoding type
+    Object expr = carrier.getExpression();
+    String serializedExpr;
+    if (expr instanceof String) {
+      serializedExpr = new String(Base64.getDecoder().decode((String)expr));
+    } else if (expr instanceof byte[]) {
+      serializedExpr = new String((byte[]) expr);
+    } else {
+      serializedExpr = null;
+    }
+    return Optional.ofNullable(serializedExpr)
+        .map(s -> newVerticalCarrier(carrier, Serialized_Knowledge_Expression, null, s));
   }
 
 

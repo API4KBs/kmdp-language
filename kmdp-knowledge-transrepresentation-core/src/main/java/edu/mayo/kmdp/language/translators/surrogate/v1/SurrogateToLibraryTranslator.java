@@ -45,7 +45,9 @@ public class SurrogateToLibraryTranslator extends AbstractSimpleTranslator<Knowl
 
   @Override
   protected Optional<Library> transformAst(ResourceIdentifier assetId,
-      KnowledgeAsset expression, SyntacticRepresentation tgtRep, Properties config) {
+      KnowledgeAsset expression,
+      SyntacticRepresentation srcRep,
+      SyntacticRepresentation tgtRep, Properties config) {
     return Optional.ofNullable(new SurrogateToLibrary().transform(expression));
   }
 

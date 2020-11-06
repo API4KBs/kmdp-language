@@ -24,9 +24,7 @@ import static org.omg.spec.api4kp._20200801.taxonomy.lexicon.LexiconSeries.SKOS;
 import edu.mayo.kmdp.language.translators.AbstractSimpleTranslator;
 import edu.mayo.kmdp.terms.skosifier.Owl2SkosConfig;
 import edu.mayo.kmdp.terms.skosifier.Owl2SkosConverter;
-import edu.mayo.kmdp.util.Util;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -78,6 +76,7 @@ public class OWLtoSKOSTranscreator extends AbstractSimpleTranslator<Model,Model>
 
   protected Optional<Model> transformAst(
       ResourceIdentifier assetId, Model model,
+      SyntacticRepresentation srcRep,
       SyntacticRepresentation tgtRep,
       Properties config) {
     return new Owl2SkosConverter()
@@ -85,7 +84,7 @@ public class OWLtoSKOSTranscreator extends AbstractSimpleTranslator<Model,Model>
   }
 
   protected Optional<Model> transformTree(
-      ResourceIdentifier assetId, Object tree,
+      ResourceIdentifier assetId, Object expression, SyntacticRepresentation srcRep,
       SyntacticRepresentation tgtRep,
       Properties config) {
     throw new UnsupportedOperationException();
@@ -93,12 +92,14 @@ public class OWLtoSKOSTranscreator extends AbstractSimpleTranslator<Model,Model>
 
   @Override
   protected Optional<Model> transformString(ResourceIdentifier assetId, String str,
+      SyntacticRepresentation srcRep,
       SyntacticRepresentation tgtRep, Properties config) {
     return doTransform(new ByteArrayInputStream(str.getBytes()), config);
   }
 
   @Override
   protected Optional<Model> transformBinary(ResourceIdentifier assetId, byte[] bytes,
+      SyntacticRepresentation srcRep,
       SyntacticRepresentation tgtRep, Properties config) {
     return doTransform(new ByteArrayInputStream(bytes), config);
   }

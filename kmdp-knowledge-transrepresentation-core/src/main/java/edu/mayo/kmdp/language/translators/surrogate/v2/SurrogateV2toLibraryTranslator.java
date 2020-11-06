@@ -18,6 +18,7 @@ import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
 import org.omg.spec.api4kp._20200801.services.KPOperation;
 import org.omg.spec.api4kp._20200801.services.KPSupport;
 import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
+import org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset;
 import org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
 
 @Named
@@ -45,7 +46,9 @@ public class SurrogateV2toLibraryTranslator extends
 
   @Override
   protected Optional<Library> transformAst(ResourceIdentifier assetId,
-      org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset expression, SyntacticRepresentation tgtRep,
+      KnowledgeAsset expression,
+      SyntacticRepresentation srcRep,
+      SyntacticRepresentation tgtRep,
       Properties config) {
     return Optional.ofNullable(new SurrogateV2ToLibrary().transform(expression));
   }

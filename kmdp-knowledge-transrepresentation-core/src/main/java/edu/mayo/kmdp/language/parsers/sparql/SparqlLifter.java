@@ -45,8 +45,6 @@ import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
 import org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
 import org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevel;
 
-;
-
 @Named
 @KPOperation(Lifting_Task)
 @KPSupport(SPARQL_1_1)

@@ -64,7 +64,9 @@ public class DmnToPlanDefTranslator extends AbstractSimpleTranslator<TDefinition
 
   @Override
   protected Optional<PlanDefinition> transformAst(ResourceIdentifier assetId,
-      TDefinitions expression, SyntacticRepresentation tgtRep, Properties config) {
+      TDefinitions expression,
+      SyntacticRepresentation srcRep,
+      SyntacticRepresentation tgtRep, Properties config) {
     return Optional.ofNullable(new DmnToPlanDef().transform(assetId, expression));
   }
 

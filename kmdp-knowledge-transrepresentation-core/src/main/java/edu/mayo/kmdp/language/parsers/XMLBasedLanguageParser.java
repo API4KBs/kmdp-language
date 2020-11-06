@@ -50,23 +50,6 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializeOpera
         Annotation.class);
   }
 
-
-  @Override
-  public Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier, Properties config) {
-    // This probably needs to be generalized based on the actual encoding type
-    Object expr = carrier.getExpression();
-    String serializedExpr;
-    if (expr instanceof String) {
-      serializedExpr = new String(Base64.getDecoder().decode((String)expr));
-    } else if (expr instanceof byte[]) {
-      serializedExpr = new String((byte[]) expr);
-    } else {
-      serializedExpr = null;
-    }
-    return Optional.ofNullable(serializedExpr)
-        .map(s -> newVerticalCarrier(carrier, Serialized_Knowledge_Expression, null, s));
-  }
-
   @Override
   public Optional<KnowledgeCarrier> innerDeserialize(KnowledgeCarrier carrier, Properties config) {
     return carrier.asBinary()

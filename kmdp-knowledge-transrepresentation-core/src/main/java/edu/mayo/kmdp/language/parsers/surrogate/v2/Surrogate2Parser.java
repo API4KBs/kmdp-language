@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import javax.inject.Named;
+import org.omg.spec.api4kp._20200801.AbstractCarrier.Encodings;
 import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
 import org.omg.spec.api4kp._20200801.services.KPOperation;
 import org.omg.spec.api4kp._20200801.services.KPSupport;
@@ -50,7 +51,9 @@ public class Surrogate2Parser extends MultiFormatParser<KnowledgeAsset> {
   private final List<SyntacticRepresentation> supportedRepresentations = Arrays.asList(
       rep(Knowledge_Asset_Surrogate_2_0),
       rep(Knowledge_Asset_Surrogate_2_0, XML_1_1, getDefaultCharset()),
-      rep(Knowledge_Asset_Surrogate_2_0, JSON, getDefaultCharset()));
+      rep(Knowledge_Asset_Surrogate_2_0, XML_1_1, getDefaultCharset(), Encodings.DEFAULT),
+      rep(Knowledge_Asset_Surrogate_2_0, JSON, getDefaultCharset()),
+      rep(Knowledge_Asset_Surrogate_2_0, JSON, getDefaultCharset(), Encodings.DEFAULT));
 
   public Surrogate2Parser() {
     super(new XMLSurrogateParser(), new JSONSurrogateParser());
