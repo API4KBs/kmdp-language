@@ -24,6 +24,7 @@ import static org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationForma
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.HTML;
 import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.Abstract_Knowledge_Expression;
 import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.Serialized_Knowledge_Expression;
+import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.snapshot.ParsingLevel.Encoded_Knowledge_Expression;
 
 import edu.mayo.kmdp.language.parsers.AbstractDeSerializeOperator;
 import java.nio.charset.Charset;
@@ -36,7 +37,6 @@ import javax.inject.Named;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.omg.spec.api4kp._20200801.AbstractCarrier.Encodings;
-import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
 import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
 import org.omg.spec.api4kp._20200801.services.KPOperation;
 import org.omg.spec.api4kp._20200801.services.KPSupport;
@@ -104,7 +104,14 @@ public class HtmlDeserializer
   @Override
   public Optional<KnowledgeCarrier> innerEncode(KnowledgeCarrier carrier,
       SyntacticRepresentation into, Properties config) {
-    return Optional.empty();
+    return carrier.asBinary()
+        .map(bytes -> newVerticalCarrier(
+            carrier,
+            Encoded_Knowledge_Expression,
+            getParseResultRepresentation(carrier,
+                Encoded_Knowledge_Expression),
+            bytes
+        ));
   }
 
   @Override
