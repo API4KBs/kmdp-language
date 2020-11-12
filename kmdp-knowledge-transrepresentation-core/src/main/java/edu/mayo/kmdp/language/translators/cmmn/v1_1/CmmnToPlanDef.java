@@ -17,7 +17,6 @@ import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.snapsh
 
 import edu.mayo.kmdp.language.translators.fhir.stu3.FHIRTranslatorUtils;
 import edu.mayo.kmdp.util.StreamUtil;
-import edu.mayo.ontology.taxonomies.kmdo.annotationreltype.AnnotationRelTypeSeries;
 import edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries;
 import java.net.URI;
 import java.util.ArrayList;
@@ -495,7 +494,7 @@ public class CmmnToPlanDef {
 
     return extensionElements.stream()
         .flatMap(StreamUtil.filterAs(Annotation.class))
-        .filter(ann -> Captures.isSameEntity(ann.getRel()))
+        .filter(ann -> Captures.sameTermAs(ann.getRel()))
         .map(Annotation::getRef)
         .map(Term.class::cast)
         .collect(Collectors.toList());
@@ -511,7 +510,7 @@ public class CmmnToPlanDef {
       List<Annotation> annotations = extensionElements.stream()
           .flatMap(StreamUtil.filterAs(Annotation.class))
           .filter(annotation -> annotation.getRel().getConceptId()
-              .equals(AnnotationRelTypeSeries.Has_Primary_Subject.getConceptId()))
+              .equals(SemanticAnnotationRelTypeSeries.Has_Primary_Subject.getConceptId()))
           .collect(Collectors.toList());
 
       if (annotations.size() > 1) {

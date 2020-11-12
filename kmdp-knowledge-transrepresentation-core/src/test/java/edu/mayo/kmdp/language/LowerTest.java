@@ -12,16 +12,16 @@ import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSe
 import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.Serialized_Knowledge_Expression;
 
 import edu.mayo.kmdp.language.parsers.dmn.v1_2.DMN12Parser;
-import edu.mayo.kmdp.language.parsers.surrogate.v1.SurrogateParser;
 import edu.mayo.kmdp.language.parsers.surrogate.v2.Surrogate2Parser;
-import edu.mayo.kmdp.metadata.surrogate.KnowledgeAsset;
 import java.nio.charset.Charset;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.omg.spec.api4kp._20200801.Answer;
 import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
 import org.omg.spec.api4kp._20200801.services.transrepresentation.ModelMIMECoder;
 import org.omg.spec.api4kp._20200801.surrogate.Annotation;
+import org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset;
 import org.omg.spec.dmn._20180521.model.TDMNElement.ExtensionElements;
 import org.omg.spec.dmn._20180521.model.TDefinitions;
 
@@ -47,16 +47,16 @@ class LowerTest {
   @Test
   void testSerializeSurrogate() {
     KnowledgeAsset surrogate = new KnowledgeAsset()
-        .withSubject(new edu.mayo.kmdp.metadata.annotations.SimpleAnnotation());
+        .withAnnotation(new Annotation());
 
-    String str = new SurrogateParser()
-        .applyLower( ofAst(surrogate).withRepresentation(rep(Knowledge_Asset_Surrogate)),
+    String str = new Surrogate2Parser()
+        .applyLower( ofAst(surrogate).withRepresentation(rep(Knowledge_Asset_Surrogate_2_0)),
             Serialized_Knowledge_Expression, null, null)
     .flatOpt(KnowledgeCarrier::asString)
-        .orElse("");
+        .orElseGet(Assertions::fail);
 
     assertTrue(str.contains("knowledgeAsset"));
-    assertTrue(str.contains("SimpleAnnotation"));
+    assertTrue(str.contains("annotation"));
   }
 
 

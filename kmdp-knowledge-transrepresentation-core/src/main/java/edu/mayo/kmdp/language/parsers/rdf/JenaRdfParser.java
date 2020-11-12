@@ -26,7 +26,6 @@ import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSe
 import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.Encoded_Knowledge_Expression;
 import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.Serialized_Knowledge_Expression;
 
-import edu.mayo.kmdp.language.DeserializeApiOperator;
 import edu.mayo.kmdp.language.parsers.AbstractDeSerializeOperator;
 import edu.mayo.kmdp.language.parsers.Lifter;
 import edu.mayo.kmdp.language.parsers.Lowerer;

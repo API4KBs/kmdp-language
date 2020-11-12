@@ -1,52 +1,7 @@
 package edu.mayo.kmdp.language.translators.surrogate.v2;
 
-import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
-
-import edu.mayo.kmdp.id.helper.DatatypeHelper;
-import edu.mayo.kmdp.registry.Registry;
-import edu.mayo.kmdp.util.StreamUtil;
-import edu.mayo.kmdp.util.URIUtil;
-import edu.mayo.ontology.taxonomies.kao.publishingrole.PublishingRoleSeries;
-import edu.mayo.ontology.taxonomies.kao.rel.relatedversiontype.RelatedVersionTypeSeries;
-import edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelType;
-import edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries;
-import edu.mayo.ontology.taxonomies.krprofile._20190801.KnowledgeRepresentationLanguageProfile;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import org.hl7.fhir.dstu3.model.Attachment;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.Contributor;
-import org.hl7.fhir.dstu3.model.DataRequirement;
-import org.hl7.fhir.dstu3.model.DataRequirement.DataRequirementCodeFilterComponent;
-import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
-import org.hl7.fhir.dstu3.model.Identifier;
-import org.hl7.fhir.dstu3.model.Identifier.IdentifierUse;
 import org.hl7.fhir.dstu3.model.Library;
-import org.hl7.fhir.dstu3.model.Period;
-import org.hl7.fhir.dstu3.model.RelatedArtifact;
-import org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType;
-import org.omg.spec.api4kp._20200801.id.ConceptIdentifier;
-import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
-import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
-import org.omg.spec.api4kp._20200801.services.transrepresentation.ModelMIMECoder;
-import org.omg.spec.api4kp._20200801.surrogate.Annotation;
-import org.omg.spec.api4kp._20200801.surrogate.Applicability;
-import org.omg.spec.api4kp._20200801.surrogate.Component;
-import org.omg.spec.api4kp._20200801.surrogate.Dependency;
-import org.omg.spec.api4kp._20200801.surrogate.Derivative;
-import org.omg.spec.api4kp._20200801.surrogate.KnowledgeArtifact;
 import org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset;
-import org.omg.spec.api4kp._20200801.surrogate.Link;
-import org.omg.spec.api4kp._20200801.surrogate.Publication;
-import org.omg.spec.api4kp._20200801.surrogate.Version;
-import org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries;
-import org.omg.spec.api4kp._20200801.taxonomy.krlanguage.snapshot.KnowledgeRepresentationLanguage;
-import org.omg.spec.api4kp._20200801.taxonomy.lexicon.Lexicon;
 
 
 public class SurrogateV2ToLibrary {

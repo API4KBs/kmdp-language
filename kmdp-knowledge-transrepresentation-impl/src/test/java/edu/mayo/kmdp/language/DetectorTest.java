@@ -106,38 +106,6 @@ public class DetectorTest {
 
 
   @Test
-  public void testSurrogateDetector() {
-    assertNotNull(detector);
-
-    Optional<String> surr = FileUtil
-        .read(DetectorTest.class.getResource("/artifacts/sample.surr.xml"));
-    assertTrue(surr.isPresent());
-    KnowledgeCarrier carrier = AbstractCarrier.of(surr.get())
-        .withRepresentation(rep(Knowledge_Asset_Surrogate));
-
-    Optional<SyntacticRepresentation> rep = detector.applyDetect(carrier)
-        .map(KnowledgeCarrier::getRepresentation)
-        .getOptionalValue();
-
-    assertTrue(rep.isPresent());
-    assertEquals(Knowledge_Asset_Surrogate.getUuid(), rep.get().getLanguage().getUuid());
-    assertEquals(XML_1_1.getUuid(), rep.get().getFormat().getUuid());
-
-    Optional<String> jsonSurr = FileUtil
-        .read(DetectorTest.class.getResource("/artifacts/sample.surr.json"));
-    assertTrue(jsonSurr.isPresent());
-    KnowledgeCarrier carrier2 = AbstractCarrier.of(jsonSurr.get());
-
-    Optional<SyntacticRepresentation> rep2 = detector.applyDetect(carrier2)
-        .map(KnowledgeCarrier::getRepresentation)
-        .getOptionalValue();
-
-    assertTrue(rep2.isPresent());
-    assertEquals(Knowledge_Asset_Surrogate.getUuid(), rep2.get().getLanguage().getUuid());
-    assertEquals(JSON.getUuid(), rep2.get().getFormat().getUuid());
-  }
-
-  @Test
   public void testOWLDetector() {
     InputStream is = DetectorTest.class.getResourceAsStream("/artifacts/test.ofn");
     KnowledgeCarrier carrier = AbstractCarrier.of(is)

@@ -15,10 +15,14 @@
  */
 package edu.mayo.kmdp.language.translators.dmn.v1_2;
 
+import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.Captures;
+import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.Defines;
+import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.Has_Primary_Subject;
+import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.In_Terms_Of;
+
 import edu.mayo.kmdp.util.StreamUtil;
 import edu.mayo.kmdp.util.URIUtil;
 import edu.mayo.kmdp.util.Util;
-import edu.mayo.ontology.taxonomies.kmdo.annotationreltype.AnnotationRelTypeSeries;
 import edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries;
 import java.net.URI;
 import java.util.Collection;
@@ -254,9 +258,9 @@ public class DmnToPlanDef {
         .flatMap(StreamUtil.filterAs(Annotation.class))
         .filter(ann ->
                 ann.getRel() == null
-                    || AnnotationRelTypeSeries.Defines.getTag().equals(ann.getRel().getTag())
-                    || AnnotationRelTypeSeries.Captures.getTag().equals(ann.getRel().getTag())
-                    || AnnotationRelTypeSeries.In_Terms_Of.getTag().equals(ann.getRel().getTag())
+                    || Defines.getTag().equals(ann.getRel().getTag())
+                    || Captures.getTag().equals(ann.getRel().getTag())
+                    || In_Terms_Of.getTag().equals(ann.getRel().getTag())
         )
         .map(Annotation::getRef)
         .map(Term.class::cast)
@@ -276,7 +280,7 @@ public class DmnToPlanDef {
           .filter(
               annotation -> annotation.getRel() != null && annotation.getRel().getReferentId() != null)
           .filter(annotation -> annotation.getRel().getReferentId()
-              .equals(AnnotationRelTypeSeries.Has_Primary_Subject.getReferentId()))
+              .equals(Has_Primary_Subject.getReferentId()))
           .collect(Collectors.toList());
 
       if (annotations.size() > 1) {

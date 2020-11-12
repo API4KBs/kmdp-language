@@ -30,7 +30,6 @@ import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.snapshot.Parsi
 import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.snapshot.ParsingLevel.Encoded_Knowledge_Expression;
 import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.snapshot.ParsingLevel.Serialized_Knowledge_Expression;
 
-import edu.mayo.kmdp.language.DeserializeApiOperator;
 import edu.mayo.kmdp.language.parsers.AbstractDeSerializeOperator;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
