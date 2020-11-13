@@ -4,6 +4,7 @@ import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.Knowledg
 import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Lowering_Task;
 import static org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormatSeries.JSON;
 import static org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormatSeries.XML_1_1;
+import static org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormatSeries.asEnum;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.FHIR_STU3;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -65,7 +66,7 @@ public class FHIR3Deserializer extends AbstractDeSerializeOperator {
   @Override
   public Optional<KnowledgeCarrier> innerParse(KnowledgeCarrier carrier,
       Properties properties) {
-    switch (carrier.getRepresentation().getFormat().asEnum()) {
+    switch (asEnum(carrier.getRepresentation().getFormat())) {
       case JSON:
         return carrier.asString()
             .map(str -> AbstractCarrier.ofAst(FhirContext.forDstu3().newJsonParser()

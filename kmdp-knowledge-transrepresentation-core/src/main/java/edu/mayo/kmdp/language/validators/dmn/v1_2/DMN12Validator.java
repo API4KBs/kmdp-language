@@ -4,6 +4,7 @@ import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
 import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Well_Formedness_Check_Task;
 import static org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormatSeries.XML_1_1;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.DMN_1_2;
+import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.asEnum;
 
 import edu.mayo.kmdp.language.ValidateApiOperator;
 import edu.mayo.kmdp.util.XMLUtil;
@@ -66,7 +67,7 @@ public class DMN12Validator
   protected boolean validate(KnowledgeCarrier sourceArtifact) {
     Schema dmn12Schema = checkSchema(sourceArtifact);
 
-    switch (sourceArtifact.getLevel().asEnum()) {
+    switch (asEnum(sourceArtifact.getLevel())) {
       case Abstract_Knowledge_Expression:
         return validateAST(sourceArtifact.getExpression(),dmn12Schema);
       case Concrete_Knowledge_Expression:

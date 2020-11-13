@@ -4,6 +4,7 @@ import static org.omg.spec.api4kp._20200801.AbstractCarrier.of;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.ofAst;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.ofTree;
 import static org.omg.spec.api4kp._20200801.contrastors.SyntacticRepresentationContrastor.theRepContrastor;
+import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.asEnum;
 
 import edu.mayo.kmdp.util.Util;
 import java.util.List;
@@ -20,6 +21,7 @@ import org.omg.spec.api4kp._20200801.services.transrepresentation.ModelMIMECoder
 import org.omg.spec.api4kp._20200801.services.transrepresentation.TransrepresentationOperator;
 import org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
 import org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevel;
+import org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries;
 
 ;
 
@@ -74,7 +76,7 @@ public interface TransionApiOperator
     ParsingLevel targetLevel = ParsingLevelContrastor.detectLevel(targetRepresentation);
 
     KnowledgeCarrier newCarrier;
-    switch (targetLevel.asEnum()) {
+    switch (asEnum(targetLevel)) {
       case Abstract_Knowledge_Expression:
         newCarrier = ofAst(targetArtifact);
         break;

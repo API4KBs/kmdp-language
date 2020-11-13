@@ -5,6 +5,7 @@ import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.Knowledg
 import static org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormatSeries.JSON;
 import static org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormatSeries.XML_1_1;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate_2_0;
+import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.asEnum;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -72,7 +73,7 @@ public class SurrogateV2Validator
   protected boolean validate(KnowledgeCarrier sourceArtifact) {
     Schema surrogateV2Schema = checkSchema(sourceArtifact);
 
-    switch (sourceArtifact.getLevel().asEnum()) {
+    switch (asEnum(sourceArtifact.getLevel())) {
       case Abstract_Knowledge_Expression:
         return validateAbstractKnowledgeExpressions(sourceArtifact, surrogateV2Schema);
       case Concrete_Knowledge_Expression:
@@ -153,16 +154,13 @@ public class SurrogateV2Validator
 
   private static String knowledgeAssetToXMLString(KnowledgeAsset knowledgeAsset) {
     ObjectFactory of = new ObjectFactory();
-    String xmlString =
-        JaxbUtil.marshall(
-                Collections.singleton(of.getClass()),
-                knowledgeAsset,
-                of::createKnowledgeAsset,
-                JaxbUtil.defaultProperties())
-            .flatMap(Util::asString)
-            .orElse("");
-
-    return xmlString;
+    return JaxbUtil.marshall(
+            Collections.singleton(of.getClass()),
+            knowledgeAsset,
+            of::createKnowledgeAsset,
+            JaxbUtil.defaultProperties())
+        .flatMap(Util::asString)
+        .orElse("");
   }
 
   private static KnowledgeAsset deserializeKnowledgeAssetJSON(String sourceArtifact) {

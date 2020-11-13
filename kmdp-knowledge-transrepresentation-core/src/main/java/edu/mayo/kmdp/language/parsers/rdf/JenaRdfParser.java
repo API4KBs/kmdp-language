@@ -21,6 +21,7 @@ import static org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationForma
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.OWL_2;
 import static org.omg.spec.api4kp._20200801.taxonomy.krserialization.KnowledgeRepresentationLanguageSerializationSeries.RDF_XML_Syntax;
 import static org.omg.spec.api4kp._20200801.taxonomy.krserialization.KnowledgeRepresentationLanguageSerializationSeries.Turtle;
+import static org.omg.spec.api4kp._20200801.taxonomy.krserialization.KnowledgeRepresentationLanguageSerializationSeries.asEnum;
 import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.Abstract_Knowledge_Expression;
 import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.Concrete_Knowledge_Expression;
 import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.Encoded_Knowledge_Expression;
@@ -47,8 +48,10 @@ import org.omg.spec.api4kp._20200801.services.KPSupport;
 import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
 import org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormat;
+import org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormatSeries;
 import org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
 import org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevel;
+import org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries;
 
 @Named
 @KPOperation(Lowering_Task)
@@ -253,7 +256,7 @@ public class JenaRdfParser extends AbstractDeSerializeOperator {
 
   protected String toJenaLangCode(SyntacticRepresentation tgtRep) {
     if (tgtRep.getSerialization() != null) {
-      switch (tgtRep.getSerialization().asEnum()) {
+      switch (asEnum(tgtRep.getSerialization())) {
         case Turtle:
           return "TTL";
         case RDF_XML_Syntax:
@@ -262,7 +265,7 @@ public class JenaRdfParser extends AbstractDeSerializeOperator {
       }
     }
     if (tgtRep.getFormat() != null) {
-      switch (tgtRep.getFormat().asEnum()) {
+      switch (SerializationFormatSeries.asEnum(tgtRep.getFormat())) {
         case TXT:
           return "TTL";
         case JSON:
@@ -294,7 +297,7 @@ public class JenaRdfParser extends AbstractDeSerializeOperator {
         return rep(OWL_2);
       }
     } else {
-      switch (tgtLevel.asEnum()) {
+      switch (ParsingLevelSeries.asEnum(tgtLevel)) {
         case Encoded_Knowledge_Expression:
           return rep(
               srcRep.getLanguage(), srcRep.getProfile(),

@@ -17,6 +17,7 @@ import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
 import static org.omg.spec.api4kp._20200801.contrastors.ParsingLevelContrastor.detectLevel;
 import static org.omg.spec.api4kp._20200801.contrastors.ParsingLevelContrastor.theLevelContrastor;
 import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.Serialized_Knowledge_Expression;
+import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.asEnum;
 
 import edu.mayo.kmdp.language.DeserializeApiOperator;
 import edu.mayo.kmdp.util.PropertiesUtil;
@@ -99,9 +100,9 @@ public abstract class AbstractDeSerializeOperator
       ParsingLevel into, SyntacticRepresentation targetRepresentation, Properties config) {
     checkLiftConsistency(sourceArtifact, into, targetRepresentation);
 
-    switch (sourceArtifact.getLevel().asEnum()) {
+    switch (asEnum(sourceArtifact.getLevel())) {
       case Encoded_Knowledge_Expression:
-        switch (into.asEnum()) {
+        switch (asEnum(into)) {
           case Abstract_Knowledge_Expression:
             return this.innerDecode(sourceArtifact, config)
                 .flatMap(str -> innerParse(str, config));
@@ -116,7 +117,7 @@ public abstract class AbstractDeSerializeOperator
             return Optional.empty();
         }
       case Serialized_Knowledge_Expression:
-        switch (into.asEnum()) {
+        switch (asEnum(into)) {
           case Abstract_Knowledge_Expression:
             return this.innerParse(sourceArtifact, config);
           case Concrete_Knowledge_Expression:
@@ -127,7 +128,7 @@ public abstract class AbstractDeSerializeOperator
             return Optional.empty();
         }
       case Concrete_Knowledge_Expression:
-        switch (into.asEnum()) {
+        switch (asEnum(into)) {
           case Abstract_Knowledge_Expression:
             return this.innerAbstract(sourceArtifact, config);
           case Concrete_Knowledge_Expression:
@@ -147,7 +148,7 @@ public abstract class AbstractDeSerializeOperator
       ParsingLevel toLevel, SyntacticRepresentation into, Properties config) {
     checkLowerConsistency(sourceArtifact, toLevel, into);
 
-    switch (sourceArtifact.getLevel().asEnum()) {
+    switch (asEnum(sourceArtifact.getLevel())) {
       case Abstract_Knowledge_Expression:
         return serializeAST(sourceArtifact, toLevel, into, config);
       case Concrete_Knowledge_Expression:
@@ -219,7 +220,7 @@ public abstract class AbstractDeSerializeOperator
       ParsingLevel toLevel,
       SyntacticRepresentation into,
       Properties config) {
-    switch (toLevel.asEnum()) {
+    switch (asEnum(toLevel)) {
       case Serialized_Knowledge_Expression:
         return Optional.ofNullable(expr);
       case Encoded_Knowledge_Expression:
@@ -230,7 +231,7 @@ public abstract class AbstractDeSerializeOperator
 
   private Optional<KnowledgeCarrier> serializeDoc(KnowledgeCarrier doc, ParsingLevel toLevel,
       SyntacticRepresentation into, Properties config) {
-    switch (toLevel.asEnum()) {
+    switch (asEnum(toLevel)) {
       case Concrete_Knowledge_Expression:
         return Optional.ofNullable(doc);
       case Serialized_Knowledge_Expression:
@@ -244,7 +245,7 @@ public abstract class AbstractDeSerializeOperator
 
   protected Optional<KnowledgeCarrier> serializeAST(KnowledgeCarrier ast, ParsingLevel toLevel,
       SyntacticRepresentation into, Properties config) {
-    switch (toLevel.asEnum()) {
+    switch (asEnum(toLevel)) {
       case Abstract_Knowledge_Expression:
         return Optional.ofNullable(ast);
       case Concrete_Knowledge_Expression:
@@ -264,7 +265,7 @@ public abstract class AbstractDeSerializeOperator
       ParsingLevel into) {
     SyntacticRepresentation rep = (SyntacticRepresentation) sourceArtifact.getRepresentation()
         .clone();
-    switch (into.asEnum()) {
+    switch (asEnum(into)) {
       case Abstract_Knowledge_Expression:
         rep.setFormat(null);
         rep.setSerialization(null);
@@ -291,7 +292,7 @@ public abstract class AbstractDeSerializeOperator
       ParsingLevel into) {
     SyntacticRepresentation rep = (SyntacticRepresentation) sourceArtifact.getRepresentation()
         .clone();
-    switch (into.asEnum()) {
+    switch (asEnum(into)) {
       case Serialized_Knowledge_Expression:
         rep.setEncoding(null);
         if (rep.getFormat() == null) {
@@ -344,7 +345,7 @@ public abstract class AbstractDeSerializeOperator
     if (tgtRep.isPresent()) {
       return tgtRep.get();
     }
-    switch (parsingLevel.asEnum()) {
+    switch (asEnum(parsingLevel)) {
       case Encoded_Knowledge_Expression:
         return rep(getSupportedLanguage(),getDefaultFormat(),Charset.defaultCharset(), Encodings.DEFAULT);
       case Serialized_Knowledge_Expression:

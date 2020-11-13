@@ -139,7 +139,7 @@ class ParserTest {
             .withAssetId(assetId);
 
     assertNotNull(carrier.getAssetId());
-    assertEquals(Encoded_Knowledge_Expression, carrier.getLevel().asEnum());
+    assertTrue(Encoded_Knowledge_Expression.sameAs(carrier.getLevel()));
     assertEquals(language, carrier.getRepresentation().getLanguage());
 
     Answer<KnowledgeCarrier> parsed =
@@ -148,7 +148,7 @@ class ParserTest {
     assertTrue(parsed.isSuccess());
     KnowledgeCarrier knowledgeCarrier = parsed.get();
     assertEquals(carrier.getAssetId(), knowledgeCarrier.getAssetId());
-    assertEquals(level, knowledgeCarrier.getLevel().asEnum());
+    assertTrue(level.sameAs(knowledgeCarrier.getLevel()));
 
     if (level.sameAs(Abstract_Knowledge_Expression)) {
       assertTrue(knowledgeCarrier.as(astRootClass).isPresent());

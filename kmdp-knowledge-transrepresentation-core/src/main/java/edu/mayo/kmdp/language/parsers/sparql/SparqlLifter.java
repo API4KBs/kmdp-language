@@ -23,6 +23,7 @@ import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeReprese
 import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.Abstract_Knowledge_Expression;
 import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.Concrete_Knowledge_Expression;
 import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.Serialized_Knowledge_Expression;
+import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.asEnum;
 
 import edu.mayo.kmdp.language.DeserializeApiOperator;
 import edu.mayo.kmdp.language.parsers.Lifter;
@@ -66,16 +67,16 @@ public class SparqlLifter
     Properties props = PropertiesUtil.parseProperties(config);
     //TODO should check for consistency between source level and targetLevel;
 
-    switch (parsingLevel.asEnum()) {
+    switch (asEnum(parsingLevel)) {
       case Serialized_Knowledge_Expression:
-        switch (knowledgeCarrier.getLevel().asEnum()) {
+        switch (asEnum(knowledgeCarrier.getLevel())) {
           case Encoded_Knowledge_Expression:
             return Answer.of(innerDecode(knowledgeCarrier, props));
           default:
             return Answer.unsupported();
         }
       case Concrete_Knowledge_Expression:
-        switch (knowledgeCarrier.getLevel().asEnum()) {
+        switch (asEnum(knowledgeCarrier.getLevel())) {
           case Encoded_Knowledge_Expression:
             return Answer.of(
                 innerDecode(knowledgeCarrier, props)
@@ -89,7 +90,7 @@ public class SparqlLifter
             return Answer.unsupported();
         }
       case Abstract_Knowledge_Expression:
-        switch (knowledgeCarrier.getLevel().asEnum()) {
+        switch (asEnum(knowledgeCarrier.getLevel())) {
           case Encoded_Knowledge_Expression:
             return Answer.of(
                 innerDecode(knowledgeCarrier, props)

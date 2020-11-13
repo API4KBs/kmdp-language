@@ -4,6 +4,7 @@ import static org.omg.spec.api4kp._20200801.AbstractCarrier.of;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.ofAst;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.ofTree;
 import static org.omg.spec.api4kp._20200801.contrastors.SyntacticRepresentationContrastor.theRepContrastor;
+import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.asEnum;
 
 import edu.mayo.kmdp.util.Util;
 import java.util.List;
@@ -66,7 +67,7 @@ public interface DeserializeApiOperator
       Object targetArtifact) {
 
     KnowledgeCarrier newCarrier;
-    switch (targetLevel.asEnum()) {
+    switch (asEnum(targetLevel)) {
       case Abstract_Knowledge_Expression:
         newCarrier = ofAst(targetArtifact);
         break;

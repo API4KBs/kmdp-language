@@ -101,7 +101,7 @@ class LifterTest {
             .withAssetId(assetId);
 
     assertNotNull(carrier.getAssetId());
-    assertEquals(Encoded_Knowledge_Expression, carrier.getLevel().asEnum());
+    assertTrue(Encoded_Knowledge_Expression.sameAs(carrier.getLevel()));
     assertEquals(language, carrier.getRepresentation().getLanguage());
 
     Answer<KnowledgeCarrier> parsed =
@@ -112,7 +112,7 @@ class LifterTest {
     assertTrue(parsed.isSuccess());
     KnowledgeCarrier knowledgeCarrier = parsed.get();
     assertEquals(carrier.getAssetId(), knowledgeCarrier.getAssetId());
-    assertEquals(Abstract_Knowledge_Expression, knowledgeCarrier.getLevel().asEnum());
+    assertTrue(Abstract_Knowledge_Expression.sameAs(knowledgeCarrier.getLevel()));
 
     assertTrue(knowledgeCarrier.is(astRootClass));
   }

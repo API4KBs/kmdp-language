@@ -31,6 +31,7 @@ import static org.omg.spec.api4kp._20200801.taxonomy.krserialization.KnowledgeRe
 import static org.omg.spec.api4kp._20200801.taxonomy.krserialization.KnowledgeRepresentationLanguageSerializationSeries.OWL_XML_Serialization;
 import static org.omg.spec.api4kp._20200801.taxonomy.krserialization.KnowledgeRepresentationLanguageSerializationSeries.RDF_XML_Syntax;
 import static org.omg.spec.api4kp._20200801.taxonomy.krserialization.KnowledgeRepresentationLanguageSerializationSeries.Turtle;
+import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.asEnum;
 
 import edu.mayo.kmdp.language.DetectApiOperator;
 import edu.mayo.kmdp.language.detectors.AbstractLanguageDetector;
@@ -114,7 +115,7 @@ public class OWLDetector
 
 
   protected Optional<OWLOntology> asOWL(KnowledgeCarrier sourceArtifact) {
-    switch (sourceArtifact.getLevel().asEnum()) {
+    switch (asEnum(sourceArtifact.getLevel())) {
       case Abstract_Knowledge_Expression:
         Object expr = sourceArtifact.getExpression();
         return (expr instanceof OWLOntology) ? Optional.of((OWLOntology) expr) : Optional.empty();

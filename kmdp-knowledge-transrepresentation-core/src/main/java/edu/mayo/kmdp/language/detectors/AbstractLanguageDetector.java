@@ -1,6 +1,7 @@
 package edu.mayo.kmdp.language.detectors;
 
 import static org.omg.spec.api4kp._20200801.contrastors.SyntacticRepresentationContrastor.theRepContrastor;
+import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.asEnum;
 
 import edu.mayo.kmdp.language.DetectApiOperator;
 import java.util.List;
@@ -42,7 +43,7 @@ public abstract class AbstractLanguageDetector
   }
 
   protected Optional<SyntacticRepresentation> detect(KnowledgeCarrier sourceArtifact) {
-    switch (sourceArtifact.getLevel().asEnum()) {
+    switch (asEnum(sourceArtifact.getLevel())) {
       case Encoded_Knowledge_Expression:
         return sourceArtifact.asBinary().flatMap(this::detectBinary);
       case Serialized_Knowledge_Expression:

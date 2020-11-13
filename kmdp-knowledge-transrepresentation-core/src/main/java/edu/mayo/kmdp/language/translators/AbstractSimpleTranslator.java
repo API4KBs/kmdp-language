@@ -7,6 +7,7 @@ import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSe
 import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.Concrete_Knowledge_Expression;
 import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.Encoded_Knowledge_Expression;
 import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.Serialized_Knowledge_Expression;
+import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.asEnum;
 
 import edu.mayo.kmdp.language.TransionApiOperator;
 import edu.mayo.kmdp.util.PropertiesUtil;
@@ -79,7 +80,7 @@ public abstract class AbstractSimpleTranslator<S, T>
       KnowledgeCarrier src,
       SyntacticRepresentation tgtRep,
       Properties config) {
-    switch (src.getLevel().asEnum()) {
+    switch (asEnum(src.getLevel())) {
       case Encoded_Knowledge_Expression:
         return src.asBinary()
             .flatMap(
