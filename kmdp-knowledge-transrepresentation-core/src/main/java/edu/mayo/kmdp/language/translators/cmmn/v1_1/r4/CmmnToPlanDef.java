@@ -1,21 +1,20 @@
 /**
  * Copyright © 2018 Mayo Clinic (RSTKNOWLEDGEMGMT@mayo.edu)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package edu.mayo.kmdp.language.translators.cmmn.v1_1;
+package edu.mayo.kmdp.language.translators.cmmn.v1_1.r4;
 
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.snapshot.SemanticAnnotationRelType.Captures;
 
-import edu.mayo.kmdp.language.translators.fhir.stu3.FHIRTranslatorUtils;
 import edu.mayo.kmdp.util.StreamUtil;
 import edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries;
 import java.net.URI;
@@ -28,20 +27,20 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.Identifier;
-import org.hl7.fhir.dstu3.model.PlanDefinition;
-import org.hl7.fhir.dstu3.model.PlanDefinition.ActionCardinalityBehavior;
-import org.hl7.fhir.dstu3.model.PlanDefinition.ActionGroupingBehavior;
-import org.hl7.fhir.dstu3.model.PlanDefinition.ActionPrecheckBehavior;
-import org.hl7.fhir.dstu3.model.PlanDefinition.ActionRelationshipType;
-import org.hl7.fhir.dstu3.model.PlanDefinition.ActionRequiredBehavior;
-import org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionComponent;
-import org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionRelatedActionComponent;
-import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.RelatedArtifact;
-import org.hl7.fhir.dstu3.model.TriggerDefinition.TriggerType;
+import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.PlanDefinition;
+import org.hl7.fhir.r4.model.PlanDefinition.ActionCardinalityBehavior;
+import org.hl7.fhir.r4.model.PlanDefinition.ActionGroupingBehavior;
+import org.hl7.fhir.r4.model.PlanDefinition.ActionPrecheckBehavior;
+import org.hl7.fhir.r4.model.PlanDefinition.ActionRelationshipType;
+import org.hl7.fhir.r4.model.PlanDefinition.ActionRequiredBehavior;
+import org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionComponent;
+import org.hl7.fhir.r4.model.PlanDefinition.PlanDefinitionActionRelatedActionComponent;
+import org.hl7.fhir.r4.model.RelatedArtifact;
+import org.hl7.fhir.r4.model.TriggerDefinition.TriggerType;
 import org.omg.spec.api4kp._20200801.id.ConceptIdentifier;
 import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
 import org.omg.spec.api4kp._20200801.id.Term;
@@ -137,14 +136,14 @@ public class CmmnToPlanDef {
   }
 
 
-  private List<PlanDefinition.PlanDefinitionActionComponent> processStage(
+  private List<PlanDefinitionActionComponent> processStage(
       TStage stage,
       URI ccpmId,
       TDefinitions caseModel) {
-    List<PlanDefinition.PlanDefinitionActionComponent> mappedPlanElements
+    List<PlanDefinitionActionComponent> mappedPlanElements
         = processStageInternals(stage, ccpmId, caseModel);
 
-    PlanDefinition.PlanDefinitionActionComponent group = new PlanDefinitionActionComponent();
+    PlanDefinitionActionComponent group = new PlanDefinitionActionComponent();
 
     group.setId(stage.getId());
     group.setTitle(stage.getName());
@@ -156,9 +155,9 @@ public class CmmnToPlanDef {
         .forEach(group::addCode);
 
     group.setGroupingBehavior(ActionGroupingBehavior.LOGICALGROUP);
-    group.setType(new Coding()
+    group.setType(new CodeableConcept().addCoding(new Coding()
         .setSystem("TODO")
-        .setCode("Stage")
+        .setCode("Stage"))
     );
     mappedPlanElements.forEach(
         group::addAction
@@ -170,7 +169,7 @@ public class CmmnToPlanDef {
 
   private List<PlanDefinitionActionComponent> processStageInternals(TStage stage,
       URI ccpmId, TDefinitions caseModel) {
-    List<PlanDefinition.PlanDefinitionActionComponent> mappedPlanElements = new ArrayList<>();
+    List<PlanDefinitionActionComponent> mappedPlanElements = new ArrayList<>();
 
     for (TPlanItem planItem : stage.getPlanItem()) {
       processPlanItem(planItem, planItem.getDefinitionRef(), ccpmId, mappedPlanElements, caseModel);
@@ -354,7 +353,7 @@ public class CmmnToPlanDef {
           PlanDefinitionActionComponent whiteAct = whiteActOpt.orElseThrow();
 
           if (sourceDef instanceof TPlanItem) {
-            String refId = ((TPlanItem) sourceDef).getId();
+            String refId = ((TCmmnElement) sourceDef).getId();
             // act resulting from the mapping of the item with the while diamond sentry
             whiteAct.addRelatedAction(
                 new PlanDefinitionActionRelatedActionComponent()
@@ -362,8 +361,8 @@ public class CmmnToPlanDef {
                     .setActionId(refId));
           } else if (sourceDef instanceof TEventListener) {
             TEventListener eventListener = (TEventListener) sourceDef;
-            whiteAct.addTriggerDefinition()
-                .setEventName(eventListener.getName())
+            whiteAct.addTrigger()
+                .setName(eventListener.getName())
                 .setType(TriggerType.NAMEDEVENT);
           } else if (sourceDef instanceof TStage) {
             TStage srcStage = (TStage) sourceDef;
@@ -397,9 +396,9 @@ public class CmmnToPlanDef {
           PlanDefinitionActionComponent whiteAct = scopedActions.stream()
               .filter(act -> act.getId().equals(itemWithSentry.getId()))
               .findFirst().orElseThrow();
-          whiteAct.addTriggerDefinition()
-              .setType(TriggerType.DATAMODIFIED)
-              .setEventName(srcCFI.getName());
+          whiteAct.addTrigger()
+              .setType(TriggerType.DATACHANGED)
+              .setName(srcCFI.getName());
         } else {
           throw new UnsupportedOperationException("Defensive!");
         }
@@ -413,9 +412,9 @@ public class CmmnToPlanDef {
             PlanDefinitionActionComponent whiteAct = scopedActions.stream()
                 .filter(act -> act.getId().equals(itemWithSentry.getId()))
                 .findFirst().orElseThrow();
-            whiteAct.addTriggerDefinition()
+            whiteAct.addTrigger()
                 .setType(TriggerType.NAMEDEVENT)
-                .setEventName(eventListener.getName());
+                .setName(eventListener.getName());
           } else {
             //TODO FIXME this gets called for a combination already visited - the IF/THEN may be overlapping
             //throw new UnsupportedOperationException("Defensive!");
@@ -432,14 +431,14 @@ public class CmmnToPlanDef {
   }
 
 
-  private PlanDefinition.PlanDefinitionActionComponent processTask(
+  private PlanDefinitionActionComponent processTask(
       TTask task,
       TDefinitions caseModel,
       TPlanItem planItem) {
 
-    PlanDefinition.PlanDefinitionActionComponent planAction = new PlanDefinitionActionComponent();
+    PlanDefinitionActionComponent planAction = new PlanDefinitionActionComponent();
     planAction.setId(task.getId());
-    planAction.setLabel(task.getName());
+    planAction.setTitle(task.getName());
 
     getTypeCode(task.getExtensionElements()).stream()
         .map(this::toCode)
@@ -479,14 +478,15 @@ public class CmmnToPlanDef {
       TPlanItem planItem,
       THumanTask humanTask,
       TDefinitions caseModel) {
-    PlanDefinition.PlanDefinitionActionComponent planAction
+    PlanDefinitionActionComponent planAction
         = processTask(humanTask, caseModel, planItem);
 
     addAnnotations(humanTask.getExtensionElements(), planAction);
 
-    planAction.setType(new Coding()
+    planAction.setType(new CodeableConcept()
+        .addCoding(new Coding()
             .setSystem("TODO")
-            .setCode("HumanTask")
+            .setCode("HumanTask"))
     );
     return planAction;
   }
@@ -500,45 +500,48 @@ public class CmmnToPlanDef {
 
     addAnnotations(humanTask.getExtensionElements(), planAction);
 
-    planAction.setType(new Coding()
-        .setSystem("TODO")
-        .setCode("HumanTask")
+    planAction.setType(new CodeableConcept()
+        .addCoding(new Coding()
+            .setSystem("TODO")
+            .setCode("HumanTask"))
     );
     return planAction;
   }
 
-  private PlanDefinition.PlanDefinitionActionComponent processGenericTask(
+  private PlanDefinitionActionComponent processGenericTask(
       TPlanItem planItem,
       TTask task,
       TDefinitions caseModel) {
-    PlanDefinition.PlanDefinitionActionComponent planAction
+    PlanDefinitionActionComponent planAction
         = processTask(task, caseModel, planItem);
 
-    addAnnotations(task.getExtensionElements(),planAction);
+    addAnnotations(task.getExtensionElements(), planAction);
 
-    planAction.setType(new Coding()
-        .setSystem("TODO")
-        .setCode("Generic Task")
+    planAction.setType(new CodeableConcept()
+        .addCoding(new Coding()
+            .setSystem("TODO")
+            .setCode("Generic Task"))
     );
     return planAction;
   }
 
-  private PlanDefinition.PlanDefinitionActionComponent processDecisionTask(
+  private PlanDefinitionActionComponent processDecisionTask(
       TPlanItem planItem,
       TDecisionTask tDecisionTask,
       TDefinitions caseModel) {
 
-    PlanDefinition.PlanDefinitionActionComponent planAction
+    PlanDefinitionActionComponent planAction
         = processTask(tDecisionTask, caseModel, planItem);
 
     addDefinition(planAction, tDecisionTask, caseModel);
 
-    addAnnotations(tDecisionTask.getExtensionElements(),planAction);
+    addAnnotations(tDecisionTask.getExtensionElements(), planAction);
 
-    planAction.setType(new Coding()
-        .setSystem("TODO")
-        .setCode("DecisionTask")
-    );
+    planAction.setType(new CodeableConcept()
+        .addCoding(new Coding()
+            .setSystem("TODO")
+            .setCode("DecisionTask")
+        ));
     return planAction;
   }
 
@@ -551,7 +554,7 @@ public class CmmnToPlanDef {
     extensionElements.getAny().stream()
         .flatMap(StreamUtil.filterAs(Annotation.class))
         .map(Annotation::getRef)
-        .map(FHIRTranslatorUtils::toCodeableConcept)
+        .map(this::toCode)
         .forEach(planAction::addCode);
   }
 
@@ -600,12 +603,8 @@ public class CmmnToPlanDef {
             dec.getId());
       } else {
         planAction.setDefinition(
-            new Reference()
-                .setReference(dec.getExternalRef().getNamespaceURI())
-                .setDisplay(dec.getName())
-                .setIdentifier(new Identifier()
-                    .setType(new CodeableConcept().setText("TODO - Knowledge Artifact Fragment Identifier"))
-                    .setValue(dec.getExternalRef().getLocalPart().replace("_","")))
+            new CanonicalType()
+                .setValue(dec.getExternalRef().getNamespaceURI())
         );
       }
     });
@@ -654,7 +653,6 @@ public class CmmnToPlanDef {
                 tDecisionTask.getName() +
                 " without an associated Decision Model ")));
   }
-
 
 
   private static Collection<Term> getTypeCode(TExtensionElements extensionElements) {
