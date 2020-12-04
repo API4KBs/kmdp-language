@@ -307,7 +307,7 @@ public class CmmnToPlanDef {
     return new CodeableConcept()
         .setCoding(Collections.singletonList(
             new Coding()
-                .setCode("_" + cid.getUuid().toString())
+                .setCode(cid.getUuid().toString())
                 .setDisplay(cid.getLabel())
                 .setSystem(cid.getNamespaceUri().toString())
                 .setVersion(cid.getVersionTag())));
@@ -439,7 +439,7 @@ public class CmmnToPlanDef {
 
     PlanDefinition.PlanDefinitionActionComponent planAction = new PlanDefinitionActionComponent();
     planAction.setId(task.getId());
-    planAction.setLabel(task.getName());
+    planAction.setTitle(task.getName());
 
     getTypeCode(task.getExtensionElements()).stream()
         .map(this::toCode)

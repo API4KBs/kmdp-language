@@ -306,7 +306,7 @@ public class CmmnToPlanDef {
     return new CodeableConcept()
         .setCoding(Collections.singletonList(
             new Coding()
-                .setCode("_" + cid.getUuid().toString())
+                .setCode(cid.getUuid().toString())
                 .setDisplay(cid.getLabel())
                 .setSystem(cid.getNamespaceUri().toString())
                 .setVersion(cid.getVersionTag())));
