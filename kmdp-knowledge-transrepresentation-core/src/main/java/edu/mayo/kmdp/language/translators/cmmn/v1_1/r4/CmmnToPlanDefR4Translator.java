@@ -19,6 +19,7 @@ import static java.util.Collections.singletonList;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
 import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Syntactic_Translation_Task;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.CMMN_1_1;
+import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.FHIR_R4;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.FHIR_STU3;
 import static org.omg.spec.api4kp._20200801.taxonomy.lexicon.LexiconSeries.PCV;
 import static org.omg.spec.api4kp._20200801.taxonomy.lexicon.LexiconSeries.SNOMED_CT;
@@ -40,7 +41,7 @@ import org.omg.spec.cmmn._20151109.model.TDefinitions;
 
 @Named
 @KPOperation(Syntactic_Translation_Task)
-@KPSupport({FHIR_STU3,CMMN_1_1})
+@KPSupport({FHIR_R4,CMMN_1_1})
 public class CmmnToPlanDefR4Translator
     extends AbstractSimpleTranslator<TDefinitions, PlanDefinition> {
 
