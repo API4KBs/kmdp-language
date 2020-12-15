@@ -23,6 +23,7 @@ import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSe
 import edu.mayo.kmdp.util.JaxbUtil;
 import edu.mayo.kmdp.util.Util;
 import edu.mayo.kmdp.util.XMLUtil;
+import edu.mayo.kmdp.util.properties.jaxb.JaxbConfig;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collection;
@@ -84,7 +85,7 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializeOpera
       return Optional.empty();
     }
     return carrier.as(root)
-        .flatMap(obj -> JaxbUtil.marshall(getClassContext(), obj, mapper))
+        .flatMap(obj -> JaxbUtil.marshall(getClassContext(), obj, mapper, new JaxbConfig().from(config)))
         .flatMap(Util::asString)
         .map(str -> newVerticalCarrier(carrier, Serialized_Knowledge_Expression, into, str));
   }
@@ -102,7 +103,7 @@ public abstract class XMLBasedLanguageParser<T> extends AbstractDeSerializeOpera
   public Optional<KnowledgeCarrier> innerConcretize(KnowledgeCarrier carrier,
       SyntacticRepresentation into, Properties config) {
     return carrier.as(root)
-        .flatMap(obj -> JaxbUtil.marshallDox(getClassContext(), obj, mapper))
+        .flatMap(obj -> JaxbUtil.marshallDox(getClassContext(), obj, mapper, new JaxbConfig().from(config)))
         .map(dox -> newVerticalCarrier(carrier, Concrete_Knowledge_Expression, into, dox));
   }
 
