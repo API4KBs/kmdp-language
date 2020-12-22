@@ -1,12 +1,14 @@
 package edu.mayo.kmdp.language.translators.surrogate.v2;
 
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
+import static org.omg.spec.api4kp._20200801.contrastors.ParsingLevelContrastor.detectLevel;
 import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Syntactic_Translation_Task;
 import static org.omg.spec.api4kp._20200801.taxonomy.krformat.snapshot.SerializationFormat.JSON;
 import static org.omg.spec.api4kp._20200801.taxonomy.krformat.snapshot.SerializationFormat.TXT;
 import static org.omg.spec.api4kp._20200801.taxonomy.krformat.snapshot.SerializationFormat.XML_1_1;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.HTML;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate_2_0;
+import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.asEnum;
 
 import edu.mayo.kmdp.language.parsers.surrogate.v2.Surrogate2Parser;
 import edu.mayo.kmdp.language.translators.AbstractSimpleTranslator;
@@ -23,6 +25,7 @@ import org.omg.spec.api4kp._20200801.AbstractCarrier.Encodings;
 import org.omg.spec.api4kp._20200801.Answer;
 import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.DeserializeApiInternal._applyLift;
 import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.DeserializeApiInternal._applyLower;
+import org.omg.spec.api4kp._20200801.contrastors.ParsingLevelContrastor;
 import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
 import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
 import org.omg.spec.api4kp._20200801.services.KPOperation;
@@ -30,6 +33,8 @@ import org.omg.spec.api4kp._20200801.services.KPSupport;
 import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
 import org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset;
 import org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
+import org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevel;
+import org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries;
 
 @Named
 @KPOperation(Syntactic_Translation_Task)
@@ -63,7 +68,10 @@ public class SurrogateV2toHTMLTranslator extends
   public List<SyntacticRepresentation> getInto() {
     return Arrays.asList(
         rep(HTML),
-        rep(HTML, TXT));
+        rep(HTML, TXT),
+        rep(HTML, TXT, Charset.defaultCharset()),
+        rep(HTML, TXT, Charset.defaultCharset(), Encodings.DEFAULT)
+    );
   }
 
   @Override
@@ -86,9 +94,9 @@ public class SurrogateV2toHTMLTranslator extends
         (sourceArtifact, levelTag, xAccept, xParams) ->
             sourceArtifact
                 .as(Document.class)
-                .map(doh -> doh.outerHtml())
+                .map(Document::outerHtml)
                 .map(str -> AbstractCarrier.of(str, rep(HTML, TXT)))
-                .map(kc -> Answer.of(kc))
+                .map(Answer::of)
                 .orElse(Answer.failed()));
   }
 

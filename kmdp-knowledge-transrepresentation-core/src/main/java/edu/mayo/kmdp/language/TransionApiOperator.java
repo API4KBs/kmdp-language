@@ -69,11 +69,12 @@ public interface TransionApiOperator
 
   static KnowledgeCarrier newHorizontalCarrier(
       SyntacticRepresentation targetRepresentation,
+      SyntacticRepresentation currentRepresentation,
       Object targetArtifact,
       ResourceIdentifier mappedAssetId,
       ResourceIdentifier mappedArtifactId, String label) {
 
-    ParsingLevel targetLevel = ParsingLevelContrastor.detectLevel(targetRepresentation);
+    ParsingLevel targetLevel = ParsingLevelContrastor.detectLevel(currentRepresentation);
 
     KnowledgeCarrier newCarrier;
     switch (asEnum(targetLevel)) {

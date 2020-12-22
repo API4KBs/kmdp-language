@@ -120,7 +120,12 @@ public abstract class AbstractSimpleTranslator<S, T>
       ResourceIdentifier mappedArtifactId,
       String label) {
     KnowledgeCarrier kc = TransionApiOperator.newHorizontalCarrier(
-        tgtRep, translatedArtifact, mappedAssetId, mappedArtifactId, label);
+        tgtRep,
+        rep(tgtRep.getLanguage()),
+        translatedArtifact,
+        mappedAssetId,
+        mappedArtifactId,
+        label);
     return getTargetParser()
         .flatMap(parser -> parser.applyLower(
             kc,
