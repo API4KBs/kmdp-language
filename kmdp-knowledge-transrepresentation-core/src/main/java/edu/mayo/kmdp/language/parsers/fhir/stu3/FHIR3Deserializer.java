@@ -51,13 +51,6 @@ public class FHIR3Deserializer extends AbstractDeSerializeOperator {
   }
 
   @Override
-  public Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier,
-      Properties properties) {
-    return carrier.asString()
-        .map(AbstractCarrier::of);
-  }
-
-  @Override
   public Optional<KnowledgeCarrier> innerDeserialize(KnowledgeCarrier carrier,
       Properties properties) {
     return Optional.empty();
