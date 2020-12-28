@@ -22,6 +22,7 @@ import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSe
 import edu.mayo.kmdp.language.DeserializeApiOperator;
 import edu.mayo.kmdp.util.PropertiesUtil;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
@@ -207,7 +208,11 @@ public abstract class AbstractDeSerializeOperator
     if (expr instanceof String) {
       serializedExpr = new String(Base64.getDecoder().decode((String)expr));
     } else if (expr instanceof byte[]) {
-      serializedExpr = new String((byte[]) expr);
+      byte[] bytes = (byte[]) expr;
+      if (bytes[0] == (byte) 0xEF && bytes[1] == (byte) 0xBB && bytes[2] == (byte) 0xBF) {
+        bytes = Arrays.copyOfRange(bytes,3, bytes.length);
+      }
+      serializedExpr = new String(bytes);
     } else {
       serializedExpr = null;
     }
