@@ -15,7 +15,7 @@ package edu.mayo.kmdp.language.translators.cmmn.v1_1;
 
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.snapshot.SemanticAnnotationRelType.Captures;
 
-import edu.mayo.kmdp.language.translators.fhir.stu3.FHIRTranslatorUtils;
+import edu.mayo.kmdp.language.common.fhir.stu3.FHIRUtils;
 import edu.mayo.kmdp.util.StreamUtil;
 import edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries;
 import java.net.URI;
@@ -52,7 +52,6 @@ import org.omg.spec.cmmn._20151109.model.TCase;
 import org.omg.spec.cmmn._20151109.model.TCaseFileItem;
 import org.omg.spec.cmmn._20151109.model.TCaseFileItemDefinition;
 import org.omg.spec.cmmn._20151109.model.TCaseFileItemOnPart;
-import org.omg.spec.cmmn._20151109.model.TCmmnElement;
 import org.omg.spec.cmmn._20151109.model.TDecision;
 import org.omg.spec.cmmn._20151109.model.TDecisionTask;
 import org.omg.spec.cmmn._20151109.model.TDefinitions;
@@ -63,7 +62,6 @@ import org.omg.spec.cmmn._20151109.model.TExitCriterion;
 import org.omg.spec.cmmn._20151109.model.TExtensionElements;
 import org.omg.spec.cmmn._20151109.model.THumanTask;
 import org.omg.spec.cmmn._20151109.model.TOnPart;
-import org.omg.spec.cmmn._20151109.model.TPlanFragment;
 import org.omg.spec.cmmn._20151109.model.TPlanItem;
 import org.omg.spec.cmmn._20151109.model.TPlanItemControl;
 import org.omg.spec.cmmn._20151109.model.TPlanItemDefinition;
@@ -551,7 +549,7 @@ public class CmmnToPlanDef {
     extensionElements.getAny().stream()
         .flatMap(StreamUtil.filterAs(Annotation.class))
         .map(Annotation::getRef)
-        .map(FHIRTranslatorUtils::toCodeableConcept)
+        .map(FHIRUtils::toCodeableConcept)
         .forEach(planAction::addCode);
   }
 
