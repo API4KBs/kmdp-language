@@ -380,7 +380,7 @@ public class DmnToPlanDef {
                     .setUrl(knowledgeSource.getLocationURI())
                     .setDisplay(knowledgeSource.getName())
                     .setDocument(new Attachment()
-                        .setTitle(knowledgeSource.getLabel())
+                        .setTitle(knowledgeSource.getName())
                         .setUrl(knowledgeSource.getLocationURI())
                         .setContentType(knowledgeSource.getType()))
             ));

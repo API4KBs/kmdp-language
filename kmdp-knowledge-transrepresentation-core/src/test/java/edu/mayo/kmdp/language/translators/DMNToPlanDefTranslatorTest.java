@@ -1,6 +1,7 @@
 package edu.mayo.kmdp.language.translators;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.codedRep;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.of;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
@@ -12,8 +13,12 @@ import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel._20200801.Pars
 import edu.mayo.kmdp.language.parsers.dmn.v1_2.DMN12Parser;
 import edu.mayo.kmdp.language.translators.dmn.v1_2.DmnToPlanDef;
 import java.nio.charset.Charset;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionComponent;
+import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.omg.spec.api4kp._20200801.AbstractCarrier.Encodings;
@@ -36,6 +41,42 @@ public class DMNToPlanDefTranslatorTest {
     assertEquals(3, serverAct.getInput().size());
     assertEquals(1, serverAct.getOutput().size());
   }
+
+
+  @Test
+  void testKnowledgeSource() {
+    DmnToPlanDef translator = new DmnToPlanDef();
+    TDefinitions source = loadDMN("/fhir.stu3/decisionKnowSource.dmn.xml");
+    PlanDefinition planDef = translator.transform(randomId(),source);
+
+    List<RelatedArtifact> relateds = getKnowledgeSources(planDef).collect(Collectors.toList());
+    assertEquals(1, relateds.size());
+    RelatedArtifact related = relateds.get(0);
+    assertEquals("https://foo.bar/baz", related.getUrl());
+    assertEquals("https://foo.bar/baz", related.getDocument().getUrl());
+    assertEquals("Sample Source", related.getDisplay());
+    assertEquals("Sample Source", related.getDocument().getTitle());
+    assertEquals("*/*", related.getDocument().getContentType());
+
+  }
+
+  private Stream<RelatedArtifact> getKnowledgeSources(PlanDefinition x) {
+    return getNestedActions(x)
+        .flatMap(act -> act.getDocumentation().stream());
+  }
+
+  private Stream<PlanDefinitionActionComponent> getNestedActions(PlanDefinition x) {
+    return x.getAction().stream()
+        .flatMap(this::getNestedActions);
+  }
+
+  private Stream<? extends PlanDefinitionActionComponent> getNestedActions(
+      PlanDefinitionActionComponent act) {
+    return Stream.concat(
+        Stream.of(act),
+        act.getAction().stream().flatMap(this::getNestedActions));
+  }
+
 
   private TDefinitions loadDMN(String path) {
     KnowledgeCarrier kc = of(DMNToPlanDefTranslatorTest.class.getResourceAsStream(path))
