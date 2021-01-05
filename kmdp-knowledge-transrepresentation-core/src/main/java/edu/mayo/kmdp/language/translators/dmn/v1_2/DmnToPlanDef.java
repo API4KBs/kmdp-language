@@ -36,6 +36,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.xml.bind.JAXBElement;
+import org.hl7.fhir.dstu3.model.Attachment;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DataRequirement;
@@ -47,13 +48,13 @@ import org.hl7.fhir.dstu3.model.PlanDefinition.ActionRelationshipType;
 import org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionComponent;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
-import org.hl7.fhir.dstu3.model.UriType;
 import org.omg.spec.api4kp._20200801.id.ConceptIdentifier;
 import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
 import org.omg.spec.api4kp._20200801.id.Term;
 import org.omg.spec.api4kp._20200801.surrogate.Annotation;
 import org.omg.spec.api4kp._20200801.taxonomy.knowledgeassettype.KnowledgeAssetTypeSeries;
 import org.omg.spec.dmn._20180521.model.TAuthorityRequirement;
+import org.omg.spec.dmn._20180521.model.TBusinessKnowledgeModel;
 import org.omg.spec.dmn._20180521.model.TDMNElement.ExtensionElements;
 import org.omg.spec.dmn._20180521.model.TDMNElementReference;
 import org.omg.spec.dmn._20180521.model.TDRGElement;
@@ -74,16 +75,16 @@ public class DmnToPlanDef {
   }
 
   public PlanDefinition transform(ResourceIdentifier assetId, TDefinitions decisionModel) {
-    log.debug("Called Translator DMN to PDF  for {}",decisionModel.getName() );
+    log.debug("Called Translator DMN to PDF  for {}", decisionModel.getName());
     PlanDefinition cpm = new PlanDefinition();
 
-    mapIdentity(cpm,assetId.getResourceId(),decisionModel);
-    mapName(cpm,decisionModel);
-    mapSubject(cpm,decisionModel);
+    mapIdentity(cpm, assetId.getResourceId(), decisionModel);
+    mapName(cpm, decisionModel);
+    mapSubject(cpm, decisionModel);
 
-    mapDecisions(cpm,decisionModel);
+    mapDecisions(cpm, decisionModel);
 
-    log.debug("Finished DMN to PDef  for {} ", decisionModel.getName() );
+    log.debug("Finished DMN to PDef  for {} ", decisionModel.getName());
     return cpm;
   }
 
@@ -95,18 +96,18 @@ public class DmnToPlanDef {
 
     Collection<TDecision> dmnDecisions = streamDecisions(decisionModel)
         .filter(dec -> dmnDecisionServices.stream()
-            .noneMatch(ds -> isDecisionServiceScoped(dec,ds)))
+            .noneMatch(ds -> isDecisionServiceScoped(dec, ds)))
         .collect(Collectors.toList());
 
     Map<String, PlanDefinitionActionComponent> mappedDecisions = dmnDecisions.stream()
-        .map(decision -> processDecision(cpm::addAction,decisionModel,decision))
+        .map(decision -> processDecision(cpm::addAction, decisionModel, decision))
         .collect(Collectors.toMap(
             Element::getId,
             Function.identity()
         ));
 
     Map<String, PlanDefinitionActionComponent> mappedDecisionServices = dmnDecisionServices.stream()
-        .map(decisionService -> processDecisionService(cpm,decisionModel,decisionService))
+        .map(decisionService -> processDecisionService(cpm, decisionModel, decisionService))
         .collect(Collectors.toMap(
             Element::getId,
             Function.identity()
@@ -129,9 +130,11 @@ public class DmnToPlanDef {
   }
 
   private boolean isDecisionServiceScoped(TDecision dec, TDecisionService ds) {
-    boolean isScoped = ds.getOutputDecision().stream().anyMatch(ref -> ref.getHref().contains(dec.getId()))
-        || ds.getEncapsulatedDecision().stream().anyMatch(ref -> ref.getHref().contains(dec.getId()))
-        || ds.getInputDecision().stream().anyMatch(ref -> ref.getHref().contains(dec.getId()));
+    boolean isScoped =
+        ds.getOutputDecision().stream().anyMatch(ref -> ref.getHref().contains(dec.getId()))
+            || ds.getEncapsulatedDecision().stream()
+            .anyMatch(ref -> ref.getHref().contains(dec.getId()))
+            || ds.getInputDecision().stream().anyMatch(ref -> ref.getHref().contains(dec.getId()));
     return isScoped;
   }
 
@@ -142,7 +145,7 @@ public class DmnToPlanDef {
       TDefinitions decisionModel) {
 
     PlanDefinitionActionComponent srcAction = mappedDecisions.get(
-        "#" + dmnDecision.getId().replace("_",""));
+        "#" + dmnDecision.getId().replace("_", ""));
 
     dmnDecision.getInformationRequirement().stream()
         .filter(info -> info.getRequiredDecision() != null)
@@ -155,16 +158,17 @@ public class DmnToPlanDef {
                         .setReference(URIUtil.normalizeURIString(ref))
                         .setDisplay(info.getLabel())
                         .setIdentifier(new Identifier()
-                            .setType(new CodeableConcept().setText("TODO - Knowledge Artifact Fragment Identifier"))
-                            .setValue(ref.getFragment().replace("_","")))
-                ).setId(ref.getFragment().replace("_",""))
+                            .setType(new CodeableConcept()
+                                .setText("TODO - Knowledge Artifact Fragment Identifier"))
+                            .setValue(ref.getFragment().replace("_", "")))
+                ).setId(ref.getFragment().replace("_", ""))
             );
           }
           return ref.getFragment();
         })
         .forEach(tgtActionId -> srcAction.addRelatedAction()
             .setRelationship(ActionRelationshipType.AFTER)
-            .setActionId("#" + tgtActionId.replace("_","")));
+            .setActionId("#" + tgtActionId.replace("_", "")));
 
   }
 
@@ -178,13 +182,31 @@ public class DmnToPlanDef {
     PlanDefinitionActionComponent srcAction = mappedDecisions.get(
         "#" + dmnDecision.getId().replace("_", ""));
 
-    List<PlanDefinitionActionComponent> serviceAction = dmnDecision.getKnowledgeRequirement().stream()
+    List<PlanDefinitionActionComponent> serviceAction = dmnDecision.getKnowledgeRequirement()
+        .stream()
         .filter(know -> know.getRequiredKnowledge() != null)
         .map(info -> mappedDecisionServices.get(
-            info.getRequiredKnowledge().getHref().replace("_","")))
+            info.getRequiredKnowledge().getHref().replace("_", "")))
+        .collect(Collectors.toList());
+
+    List<PlanDefinitionActionComponent> serviceClientAction = dmnDecision.getKnowledgeRequirement()
+        .stream()
+        .filter(know -> know.getRequiredKnowledge() != null)
+        .flatMap(know -> lookupBKM(decisionModel, know.getRequiredKnowledge()))
+        .flatMap(bkm -> bkm.getKnowledgeRequirement().stream())
+        .filter(know -> know.getRequiredKnowledge() != null)
+        .map(info -> mappedDecisionServices.get(
+            info.getRequiredKnowledge().getHref().replace("_", "")))
         .collect(Collectors.toList());
 
     serviceAction.forEach(srcAction::addAction);
+    serviceClientAction.forEach(srcAction::addAction);
+  }
+
+  private Stream<TBusinessKnowledgeModel> lookupBKM(TDefinitions decisionModel,
+      TDMNElementReference requiredKnowledge) {
+    return streamBKM(decisionModel)
+        .filter(bkm -> requiredKnowledge.getHref().contains(bkm.getId()));
   }
 
   private void mapIdentity(PlanDefinition cpm, URI assetId, TDefinitions decisionModel) {
@@ -204,18 +226,19 @@ public class DmnToPlanDef {
       TDefinitions decisionModel, TDecision decision) {
     PlanDefinitionActionComponent decisionAction = new PlanDefinitionActionComponent();
     decisionAction.setLabel(decision.getName());
-    decisionAction.setId("#" + decision.getId().replace("_",""));
+    decisionAction.setTitle(decision.getName());
+    decisionAction.setId("#" + decision.getId().replace("_", ""));
 
     getSemanticAnnotation(decision.getExtensionElements()).stream()
         .map(this::toCode)
         .forEach(decisionAction::addCode);
 
     decision.getAuthorityRequirement()
-        .forEach(know -> mapKnowledgeSource(know,decisionAction,decisionModel));
+        .forEach(know -> mapKnowledgeSource(know, decisionAction, decisionModel));
 
     decision.getInformationRequirement().stream()
         .filter(info -> info.getRequiredInput() != null)
-        .map(info -> findInput(info.getRequiredInput(),decisionModel))
+        .map(info -> findInput(info.getRequiredInput(), decisionModel))
         .flatMap(StreamUtil::trimStream)
         .map(this::mapInput)
         .forEach(decisionAction::addInput);
@@ -229,7 +252,7 @@ public class DmnToPlanDef {
       TDefinitions decisionModel, TDecisionService decisionService) {
     PlanDefinitionActionComponent serviceAction = new PlanDefinitionActionComponent();
     serviceAction.setLabel(decisionService.getName());
-    serviceAction.setId("#" + decisionService.getId().replace("_",""));
+    serviceAction.setId("#" + decisionService.getId().replace("_", ""));
 
     getSemanticAnnotation(decisionService.getExtensionElements()).stream()
         .map(this::toCode)
@@ -269,19 +292,17 @@ public class DmnToPlanDef {
     return dataRequirement;
   }
 
-  private DataRequirement mapOutput(TDecision input,
+  private DataRequirement mapOutput(TDecision output,
       PlanDefinitionActionComponent serviceAction) {
     DataRequirement dataRequirement = new DataRequirement();
     DataRequirementCodeFilterComponent codeFilters = new DataRequirementCodeFilterComponent();
     dataRequirement.addCodeFilter(codeFilters);
-//    dataRequirement.setType("TODO Data Shape - Base Resource type");
-//    dataRequirement.setProfile(Collections.singletonList(new UriType("http://todo.me/datashape/profile123")));
 
-    getSemanticAnnotation(input.getExtensionElements()).stream()
+    getSemanticAnnotation(output.getExtensionElements()).stream()
         .map(this::toCode)
-        .filter(cd -> ! isKMConcept(cd))
+        .filter(cd -> !isKMConcept(cd))
         .forEach(codeFilters::addValueCodeableConcept);
-    getSemanticAnnotation(input.getExtensionElements()).stream()
+    getSemanticAnnotation(output.getExtensionElements()).stream()
         .map(this::toCode)
         .filter(cd -> isKMConcept(cd))
         .forEach(serviceAction::addCode);
@@ -294,12 +315,14 @@ public class DmnToPlanDef {
     String codeSystem = cd.getCodingFirstRep().getSystem();
     boolean isDecisionType = DecisionTypeSeries.schemeSeriesIdentifier.getNamespaceUri().toString()
         .equals(codeSystem);
-    boolean isKnowledgeAssetType = DecisionTypeSeries.schemeSeriesIdentifier.getNamespaceUri().toString()
+    boolean isKnowledgeAssetType = KnowledgeAssetTypeSeries.schemeSeriesIdentifier.getNamespaceUri()
+        .toString()
         .equals(codeSystem);
     return isDecisionType || isKnowledgeAssetType;
   }
 
-  private Optional<TInputData> findInput(TDMNElementReference requiredInput, TDefinitions decisionModel) {
+  private Optional<TInputData> findInput(TDMNElementReference requiredInput,
+      TDefinitions decisionModel) {
     return decisionModel.getDrgElement().stream()
         .map(JAXBElement::getValue)
         .flatMap(StreamUtil.filterAs(TInputData.class))
@@ -318,7 +341,8 @@ public class DmnToPlanDef {
   }
 
 
-  private Optional<TDecision> findDecision(TDMNElementReference requiredDecision, TDefinitions decisionModel) {
+  private Optional<TDecision> findDecision(TDMNElementReference requiredDecision,
+      TDefinitions decisionModel) {
     return decisionModel.getDrgElement().stream()
         .map(JAXBElement::getValue)
         .flatMap(StreamUtil.filterAs(TDecision.class))
@@ -337,7 +361,8 @@ public class DmnToPlanDef {
   }
 
 
-  private Optional<TKnowledgeSource> findKnowledgeSource(TDMNElementReference requiredSource, TDefinitions decisionModel) {
+  private Optional<TKnowledgeSource> findKnowledgeSource(TDMNElementReference requiredSource,
+      TDefinitions decisionModel) {
     return decisionModel.getDrgElement().stream()
         .map(JAXBElement::getValue)
         .flatMap(StreamUtil.filterAs(TKnowledgeSource.class))
@@ -353,7 +378,12 @@ public class DmnToPlanDef {
             decisionAction.addDocumentation(
                 new RelatedArtifact()
                     .setUrl(knowledgeSource.getLocationURI())
-                    .setDisplay(knowledgeSource.getName())));
+                    .setDisplay(knowledgeSource.getName())
+                    .setDocument(new Attachment()
+                        .setTitle(knowledgeSource.getLabel())
+                        .setUrl(knowledgeSource.getLocationURI())
+                        .setContentType(knowledgeSource.getType()))
+            ));
   }
 
   private void mapSubject(PlanDefinition cpm, TDefinitions tCase) {
@@ -367,7 +397,7 @@ public class DmnToPlanDef {
     return new CodeableConcept()
         .setCoding(Collections.singletonList(
             new Coding()
-                .setCode("_" + cid.getUuid().toString())
+                .setCode(cid.getUuid().toString())
                 .setDisplay(cid.getLabel())
                 .setSystem(cid.getNamespaceUri().toString())
                 .setVersion(cid.getVersionTag())));
@@ -393,10 +423,10 @@ public class DmnToPlanDef {
     return extensionElements.stream()
         .flatMap(StreamUtil.filterAs(Annotation.class))
         .filter(ann ->
-                ann.getRel() == null
-                    || Defines.getTag().equals(ann.getRel().getTag())
-                    || Captures.getTag().equals(ann.getRel().getTag())
-                    || In_Terms_Of.getTag().equals(ann.getRel().getTag())
+            ann.getRel() == null
+                || Defines.getTag().equals(ann.getRel().getTag())
+                || Captures.getTag().equals(ann.getRel().getTag())
+                || In_Terms_Of.getTag().equals(ann.getRel().getTag())
         )
         .map(Annotation::getRef)
         .map(Term.class::cast)
@@ -414,7 +444,8 @@ public class DmnToPlanDef {
           .filter(e -> e instanceof Annotation)
           .map(e -> (Annotation) e)
           .filter(
-              annotation -> annotation.getRel() != null && annotation.getRel().getReferentId() != null)
+              annotation -> annotation.getRel() != null
+                  && annotation.getRel().getReferentId() != null)
           .filter(annotation -> annotation.getRel().getReferentId()
               .equals(Has_Primary_Subject.getReferentId()))
           .collect(Collectors.toList());
@@ -439,6 +470,10 @@ public class DmnToPlanDef {
 
   private Stream<TInputData> streamInputs(TDefinitions dmn) {
     return streamDRG(dmn, TInputData.class);
+  }
+
+  private Stream<TBusinessKnowledgeModel> streamBKM(TDefinitions dmn) {
+    return streamDRG(dmn, TBusinessKnowledgeModel.class);
   }
 
   private Stream<TDecisionService> streamDecisionServices(TDefinitions dmn) {
