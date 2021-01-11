@@ -13,8 +13,10 @@
  */
 package edu.mayo.kmdp.language.translators.cmmn.v1_1.r4;
 
+import static edu.mayo.kmdp.util.NameUtils.nameToIdentifier;
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.snapshot.SemanticAnnotationRelType.Captures;
 
+import edu.mayo.kmdp.util.NameUtils.IdentifierType;
 import edu.mayo.kmdp.util.StreamUtil;
 import edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries;
 import java.net.URI;
@@ -62,7 +64,6 @@ import org.omg.spec.cmmn._20151109.model.TExitCriterion;
 import org.omg.spec.cmmn._20151109.model.TExtensionElements;
 import org.omg.spec.cmmn._20151109.model.THumanTask;
 import org.omg.spec.cmmn._20151109.model.TOnPart;
-import org.omg.spec.cmmn._20151109.model.TPlanFragment;
 import org.omg.spec.cmmn._20151109.model.TPlanItem;
 import org.omg.spec.cmmn._20151109.model.TPlanItemControl;
 import org.omg.spec.cmmn._20151109.model.TPlanItemDefinition;
@@ -313,7 +314,7 @@ public class CmmnToPlanDef {
   }
 
   private void mapName(PlanDefinition cpm, TDefinitions tCase) {
-    cpm.setName(tCase.getName());
+    cpm.setName(nameToIdentifier(tCase.getName(), IdentifierType.CLASS));
     cpm.setTitle(tCase.getName());
   }
 

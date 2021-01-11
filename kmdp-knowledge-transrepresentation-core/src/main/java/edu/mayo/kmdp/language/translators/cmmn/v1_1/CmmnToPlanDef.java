@@ -13,9 +13,11 @@
  */
 package edu.mayo.kmdp.language.translators.cmmn.v1_1;
 
+import static edu.mayo.kmdp.util.NameUtils.nameToIdentifier;
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.snapshot.SemanticAnnotationRelType.Captures;
 
 import edu.mayo.kmdp.language.common.fhir.stu3.FHIRUtils;
+import edu.mayo.kmdp.util.NameUtils.IdentifierType;
 import edu.mayo.kmdp.util.StreamUtil;
 import edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries;
 import java.net.URI;
@@ -312,7 +314,7 @@ public class CmmnToPlanDef {
   }
 
   private void mapName(PlanDefinition cpm, TDefinitions tCase) {
-    cpm.setName(tCase.getName());
+    cpm.setName(nameToIdentifier(tCase.getName(), IdentifierType.CLASS));
     cpm.setTitle(tCase.getName());
   }
 

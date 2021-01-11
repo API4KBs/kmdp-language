@@ -15,11 +15,13 @@
  */
 package edu.mayo.kmdp.language.translators.dmn.v1_2;
 
+import static edu.mayo.kmdp.util.NameUtils.nameToIdentifier;
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.Captures;
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.Defines;
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.Has_Primary_Subject;
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.In_Terms_Of;
 
+import edu.mayo.kmdp.util.NameUtils.IdentifierType;
 import edu.mayo.kmdp.util.StreamUtil;
 import edu.mayo.kmdp.util.URIUtil;
 import edu.mayo.kmdp.util.Util;
@@ -225,7 +227,6 @@ public class DmnToPlanDef {
       Consumer<PlanDefinitionActionComponent> cpmScope,
       TDefinitions decisionModel, TDecision decision) {
     PlanDefinitionActionComponent decisionAction = new PlanDefinitionActionComponent();
-    decisionAction.setLabel(decision.getName());
     decisionAction.setTitle(decision.getName());
     decisionAction.setId("#" + decision.getId().replace("_", ""));
 
@@ -251,7 +252,7 @@ public class DmnToPlanDef {
   private PlanDefinitionActionComponent processDecisionService(PlanDefinition cpm,
       TDefinitions decisionModel, TDecisionService decisionService) {
     PlanDefinitionActionComponent serviceAction = new PlanDefinitionActionComponent();
-    serviceAction.setLabel(decisionService.getName());
+    serviceAction.setTitle(decisionService.getName());
     serviceAction.setId("#" + decisionService.getId().replace("_", ""));
 
     getSemanticAnnotation(decisionService.getExtensionElements()).stream()
@@ -404,7 +405,7 @@ public class DmnToPlanDef {
   }
 
   private void mapName(PlanDefinition cpm, TDefinitions tCase) {
-    cpm.setName(tCase.getName());
+    cpm.setName(nameToIdentifier(tCase.getName(), IdentifierType.CLASS));
     cpm.setTitle(tCase.getName());
   }
 

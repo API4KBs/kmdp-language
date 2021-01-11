@@ -15,12 +15,14 @@
  */
 package edu.mayo.kmdp.language.translators.dmn.v1_2.r4;
 
+import static edu.mayo.kmdp.util.NameUtils.nameToIdentifier;
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.Captures;
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.Defines;
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.Has_Primary_Subject;
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.In_Terms_Of;
 import static org.hl7.fhir.r4.model.PlanDefinition.ActionRelationshipType.AFTER;
 
+import edu.mayo.kmdp.util.NameUtils.IdentifierType;
 import edu.mayo.kmdp.util.StreamUtil;
 import edu.mayo.kmdp.util.URIUtil;
 import edu.mayo.kmdp.util.Util;
@@ -400,7 +402,7 @@ public class DmnToPlanDefR4 {
   }
 
   private void mapName(PlanDefinition cpm, TDefinitions tCase) {
-    cpm.setName(tCase.getName());
+    cpm.setName(nameToIdentifier(tCase.getName(), IdentifierType.CLASS));
     cpm.setTitle(tCase.getName());
   }
 

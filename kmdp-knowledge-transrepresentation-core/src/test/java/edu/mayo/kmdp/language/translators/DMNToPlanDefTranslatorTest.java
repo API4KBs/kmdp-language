@@ -1,6 +1,6 @@
 package edu.mayo.kmdp.language.translators;
 
-import static edu.mayo.kmdp.language.common.fhir.stu3.FHIRUtils.getNestedActions;
+import static edu.mayo.kmdp.language.common.fhir.stu3.FHIRUtils.getSubActions;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.codedRep;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.of;
@@ -61,7 +61,7 @@ public class DMNToPlanDefTranslatorTest {
   }
 
   private Stream<RelatedArtifact> getKnowledgeSources(PlanDefinition x) {
-    return getNestedActions(x)
+    return getSubActions(x)
         .flatMap(act -> act.getDocumentation().stream());
   }
 

@@ -48,7 +48,7 @@ class FHIRUtilTest {
             .setTitle("D"))
         );
 
-    Set<String> names = FHIRUtils.getNestedActions(p1)
+    Set<String> names = FHIRUtils.getSubActions(p1)
         .map(PlanDefinitionActionComponent::getTitle)
         .collect(Collectors.toSet());
 
@@ -75,7 +75,7 @@ class FHIRUtilTest {
 
     p1.addContained(p2);
 
-    Set<String> names = FHIRUtils.getDeepNestedActions(p1)
+    Set<String> names = FHIRUtils.getDeepNestedSubActions(p1)
         .map(PlanDefinitionActionComponent::getTitle)
         .collect(Collectors.toSet());
 
