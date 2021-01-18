@@ -25,11 +25,13 @@ import edu.mayo.kmdp.language.parsers.dmn.v1_2.DMN12Parser;
 import edu.mayo.kmdp.language.parsers.owl2.JenaOwlParser;
 import edu.mayo.kmdp.language.parsers.owl2.OWLParser;
 import edu.mayo.kmdp.language.parsers.sparql.SparqlLifter;
+import java.nio.charset.Charset;
 import java.util.UUID;
 import org.apache.jena.query.Query;
 import org.apache.jena.rdf.model.Model;
 import org.junit.jupiter.api.Test;
 import org.omg.spec.api4kp._20200801.AbstractCarrier;
+import org.omg.spec.api4kp._20200801.AbstractCarrier.Encodings;
 import org.omg.spec.api4kp._20200801.Answer;
 import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.DeserializeApiInternal;
 import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
@@ -135,7 +137,7 @@ class ParserTest {
 
     KnowledgeCarrier carrier =
         AbstractCarrier.of(ParserTest.class.getResourceAsStream(sourcePath))
-            .withRepresentation(rep(language, ser, fmt))
+            .withRepresentation(rep(language, ser, fmt, Charset.defaultCharset(), Encodings.DEFAULT))
             .withAssetId(assetId);
 
     assertNotNull(carrier.getAssetId());

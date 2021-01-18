@@ -216,8 +216,10 @@ public abstract class AbstractDeSerializeOperator
     } else {
       serializedExpr = null;
     }
+    SyntacticRepresentation tgtRep =
+        ((SyntacticRepresentation) carrier.getRepresentation().clone()).withEncoding(null);
     return Optional.ofNullable(serializedExpr)
-        .map(s -> newVerticalCarrier(carrier, Serialized_Knowledge_Expression, null, s));
+        .map(s -> newVerticalCarrier(carrier, Serialized_Knowledge_Expression, tgtRep, s));
   }
 
 
