@@ -81,23 +81,6 @@ public class JenaRdfParser extends AbstractDeSerializeOperator {
     return TXT;
   }
 
-  /**
-   * Lifts a binary-encoded expression (byte[]) into a concrete expression (String)
-   *
-   * @param carrier A binary carrier
-   * @return A string carrier
-   * @see Lowerer#innerEncode(KnowledgeCarrier, Properties)
-   */
-  @Override
-  public Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier, Properties properties) {
-    SyntacticRepresentation tgtRep =
-        getTargetLiftRepresentation(carrier.getRepresentation(), Serialized_Knowledge_Expression);
-    return Optional.of(
-        newVerticalCarrier(carrier,
-            Serialized_Knowledge_Expression,
-            tgtRep,
-            carrier.asString().orElseThrow(UnsupportedOperationException::new)));
-  }
 
   /**
    * Lifts a concrete expression (String) into a parsed expression (parse tree)
