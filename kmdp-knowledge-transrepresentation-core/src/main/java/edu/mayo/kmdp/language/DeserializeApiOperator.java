@@ -86,6 +86,7 @@ public interface DeserializeApiOperator
         .withAssetId(mapAssetId(source.getAssetId()))
         .withArtifactId(mapArtifactId(source.getArtifactId()))
         .withLevel(targetLevel)
+        .withLabel(source.getLabel())
         .withRepresentation(targetRepresentation != null
             ? targetRepresentation
             : inferRepresentationForLevel(targetLevel).orElse(null));
