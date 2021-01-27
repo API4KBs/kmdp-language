@@ -23,7 +23,7 @@ import org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset;
 import org.omg.spec.api4kp._20200801.surrogate.SurrogateBuilder;
 import org.omg.spec.api4kp._20200801.surrogate.SurrogateHelper;
 
-public class CompositeSyntacticOperationTest {
+class CompositeSyntacticOperationTest {
 
   @Test
   void testCompositeSerialization() {
@@ -43,7 +43,7 @@ public class CompositeSyntacticOperationTest {
 
     CompositeKnowledgeCarrier out = (CompositeKnowledgeCarrier) kc;
 
-    assertSame(CompositeStructType.TREE, out.getStructType());
+    assertSame(CompositeStructType.GRAPH, out.getStructType());
     assertNotNull(out.getStruct());
     assertNotNull(out.getRepresentation());
     assertNotNull(out.getRootId());
@@ -62,9 +62,8 @@ public class CompositeSyntacticOperationTest {
             .withRel(Depends_On)
             .withHref(ax2.getAssetId()));
 
-    return SurrogateHelper.toCompositeAsset(
+    return SurrogateHelper.toAnonymousCompositeAsset(
         ax1.getAssetId(),
-        Arrays.asList(ax1,ax2),
-        CompositeStructType.TREE);
+        Arrays.asList(ax1,ax2));
   }
 }
