@@ -3,6 +3,7 @@ package edu.mayo.kmdp.language.translators;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.codedRep;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
+import static org.omg.spec.api4kp._20200801.surrogate.SurrogateBuilder.newRandomSurrogate;
 import static org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormatSeries.JSON;
 import static org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormatSeries.XML_1_1;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate_2_0;
@@ -24,7 +25,7 @@ class SurrogateTranscriptorTest {
 
   @Test
   void testXMLtoJSONTranscript() {
-    KnowledgeAsset asset = SurrogateBuilder.newSurrogate(SurrogateBuilder.randomAssetId()).get();
+    KnowledgeAsset asset = newRandomSurrogate().get();
 
     KnowledgeCarrier jsonCarrier = AbstractCarrier.of(
         JSonUtil.printJson(asset).orElseGet(Assertions::fail))
@@ -42,7 +43,7 @@ class SurrogateTranscriptorTest {
 
   @Test
   void testJSONtoXMLTranscript() {
-    KnowledgeAsset asset = SurrogateBuilder.newSurrogate(SurrogateBuilder.randomAssetId()).get();
+    KnowledgeAsset asset = newRandomSurrogate().get();
 
     KnowledgeCarrier xmlCarrier = AbstractCarrier.of(
         JaxbUtil.marshallToString(asset))

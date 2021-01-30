@@ -1,6 +1,7 @@
 package edu.mayo.kmdp.language.translators;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.omg.spec.api4kp._20200801.surrogate.SurrogateBuilder.newRandomSurrogate;
 import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeassetcategory.KnowledgeAssetCategorySeries.Rules_Policies_And_Guidelines;
 
 import edu.mayo.kmdp.language.translators.surrogate.v2.SurrogateV2ToHTML;
@@ -25,7 +26,7 @@ public class SurrToHTMLTest {
   }
 
   static String getHtml() {
-    KnowledgeAsset surr = SurrogateBuilder.newSurrogate(SurrogateBuilder.randomAssetId())
+    KnowledgeAsset surr = newRandomSurrogate()
         .withName("Test Asset", "Some description...")
         .withFormalType(Rules_Policies_And_Guidelines, KnowledgeAssetTypeSeries.Clinical_Rule)
         .withCarriers(SurrogateBuilder.randomArtifactId(), URI.create("http://www.mayo.edu"))
