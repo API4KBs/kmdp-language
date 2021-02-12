@@ -4,8 +4,11 @@ import static org.omg.spec.api4kp._20200801.contrastors.SyntacticRepresentationC
 
 import edu.mayo.kmdp.util.Util;
 import java.util.List;
+import java.util.UUID;
+import org.omg.spec.api4kp._20200801.Answer;
 import org.omg.spec.api4kp._20200801.KnowledgePlatformOperator;
 import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.ValidateApiInternal;
+import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
 import org.omg.spec.api4kp._20200801.services.transrepresentation.ModelMIMECoder;
 import org.omg.spec.api4kp._20200801.services.transrepresentation.ValidationOperator;

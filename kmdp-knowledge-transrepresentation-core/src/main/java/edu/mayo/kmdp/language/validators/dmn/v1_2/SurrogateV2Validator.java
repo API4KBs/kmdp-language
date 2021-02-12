@@ -9,12 +9,13 @@ import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSe
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import edu.mayo.kmdp.language.ValidateApiOperator;
+import edu.mayo.kmdp.language.validators.AbstractValidator;
 import edu.mayo.kmdp.util.JSonUtil;
 import edu.mayo.kmdp.util.JaxbUtil;
 import edu.mayo.kmdp.util.Util;
 import edu.mayo.kmdp.util.XMLUtil;
 import java.io.ByteArrayInputStream;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -23,9 +24,8 @@ import java.util.UUID;
 import javax.inject.Named;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
+import org.omg.spec.api4kp._20200801.AbstractCarrier.Encodings;
 import org.omg.spec.api4kp._20200801.Answer;
-import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.ValidateApiInternal._applyNamedValidate;
-import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.ValidateApiInternal._applyValidate;
 import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
 import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
 import org.omg.spec.api4kp._20200801.services.KPOperation;
@@ -41,8 +41,7 @@ import org.w3c.dom.Document;
 @Named
 @KPOperation(Well_Formedness_Check_Task)
 @KPSupport(Knowledge_Asset_Surrogate_2_0)
-public class SurrogateV2Validator
-    implements ValidateApiOperator, _applyValidate, _applyNamedValidate {
+public class SurrogateV2Validator extends AbstractValidator {
 
   public static final UUID id = UUID.fromString("85ea1656-60e1-46a6-944f-942367de4ec5");
   public static final String version = "1.0.0";
@@ -54,37 +53,35 @@ public class SurrogateV2Validator
   }
 
   @Override
-  public Answer<Void> applyNamedValidate(
-      UUID uuid, KnowledgeCarrier knowledgeCarrier, String config) {
-    return uuid.equals(getOperatorId().getUuid())
-        ? applyValidate(knowledgeCarrier, config)
-        : Answer.unsupported();
-  }
-
-  @Override
   public Answer<Void> applyValidate(KnowledgeCarrier sourceArtifact, String config) {
     try {
-      return validate(sourceArtifact) ? Answer.succeed() : Answer.failed();
+      return validateComponent(sourceArtifact);
     } catch (Exception e) {
       return Answer.failed(e);
     }
   }
 
-  protected boolean validate(KnowledgeCarrier sourceArtifact) {
+  protected Answer<Void> validateComponent(KnowledgeCarrier sourceArtifact) {
     Schema surrogateV2Schema = checkSchema(sourceArtifact);
 
+    boolean outcome;
     switch (asEnum(sourceArtifact.getLevel())) {
       case Abstract_Knowledge_Expression:
-        return validateAbstractKnowledgeExpressions(sourceArtifact, surrogateV2Schema);
+        outcome = validateAbstractKnowledgeExpressions(sourceArtifact, surrogateV2Schema);
+        break;
       case Concrete_Knowledge_Expression:
-        return validateConcreteKnowledgeExpression(sourceArtifact, surrogateV2Schema);
+        outcome = validateConcreteKnowledgeExpression(sourceArtifact, surrogateV2Schema);
+        break;
       case Serialized_Knowledge_Expression:
-        return validateString(sourceArtifact, surrogateV2Schema);
+        outcome = validateString(sourceArtifact, surrogateV2Schema);
+        break;
       case Encoded_Knowledge_Expression:
-        return validateBinary(sourceArtifact, surrogateV2Schema);
+        outcome = validateBinary(sourceArtifact, surrogateV2Schema);
+        break;
       default:
-        return false;
+        outcome = false;
     }
+    return outcome ? Answer.succeed() : Answer.failed();
   }
 
   private boolean validateString(KnowledgeCarrier sourceArtifact, Schema schema) {
@@ -205,7 +202,10 @@ public class SurrogateV2Validator
   @Override
   public List<SyntacticRepresentation> getFrom() {
     return Arrays.asList(
-        rep(Knowledge_Asset_Surrogate_2_0), rep(Knowledge_Asset_Surrogate_2_0, XML_1_1));
+        rep(Knowledge_Asset_Surrogate_2_0),
+        rep(Knowledge_Asset_Surrogate_2_0, XML_1_1),
+        rep(Knowledge_Asset_Surrogate_2_0, XML_1_1, Charset.defaultCharset()),
+        rep(Knowledge_Asset_Surrogate_2_0, XML_1_1, Charset.defaultCharset(), Encodings.DEFAULT));
   }
 
   @Override
@@ -218,13 +218,4 @@ public class SurrogateV2Validator
     return Knowledge_Asset_Surrogate_2_0;
   }
 
-  @Override
-  public boolean can_applyNamedValidate() {
-    return true;
-  }
-
-  @Override
-  public boolean can_applyValidate() {
-    return true;
-  }
 }
