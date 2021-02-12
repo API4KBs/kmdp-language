@@ -31,6 +31,7 @@ import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
 import org.omg.spec.api4kp._20200801.surrogate.Annotation;
 import org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset;
 import org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
+import org.omg.spec.dmn._20180521.model.TAuthorityRequirement;
 import org.omg.spec.dmn._20180521.model.TDMNElementReference;
 import org.omg.spec.dmn._20180521.model.TDRGElement;
 import org.omg.spec.dmn._20180521.model.TDecision;
@@ -166,10 +167,17 @@ public class CCPMProfilDMNValidator extends CCPMComponentValidator {
         .filter(ds -> ! ds.getOutputDecision().isEmpty())
         .filter(ds -> ds.getOutputDecision().stream()
             .flatMap(ref -> lookup(ref, decisionModel, TDecision.class))
-            .anyMatch(out -> hasCSOAnnotation(out) || hasDEK(out, decisionModel)))
+            .anyMatch(out -> hasCSOAnnotation(out)))
+        .collect(Collectors.toSet());
+    Set<TDecisionService> withDEK = decServices.stream()
+        .filter(ds -> ! ds.getOutputDecision().isEmpty())
+        .filter(ds -> ds.getOutputDecision().stream()
+            .flatMap(ref -> lookup(ref, decisionModel, TDecision.class))
+            .anyMatch(out -> hasDEK(out, decisionModel)))
         .collect(Collectors.toSet());
     Set<TDecisionService> incomplete = new HashSet<>(decServices);
     incomplete.removeAll(semantic);
+    incomplete.removeAll(withDEK);
 
     return validationResponse(
         carrier,
@@ -201,7 +209,7 @@ public class CCPMProfilDMNValidator extends CCPMComponentValidator {
         .flatMap(StreamUtil.filterAs(TKnowledgeSource.class))
         .collect(Collectors.toSet());
     Set<TKnowledgeSource> incomplete = knowSources.stream()
-        .filter(ks -> isValidKSMime(ks.getType()) || isEmpty(ks.getLocationURI()))
+        .filter(ks -> !isValidKSMime(ks.getType()) || isEmpty(ks.getLocationURI()))
         .collect(Collectors.toSet());
 
     return validationResponse(
@@ -215,17 +223,18 @@ public class CCPMProfilDMNValidator extends CCPMComponentValidator {
 
 
   private boolean hasDEK(TDecision out, TDefinitions decisionModel) {
-    return out.getKnowledgeRequirement().stream()
-        .map(TKnowledgeRequirement::getRequiredKnowledge)
+    return out.getAuthorityRequirement().stream()
+        .map(TAuthorityRequirement::getRequiredAuthority)
         .flatMap(ref -> lookup(ref, decisionModel, TKnowledgeSource.class))
-        .anyMatch(ks -> ks.getType().equalsIgnoreCase("application/dita+xml "));
+        .anyMatch(ks -> ks.getType().equalsIgnoreCase("application/dita+xml"));
   }
 
   private <T extends TDRGElement> Stream<T> lookup(
       TDMNElementReference ref, TDefinitions decisionModel, Class<T> type) {
     return decisionModel.getDrgElement().stream()
+        .map(JAXBElement::getValue)
         .flatMap(StreamUtil.filterAs(type))
-        .filter(d -> d.getId().equals(ref.getHref()))
+        .filter(d -> d.getId().equals(URI.create(ref.getHref()).getFragment()))
         .findFirst().stream();
   }
 
