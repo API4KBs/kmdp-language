@@ -52,6 +52,7 @@ import java.util.UUID;
 import javax.inject.Named;
 import org.apache.jena.vocabulary.SKOS;
 import org.apache.xml.resolver.tools.CatalogResolver;
+import org.omg.spec.api4kp._20200801.AbstractCarrier.Encodings;
 import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
 import org.omg.spec.api4kp._20200801.services.KPOperation;
 import org.omg.spec.api4kp._20200801.services.KPSupport;
@@ -70,9 +71,11 @@ import org.semanticweb.owlapi.formats.OWLXMLDocumentFormat;
 import org.semanticweb.owlapi.formats.RDFXMLDocumentFormat;
 import org.semanticweb.owlapi.formats.TurtleDocumentFormat;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.MissingImportHandlingStrategy;
 import org.semanticweb.owlapi.model.OWLDocumentFormat;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
+import org.semanticweb.owlapi.model.OWLOntologyLoaderConfiguration;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.profiles.OWL2DLProfile;
 import org.semanticweb.owlapi.profiles.OWL2ELProfile;
@@ -139,7 +142,7 @@ public class OWLDetector
             detectSerialization(o),
             detectFormat(o),
             Charset.defaultCharset(),
-            null,
+            Encodings.DEFAULT,
             detectLexicon(o)));
   }
 
@@ -225,6 +228,9 @@ public class OWLDetector
   protected Optional<OWLOntology> loadOntology(InputStream is, OWLDetectorConfig params) {
     try {
       OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+      manager.setOntologyLoaderConfiguration(
+          new OWLOntologyLoaderConfiguration()
+              .setMissingImportHandlingStrategy(MissingImportHandlingStrategy.SILENT));
 
       configureCatalog(manager, params);
 
