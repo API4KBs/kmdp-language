@@ -30,7 +30,11 @@ import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.snapshot.Parsi
 import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.snapshot.ParsingLevel.Encoded_Knowledge_Expression;
 import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.snapshot.ParsingLevel.Serialized_Knowledge_Expression;
 
+import edu.mayo.kmdp.ConfigProperties;
+import edu.mayo.kmdp.Opt;
+import edu.mayo.kmdp.Option;
 import edu.mayo.kmdp.language.parsers.AbstractDeSerializeOperator;
+import edu.mayo.kmdp.language.parsers.owl2.OWLParser.OWLParserConfiguration.OWLParserParams;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
@@ -75,18 +79,6 @@ public class OWLParser extends AbstractDeSerializeOperator {
     throw new UnsupportedOperationException();
   }
 
-  @Override
-  public Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier, Properties properties) {
-    return carrier.asBinary()
-        .map(String::new)
-        .map(str -> newVerticalCarrier(
-            carrier,
-            Serialized_Knowledge_Expression,
-            getParseResultRepresentation(carrier,
-                Serialized_Knowledge_Expression),
-            str
-        ));
-  }
 
   @Override
   public Optional<KnowledgeCarrier> innerDeserialize(KnowledgeCarrier carrier, Properties properties) {
@@ -97,10 +89,9 @@ public class OWLParser extends AbstractDeSerializeOperator {
   public Optional<KnowledgeCarrier> innerParse(KnowledgeCarrier carrier, Properties properties) {
     try {
       OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-      OWLOntologyLoaderConfiguration conf = new OWLOntologyLoaderConfiguration()
-          .setMissingImportHandlingStrategy(MissingImportHandlingStrategy.SILENT)
-          .addIgnoredImport(IRI.create(DCTerms.getURI()));
+      OWLOntologyLoaderConfiguration conf = getConfiguration(properties);
       manager.setOntologyLoaderConfiguration(conf);
+
 
       Optional<byte[]> bytes = carrier.asBinary();
       if (bytes.isEmpty()) {
@@ -189,5 +180,68 @@ public class OWLParser extends AbstractDeSerializeOperator {
   @Override
   public KnowledgeRepresentationLanguage getSupportedLanguage() {
     return OWL_2;
+  }
+
+
+  private OWLOntologyLoaderConfiguration getConfiguration(Properties properties) {
+    OWLParserConfiguration cfg = new OWLParserConfiguration(properties);
+    if (cfg.getTyped(OWLParserParams.IGNORE_IMPORTS)) {
+      return new OWLOntologyLoaderConfiguration() {
+        @Override
+        public boolean isIgnoredImport(IRI iri) {
+          return true;
+        }
+
+        @Override
+        public MissingImportHandlingStrategy getMissingImportHandlingStrategy() {
+          return MissingImportHandlingStrategy.SILENT;
+        }
+      };
+    } else {
+      return new OWLOntologyLoaderConfiguration()
+          .setMissingImportHandlingStrategy(MissingImportHandlingStrategy.SILENT)
+          .addIgnoredImport(IRI.create(DCTerms.getURI()));
+    }
+  }
+
+
+
+  public static class OWLParserConfiguration
+      extends ConfigProperties<OWLParserConfiguration, OWLParserParams> {
+    private static final Properties DEFAULTS = defaulted( OWLParserConfiguration.OWLParserParams.class );
+
+    public OWLParserConfiguration() {
+      super( DEFAULTS );
+    }
+
+    public OWLParserConfiguration(Properties defaults) {
+      super(defaults);
+    }
+
+    @Override
+    public OWLParserConfiguration.OWLParserParams[] properties() {
+      return OWLParserConfiguration.OWLParserParams.values();
+    }
+
+    public enum OWLParserParams implements Option<OWLParserConfiguration.OWLParserParams> {
+
+      IGNORE_IMPORTS(Opt.of(
+          "ignoreImports",
+          "false",
+          "",
+          Boolean.class,
+          false));
+
+      private Opt<OWLParserParams> opt;
+
+      OWLParserParams( Opt<OWLParserParams> opt ) {
+        this.opt = opt;
+      }
+
+      @Override
+      public Opt<OWLParserParams> getOption() {
+        return opt;
+      }
+    }
   }
 }

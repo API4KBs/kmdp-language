@@ -228,9 +228,19 @@ public class OWLDetector
   protected Optional<OWLOntology> loadOntology(InputStream is, OWLDetectorConfig params) {
     try {
       OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-      manager.setOntologyLoaderConfiguration(
-          new OWLOntologyLoaderConfiguration()
-              .setMissingImportHandlingStrategy(MissingImportHandlingStrategy.SILENT));
+      OWLOntologyLoaderConfiguration loaderCfg = new OWLOntologyLoaderConfiguration() {
+        @Override
+        public boolean isIgnoredImport(IRI iri) {
+          return true;
+        }
+
+        @Override
+        public MissingImportHandlingStrategy getMissingImportHandlingStrategy() {
+          return MissingImportHandlingStrategy.SILENT;
+        }
+      };
+
+      manager.setOntologyLoaderConfiguration(loaderCfg);
 
       configureCatalog(manager, params);
 
