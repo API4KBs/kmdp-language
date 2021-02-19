@@ -43,6 +43,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.omg.spec.api4kp._20200801.AbstractCarrier.Encodings;
 import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
+import org.omg.spec.api4kp._20200801.services.KPComponent;
 import org.omg.spec.api4kp._20200801.services.KPOperation;
 import org.omg.spec.api4kp._20200801.services.KPSupport;
 import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
@@ -57,6 +58,7 @@ import org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries;
 @KPOperation(Lowering_Task)
 @KPOperation(Lifting_Task)
 @KPSupport(OWL_2)
+@KPComponent(implementation = "jena-rdf")
 public class JenaRdfParser extends AbstractDeSerializeOperator {
 
   public static final UUID id = UUID.fromString("6bbfb6bc-4e45-43e1-9168-715d12736f3d");

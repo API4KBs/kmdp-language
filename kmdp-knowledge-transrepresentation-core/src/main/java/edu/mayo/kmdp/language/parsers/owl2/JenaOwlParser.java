@@ -42,6 +42,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
 import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
+import org.omg.spec.api4kp._20200801.services.KPComponent;
 import org.omg.spec.api4kp._20200801.services.KPOperation;
 import org.omg.spec.api4kp._20200801.services.KPSupport;
 import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
@@ -52,6 +53,7 @@ import org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormat;
 @KPOperation(Lowering_Task)
 @KPOperation(Lifting_Task)
 @KPSupport(OWL_2)
+@KPComponent(implementation = "jena-owl")
 public class JenaOwlParser extends JenaRdfParser {
 
   public static final UUID id = UUID.fromString("1e912b84-f08f-4d9c-a2ae-30f6f09a27a4");

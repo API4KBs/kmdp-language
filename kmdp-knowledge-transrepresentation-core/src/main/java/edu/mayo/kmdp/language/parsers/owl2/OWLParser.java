@@ -45,6 +45,7 @@ import java.util.UUID;
 import javax.inject.Named;
 import org.apache.jena.vocabulary.DCTerms;
 import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
+import org.omg.spec.api4kp._20200801.services.KPComponent;
 import org.omg.spec.api4kp._20200801.services.KPOperation;
 import org.omg.spec.api4kp._20200801.services.KPSupport;
 import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
@@ -60,11 +61,13 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyLoaderConfiguration;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 @Named
 @KPOperation(Lowering_Task)
 @KPOperation(Lifting_Task)
 @KPSupport(OWL_2)
+@KPComponent(implementation = "owlapi")
 public class OWLParser extends AbstractDeSerializeOperator {
 
   public static final UUID id = UUID.fromString("6527546e-925d-413a-ad97-e8bf9142ea51");
