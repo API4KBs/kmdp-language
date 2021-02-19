@@ -87,26 +87,26 @@ public abstract class AbstractSimpleTranslator<S, T>
                 bytes -> transformBinary(src.getAssetId(), bytes, src.getRepresentation(), tgtRep,
                     config))
             .map(out -> wrap(
-                tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getArtifactId()),
+                tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getAssetId(), src.getArtifactId()),
                 src.getLabel()));
       case Serialized_Knowledge_Expression:
         return src.asString()
             .flatMap(str -> transformString(src.getAssetId(), str, src.getRepresentation(), tgtRep,
                 config))
             .map(out -> wrap(
-                tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getArtifactId()),
+                tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getAssetId(), src.getArtifactId()),
                 src.getLabel()));
       case Concrete_Knowledge_Expression:
         return transformTree(src.getAssetId(), src.getExpression(), src.getRepresentation(), tgtRep,
             config)
             .map(out -> wrap(
-                tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getArtifactId()),
+                tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getAssetId(), src.getArtifactId()),
                 src.getLabel()));
       case Abstract_Knowledge_Expression:
         return transformAst(src.getAssetId(), (S) src.getExpression(), src.getRepresentation(),
             tgtRep, config)
             .map(out -> wrap(
-                tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getArtifactId()),
+                tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getAssetId(), src.getArtifactId()),
                 src.getLabel()));
       default:
         throw new UnsupportedOperationException();

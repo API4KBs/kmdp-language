@@ -8,20 +8,17 @@ import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSe
 
 import edu.mayo.kmdp.util.Util;
 import java.util.List;
-import java.util.UUID;
 import org.omg.spec.api4kp._20200801.KnowledgePlatformOperator;
 import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.TransxionApiInternal;
 import org.omg.spec.api4kp._20200801.contrastors.ParsingLevelContrastor;
-import org.omg.spec.api4kp._20200801.id.IdentifierConstants;
 import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
-import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
 import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
 import org.omg.spec.api4kp._20200801.services.transrepresentation.ModelMIMECoder;
 import org.omg.spec.api4kp._20200801.services.transrepresentation.TransrepresentationOperator;
+import org.omg.spec.api4kp._20200801.surrogate.SurrogateBuilder;
 import org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
 import org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevel;
-import org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries;
 
 ;
 
@@ -34,9 +31,9 @@ public interface TransionApiOperator
 
   KnowledgeRepresentationLanguage getTargetLanguage();
 
-  default ResourceIdentifier mapArtifactId(ResourceIdentifier artifactId) {
+  default ResourceIdentifier mapArtifactId(ResourceIdentifier assetId, ResourceIdentifier artifactId) {
     // in general, transformations preserve the asset, but create brand new artifacts
-    return SemanticIdentifier.newId(UUID.randomUUID(), IdentifierConstants.VERSION_ZERO);
+    return SurrogateBuilder.defaultArtifactId(assetId, getTargetLanguage());
   }
 
   default ResourceIdentifier mapAssetId(ResourceIdentifier assetId) {

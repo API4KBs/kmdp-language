@@ -117,9 +117,7 @@ public class JenaRdfParser extends AbstractDeSerializeOperator {
         newVerticalCarrier(carrier,
             Abstract_Knowledge_Expression,
             tgtRep,
-            model)
-        .withAssetId(SemanticIdentifier.randomId());
-
+            model);
     return Optional.of(kc);
   }
 

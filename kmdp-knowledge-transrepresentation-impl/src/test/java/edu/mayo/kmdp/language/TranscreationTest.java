@@ -31,7 +31,6 @@ import edu.mayo.kmdp.language.translators.owl2.OWLtoSKOSTranscreator;
 import edu.mayo.kmdp.terms.skosifier.Owl2SkosConfig;
 import edu.mayo.kmdp.terms.skosifier.Owl2SkosConfig.OWLtoSKOSTxParams;
 import edu.mayo.kmdp.util.FileUtil;
-import edu.mayo.kmdp.util.JenaUtil;
 import edu.mayo.kmdp.util.NameUtils;
 import edu.mayo.kmdp.util.Util;
 import java.nio.charset.Charset;
@@ -45,8 +44,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.SKOS;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -177,7 +174,9 @@ public class TranscreationTest {
 
     Answer<KnowledgeCarrier> ac = transtor
         .listTxionOperators(codedRep(kc.getRepresentation()), codedRep(OWL_2,LexiconSeries.SKOS))
-        .flatMap(Answer::first)
+        .map(list -> list.stream()
+            .filter(op -> op.getOperatorId().getUuid().equals(OWLtoSKOSTranscreator.id))
+            .findFirst().orElseGet(Assertions::fail))
         .flatMap(op -> transtor.applyNamedTransrepresent(
             op.getOperatorId().getUuid(),
             kc,
