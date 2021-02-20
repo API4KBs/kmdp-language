@@ -77,10 +77,10 @@ public final class FHIRUtils {
    * @param title
    * @return
    */
-  public static Optional<PlanDefinitionActionComponent> getSubActionByTitle(PlanDefinition planDefinition,
-      String title) {
+  public static Optional<PlanDefinitionActionComponent> getSubActionByTitle(
+      PlanDefinition planDefinition, String title) {
     return getSubActions(planDefinition)
-        .filter(act -> title.equals(act.getTitle()) || title.equals(act.getLabel()))
+        .filter(act -> title.equalsIgnoreCase(act.getTitle()) || title.equalsIgnoreCase(act.getLabel()))
         .findFirst();
   }
 
