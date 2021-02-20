@@ -1,6 +1,7 @@
 package edu.mayo.kmdp.language.translators.skos;
 
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
+import static org.omg.spec.api4kp._20200801.surrogate.SurrogateBuilder.defaultArtifactId;
 import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Transcreation_Task;
 import static org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormatSeries.JSON;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.FHIR_STU3;
@@ -12,6 +13,7 @@ import edu.mayo.kmdp.language.parsers.owl2.JenaOwlParser;
 import edu.mayo.kmdp.language.translators.AbstractSimpleTranslator;
 import edu.mayo.kmdp.util.NameUtils;
 import edu.mayo.kmdp.util.NameUtils.IdentifierType;
+import edu.mayo.kmdp.util.Util;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -33,6 +35,7 @@ import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
+import org.hl7.fhir.dstu3.model.Enumerations.FHIRAllTypes;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.omg.spec.api4kp._20200801.AbstractCarrier.Encodings;
@@ -124,8 +127,11 @@ public class SKOStoCodeSystemTranscreator extends AbstractSimpleTranslator<Model
     cs.setIdentifier(new Identifier()
         .setValue(conceptScheme.getURI()));
 
+    UUID mainUUID = defaultArtifactId(assetId, FHIR_STU3, assetId.getVersionTag()).getUuid();
+    UUID vsUUID = Util.hashUUID(mainUUID, Util.uuid(FHIRAllTypes.VALUESET.toCode()));
+
     ValueSet vs = new ValueSet();
-    vs.setId(UUID.randomUUID().toString());
+    vs.setId(vsUUID.toString());
     vs.setName(conceptSchemeLabel + " (Entire ValueSet)");
 
     cs.setValueSet("#" + vs.getId());
