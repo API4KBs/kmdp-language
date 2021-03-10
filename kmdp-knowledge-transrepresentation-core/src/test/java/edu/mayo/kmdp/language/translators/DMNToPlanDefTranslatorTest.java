@@ -1,6 +1,6 @@
 package edu.mayo.kmdp.language.translators;
 
-import static edu.mayo.kmdp.language.common.fhir.stu3.FHIRUtils.getSubActions;
+import static edu.mayo.kmdp.language.common.fhir.stu3.FHIRPlanDefinitionUtils.getSubActions;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.codedRep;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.of;

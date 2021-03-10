@@ -2,7 +2,7 @@ package edu.mayo.kmdp.language;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import edu.mayo.kmdp.language.common.fhir.stu3.FHIRUtils;
+import edu.mayo.kmdp.language.common.fhir.stu3.FHIRPlanDefinitionUtils;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -24,7 +24,7 @@ class FHIRUtilTest {
     p1.addContained(p3);
     p3.addContained(p4);
 
-    Set<String> names = FHIRUtils.getNestedPlanDefs(p1)
+    Set<String> names = FHIRPlanDefinitionUtils.getNestedPlanDefs(p1)
         .map(PlanDefinition::getName)
         .collect(Collectors.toSet());
 
@@ -48,7 +48,7 @@ class FHIRUtilTest {
             .setTitle("D"))
         );
 
-    Set<String> names = FHIRUtils.getSubActions(p1)
+    Set<String> names = FHIRPlanDefinitionUtils.getSubActions(p1)
         .map(PlanDefinitionActionComponent::getTitle)
         .collect(Collectors.toSet());
 
@@ -75,7 +75,7 @@ class FHIRUtilTest {
 
     p1.addContained(p2);
 
-    Set<String> names = FHIRUtils.getDeepNestedSubActions(p1)
+    Set<String> names = FHIRPlanDefinitionUtils.getDeepNestedSubActions(p1)
         .map(PlanDefinitionActionComponent::getTitle)
         .collect(Collectors.toSet());
 

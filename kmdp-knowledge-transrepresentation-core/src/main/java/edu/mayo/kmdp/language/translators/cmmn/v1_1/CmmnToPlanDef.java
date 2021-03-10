@@ -16,7 +16,7 @@ package edu.mayo.kmdp.language.translators.cmmn.v1_1;
 import static edu.mayo.kmdp.util.NameUtils.nameToIdentifier;
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.snapshot.SemanticAnnotationRelType.Captures;
 
-import edu.mayo.kmdp.language.common.fhir.stu3.FHIRUtils;
+import edu.mayo.kmdp.language.common.fhir.stu3.FHIRPlanDefinitionUtils;
 import edu.mayo.kmdp.util.NameUtils.IdentifierType;
 import edu.mayo.kmdp.util.StreamUtil;
 import edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries;
@@ -551,7 +551,7 @@ public class CmmnToPlanDef {
     extensionElements.getAny().stream()
         .flatMap(StreamUtil.filterAs(Annotation.class))
         .map(Annotation::getRef)
-        .map(FHIRUtils::toCodeableConcept)
+        .map(FHIRPlanDefinitionUtils::toCodeableConcept)
         .forEach(planAction::addCode);
   }
 

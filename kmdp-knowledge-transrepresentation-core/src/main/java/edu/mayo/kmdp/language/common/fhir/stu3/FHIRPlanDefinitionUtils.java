@@ -1,5 +1,6 @@
 package edu.mayo.kmdp.language.common.fhir.stu3;
 
+import static edu.mayo.kmdp.language.common.fhir.stu3.FHIRVisitor.getContained;
 import static edu.mayo.kmdp.util.StreamUtil.filterAs;
 
 import java.net.URI;
@@ -11,12 +12,11 @@ import org.hl7.fhir.dstu3.model.DomainResource;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionComponent;
 import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.Resource;
 import org.omg.spec.api4kp._20200801.id.Term;
 
-public final class FHIRUtils {
+public final class FHIRPlanDefinitionUtils {
 
-  private FHIRUtils() {
+  private FHIRPlanDefinitionUtils() {
     // static functions only
   }
 
@@ -49,7 +49,7 @@ public final class FHIRUtils {
    */
   public static Stream<PlanDefinitionActionComponent> getSubActions(PlanDefinition planDef) {
     return planDef.getAction().stream()
-        .flatMap(FHIRUtils::getSubActions);
+        .flatMap(FHIRPlanDefinitionUtils::getSubActions);
   }
 
   /**
@@ -59,14 +59,14 @@ public final class FHIRUtils {
    */
   public static Stream<PlanDefinitionActionComponent> getDeepNestedSubActions(PlanDefinition planDef) {
     return getNestedPlanDefs(planDef)
-        .flatMap(FHIRUtils::getSubActions);
+        .flatMap(FHIRPlanDefinitionUtils::getSubActions);
   }
 
   private static Stream<? extends PlanDefinitionActionComponent> getSubActions(
       PlanDefinitionActionComponent act) {
     return Stream.concat(
         Stream.of(act),
-        act.getAction().stream().flatMap(FHIRUtils::getSubActions));
+        act.getAction().stream().flatMap(FHIRPlanDefinitionUtils::getSubActions));
   }
 
 
@@ -90,37 +90,13 @@ public final class FHIRUtils {
    * @return a Stream of the nested PlanDefinitions
    */
   public static Stream<PlanDefinition> getNestedPlanDefs(PlanDefinition planDef) {
-    return getNested(planDef, PlanDefinition.class);
-  }
-
-  /**
-   * Traverses a DomainResource with nested (contained) Resources
-   * @param root the root resource
-   * @return a Stream of the nested resources
-   */
-  public static Stream<Resource> getNested(Resource root) {
-    return Stream.concat(Stream.of(root),
-        root instanceof DomainResource
-            ? ((DomainResource) root).getContained().stream().flatMap(FHIRUtils::getNested)
-            : Stream.empty());
-  }
-
-  /**
-   * Traverses a DomainResource with nested (contained) Resources
-   * @param root the root resource
-   * @return a Stream of the nested resources
-   */
-  public static <T extends DomainResource> Stream<T> getNested(T root, Class<T> type) {
-    return Stream.concat(Stream.of(root),
-            root.getContained().stream()
-                .flatMap(filterAs(type))
-                .flatMap(x -> getNested(x,type)));
+    return getContained(planDef, PlanDefinition.class);
   }
 
 
   public static <T> Optional<T> resolveInternalReference(
       DomainResource root, Reference ref, Class<T> tgtClass) {
-    return getNested(root, DomainResource.class)
+    return getContained(root, DomainResource.class)
         .filter(x -> ref.getReference().contains(x.getId()))
         .flatMap(filterAs(tgtClass))
         .findFirst();
