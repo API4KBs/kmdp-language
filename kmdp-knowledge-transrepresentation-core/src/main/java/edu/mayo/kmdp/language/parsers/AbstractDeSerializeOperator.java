@@ -206,8 +206,9 @@ public abstract class AbstractDeSerializeOperator
     Object expr = carrier.getExpression();
     String serializedExpr;
     if (expr instanceof String) {
-      serializedExpr = new String(Base64.getDecoder().decode((String)expr));
-    } else if (expr instanceof byte[]) {
+      expr = Base64.getDecoder().decode((String)expr);
+    }
+    if (expr instanceof byte[]) {
       byte[] bytes = (byte[]) expr;
       if (bytes[0] == (byte) 0xEF && bytes[1] == (byte) 0xBB && bytes[2] == (byte) 0xBF) {
         bytes = Arrays.copyOfRange(bytes,3, bytes.length);
