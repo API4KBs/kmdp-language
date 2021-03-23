@@ -75,6 +75,8 @@ public class CCPMProfileCMMNValidator extends CCPMComponentValidator {
   protected Answer<Void> validate(KnowledgeAsset knowledgeAsset, KnowledgeCarrier carrier) {
     return allOf(
         validateAssetId(knowledgeAsset, carrier),
+        validateAssetVersion(knowledgeAsset, carrier),
+        validateArtifactVersion(knowledgeAsset, carrier),
         validateAssetType(knowledgeAsset, carrier, Cognitive_Process_Model),
         validatePublicationStatus(knowledgeAsset, carrier)
     );

@@ -6,11 +6,14 @@ import edu.mayo.kmdp.language.validators.AbstractValidator;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.omg.spec.api4kp._20200801.Answer;
+import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
 import org.omg.spec.api4kp._20200801.id.Term;
 import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset;
@@ -72,6 +75,46 @@ public abstract class CCPMComponentValidator extends AbstractValidator {
         "Asset ID",
         () -> "found " + knowledgeAsset.getAssetId().asKey(),
         () -> "MISSING AssetId"
+    );
+  }
+
+  /**
+   * Validates that the versionTag of an Asset is a full SemVer identifier
+   * @param knowledgeAsset
+   * @param carrier
+   * @return
+   */
+  protected Answer<Void> validateAssetVersion(KnowledgeAsset knowledgeAsset, KnowledgeCarrier carrier) {
+    Pattern semverPatter = Pattern.compile("\\d+\\.\\d+\\.\\d+(-\\d+)?");
+    String assetVersion = knowledgeAsset.getAssetId().getVersionTag();
+    boolean success = semverPatter.matcher(assetVersion).matches();
+    return validationResponse(
+        carrier,
+        success,
+        "Asset Version Tag",
+        () -> "found Asset Version " + knowledgeAsset.getAssetId().getVersionTag(),
+        () -> "Asset Version NOT a full SemVer " + assetVersion
+    );
+  }
+
+  /**
+   * Validates that the versionTag of an Artifact is a full SemVer identifier
+   * @param knowledgeAsset
+   * @param carrier
+   * @return
+   */
+  protected Answer<Void> validateArtifactVersion(KnowledgeAsset knowledgeAsset, KnowledgeCarrier carrier) {
+    Pattern semverPatter = Pattern.compile("\\d+\\.\\d+\\.\\d+(-\\d+)?");
+    String artifactVersion = Optional.ofNullable(carrier.getArtifactId())
+        .map(ResourceIdentifier::getVersionTag)
+        .orElse("");
+    boolean success = semverPatter.matcher(artifactVersion).matches();
+    return validationResponse(
+        carrier,
+        success,
+        "Artifact Version Tag",
+        () -> "found Artifact Version " + carrier.getArtifactId().getVersionTag(),
+        () -> "Asset Version NOT a full SemVer " + artifactVersion
     );
   }
 

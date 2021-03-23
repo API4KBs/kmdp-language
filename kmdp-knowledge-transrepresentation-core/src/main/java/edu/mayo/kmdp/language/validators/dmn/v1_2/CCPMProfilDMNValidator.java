@@ -9,7 +9,6 @@ import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeReprese
 import edu.mayo.kmdp.language.validators.cmmn.v1_1.CCPMComponentValidator;
 import edu.mayo.kmdp.util.StreamUtil;
 import edu.mayo.kmdp.util.URIUtil;
-import edu.mayo.kmdp.util.Util;
 import java.net.URI;
 import java.util.Collections;
 import java.util.HashSet;
@@ -38,7 +37,6 @@ import org.omg.spec.dmn._20180521.model.TDecision;
 import org.omg.spec.dmn._20180521.model.TDecisionService;
 import org.omg.spec.dmn._20180521.model.TDefinitions;
 import org.omg.spec.dmn._20180521.model.TInputData;
-import org.omg.spec.dmn._20180521.model.TKnowledgeRequirement;
 import org.omg.spec.dmn._20180521.model.TKnowledgeSource;
 
 @Named
@@ -73,6 +71,8 @@ public class CCPMProfilDMNValidator extends CCPMComponentValidator {
   protected Answer<Void> validate(KnowledgeAsset knowledgeAsset, KnowledgeCarrier carrier) {
     return Stream.of(
         validateAssetId(knowledgeAsset, carrier),
+        validateAssetVersion(knowledgeAsset, carrier),
+        validateArtifactVersion(knowledgeAsset, carrier),
         validateAssetType(knowledgeAsset, carrier, Decision_Model),
         validatePublicationStatus(knowledgeAsset, carrier)
     ).reduce(Answer::merge).orElseGet(Answer::failed);
