@@ -15,6 +15,7 @@ package edu.mayo.kmdp.language.translators.cmmn.v1_1.r4;
 
 import static edu.mayo.kmdp.util.NameUtils.nameToIdentifier;
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.snapshot.SemanticAnnotationRelType.Captures;
+import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.FHIRPath_STU1;
 
 import edu.mayo.kmdp.util.NameUtils.IdentifierType;
 import edu.mayo.kmdp.util.StreamUtil;
@@ -32,9 +33,13 @@ import javax.xml.namespace.QName;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DataRequirement;
+import org.hl7.fhir.r4.model.DataRequirement.DataRequirementCodeFilterComponent;
+import org.hl7.fhir.r4.model.Expression;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.PlanDefinition.ActionCardinalityBehavior;
+import org.hl7.fhir.r4.model.PlanDefinition.ActionConditionKind;
 import org.hl7.fhir.r4.model.PlanDefinition.ActionGroupingBehavior;
 import org.hl7.fhir.r4.model.PlanDefinition.ActionPrecheckBehavior;
 import org.hl7.fhir.r4.model.PlanDefinition.ActionRelationshipType;
@@ -63,6 +68,7 @@ import org.omg.spec.cmmn._20151109.model.TEventListener;
 import org.omg.spec.cmmn._20151109.model.TExitCriterion;
 import org.omg.spec.cmmn._20151109.model.TExtensionElements;
 import org.omg.spec.cmmn._20151109.model.THumanTask;
+import org.omg.spec.cmmn._20151109.model.TMilestone;
 import org.omg.spec.cmmn._20151109.model.TOnPart;
 import org.omg.spec.cmmn._20151109.model.TPlanItem;
 import org.omg.spec.cmmn._20151109.model.TPlanItemControl;
@@ -89,7 +95,7 @@ public class CmmnToPlanDef {
   public PlanDefinition transform(ResourceIdentifier assetId, TDefinitions caseModel) {
     // Use of discretionary items causes a PlanningTable to be added to a separate Case? Check...
     List<TCase> nonDefaultCase = caseModel.getCase().stream()
-        .filter(c -> c.getName() == null || ! c.getName().startsWith("Page"))
+        .filter(c -> c.getName() == null || !c.getName().startsWith("Page"))
         .collect(Collectors.toList());
 
     if (nonDefaultCase.size() != 1) {
@@ -122,7 +128,7 @@ public class CmmnToPlanDef {
   }
 
   private void mapIdentity(PlanDefinition cpm, URI assetId
-  //    , TDefinitions caseModel
+      //    , TDefinitions caseModel
   ) {
     // TODO Need formal "Asset ID" and "Artifact ID" roles
     Identifier fhirAssetId = new Identifier()
@@ -177,7 +183,8 @@ public class CmmnToPlanDef {
     }
 
     for (TDiscretionaryItem discretionaryItem : getDiscretionaryItems(stage.getPlanningTable())) {
-      processPlannableItem(discretionaryItem, discretionaryItem.getDefinitionRef(), ccpmId, mappedPlanElements, caseModel);
+      processPlannableItem(discretionaryItem, discretionaryItem.getDefinitionRef(), ccpmId,
+          mappedPlanElements, caseModel);
     }
 
     for (TPlanItem planItem : stage.getPlanItem()) {
@@ -224,6 +231,8 @@ public class CmmnToPlanDef {
         mappedPlanElements.add(this.processHumanTask(planItem, (THumanTask) definition, caseModel));
       } else if (definition instanceof TTask) {
         mappedPlanElements.add(this.processGenericTask(planItem, (TTask) definition, caseModel));
+      } else if (definition instanceof TMilestone) {
+        this.processMilestone(planItem, (TMilestone) definition, caseModel);
       } else {
         throw new UnsupportedOperationException(
             "Cannot process " + definition.getClass().getName());
@@ -238,11 +247,12 @@ public class CmmnToPlanDef {
       TDefinitions caseModel) {
     if (definition != null) {
       if (definition instanceof THumanTask) {
-        mappedPlanElements.add(this.processDiscretionaryHumanTask(discretionaryItem, (THumanTask) definition, caseModel));
+        mappedPlanElements.add(
+            this.processDiscretionaryHumanTask(discretionaryItem, (THumanTask) definition,
+                caseModel));
       }
     }
   }
-
 
 
   private void processCaseFileItem(
@@ -383,13 +393,38 @@ public class CmmnToPlanDef {
                 new PlanDefinitionActionRelatedActionComponent()
                     .setRelationship(ActionRelationshipType.AFTER)
                     .setActionId(blackAct.getId()));
+          } else if (sourceDef instanceof TMilestone) {
+            TMilestone milestone = (TMilestone) sourceDef;
+            // expect one annotation - this will break defensively if the milestone is not annotated
+            Collection<Term> annos = getSemanticAnnotation(milestone.getExtensionElements());
+            if (annos.isEmpty()) {
+              throw new IllegalStateException("Defensive!");
+            }
+            // model milestone as a state + enabler
+            Term anno = annos.iterator().next();
+            whiteAct.addCondition()
+                .setKind(ActionConditionKind.START)
+                .setExpression(
+                    new Expression()
+                        .setLanguage(FHIRPath_STU1.getReferentId().toString())
+                        .setExpression("Resource.where(tag = '" + anno.getTag() + "').exists()"));
+
+            // model milestone as a trigger
+            DataRequirement dataRequirement = new DataRequirement();
+            DataRequirementCodeFilterComponent codeFilters = new DataRequirementCodeFilterComponent();
+            dataRequirement.addCodeFilter(codeFilters);
+            codeFilters.addCode(toCode(anno).getCoding().get(0));
+            whiteAct.addTrigger()
+                .setType(TriggerType.DATAACCESSED)
+                .addData(dataRequirement);
           } else {
             throw new UnsupportedOperationException("Defensive!");
           }
         } else {
           throw new UnsupportedOperationException("Defensive!");
         }
-      } if (onPart instanceof TCaseFileItemOnPart) {
+      }
+      if (onPart instanceof TCaseFileItemOnPart) {
         TCaseFileItemOnPart caseFileItemOnPart = (TCaseFileItemOnPart) onPart;
         Object sourceRef = caseFileItemOnPart.getSourceRef();
         if (sourceRef instanceof TCaseFileItem) {
@@ -526,7 +561,16 @@ public class CmmnToPlanDef {
     return planAction;
   }
 
-  private PlanDefinitionActionComponent processDecisionTask(
+  private PlanDefinitionActionComponent processMilestone(
+      TPlanItem planItem,
+      TMilestone milestone,
+      TDefinitions caseModel) {
+    // nothing to to with Milestones per se
+    // Milestones get absorbed into the Task/Action that the milestone is linked to
+    return null;
+  }
+
+  private PlanDefinition.PlanDefinitionActionComponent processDecisionTask(
       TPlanItem planItem,
       TDecisionTask tDecisionTask,
       TDefinitions caseModel) {
@@ -699,6 +743,24 @@ public class CmmnToPlanDef {
       }
     }
     return Optional.empty();
+  }
+
+  private static Collection<Term> getSemanticAnnotation(TExtensionElements extensionElements) {
+    return extensionElements == null
+        ? Collections.emptyList()
+        : getSemanticAnnotation(extensionElements.getAny());
+  }
+
+  private static List<Term> getSemanticAnnotation(List<Object> extensionElements) {
+    if (extensionElements == null || extensionElements.isEmpty()) {
+      return Collections.emptyList();
+    }
+
+    return extensionElements.stream()
+        .flatMap(StreamUtil.filterAs(Annotation.class))
+        .map(Annotation::getRef)
+        .map(Term.class::cast)
+        .collect(Collectors.toList());
   }
 
 
