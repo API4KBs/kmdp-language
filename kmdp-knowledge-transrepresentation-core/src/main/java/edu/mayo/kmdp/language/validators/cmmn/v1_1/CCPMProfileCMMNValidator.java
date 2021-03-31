@@ -1,6 +1,7 @@
 package edu.mayo.kmdp.language.validators.cmmn.v1_1;
 
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
+import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeassettype.KnowledgeAssetTypeSeries.Care_Process_Model;
 import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeassettype.KnowledgeAssetTypeSeries.Cognitive_Care_Process_Model;
 import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Well_Formedness_Check_Task;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.CMMN_1_1;
@@ -83,7 +84,7 @@ public class CCPMProfileCMMNValidator extends CCPMComponentValidator {
         validateAssetId(knowledgeAsset, carrier),
         validateAssetVersion(knowledgeAsset, carrier),
         validateArtifactVersion(knowledgeAsset, carrier),
-        validateAssetType(knowledgeAsset, carrier, Cognitive_Care_Process_Model),
+        validateAssetType(knowledgeAsset, carrier, Care_Process_Model),
         validatePublicationStatus(knowledgeAsset, carrier)
     );
   }
