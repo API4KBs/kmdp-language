@@ -1,9 +1,7 @@
 package edu.mayo.kmdp.language.validators.cmmn.v1_1;
 
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
-import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeassettype.KnowledgeAssetTypeSeries.Care_Process_Model;
 import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeassettype.KnowledgeAssetTypeSeries.Cognitive_Care_Process_Model;
-import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeassettype.KnowledgeAssetTypeSeries.Cognitive_Process_Model;
 import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Well_Formedness_Check_Task;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.CMMN_1_1;
 
@@ -20,6 +18,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.inject.Named;
 import javax.xml.bind.JAXBElement;
 import org.omg.spec.api4kp._20200801.Answer;
@@ -42,7 +41,10 @@ import org.omg.spec.cmmn._20151109.model.TDecision;
 import org.omg.spec.cmmn._20151109.model.TDecisionTask;
 import org.omg.spec.cmmn._20151109.model.TDefinitions;
 import org.omg.spec.cmmn._20151109.model.TExtensionElements;
+import org.omg.spec.cmmn._20151109.model.TMilestone;
 import org.omg.spec.cmmn._20151109.model.TPlanItem;
+import org.omg.spec.cmmn._20151109.model.TPlanItemOnPart;
+import org.omg.spec.cmmn._20151109.model.TSentry;
 import org.omg.spec.cmmn._20151109.model.TStage;
 import org.omg.spec.cmmn._20151109.model.TTask;
 
@@ -91,7 +93,8 @@ public class CCPMProfileCMMNValidator extends CCPMComponentValidator {
     return allOf(
         validateTaskTypes(caseModel, carrier),
         validateDecisionTaskLinks(caseModel, carrier),
-        validateCaseFileItems(caseModel, carrier)
+        validateCaseFileItems(caseModel, carrier),
+        validateMilestones(caseModel, carrier)
     );
   }
 
@@ -148,6 +151,85 @@ public class CCPMProfileCMMNValidator extends CCPMComponentValidator {
         () -> "TASKS with no Type " + toString(tasksWithoutAnnotation, TTask::getName)
     );
   }
+
+  /**
+   * Data Case file item is annotated with the concepts it resolves
+   * Task which creates generates the data
+   * has input and output bound to the name of the case file item
+   *
+   * @param caseModel
+   * @param carrier
+   * @return
+   */
+  private Answer<Void> validateMilestones(TDefinitions caseModel, KnowledgeCarrier carrier) {
+    Set<TTask> tasks = new CaseTaskCollector().visitCase(caseModel);
+    Set<TMilestone> miles
+        = new CaseMilestoneCollector().visitCase(caseModel);
+    Map<TMilestone, String> partial = new HashMap<>();
+
+    // Check connected to Task
+    miles.stream()
+        .filter(m -> !isLinked(m, tasks, caseModel))
+        .forEach(m ->
+            addInMap(m, partial, "Link", (x, y) -> String.join("/", x, y)));
+
+    // Check for Annotation
+    miles.stream()
+        .filter(m -> m.getExtensionElements().getAny().stream()
+            .noneMatch(Annotation.class::isInstance))
+        .forEach(m ->
+            addInMap(m, partial, "Conceot", (x, y) -> String.join("/", x, y)));
+
+    return validationResponse(
+        carrier,
+        partial.isEmpty(),
+        "Milest",
+        () -> miles.isEmpty() ? "none" : "all configured",
+        () -> "PARTIAL " + toString(partial.keySet(), c -> c.getName() + ":" + partial.get(c))
+    );
+  }
+
+  private boolean isLinked(TMilestone miles,
+      Set<TTask> tasks, TDefinitions caseModel) {
+    Set<TPlanItem> planItems = new CasePlanItemCollector().visitCase(caseModel);
+
+    // Get the PlanItems that reference a Milestone
+    Optional<TPlanItem> milPlanItem = planItems.stream()
+        .filter(pi -> pi.getDefinitionRef() == miles)
+        .findFirst();
+    if (milPlanItem.isEmpty()) {
+      return false;
+    }
+
+    // Get the Sentry whose OnPart
+    //  references a PlanItem that references a Milestone
+    Set<TSentry> milestoneSentries = new CaseSentryCollector().visitCase(caseModel).stream()
+        .filter(s -> s.getOnPart().stream()
+            .map(JAXBElement::getValue)
+            .flatMap(StreamUtil.filterAs(TPlanItemOnPart.class))
+            .anyMatch(on -> on.getSourceRef() == milPlanItem.get()))
+        .collect(Collectors.toSet());
+
+    // Get the PlanItems whose Entry/Exit criterion is
+    //   a Sentry whose OnPart
+    //     references a PlanItem that references a Milestone
+    Set<TPlanItem> milestoneLinkedItems = planItems.stream()
+        .filter(pi ->
+            pi.getEntryCriterion().stream()
+                .anyMatch(in -> milestoneSentries.stream().anyMatch(s -> s == in.getSentryRef()))
+            || pi.getExitCriterion().stream()
+                .anyMatch(out -> milestoneSentries.stream().anyMatch(s -> s == out.getSentryRef())))
+        .collect(Collectors.toSet());
+
+    // See if any Task is the definition of
+    //   a PlanItem whose Entry/Exit criterion is
+    //     a Sentry whose OnPart
+    //       references a PlanItem that references a Milestone
+    return milestoneLinkedItems.stream()
+        .anyMatch(pi ->
+            tasks.stream().anyMatch(t -> t == pi.getDefinitionRef()));
+  }
+
 
   /**
    * Data Case file item is annotated with the concepts it resolves
@@ -224,6 +306,10 @@ public class CCPMProfileCMMNValidator extends CCPMComponentValidator {
 
   private boolean pointsTo(TAssociation assoc, TCaseFileItem cfi) {
     return assoc.getTargetRef() == cfi || assoc.getSourceRef() == cfi;
+  }
+
+  private boolean pointsTo(TAssociation assoc, TMilestone miles) {
+    return assoc.getTargetRef() == miles || assoc.getSourceRef() == miles;
   }
 
   private boolean pointsTo(TAssociation assoc, TTask cfi) {
@@ -319,6 +405,36 @@ public class CCPMProfileCMMNValidator extends CCPMComponentValidator {
 
   }
 
+
+  private class CaseMilestoneCollector extends CaseCollector<TMilestone> {
+
+    public Set<TMilestone> visitCase(TDefinitions caseModel) {
+      caseModel.getCase().forEach(this::visit);
+      return new HashSet<>(elements);
+    }
+
+    @Override
+    protected void collect(TStage stage) {
+      collect(stage, TMilestone.class);
+    }
+
+  }
+
+
+  private class CasePlanItemCollector extends CaseCollector<TPlanItem> {
+
+    public Set<TPlanItem> visitCase(TDefinitions caseModel) {
+      caseModel.getCase().forEach(this::visit);
+      return new HashSet<>(elements);
+    }
+
+    @Override
+    protected void collect(TStage stage) {
+      elements.addAll(stage.getPlanItem());
+    }
+
+  }
+
   private class CaseTaskCollector extends CaseCollector<TTask> {
 
     public Set<TTask> visitCase(TDefinitions caseModel) {
@@ -328,6 +444,18 @@ public class CCPMProfileCMMNValidator extends CCPMComponentValidator {
     @Override
     protected void collect(TStage stage) {
       collect(stage, TTask.class);
+    }
+  }
+
+  private class CaseSentryCollector extends CaseCollector<TSentry> {
+
+    public Set<TSentry> visitCase(TDefinitions caseModel) {
+      return visit(caseModel);
+    }
+
+    @Override
+    protected void collect(TStage stage) {
+      elements.addAll(stage.getSentry());
     }
   }
 }
