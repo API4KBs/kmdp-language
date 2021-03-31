@@ -31,6 +31,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
+import org.hl7.fhir.dstu3.model.Attachment;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DataRequirement;
@@ -53,7 +54,6 @@ import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
 import org.omg.spec.api4kp._20200801.id.Term;
 import org.omg.spec.api4kp._20200801.surrogate.Annotation;
 import org.omg.spec.api4kp._20200801.taxonomy.knowledgeassettype.KnowledgeAssetTypeSeries;
-import org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries;
 import org.omg.spec.cmmn._20151109.model.TAssociation;
 import org.omg.spec.cmmn._20151109.model.TCase;
 import org.omg.spec.cmmn._20151109.model.TCaseFileItem;
@@ -87,6 +87,7 @@ public class CmmnToPlanDef {
   private static final Logger log = LoggerFactory.getLogger(CmmnToPlanDef.class);
 
   static final String CMIS_DOCUMENT_TYPE = "http://www.omg.org/spec/CMMN/DefinitionType/CMISDocument";
+  static final String XSD_ELEMENT_TYPE = "http://www.omg.org/spec/CMMN/DefinitionType/XSDElement";
 
   public CmmnToPlanDef() {
     // nothing to do
@@ -261,16 +262,30 @@ public class CmmnToPlanDef {
     caseModel.getCaseFileItemDefinition().stream()
         .filter(itemDef -> itemDef.getId().equals(definitionId))
         .findFirst()
-        .ifPresent(cfiDef -> processCaseFileItem(cfiDef, planAction));
+        .ifPresent(cfiDef -> processCaseFileItem(cfiDef, caseFileItem, planAction));
   }
 
   private void processCaseFileItem(TCaseFileItemDefinition cfiDef,
+      TCaseFileItem cfi,
       PlanDefinitionActionComponent planAction) {
     if (CMIS_DOCUMENT_TYPE.equals(cfiDef.getDefinitionType())) {
+      String url = resolveKnowledgeAsset(cfiDef);
       planAction.addDocumentation(new RelatedArtifact()
+          .setUrl(url)
           .setDisplay(cfiDef.getName())
-          .setUrl(resolveKnowledgeAsset(cfiDef))
-      );
+          .setDocument(new Attachment()
+              .setTitle(cfiDef.getName())
+              .setUrl(url)
+              .setContentType("text/html")));
+    } else if (XSD_ELEMENT_TYPE.equals(cfiDef.getDefinitionType())) {
+      Collection<Term> annos = getSemanticAnnotation(cfi.getExtensionElements());
+      if (annos.isEmpty()) {
+        throw new IllegalStateException("Defensive!");
+      }
+      planAction.addInput(toSemanticInput(annos.iterator().next()));
+    } else {
+      throw new UnsupportedOperationException(
+          "Unable to map CaseFileItems of type " + cfiDef.getDefinitionType());
     }
   }
 
@@ -406,10 +421,7 @@ public class CmmnToPlanDef {
                 .setExpression("Resource.where(tag = '" + anno.getTag() + "').exists()");
 
             // model milestone as a trigger
-            DataRequirement dataRequirement = new DataRequirement();
-            DataRequirementCodeFilterComponent codeFilters = new DataRequirementCodeFilterComponent();
-            dataRequirement.addCodeFilter(codeFilters);
-            codeFilters.addValueCoding(FHIRPlanDefinitionUtils.toCoding(anno));
+            DataRequirement dataRequirement = toSemanticInput(anno);
             whiteAct.addTriggerDefinition()
                 .setType(TriggerType.DATAACCESSED)
                 .setEventData(dataRequirement);
@@ -741,6 +753,14 @@ public class CmmnToPlanDef {
     return Optional.empty();
   }
 
+
+  private DataRequirement toSemanticInput(Term anno) {
+    DataRequirement dataRequirement = new DataRequirement();
+    DataRequirementCodeFilterComponent codeFilters = new DataRequirementCodeFilterComponent();
+    dataRequirement.addCodeFilter(codeFilters);
+    codeFilters.addValueCoding(FHIRPlanDefinitionUtils.toCoding(anno));
+    return dataRequirement;
+  }
 
   private static Collection<Term> getSemanticAnnotation(TExtensionElements extensionElements) {
     return extensionElements == null
