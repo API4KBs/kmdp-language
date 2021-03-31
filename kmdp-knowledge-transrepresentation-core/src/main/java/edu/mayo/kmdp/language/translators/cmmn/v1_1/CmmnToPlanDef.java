@@ -59,6 +59,7 @@ import org.omg.spec.cmmn._20151109.model.TCase;
 import org.omg.spec.cmmn._20151109.model.TCaseFileItem;
 import org.omg.spec.cmmn._20151109.model.TCaseFileItemDefinition;
 import org.omg.spec.cmmn._20151109.model.TCaseFileItemOnPart;
+import org.omg.spec.cmmn._20151109.model.TCaseParameter;
 import org.omg.spec.cmmn._20151109.model.TDecision;
 import org.omg.spec.cmmn._20151109.model.TDecisionTask;
 import org.omg.spec.cmmn._20151109.model.TDefinitions;
@@ -257,17 +258,31 @@ public class CmmnToPlanDef {
   private void processCaseFileItem(
       TCaseFileItem caseFileItem,
       PlanDefinitionActionComponent planAction,
-      TDefinitions caseModel) {
+      TDefinitions caseModel,
+      Object associated) {
     String definitionId = caseFileItem.getDefinitionRef().getLocalPart();
     caseModel.getCaseFileItemDefinition().stream()
         .filter(itemDef -> itemDef.getId().equals(definitionId))
         .findFirst()
-        .ifPresent(cfiDef -> processCaseFileItem(cfiDef, caseFileItem, planAction));
+        .ifPresent(cfiDef -> processCaseFileItem(cfiDef, caseFileItem, planAction, toTask(associated)));
+  }
+
+  private TTask toTask(Object associated) {
+    Object x = associated;
+    if (!(x instanceof TPlanItem)) {
+      throw new UnsupportedOperationException("Defensive");
+    }
+    x = ((TPlanItem) associated).getDefinitionRef();
+    if (!(x instanceof TTask)) {
+      throw new UnsupportedOperationException("Defensive");
+    }
+    return (TTask) x;
   }
 
   private void processCaseFileItem(TCaseFileItemDefinition cfiDef,
       TCaseFileItem cfi,
-      PlanDefinitionActionComponent planAction) {
+      PlanDefinitionActionComponent planAction,
+      TTask associated) {
     if (CMIS_DOCUMENT_TYPE.equals(cfiDef.getDefinitionType())) {
       String url = resolveKnowledgeAsset(cfiDef);
       planAction.addDocumentation(new RelatedArtifact()
@@ -282,7 +297,12 @@ public class CmmnToPlanDef {
       if (annos.isEmpty()) {
         throw new IllegalStateException("Defensive!");
       }
-      planAction.addInput(toSemanticInput(annos.iterator().next()));
+      if (associated.getInput().stream().map(TCaseParameter::getBindingRef).anyMatch(x -> x == cfi)) {
+        planAction.addInput(toSemanticInput(annos.iterator().next()));
+      }
+      if (associated.getOutput().stream().map(TCaseParameter::getBindingRef).anyMatch(x -> x == cfi)) {
+        planAction.addOutput(toSemanticInput(annos.iterator().next()));
+      }
     } else {
       throw new UnsupportedOperationException(
           "Unable to map CaseFileItems of type " + cfiDef.getDefinitionType());
@@ -490,7 +510,7 @@ public class CmmnToPlanDef {
     getControls(planItem, task)
         .ifPresent(ctrl -> mapControls(ctrl, planAction));
 
-    processAssociatedItems(planItem, caseModel, planAction);
+    processAssociatedItems(planItem, caseModel, planAction, task);
 
     return planAction;
   }
@@ -618,7 +638,7 @@ public class CmmnToPlanDef {
   }
 
   private void processAssociatedItems(TPlanItem planItem, TDefinitions caseModel,
-      PlanDefinitionActionComponent planAction) {
+      PlanDefinitionActionComponent planAction, TTask task) {
     caseModel.getArtifact().stream()
         .map(JAXBElement::getValue)
         .flatMap(StreamUtil.filterAs(TAssociation.class))
@@ -643,9 +663,9 @@ public class CmmnToPlanDef {
       PlanDefinitionActionComponent planAction,
       TAssociation assoc) {
     if (assoc.getTargetRef() instanceof TCaseFileItem) {
-      processCaseFileItem((TCaseFileItem) assoc.getTargetRef(), planAction, caseModel);
+      processCaseFileItem((TCaseFileItem) assoc.getTargetRef(), planAction, caseModel, assoc.getSourceRef());
     } else if (assoc.getSourceRef() instanceof TCaseFileItem) {
-      processCaseFileItem((TCaseFileItem) assoc.getSourceRef(), planAction, caseModel);
+      processCaseFileItem((TCaseFileItem) assoc.getSourceRef(), planAction, caseModel, assoc.getTargetRef());
     }
   }
 
