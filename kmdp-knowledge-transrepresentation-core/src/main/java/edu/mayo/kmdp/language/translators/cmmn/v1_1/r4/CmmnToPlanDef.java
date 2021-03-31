@@ -30,6 +30,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
+import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -87,6 +88,7 @@ public class CmmnToPlanDef {
   private static final Logger log = LoggerFactory.getLogger(CmmnToPlanDef.class);
 
   static final String CMIS_DOCUMENT_TYPE = "http://www.omg.org/spec/CMMN/DefinitionType/CMISDocument";
+  static final String XSD_ELEMENT_TYPE = "http://www.omg.org/spec/CMMN/DefinitionType/XSDElement";
 
   public CmmnToPlanDef() {
     // nothing to do
@@ -159,7 +161,7 @@ public class CmmnToPlanDef {
 
     getTypeCode(stage.getExtensionElements()).stream()
         .map(this::toCode)
-        .forEach(group::addCode);
+        .forEach(cd -> this.addCodeIfMissing(cd, group));
 
     group.setGroupingBehavior(ActionGroupingBehavior.LOGICALGROUP);
     group.setType(new CodeableConcept().addCoding(new Coding()
@@ -263,18 +265,33 @@ public class CmmnToPlanDef {
     caseModel.getCaseFileItemDefinition().stream()
         .filter(itemDef -> itemDef.getId().equals(definitionId))
         .findFirst()
-        .ifPresent(cfiDef -> processCaseFileItem(cfiDef, planAction));
+        .ifPresent(cfiDef -> processCaseFileItem(cfiDef, caseFileItem, planAction));
   }
 
   private void processCaseFileItem(TCaseFileItemDefinition cfiDef,
+      TCaseFileItem cfi,
       PlanDefinitionActionComponent planAction) {
     if (CMIS_DOCUMENT_TYPE.equals(cfiDef.getDefinitionType())) {
+      String url = resolveKnowledgeAsset(cfiDef);
       planAction.addDocumentation(new RelatedArtifact()
+          .setUrl(url)
           .setDisplay(cfiDef.getName())
-          .setUrl(resolveKnowledgeAsset(cfiDef))
-      );
+          .setDocument(new Attachment()
+              .setTitle(cfiDef.getName())
+              .setUrl(url)
+              .setContentType("text/html")));
+    } else if (XSD_ELEMENT_TYPE.equals(cfiDef.getDefinitionType())) {
+      Collection<Term> annos = getSemanticAnnotation(cfi.getExtensionElements());
+      if (annos.isEmpty()) {
+        throw new IllegalStateException("Defensive!");
+      }
+      planAction.addInput(toSemanticInput(annos.iterator().next()));
+    } else {
+      throw new UnsupportedOperationException(
+          "Unable to map CaseFileItems of type " + cfiDef.getDefinitionType());
     }
   }
+
 
   private String resolveKnowledgeAsset(TCaseFileItemDefinition cfiDef) {
     if (cfiDef.getStructureRef() == null) {
@@ -410,10 +427,7 @@ public class CmmnToPlanDef {
                         .setExpression("Resource.where(tag = '" + anno.getTag() + "').exists()"));
 
             // model milestone as a trigger
-            DataRequirement dataRequirement = new DataRequirement();
-            DataRequirementCodeFilterComponent codeFilters = new DataRequirementCodeFilterComponent();
-            dataRequirement.addCodeFilter(codeFilters);
-            codeFilters.addCode(toCode(anno).getCoding().get(0));
+            DataRequirement dataRequirement = toSemanticInput(anno);
             whiteAct.addTrigger()
                 .setType(TriggerType.DATAACCESSED)
                 .addData(dataRequirement);
@@ -478,7 +492,7 @@ public class CmmnToPlanDef {
 
     getTypeCode(task.getExtensionElements()).stream()
         .map(this::toCode)
-        .forEach(planAction::addCode);
+        .forEach(cd -> this.addCodeIfMissing(cd, planAction));
 
     getControls(planItem, task)
         .ifPresent(ctrl -> mapControls(ctrl, planAction));
@@ -486,6 +500,17 @@ public class CmmnToPlanDef {
     processAssociatedItems(planItem, caseModel, planAction);
 
     return planAction;
+  }
+
+  private void addCodeIfMissing(CodeableConcept cd, PlanDefinitionActionComponent planAction) {
+    boolean hasCode = planAction
+        .getCode().stream().anyMatch(c ->
+            cd.getCoding().stream().anyMatch(d ->
+                c.getCoding().stream().anyMatch(e ->
+                    e.getCode().equals(d.getCode()))));
+    if (! hasCode) {
+      planAction.addCode(cd);
+    }
   }
 
   private PlanDefinitionActionComponent processDiscretionaryTask(
@@ -499,7 +524,7 @@ public class CmmnToPlanDef {
 
     getTypeCode(task.getExtensionElements()).stream()
         .map(this::toCode)
-        .forEach(planAction::addCode);
+        .forEach(cd -> this.addCodeIfMissing(cd, planAction));
 
     getControls(discretionaryItem, task)
         .ifPresent(ctrl -> mapControls(ctrl, planAction));
@@ -743,6 +768,15 @@ public class CmmnToPlanDef {
       }
     }
     return Optional.empty();
+  }
+
+
+  private DataRequirement toSemanticInput(Term anno) {
+    DataRequirement dataRequirement = new DataRequirement();
+    DataRequirementCodeFilterComponent codeFilters = new DataRequirementCodeFilterComponent();
+    dataRequirement.addCodeFilter(codeFilters);
+    codeFilters.addCode(toCode(anno).getCodingFirstRep());
+    return dataRequirement;
   }
 
   private static Collection<Term> getSemanticAnnotation(TExtensionElements extensionElements) {

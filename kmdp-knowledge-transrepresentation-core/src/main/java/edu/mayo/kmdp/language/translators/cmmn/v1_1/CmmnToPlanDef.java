@@ -160,7 +160,7 @@ public class CmmnToPlanDef {
 
     getTypeCode(stage.getExtensionElements()).stream()
         .map(this::toCode)
-        .forEach(group::addCode);
+        .forEach(cd -> this.addCodeIfMissing(cd, group));
 
     group.setGroupingBehavior(ActionGroupingBehavior.LOGICALGROUP);
     group.setType(new Coding()
@@ -485,7 +485,7 @@ public class CmmnToPlanDef {
 
     getTypeCode(task.getExtensionElements()).stream()
         .map(this::toCode)
-        .forEach(planAction::addCode);
+        .forEach(cd -> this.addCodeIfMissing(cd, planAction));
 
     getControls(planItem, task)
         .ifPresent(ctrl -> mapControls(ctrl, planAction));
@@ -493,6 +493,17 @@ public class CmmnToPlanDef {
     processAssociatedItems(planItem, caseModel, planAction);
 
     return planAction;
+  }
+
+  private void addCodeIfMissing(CodeableConcept cd, PlanDefinitionActionComponent planAction) {
+    boolean hasCode = planAction
+        .getCode().stream().anyMatch(c ->
+            cd.getCoding().stream().anyMatch(d ->
+                c.getCoding().stream().anyMatch(e ->
+                    e.getCode().equals(d.getCode()))));
+    if (! hasCode) {
+      planAction.addCode(cd);
+    }
   }
 
   private PlanDefinitionActionComponent processDiscretionaryTask(
@@ -506,7 +517,7 @@ public class CmmnToPlanDef {
 
     getTypeCode(task.getExtensionElements()).stream()
         .map(this::toCode)
-        .forEach(planAction::addCode);
+        .forEach(cd -> this.addCodeIfMissing(cd, planAction));
 
     getControls(discretionaryItem, task)
         .ifPresent(ctrl -> mapControls(ctrl, planAction));
@@ -603,7 +614,7 @@ public class CmmnToPlanDef {
         .flatMap(StreamUtil.filterAs(Annotation.class))
         .map(Annotation::getRef)
         .map(FHIRPlanDefinitionUtils::toCodeableConcept)
-        .forEach(planAction::addCode);
+        .forEach(cd -> this.addCodeIfMissing(cd, planAction));
   }
 
   private void processAssociatedItems(TPlanItem planItem, TDefinitions caseModel,
