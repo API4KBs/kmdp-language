@@ -3,6 +3,7 @@ package edu.mayo.kmdp.language.validators.cmmn.v1_1;
 import static org.omg.spec.api4kp._20200801.taxonomy.publicationstatus.PublicationStatusSeries.Published;
 
 import edu.mayo.kmdp.language.validators.AbstractValidator;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -126,13 +127,20 @@ public abstract class CCPMComponentValidator extends AbstractValidator {
    */
   protected Answer<Void> validatePublicationStatus(KnowledgeAsset knowledgeAsset, KnowledgeCarrier carrier) {
     PublicationStatus status = knowledgeAsset.getLifecycle().getPublicationStatus();
-    boolean success = Published.sameAs(status);
+    ValidationStatus valid;
+    if (status == null) {
+      valid = ValidationStatus.ERR;
+    } else if (Published.sameAs(status)) {
+      valid = ValidationStatus.OK;
+    } else {
+      valid = ValidationStatus.WRN;
+    }
     return validationResponse(
         carrier,
-        success,
+        valid,
         "Status",
-        status::getLabel,
-        () -> "NOT Published - " + status.getLabel().toUpperCase()
+        Published::getLabel,
+        () -> status != null ? status.getLabel().toUpperCase() : "NOT Published"
     );
   }
 
@@ -147,14 +155,24 @@ public abstract class CCPMComponentValidator extends AbstractValidator {
       KnowledgeAssetType... types ) {
     List<KnowledgeAssetType> actualTypes = knowledgeAsset.getFormalType();
     List<KnowledgeAssetType> expectedTypes = Arrays.stream(types).collect(Collectors.toList());
-    List<KnowledgeAssetType> missingTypes = expectedTypes.stream()
-        .filter(type -> actualTypes.stream().noneMatch(t -> t.sameAs(type)))
+    List<KnowledgeAssetType> foundTypes = expectedTypes.stream()
+        .filter(type -> actualTypes.stream().anyMatch(t -> t.sameAs(type)))
         .collect(Collectors.toList());
-    boolean success = missingTypes.isEmpty();
+    List<KnowledgeAssetType> missingTypes = new ArrayList<>(expectedTypes);
+    missingTypes.removeAll(foundTypes);
+
+    ValidationStatus status;
+    if (actualTypes.isEmpty()) {
+      status = ValidationStatus.ERR;
+    } else if (foundTypes.containsAll(expectedTypes)) {
+      status = ValidationStatus.OK;
+    } else {
+      status = ValidationStatus.WRN;
+    }
 
     return validationResponse(
         carrier,
-        success,
+        status,
         "Asset Type",
         () -> "found " + toString(actualTypes, Term::getLabel),
         () -> "MISSING " + toString(missingTypes, Term::getLabel)
@@ -176,6 +194,16 @@ public abstract class CCPMComponentValidator extends AbstractValidator {
             outcome ? ValidationStatus.OK : ValidationStatus.ERR,
             ruleName,
             outcome ? successMsg.get() : failMsg.get()));
+  }
+
+  protected Answer<Void> validationResponse(KnowledgeCarrier carrier, ValidationStatus outcome,
+      String ruleName, Supplier<String> successMsg, Supplier<String> failMsg) {
+    return Answer.succeed().withExplanation(
+        format(
+            carrier,
+            outcome,
+            ruleName,
+            outcome == ValidationStatus.OK ? successMsg.get() : failMsg.get()));
   }
 
   @SuppressWarnings("unchecked")

@@ -1,6 +1,8 @@
 package edu.mayo.kmdp.language.validators.cmmn.v1_1;
 
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
+import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeassettype.KnowledgeAssetTypeSeries.Care_Process_Model;
+import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeassettype.KnowledgeAssetTypeSeries.Cognitive_Care_Process_Model;
 import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeassettype.KnowledgeAssetTypeSeries.Cognitive_Process_Model;
 import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Well_Formedness_Check_Task;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.CMMN_1_1;
@@ -8,6 +10,7 @@ import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeReprese
 import edu.mayo.kmdp.util.StreamUtil;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +18,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 import javax.inject.Named;
 import javax.xml.bind.JAXBElement;
@@ -77,7 +81,7 @@ public class CCPMProfileCMMNValidator extends CCPMComponentValidator {
         validateAssetId(knowledgeAsset, carrier),
         validateAssetVersion(knowledgeAsset, carrier),
         validateArtifactVersion(knowledgeAsset, carrier),
-        validateAssetType(knowledgeAsset, carrier, Cognitive_Process_Model),
+        validateAssetType(knowledgeAsset, carrier, Cognitive_Care_Process_Model),
         validatePublicationStatus(knowledgeAsset, carrier)
     );
   }
@@ -146,7 +150,8 @@ public class CCPMProfileCMMNValidator extends CCPMComponentValidator {
   }
 
   /**
-   * Case file item is annotated with the concepts it resolves Task which creates generates the data
+   * Data Case file item is annotated with the concepts it resolves
+   * Task which creates generates the data
    * has input and output bound to the name of the case file item
    *
    * @param caseModel
@@ -158,23 +163,46 @@ public class CCPMProfileCMMNValidator extends CCPMComponentValidator {
     Map<TCaseFileItem, TCaseFileItemDefinition> cfis
         = new CaseFileItemCollector().visitCase(caseModel);
 
-    Set<TCaseFileItem> configured = cfis.keySet().stream()
-        .filter(cfi -> isLinked(cfi, tasks, caseModel) &&
-            (isDocument(cfis.get(cfi)) || isOutput(cfi, tasks)))
-        .collect(Collectors.toSet());
-    Set<TCaseFileItem> partial = new HashSet<>(cfis.keySet());
-    partial.removeAll(configured);
+    Map<TCaseFileItem, String> partial = new HashMap<>();
+
+    // Check connected to Task
+    cfis.keySet().stream()
+        .filter(cfi -> !isLinked(cfi, tasks, caseModel))
+        .forEach(cfi ->
+            addInMap(cfi, partial, "Link", (x, y) -> String.join("/", x, y)));
+
+    // If document, must have a asset:UUID
+    cfis.keySet().stream()
+        .filter(cfi -> isDocument(cfis.get(cfi)))
+        .filter(cfi -> cfis.get(cfi).getStructureRef() == null)
+        .forEach(cfi ->
+            addInMap(cfi, partial, "assetUUID", (x, y) -> String.join("/", x, y)));
+
+    // If input/output, must have a Concept annotation
+    cfis.keySet().stream()
+        .filter(cfi -> isInputOutput(cfi, tasks))
+        .filter(cfi -> cfi.getExtensionElements().getAny().stream()
+            .noneMatch(Annotation.class::isInstance))
+        .forEach(cfi ->
+            addInMap(cfi, partial, "Concept", (x, y) -> String.join("/", x, y)));
+
+    // Check either input/output or document
+    cfis.keySet().stream()
+        .filter(cfi -> ! isDocument(cfis.get(cfi)))
+        .filter(cfi -> ! isInputOutput(cfi, tasks))
+        .forEach(cfi ->
+            addInMap(cfi, partial, "Type", (x, y) -> String.join("/", x, y)));
 
     return validationResponse(
         carrier,
         partial.isEmpty(),
         "CFIs",
-        () -> cfis.isEmpty() ? "none" : "configured",
-        () -> "PARTIAL CFIDef " + toString(partial, TCaseFileItem::getName)
+        () -> cfis.isEmpty() ? "none" : "all configured",
+        () -> "PARTIAL " + toString(partial.keySet(), c -> c.getName() + ":" + partial.get(c))
     );
   }
 
-  private boolean isOutput(TCaseFileItem cfi, Set<TTask> tasks) {
+  private boolean isInputOutput(TCaseFileItem cfi, Set<TTask> tasks) {
     return tasks.stream().anyMatch(
         task -> task.getInput() != null && task.getInput().stream()
             .anyMatch(in -> cfi == in.getBindingRef()))
@@ -207,8 +235,7 @@ public class CCPMProfileCMMNValidator extends CCPMComponentValidator {
 
   private boolean isDocument(TCaseFileItemDefinition cfid) {
     return "http://www.omg.org/spec/CMMN/DefinitionType/CMISDocument"
-        .equals(cfid.getDefinitionType())
-        && cfid.getStructureRef() != null;
+        .equals(cfid.getDefinitionType());
   }
 
   private boolean hasTaskTypeAnnotation(TTask task) {
@@ -220,6 +247,10 @@ public class CCPMProfileCMMNValidator extends CCPMComponentValidator {
         .map(Annotation::getRef)
         .map(ResourceIdentifier::getNamespaceUri)
         .anyMatch(ns -> "https://ontology.mayo.edu/taxonomies/ClinicalTasks".equals(ns.toString()));
+  }
+
+  private <X,V> void addInMap(X key, Map<X, V> map, V val, BinaryOperator<V> joiner) {
+    map.compute(key, (k,v) -> v == null ? val : joiner.apply(v,val));
   }
 
   private abstract class CaseCollector<T extends TCmmnElement> {
