@@ -13,6 +13,7 @@
  */
 package edu.mayo.kmdp.language.translators.cmmn.v1_1;
 
+import static edu.mayo.kmdp.language.common.fhir.stu3.FHIRPlanDefinitionUtils.toCodeableConcept;
 import static edu.mayo.kmdp.util.NameUtils.nameToIdentifier;
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.snapshot.SemanticAnnotationRelType.Captures;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.FHIRPath_STU1;
@@ -789,7 +790,7 @@ public class CmmnToPlanDef {
     DataRequirement dataRequirement = new DataRequirement();
     DataRequirementCodeFilterComponent codeFilters = new DataRequirementCodeFilterComponent();
     dataRequirement.addCodeFilter(codeFilters);
-    codeFilters.addValueCoding(FHIRPlanDefinitionUtils.toCoding(anno));
+    codeFilters.addValueCodeableConcept(toCodeableConcept(anno));
     return dataRequirement;
   }
 
