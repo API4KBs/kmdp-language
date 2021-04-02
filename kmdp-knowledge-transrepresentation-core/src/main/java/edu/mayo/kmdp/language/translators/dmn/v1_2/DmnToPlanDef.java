@@ -265,6 +265,9 @@ public class DmnToPlanDef {
           TDecision outputDecision = findDecision(out, decisionModel)
               .orElseThrow();
           mapOutput(outputDecision, serviceAction);
+          outputDecision.getAuthorityRequirement().forEach(
+              ks -> mapKnowledgeSource(ks, serviceAction, decisionModel)
+          );
         }
     );
 
