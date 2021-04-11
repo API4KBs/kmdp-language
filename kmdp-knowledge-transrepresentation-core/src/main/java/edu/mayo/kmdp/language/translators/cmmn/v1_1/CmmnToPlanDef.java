@@ -15,7 +15,8 @@ package edu.mayo.kmdp.language.translators.cmmn.v1_1;
 
 import static edu.mayo.kmdp.language.common.fhir.stu3.FHIRPlanDefinitionUtils.toCodeableConcept;
 import static edu.mayo.kmdp.util.NameUtils.nameToIdentifier;
-import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.snapshot.SemanticAnnotationRelType.Captures;
+import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.Captures;
+import static org.omg.spec.api4kp._20200801.taxonomy.clinicalknowledgeassettype.ClinicalKnowledgeAssetTypeSeries.Care_Process_Model;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.FHIRPath_STU1;
 
 import edu.mayo.kmdp.language.common.fhir.stu3.FHIRPlanDefinitionUtils;
@@ -141,7 +142,7 @@ public class CmmnToPlanDef {
     cpm.setIdentifier(Collections.singletonList(fhirAssetId))
         .setVersion("TODO");
 
-    cpm.setType(toCode(KnowledgeAssetTypeSeries.Care_Process_Model));
+    cpm.setType(toCode(Care_Process_Model));
     cpm.setId("#" + UUID.randomUUID().toString());
   }
 
