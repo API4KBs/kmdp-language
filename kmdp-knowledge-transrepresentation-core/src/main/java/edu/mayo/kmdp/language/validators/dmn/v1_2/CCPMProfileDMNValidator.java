@@ -2,6 +2,7 @@ package edu.mayo.kmdp.language.validators.dmn.v1_2;
 
 import static edu.mayo.kmdp.util.Util.isEmpty;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
+import static org.omg.spec.api4kp._20200801.taxonomy.clinicalknowledgeassettype.ClinicalKnowledgeAssetTypeSeries.Clinical_Decision_Model;
 import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeassettype.KnowledgeAssetTypeSeries.Decision_Model;
 import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Well_Formedness_Check_Task;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.DMN_1_2;
@@ -29,6 +30,7 @@ import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
 import org.omg.spec.api4kp._20200801.surrogate.Annotation;
 import org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset;
+import org.omg.spec.api4kp._20200801.taxonomy.clinicalknowledgeassettype._20210401.ClinicalKnowledgeAssetType;
 import org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
 import org.omg.spec.dmn._20180521.model.TAuthorityRequirement;
 import org.omg.spec.dmn._20180521.model.TDMNElementReference;
@@ -42,14 +44,14 @@ import org.omg.spec.dmn._20180521.model.TKnowledgeSource;
 @Named
 @KPOperation(Well_Formedness_Check_Task)
 @KPSupport(DMN_1_2)
-public class CCPMProfilDMNValidator extends CCPMComponentValidator {
+public class CCPMProfileDMNValidator extends CCPMComponentValidator {
 
   public static final UUID id = UUID.fromString("cdf5c894-c74a-4a46-892a-dd3ec63bf540");
   public static final String version = "1.0.0";
 
   private ResourceIdentifier operatorId;
 
-  public CCPMProfilDMNValidator() {
+  public CCPMProfileDMNValidator() {
     this.operatorId = SemanticIdentifier.newId(id, version);
   }
 
@@ -73,7 +75,7 @@ public class CCPMProfilDMNValidator extends CCPMComponentValidator {
         validateAssetId(knowledgeAsset, carrier),
         validateAssetVersion(knowledgeAsset, carrier),
         validateArtifactVersion(knowledgeAsset, carrier),
-        validateAssetType(knowledgeAsset, carrier, Decision_Model),
+        validateAssetType(knowledgeAsset, carrier, Clinical_Decision_Model),
         validatePublicationStatus(knowledgeAsset, carrier)
     ).reduce(Answer::merge).orElseGet(Answer::failed);
   }
