@@ -30,6 +30,7 @@ import edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnot
 import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -101,19 +102,15 @@ public class DmnToPlanDef {
             .noneMatch(ds -> isDecisionServiceScoped(dec, ds)))
         .collect(Collectors.toList());
 
-    Map<String, PlanDefinitionActionComponent> mappedDecisions = dmnDecisions.stream()
+    Map<String, PlanDefinitionActionComponent> mappedDecisions = new HashMap<>();
+    dmnDecisions.stream()
         .map(decision -> processDecision(cpm::addAction, decisionModel, decision))
-        .collect(Collectors.toMap(
-            Element::getId,
-            Function.identity()
-        ));
+        .forEach(act -> mappedDecisions.putIfAbsent(act.getId(),act));
 
-    Map<String, PlanDefinitionActionComponent> mappedDecisionServices = dmnDecisionServices.stream()
+    Map<String, PlanDefinitionActionComponent> mappedDecisionServices = new HashMap<>();
+    dmnDecisionServices.stream()
         .map(decisionService -> processDecisionService(cpm, decisionModel, decisionService))
-        .collect(Collectors.toMap(
-            Element::getId,
-            Function.identity()
-        ));
+        .forEach(act -> mappedDecisionServices.putIfAbsent(act.getId(),act));
 
     dmnDecisions
         .forEach(decision -> processDecisionDependencies(
