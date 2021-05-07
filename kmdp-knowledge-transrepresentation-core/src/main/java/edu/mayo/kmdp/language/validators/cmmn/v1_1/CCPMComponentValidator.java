@@ -13,6 +13,7 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.omg.spec.api4kp._20200801.Answer;
 import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
 import org.omg.spec.api4kp._20200801.id.Term;
@@ -37,6 +38,10 @@ public abstract class CCPMComponentValidator extends AbstractValidator {
       return carrier.as(org.omg.spec.cmmn._20151109.model.TDefinitions.class)
           .map(kc -> this.validate(kc, carrier))
           .orElseGet(Answer::failed);
+    } else if (carrier.is(PlanDefinition.class)) {
+      return carrier.as(PlanDefinition.class)
+          .map(kc -> this.validate(kc, carrier))
+          .orElseGet(Answer::failed);
     } else {
       return Answer.failed();
     }
@@ -54,6 +59,11 @@ public abstract class CCPMComponentValidator extends AbstractValidator {
 
   protected Answer<Void> validate(
       org.omg.spec.cmmn._20151109.model.TDefinitions caseModel, KnowledgeCarrier carrier) {
+    return illegal();
+  }
+
+  protected Answer<Void> validate(
+      PlanDefinition planDefinition, KnowledgeCarrier carrier) {
     return illegal();
   }
 
@@ -188,19 +198,34 @@ public abstract class CCPMComponentValidator extends AbstractValidator {
 
   protected Answer<Void> validationResponse(KnowledgeCarrier carrier, boolean outcome,
       String ruleName, Supplier<String> successMsg, Supplier<String> failMsg) {
+    return validationResponse(carrier, this::mapAssetId, outcome, ruleName, successMsg, failMsg);
+  }
+
+  protected Answer<Void> validationResponse(KnowledgeCarrier carrier, ValidationStatus outcome,
+      String ruleName, Supplier<String> successMsg, Supplier<String> failMsg) {
+    return validationResponse(carrier, this::mapAssetId, outcome, ruleName, successMsg, failMsg);
+  }
+
+  protected Answer<Void> validationResponse(
+      KnowledgeCarrier carrier, Function<KnowledgeCarrier, String> keyMapper,
+      boolean outcome,
+      String ruleName, Supplier<String> successMsg, Supplier<String> failMsg) {
     return Answer.succeed().withExplanation(
         format(
-            carrier,
+            keyMapper.apply(carrier),
             outcome ? ValidationStatus.OK : ValidationStatus.ERR,
             ruleName,
             outcome ? successMsg.get() : failMsg.get()));
   }
 
-  protected Answer<Void> validationResponse(KnowledgeCarrier carrier, ValidationStatus outcome,
+
+  protected Answer<Void> validationResponse(
+      KnowledgeCarrier carrier, Function<KnowledgeCarrier, String> keyMapper,
+      ValidationStatus outcome,
       String ruleName, Supplier<String> successMsg, Supplier<String> failMsg) {
     return Answer.succeed().withExplanation(
         format(
-            carrier,
+            keyMapper.apply(carrier),
             outcome,
             ruleName,
             outcome == ValidationStatus.OK ? successMsg.get() : failMsg.get()));

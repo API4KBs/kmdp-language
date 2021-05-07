@@ -7,6 +7,7 @@ import org.omg.spec.api4kp._20200801.Answer;
 import org.omg.spec.api4kp._20200801.ServerSideException;
 import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.ValidateApiInternal._applyNamedValidate;
 import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.ValidateApiInternal._applyValidate;
+import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
 import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
 
 public abstract class AbstractValidator
@@ -48,12 +49,20 @@ public abstract class AbstractValidator
 
   protected abstract Answer<Void> validateComponent(KnowledgeCarrier carrier);
 
-  protected String format(KnowledgeCarrier carrier, ValidationStatus status, String ruleName, String message) {
+  protected String format(String key, ValidationStatus status, String ruleName, String message) {
     return String.format("%s... \t : %3s \t %20s \t %s",
-        carrier.getAssetId().asKey().toString().substring(0,4),
+        key,
         status,
         ruleName,
         message);
+  }
+
+  protected String mapAssetId(KnowledgeCarrier carrier) {
+    return mapResourceId(carrier.getAssetId(),4);
+  }
+
+  protected String mapResourceId(ResourceIdentifier rid, int len) {
+    return rid.asKey().toString().substring(0,len);
   }
 
   @Override
