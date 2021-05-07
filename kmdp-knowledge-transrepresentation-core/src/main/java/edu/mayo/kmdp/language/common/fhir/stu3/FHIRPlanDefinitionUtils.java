@@ -4,7 +4,9 @@ import static edu.mayo.kmdp.language.common.fhir.stu3.FHIRVisitor.getContained;
 import static edu.mayo.kmdp.util.StreamUtil.filterAs;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -39,6 +41,19 @@ public final class FHIRPlanDefinitionUtils {
         c.getCode(),
         c.getVersion(),
         c.getDisplay());
+  }
+
+  public static List<Term> toTerm(CodeableConcept c) {
+    return c.getCoding().stream()
+        .map(FHIRPlanDefinitionUtils::toTerm)
+        .collect(Collectors.toList());
+  }
+
+  public static String toDisplayTerms(CodeableConcept c) {
+    return c.getCoding().stream()
+        .map(FHIRPlanDefinitionUtils::toTerm)
+        .map(Term::getLabel)
+        .collect(Collectors.joining(","));
   }
 
 
@@ -91,6 +106,21 @@ public final class FHIRPlanDefinitionUtils {
    */
   public static Stream<PlanDefinition> getNestedPlanDefs(PlanDefinition planDef) {
     return getContained(planDef, PlanDefinition.class);
+  }
+
+  /**
+   * Traverses a PlanDefintion with nested (contained) PlanDefinitions
+   * and returns the one whose name matches the given name
+   *
+   * @param planDef the root PlanDefinition
+   * @param name the name of the PlanDefinition to select
+   * @return an Optional nested PlanDefinitions
+   */
+  public static Optional<PlanDefinition> getNestedPlanDefByName(
+      PlanDefinition planDef, String name) {
+    return getNestedPlanDefs(planDef)
+        .filter(pd -> pd.getName().equalsIgnoreCase(name.trim()))
+        .findFirst();
   }
 
 

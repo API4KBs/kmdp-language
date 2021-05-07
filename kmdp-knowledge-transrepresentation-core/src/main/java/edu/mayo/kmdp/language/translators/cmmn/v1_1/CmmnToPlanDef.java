@@ -55,7 +55,7 @@ import org.omg.spec.api4kp._20200801.id.ConceptIdentifier;
 import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
 import org.omg.spec.api4kp._20200801.id.Term;
 import org.omg.spec.api4kp._20200801.surrogate.Annotation;
-import org.omg.spec.api4kp._20200801.taxonomy.knowledgeassettype.KnowledgeAssetTypeSeries;
+import org.omg.spec.api4kp._20200801.taxonomy.krserialization.KnowledgeRepresentationLanguageSerializationSeries;
 import org.omg.spec.cmmn._20151109.model.TAssociation;
 import org.omg.spec.cmmn._20151109.model.TCase;
 import org.omg.spec.cmmn._20151109.model.TCaseFileItem;
@@ -99,7 +99,7 @@ public class CmmnToPlanDef {
   public PlanDefinition transform(ResourceIdentifier assetId, TDefinitions caseModel) {
     // Use of discretionary items causes a PlanningTable to be added to a separate Case? Check...
     List<TCase> nonDefaultCase = caseModel.getCase().stream()
-        .filter(c -> c.getName() == null || ! c.getName().startsWith("Page"))
+        .filter(c -> c.getName() == null || !c.getName().startsWith("Page"))
         .collect(Collectors.toList());
 
     if (nonDefaultCase.size() != 1) {
@@ -132,7 +132,7 @@ public class CmmnToPlanDef {
   }
 
   private void mapIdentity(PlanDefinition cpm, URI assetId
-  //    , TDefinitions caseModel
+      //    , TDefinitions caseModel
   ) {
     // TODO Need formal "Asset ID" and "Artifact ID" roles
     Identifier fhirAssetId = new Identifier()
@@ -143,7 +143,7 @@ public class CmmnToPlanDef {
         .setVersion("TODO");
 
     cpm.setType(toCode(Care_Process_Model));
-    cpm.setId("#" + UUID.randomUUID().toString());
+    cpm.setId(UUID.randomUUID().toString());
   }
 
 
@@ -167,7 +167,9 @@ public class CmmnToPlanDef {
 
     group.setGroupingBehavior(ActionGroupingBehavior.LOGICALGROUP);
     group.setType(new Coding()
-        .setSystem("TODO")
+        .setSystem(
+            KnowledgeRepresentationLanguageSerializationSeries.CMMN_1_1_XML_Syntax.getReferentId()
+                .toString())
         .setCode("Stage")
     );
     mappedPlanElements.forEach(
@@ -187,7 +189,8 @@ public class CmmnToPlanDef {
     }
 
     for (TDiscretionaryItem discretionaryItem : getDiscretionaryItems(stage.getPlanningTable())) {
-      processPlannableItem(discretionaryItem, discretionaryItem.getDefinitionRef(), ccpmId, mappedPlanElements, caseModel);
+      processPlannableItem(discretionaryItem, discretionaryItem.getDefinitionRef(), ccpmId,
+          mappedPlanElements, caseModel);
     }
 
     for (TPlanItem planItem : stage.getPlanItem()) {
@@ -250,11 +253,12 @@ public class CmmnToPlanDef {
       TDefinitions caseModel) {
     if (definition != null) {
       if (definition instanceof THumanTask) {
-        mappedPlanElements.add(this.processDiscretionaryHumanTask(discretionaryItem, (THumanTask) definition, caseModel));
+        mappedPlanElements.add(
+            this.processDiscretionaryHumanTask(discretionaryItem, (THumanTask) definition,
+                caseModel));
       }
     }
   }
-
 
 
   private void processCaseFileItem(
@@ -266,7 +270,8 @@ public class CmmnToPlanDef {
     caseModel.getCaseFileItemDefinition().stream()
         .filter(itemDef -> itemDef.getId().equals(definitionId))
         .findFirst()
-        .ifPresent(cfiDef -> processCaseFileItem(cfiDef, caseFileItem, planAction, toTask(associated)));
+        .ifPresent(
+            cfiDef -> processCaseFileItem(cfiDef, caseFileItem, planAction, toTask(associated)));
   }
 
   private TTask toTask(Object associated) {
@@ -299,10 +304,12 @@ public class CmmnToPlanDef {
       if (annos.isEmpty()) {
         throw new IllegalStateException("Defensive!");
       }
-      if (associated.getInput().stream().map(TCaseParameter::getBindingRef).anyMatch(x -> x == cfi)) {
+      if (associated.getInput().stream().map(TCaseParameter::getBindingRef)
+          .anyMatch(x -> x == cfi)) {
         planAction.addInput(toSemanticInput(annos.iterator().next()));
       }
-      if (associated.getOutput().stream().map(TCaseParameter::getBindingRef).anyMatch(x -> x == cfi)) {
+      if (associated.getOutput().stream().map(TCaseParameter::getBindingRef)
+          .anyMatch(x -> x == cfi)) {
         planAction.addOutput(toSemanticInput(annos.iterator().next()));
       }
     } else {
@@ -369,130 +376,147 @@ public class CmmnToPlanDef {
       TStage stage, TSentry sentry) {
 
     if (sentry.getOnPart() != null && !sentry.getOnPart().isEmpty()) {
+      // TODO - handle sentries with multiple, possibly hybrid, onParts better as needed
       TOnPart onPart = sentry.getOnPart().get(0).getValue();
 
       if (onPart instanceof TPlanItemOnPart) {
         TPlanItemOnPart planItemOnPartPart = (TPlanItemOnPart) onPart;
         Object sourceRef = planItemOnPartPart.getSourceRef();
         if (sourceRef instanceof TSentry) {
-          TSentry src = (TSentry) sourceRef;
-          Optional<Object> itemRef = stage.getPlanItem().stream()
-              .filter(pi -> collectExitSentries(pi).contains(src))
-              .findFirst()
-              .map(TPlanItem::getDefinitionRef);
-          if (itemRef.isPresent() && itemRef.get() instanceof TPlanItemDefinition) {
-            scopedActions.stream()
-                .filter(act -> act.getId().equals(itemWithSentry.getId()))
-                .findFirst()
-                .ifPresent(act -> act.addRelatedAction(
-                    new PlanDefinitionActionRelatedActionComponent()
-                        .setRelationship(ActionRelationshipType.AFTER)
-                        .setActionId(((TPlanItemDefinition) itemRef.get()).getId())));
-          }
+          processPlanItemOnPartWithSentrySource(itemWithSentry, scopedActions, stage,
+              (TSentry) sourceRef);
         } else if (sourceRef instanceof TPlanItem) {
-          TPlanItem sourceItem = (TPlanItem) sourceRef;
-          Object sourceDef = sourceItem.getDefinitionRef();
-
-          Optional<PlanDefinitionActionComponent> whiteActOpt = scopedActions.stream()
-              .filter(act -> act.getId().equals(itemWithSentry.getId()))
-              .findFirst();
-          PlanDefinitionActionComponent whiteAct = whiteActOpt.orElseThrow();
-
-          if (sourceDef instanceof TPlanItem) {
-            String refId = ((TPlanItem) sourceDef).getId();
-            // act resulting from the mapping of the item with the while diamond sentry
-            whiteAct.addRelatedAction(
-                new PlanDefinitionActionRelatedActionComponent()
-                    .setRelationship(ActionRelationshipType.AFTER)
-                    .setActionId(refId));
-          } else if (sourceDef instanceof TEventListener) {
-            TEventListener eventListener = (TEventListener) sourceDef;
-            whiteAct.addTriggerDefinition()
-                .setEventName(eventListener.getName())
-                .setType(TriggerType.NAMEDEVENT);
-          } else if (sourceDef instanceof TStage) {
-            TStage srcStage = (TStage) sourceDef;
-            PlanDefinitionActionComponent blackAct = scopedActions.stream()
-                .filter(act -> act.getId().equals(srcStage.getId()))
-                .findFirst().orElseThrow();
-            whiteAct.addRelatedAction(
-                new PlanDefinitionActionRelatedActionComponent()
-                    .setRelationship(ActionRelationshipType.AFTER)
-                    .setActionId(blackAct.getId()));
-          } else if (sourceDef instanceof TTask) {
-            TTask srcTask = (TTask) sourceDef;
-            PlanDefinitionActionComponent blackAct = scopedActions.stream()
-                .filter(act -> act.getId().equals(srcTask.getId()))
-                .findFirst().orElseThrow();
-            whiteAct.addRelatedAction(
-                new PlanDefinitionActionRelatedActionComponent()
-                    .setRelationship(ActionRelationshipType.AFTER)
-                    .setActionId(blackAct.getId()));
-          } else if(sourceDef instanceof TMilestone) {
-            TMilestone milestone = (TMilestone) sourceDef;
-            // expect one annotation - this will break defensively if the milestone is not annotated
-            Collection<Term> annos = getSemanticAnnotation(milestone.getExtensionElements());
-            if (annos.isEmpty()) {
-              throw new IllegalStateException("Defensive!");
-            }
-            // model milestone as a state + enabler
-            Term anno = annos.iterator().next();
-            whiteAct.addCondition()
-                .setKind(ActionConditionKind.START)
-                .setLanguage(FHIRPath_STU1.getReferentId().toString())
-                .setExpression("Resource.where(tag = '" + anno.getTag() + "').exists()");
-
-            // model milestone as a trigger
-            DataRequirement dataRequirement = toSemanticInput(anno);
-            whiteAct.addTriggerDefinition()
-                .setType(TriggerType.DATAACCESSED)
-                .setEventData(dataRequirement);
-          } else {
-            throw new UnsupportedOperationException("Defensive!");
-          }
+          processPlanItemOnPartWithPlanItemSource(itemWithSentry, scopedActions, stage,
+              (TPlanItem) sourceRef);
         } else {
           throw new UnsupportedOperationException("Defensive!");
         }
-      } if (onPart instanceof TCaseFileItemOnPart) {
-        TCaseFileItemOnPart caseFileItemOnPart = (TCaseFileItemOnPart) onPart;
-        Object sourceRef = caseFileItemOnPart.getSourceRef();
-        if (sourceRef instanceof TCaseFileItem) {
-          TCaseFileItem srcCFI = (TCaseFileItem) sourceRef;
-          PlanDefinitionActionComponent whiteAct = scopedActions.stream()
-              .filter(act -> act.getId().equals(itemWithSentry.getId()))
-              .findFirst().orElseThrow();
-          whiteAct.addTriggerDefinition()
-              .setType(TriggerType.DATAMODIFIED)
-              .setEventName(srcCFI.getName());
-        } else {
-          throw new UnsupportedOperationException("Defensive!");
+      } else if (onPart instanceof TCaseFileItemOnPart) {
+        // CFI are likely AND-ed
+        List<TCaseFileItemOnPart> cfiOnParts = sentry.getOnPart().stream()
+            .map(JAXBElement::getValue)
+            .flatMap(StreamUtil.filterAs(TCaseFileItemOnPart.class))
+            .collect(Collectors.toList());
+        boolean allCFISources = cfiOnParts.stream()
+            .map(TCaseFileItemOnPart::getSourceRef)
+            .allMatch(TCaseFileItem.class::isInstance);
+        if (!allCFISources) {
+          throw new UnsupportedOperationException(
+              "Defensive: Unable to handle Sentry with multiple CFI sources not connected to actual CFIs!");
         }
-      } else if (onPart instanceof TPlanItemOnPart) {
-        TPlanItemOnPart planItemOnPart = (TPlanItemOnPart) onPart;
-        if (planItemOnPart.getSourceRef() instanceof TPlanItem) {
-          TPlanItem sourceRef = (TPlanItem) planItemOnPart.getSourceRef();
-          Object sourceDef = sourceRef.getDefinitionRef();
-          if (sourceDef instanceof TEventListener) {
-            TEventListener eventListener = (TEventListener) sourceDef;
-            PlanDefinitionActionComponent whiteAct = scopedActions.stream()
-                .filter(act -> act.getId().equals(itemWithSentry.getId()))
-                .findFirst().orElseThrow();
-            whiteAct.addTriggerDefinition()
-                .setType(TriggerType.NAMEDEVENT)
-                .setEventName(eventListener.getName());
-          } else {
-            //TODO FIXME this gets called for a combination already visited - the IF/THEN may be overlapping
-            //throw new UnsupportedOperationException("Defensive!");
-          }
-        } else if (planItemOnPart.getSourceRef() instanceof TSentry) {
-          // TODO Black diamond - White diamond
-        } else {
-          throw new UnsupportedOperationException("Defensive!");
-        }
+        processCFIOnPartWithCFISource(
+            itemWithSentry, scopedActions, stage, cfiOnParts);
       } else {
         throw new UnsupportedOperationException("Defensive!");
       }
     }
+  }
+
+  private void processCFIOnPartWithCFISource(TPlanItemDefinition itemWithSentry,
+      List<PlanDefinitionActionComponent> scopedActions, TStage stage,
+      List<TCaseFileItemOnPart> sourceRef) {
+    PlanDefinitionActionComponent whiteAct = scopedActions.stream()
+        .filter(act -> act.getId().equals(itemWithSentry.getId()))
+        .findFirst().orElseThrow();
+
+    DataRequirement dataReq = new DataRequirement();
+    sourceRef.stream()
+        .map(TCaseFileItemOnPart::getSourceRef)
+        .flatMap(StreamUtil.filterAs(TCaseFileItem.class))
+        .flatMap(cfi -> getSemanticAnnotation(cfi.getExtensionElements()).stream())
+        .map(this::toCode)
+        .forEach(cd -> dataReq.addCodeFilter().addValueCodeableConcept(cd));
+
+    whiteAct.addTriggerDefinition()
+        .setType(TriggerType.DATAMODIFIED)
+        .setEventName("on " + sourceRef.stream().map(TOnPart::getName).collect(Collectors.joining(", "))  )
+        .setEventData(dataReq);
+  }
+
+  private void processPlanItemOnPartWithPlanItemSource(TPlanItemDefinition itemWithSentry,
+      List<PlanDefinitionActionComponent> scopedActions, TStage stage, TPlanItem sourceRef) {
+    TPlanItem sourceItem = sourceRef;
+    Object sourceDef = sourceItem.getDefinitionRef();
+
+    Optional<PlanDefinitionActionComponent> whiteActOpt = scopedActions.stream()
+        .filter(act -> act.getId().equals(itemWithSentry.getId()))
+        .findFirst();
+    PlanDefinitionActionComponent whiteAct = whiteActOpt.orElseThrow();
+
+    if (sourceDef instanceof TPlanItem) {
+      String refId = ((TPlanItem) sourceDef).getId();
+      // act resulting from the mapping of the item with the while diamond sentry
+      whiteAct.addRelatedAction(
+          new PlanDefinitionActionRelatedActionComponent()
+              .setRelationship(ActionRelationshipType.AFTER)
+              .setActionId(refId));
+    } else if (sourceDef instanceof TEventListener) {
+      TEventListener eventListener = (TEventListener) sourceDef;
+      whiteAct.addTriggerDefinition()
+          .setEventName(eventListener.getName())
+          .setType(TriggerType.NAMEDEVENT);
+    } else if (sourceDef instanceof TStage) {
+      TStage srcStage = (TStage) sourceDef;
+      PlanDefinitionActionComponent blackAct = scopedActions.stream()
+          .filter(act -> act.getId().equals(srcStage.getId()))
+          .findFirst().orElseThrow();
+      whiteAct.addRelatedAction(
+          new PlanDefinitionActionRelatedActionComponent()
+              .setRelationship(ActionRelationshipType.AFTER)
+              .setActionId(blackAct.getId()));
+    } else if (sourceDef instanceof TTask) {
+      TTask srcTask = (TTask) sourceDef;
+      PlanDefinitionActionComponent blackAct = scopedActions.stream()
+          .filter(act -> act.getId().equals(srcTask.getId()))
+          .findFirst().orElseThrow();
+      whiteAct.addRelatedAction(
+          new PlanDefinitionActionRelatedActionComponent()
+              .setRelationship(ActionRelationshipType.AFTER)
+              .setActionId(blackAct.getId()));
+    } else if (sourceDef instanceof TMilestone) {
+      TMilestone milestone = (TMilestone) sourceDef;
+      // expect one annotation - this will break defensively if the milestone is not annotated
+      Collection<Term> annos = getSemanticAnnotation(milestone.getExtensionElements());
+      if (annos.isEmpty()) {
+        throw new IllegalStateException("Defensive!");
+      }
+      // model milestone as a state + enabler
+      Term anno = annos.iterator().next();
+      whiteAct.addCondition()
+          .setKind(ActionConditionKind.START)
+          .setLanguage(FHIRPath_STU1.getReferentId().toString())
+          .setExpression("Resource.where(tag = '" + anno.getTag() + "').exists()");
+
+      // model milestone as a trigger
+      DataRequirement dataRequirement = toSemanticInput(anno);
+      whiteAct.addTriggerDefinition()
+          .setType(TriggerType.DATAACCESSED)
+          .setEventData(dataRequirement);
+    } else {
+      throw new UnsupportedOperationException("Defensive!");
+    }
+  }
+
+  private void processPlanItemOnPartWithSentrySource(
+      TPlanItemDefinition itemWithSentry,
+      List<PlanDefinitionActionComponent> scopedActions,
+      TStage stage,
+      TSentry sourceRef) {
+    TSentry src = sourceRef;
+    Optional<Object> itemRef = stage.getPlanItem().stream()
+        .filter(pi -> collectExitSentries(pi).contains(src))
+        .findFirst()
+        .map(TPlanItem::getDefinitionRef);
+    if (itemRef.isPresent() && itemRef.get() instanceof TPlanItemDefinition) {
+      scopedActions.stream()
+          .filter(act -> act.getId().equals(itemWithSentry.getId()))
+          .findFirst()
+          .ifPresent(act -> act.addRelatedAction(
+              new PlanDefinitionActionRelatedActionComponent()
+                  .setRelationship(ActionRelationshipType.AFTER)
+                  .setActionId(((TPlanItemDefinition) itemRef.get()).getId())));
+    }
+
   }
 
 
@@ -523,7 +547,7 @@ public class CmmnToPlanDef {
             cd.getCoding().stream().anyMatch(d ->
                 c.getCoding().stream().anyMatch(e ->
                     e.getCode().equals(d.getCode()))));
-    if (! hasCode) {
+    if (!hasCode) {
       planAction.addCode(cd);
     }
   }
@@ -560,8 +584,10 @@ public class CmmnToPlanDef {
     addAnnotations(humanTask.getExtensionElements(), planAction);
 
     planAction.setType(new Coding()
-            .setSystem("TODO")
-            .setCode("HumanTask")
+        .setSystem(
+            KnowledgeRepresentationLanguageSerializationSeries.CMMN_1_1_XML_Syntax.getReferentId()
+                .toString())
+        .setCode("HumanTask")
     );
     return planAction;
   }
@@ -576,7 +602,9 @@ public class CmmnToPlanDef {
     addAnnotations(humanTask.getExtensionElements(), planAction);
 
     planAction.setType(new Coding()
-        .setSystem("TODO")
+        .setSystem(
+            KnowledgeRepresentationLanguageSerializationSeries.CMMN_1_1_XML_Syntax.getReferentId()
+                .toString())
         .setCode("HumanTask")
     );
     return planAction;
@@ -589,10 +617,12 @@ public class CmmnToPlanDef {
     PlanDefinition.PlanDefinitionActionComponent planAction
         = processTask(task, caseModel, planItem);
 
-    addAnnotations(task.getExtensionElements(),planAction);
+    addAnnotations(task.getExtensionElements(), planAction);
 
     planAction.setType(new Coding()
-        .setSystem("TODO")
+        .setSystem(
+            KnowledgeRepresentationLanguageSerializationSeries.CMMN_1_1_XML_Syntax.getReferentId()
+                .toString())
         .setCode("Generic Task")
     );
     return planAction;
@@ -617,10 +647,12 @@ public class CmmnToPlanDef {
 
     addDefinition(planAction, tDecisionTask, caseModel);
 
-    addAnnotations(tDecisionTask.getExtensionElements(),planAction);
+    addAnnotations(tDecisionTask.getExtensionElements(), planAction);
 
     planAction.setType(new Coding()
-        .setSystem("TODO")
+        .setSystem(
+            KnowledgeRepresentationLanguageSerializationSeries.CMMN_1_1_XML_Syntax.getReferentId()
+                .toString())
         .setCode("DecisionTask")
     );
     return planAction;
@@ -665,9 +697,11 @@ public class CmmnToPlanDef {
       PlanDefinitionActionComponent planAction,
       TAssociation assoc) {
     if (assoc.getTargetRef() instanceof TCaseFileItem) {
-      processCaseFileItem((TCaseFileItem) assoc.getTargetRef(), planAction, caseModel, assoc.getSourceRef());
+      processCaseFileItem((TCaseFileItem) assoc.getTargetRef(), planAction, caseModel,
+          assoc.getSourceRef());
     } else if (assoc.getSourceRef() instanceof TCaseFileItem) {
-      processCaseFileItem((TCaseFileItem) assoc.getSourceRef(), planAction, caseModel, assoc.getTargetRef());
+      processCaseFileItem((TCaseFileItem) assoc.getSourceRef(), planAction, caseModel,
+          assoc.getTargetRef());
     }
   }
 
@@ -688,8 +722,9 @@ public class CmmnToPlanDef {
                 .setReference(dec.getExternalRef().getNamespaceURI())
                 .setDisplay(dec.getName())
                 .setIdentifier(new Identifier()
-                    .setType(new CodeableConcept().setText("TODO - Knowledge Artifact Fragment Identifier"))
-                    .setValue(dec.getExternalRef().getLocalPart().replace("_","")))
+                    .setType(new CodeableConcept()
+                        .setText("TODO - Knowledge Artifact Fragment Identifier"))
+                    .setValue(dec.getExternalRef().getLocalPart().replace("_", "")))
         );
       }
     });
@@ -738,7 +773,6 @@ public class CmmnToPlanDef {
                 tDecisionTask.getName() +
                 " without an associated Decision Model ")));
   }
-
 
 
   private static Collection<Term> getTypeCode(TExtensionElements extensionElements) {
