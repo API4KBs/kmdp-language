@@ -27,6 +27,12 @@ public final class FHIRPlanDefinitionUtils {
         .addCoding(toCoding(trm));
   }
 
+  public static CodeableConcept toCodeableConcept(List<Term> trm) {
+    CodeableConcept cc = new CodeableConcept();
+    trm.forEach(t -> cc.addCoding(toCoding(t)));
+    return cc;
+  }
+
   public static Coding toCoding(Term trm) {
     return new Coding()
         .setCode(trm.getTag())

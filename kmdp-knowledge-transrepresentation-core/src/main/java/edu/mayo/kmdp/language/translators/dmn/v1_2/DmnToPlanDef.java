@@ -1,26 +1,27 @@
 /**
  * Copyright © 2018 Mayo Clinic (RSTKNOWLEDGEMGMT@mayo.edu)
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package edu.mayo.kmdp.language.translators.dmn.v1_2;
 
+import static edu.mayo.kmdp.language.common.fhir.stu3.FHIRPlanDefinitionUtils.toCodeableConcept;
 import static edu.mayo.kmdp.util.NameUtils.nameToIdentifier;
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.Captures;
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.Defines;
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.Has_Primary_Subject;
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.In_Terms_Of;
+import static org.omg.spec.api4kp._20200801.id.SemanticIdentifier.newVersionId;
 
+import edu.mayo.kmdp.language.common.fhir.stu3.FHIRPlanDefinitionUtils;
 import edu.mayo.kmdp.util.NameUtils.IdentifierType;
 import edu.mayo.kmdp.util.StreamUtil;
 import edu.mayo.kmdp.util.URIUtil;
@@ -43,7 +44,9 @@ import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DataRequirement;
 import org.hl7.fhir.dstu3.model.DataRequirement.DataRequirementCodeFilterComponent;
+import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Identifier;
+import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.PlanDefinition.ActionRelationshipType;
 import org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionComponent;
@@ -51,6 +54,7 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.omg.spec.api4kp._20200801.id.ConceptIdentifier;
 import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
+import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
 import org.omg.spec.api4kp._20200801.id.Term;
 import org.omg.spec.api4kp._20200801.surrogate.Annotation;
 import org.omg.spec.api4kp._20200801.taxonomy.knowledgeassettype.KnowledgeAssetTypeSeries;
@@ -103,7 +107,7 @@ public class DmnToPlanDef {
 
     Map<String, PlanDefinitionActionComponent> mappedDecisions = new HashMap<>();
     dmnDecisions.stream()
-        .map(decision -> processDecision(cpm::addAction, decisionModel, decision))
+        .map(decision -> processDecision(cpm, cpm::addAction, decisionModel, decision))
         .forEach(act -> mappedDecisions.putIfAbsent(act.getId(), act));
 
     Map<String, PlanDefinitionActionComponent> mappedDecisionServices = new HashMap<>();
@@ -129,11 +133,11 @@ public class DmnToPlanDef {
 
   private boolean isDecisionServiceScoped(TDecision dec, TDecisionService ds) {
     boolean isOutput = ds.getOutputDecision().stream()
-        .anyMatch(ref -> joins(dec.getId(),ref.getHref()));
+        .anyMatch(ref -> joins(dec.getId(), ref.getHref()));
     boolean isEncapsulated = ds.getEncapsulatedDecision().stream()
-        .anyMatch(ref -> joins(dec.getId(),ref.getHref()));
+        .anyMatch(ref -> joins(dec.getId(), ref.getHref()));
     boolean isInput = ds.getInputDecision().stream()
-        .anyMatch(ref -> joins(dec.getId(),ref.getHref()));
+        .anyMatch(ref -> joins(dec.getId(), ref.getHref()));
     return isOutput || isEncapsulated || isInput;
   }
 
@@ -210,17 +214,18 @@ public class DmnToPlanDef {
 
   private void mapIdentity(PlanDefinition cpm, URI assetId, TDefinitions decisionModel) {
     Identifier fhirAssetId = new Identifier()
-        .setType(toCode(SemanticAnnotationRelTypeSeries.Is_Identified_By))
+        .setType(toCodeableConcept(SemanticAnnotationRelTypeSeries.Is_Identified_By))
         .setValue(assetId.toString());
 
     cpm.setIdentifier(Collections.singletonList(fhirAssetId))
         .setVersion("TODO");
 
-    cpm.setType(toCode(KnowledgeAssetTypeSeries.Decision_Model));
+    cpm.setType(toCodeableConcept(KnowledgeAssetTypeSeries.Decision_Model));
     cpm.setId("#" + decisionModel.getNamespace());
   }
 
   private PlanDefinitionActionComponent processDecision(
+      PlanDefinition cpm,
       Consumer<PlanDefinitionActionComponent> cpmScope,
       TDefinitions decisionModel, TDecision decision) {
     PlanDefinitionActionComponent decisionAction = new PlanDefinitionActionComponent();
@@ -235,11 +240,11 @@ public class DmnToPlanDef {
     );
 
     getSemanticAnnotation(decision.getExtensionElements()).stream()
-        .map(this::toCode)
+        .map(FHIRPlanDefinitionUtils::toCodeableConcept)
         .forEach(decisionAction::addCode);
 
     decision.getAuthorityRequirement()
-        .forEach(know -> mapKnowledgeSource(know, decisionAction, decisionModel));
+        .forEach(know -> mapKnowledgeSource(know, cpm, decisionAction, decisionModel));
 
     decision.getInformationRequirement().stream()
         .filter(info -> info.getRequiredInput() != null)
@@ -267,7 +272,7 @@ public class DmnToPlanDef {
     );
 
     getSemanticAnnotation(decisionService.getExtensionElements()).stream()
-        .map(this::toCode)
+        .map(FHIRPlanDefinitionUtils::toCodeableConcept)
         .filter(cd -> isKMConcept(cd))
         .forEach(serviceAction::addCode);
 
@@ -277,7 +282,7 @@ public class DmnToPlanDef {
               .orElseThrow();
           mapOutput(outputDecision, serviceAction);
           outputDecision.getAuthorityRequirement().forEach(
-              ks -> mapKnowledgeSource(ks, serviceAction, decisionModel)
+              ks -> mapKnowledgeSource(ks, cpm, serviceAction, decisionModel)
           );
         }
     );
@@ -302,7 +307,7 @@ public class DmnToPlanDef {
 //    dataRequirement.setProfile(Collections.singletonList(new UriType("http://todo.me/datashape/profile123")));
 
     getSemanticAnnotation(input.getExtensionElements()).stream()
-        .map(this::toCode)
+        .map(FHIRPlanDefinitionUtils::toCodeableConcept)
         .forEach(codeFilters::addValueCodeableConcept);
     return dataRequirement;
   }
@@ -314,11 +319,11 @@ public class DmnToPlanDef {
     dataRequirement.addCodeFilter(codeFilters);
 
     getSemanticAnnotation(output.getExtensionElements()).stream()
-        .map(this::toCode)
+        .map(FHIRPlanDefinitionUtils::toCodeableConcept)
         .filter(cd -> !isKMConcept(cd))
         .forEach(codeFilters::addValueCodeableConcept);
     getSemanticAnnotation(output.getExtensionElements()).stream()
-        .map(this::toCode)
+        .map(FHIRPlanDefinitionUtils::toCodeableConcept)
         .filter(cd -> isKMConcept(cd))
         .forEach(serviceAction::addCode);
 
@@ -341,11 +346,9 @@ public class DmnToPlanDef {
     return decisionModel.getDrgElement().stream()
         .map(JAXBElement::getValue)
         .flatMap(StreamUtil.filterAs(TInputData.class))
-        // TODO Fix this ID mess....
         .filter(in -> joins(in.getId(), requiredInput.getHref()))
         .findFirst();
   }
-
 
 
   private Optional<TDecision> findDecision(TDMNElementReference requiredDecision,
@@ -369,36 +372,65 @@ public class DmnToPlanDef {
   }
 
   private void mapKnowledgeSource(TAuthorityRequirement know,
-      PlanDefinitionActionComponent decisionAction, TDefinitions decisionModel) {
+      PlanDefinition cpm, PlanDefinitionActionComponent decisionAction,
+      TDefinitions decisionModel) {
     findKnowledgeSource(know.getRequiredAuthority(), decisionModel)
         .ifPresent(knowledgeSource ->
-            decisionAction.addDocumentation(
-                new RelatedArtifact()
-                    .setUrl(knowledgeSource.getLocationURI())
-                    .setDisplay(knowledgeSource.getName())
-                    .setDocument(new Attachment()
-                        .setTitle(knowledgeSource.getName())
-                        .setUrl(knowledgeSource.getLocationURI())
-                        .setContentType(knowledgeSource.getType()))
-            ));
+            mapKnowledgeSource(knowledgeSource, cpm, decisionAction));
+  }
+
+  private void mapKnowledgeSource(TKnowledgeSource knowledgeSource,
+      PlanDefinition cpm, PlanDefinitionActionComponent decisionAction) {
+    if (Util.isEmpty(knowledgeSource.getLocationURI())) {
+      return;
+    }
+
+    RelatedArtifact relatedArtifact = new RelatedArtifact()
+        .setUrl(knowledgeSource.getLocationURI())
+        .setDisplay(knowledgeSource.getName())
+        .setDocument(new Attachment()
+            .setTitle(knowledgeSource.getName())
+            .setUrl(knowledgeSource.getLocationURI())
+            .setContentType(knowledgeSource.getType()));
+
+    decisionAction.addDocumentation(relatedArtifact);
+
+    if (knowledgeSource.getExtensionElements() != null &&
+        knowledgeSource.getExtensionElements().getAny() != null) {
+      List<Term> types = knowledgeSource.getExtensionElements().getAny().stream()
+          .flatMap(StreamUtil.filterAs(Annotation.class))
+          .map(Annotation::getRef)
+          .collect(Collectors.toList());
+
+      if (! types.isEmpty()) {
+        CodeableConcept typesCC = toCodeableConcept(types);
+        String id = asId(knowledgeSource.getId());
+        ResourceIdentifier knowAssetId = newVersionId(URI.create(knowledgeSource.getLocationURI()));
+        Library lib = (Library) new Library()
+            .addIdentifier(new Identifier()
+                .setSystem(knowAssetId.getNamespaceUri().toString())
+                .setValue(knowAssetId.getTag() + ":" + knowAssetId.getVersionTag()))
+            .setType(typesCC)
+            .setId(id);
+
+        relatedArtifact.setResource(new Reference().setReference(idToRef(id)));
+        relatedArtifact.addExtension(new Extension()
+            .setUrl("http://kmd.mayo.edu/fhirExtensions/knowledgeAssetType")
+            .setValue(typesCC));
+
+        cpm.addContained(lib);
+      }
+    }
+
   }
 
   private void mapSubject(PlanDefinition cpm, TDefinitions tCase) {
     this.findSubject(tCase.getExtensionElements())
-        .map(this::toCode)
+        .map(FHIRPlanDefinitionUtils::toCodeableConcept)
         .map(Collections::singletonList)
         .ifPresent(cpm::setTopic);
   }
 
-  private CodeableConcept toCode(Term cid) {
-    return new CodeableConcept()
-        .setCoding(Collections.singletonList(
-            new Coding()
-                .setCode(cid.getUuid().toString())
-                .setDisplay(cid.getLabel())
-                .setSystem(cid.getNamespaceUri().toString())
-                .setVersion(cid.getVersionTag())));
-  }
 
   private void mapName(PlanDefinition cpm, TDefinitions tCase) {
     cpm.setName(nameToIdentifier(tCase.getName(), IdentifierType.CLASS));
