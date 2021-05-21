@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -54,7 +55,6 @@ import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.omg.spec.api4kp._20200801.id.ConceptIdentifier;
 import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
-import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
 import org.omg.spec.api4kp._20200801.id.Term;
 import org.omg.spec.api4kp._20200801.surrogate.Annotation;
 import org.omg.spec.api4kp._20200801.taxonomy.knowledgeassettype.KnowledgeAssetTypeSeries;
@@ -67,7 +67,9 @@ import org.omg.spec.dmn._20180521.model.TDRGElement;
 import org.omg.spec.dmn._20180521.model.TDecision;
 import org.omg.spec.dmn._20180521.model.TDecisionService;
 import org.omg.spec.dmn._20180521.model.TDefinitions;
+import org.omg.spec.dmn._20180521.model.TInformationRequirement;
 import org.omg.spec.dmn._20180521.model.TInputData;
+import org.omg.spec.dmn._20180521.model.TKnowledgeRequirement;
 import org.omg.spec.dmn._20180521.model.TKnowledgeSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,18 +118,26 @@ public class DmnToPlanDef {
         .forEach(act -> mappedDecisionServices.putIfAbsent(act.getId(), act));
 
     dmnDecisions
-        .forEach(decision -> processDecisionDependencies(
+        .forEach(decision -> processDecisionToDecisionDependencies(
             cpm,
             mappedDecisions,
             decision,
             decisionModel));
 
     dmnDecisions
-        .forEach(decision -> processDecisionServiceDependencies(
+        .forEach(decision -> processDecisionToDecisionServiceDependencies(
             cpm,
             mappedDecisions,
             mappedDecisionServices,
             decision,
+            decisionModel));
+
+    dmnDecisionServices
+        .forEach(ds -> processDecisionServiceToDecisionServiceDependencies(
+            cpm,
+            mappedDecisions,
+            mappedDecisionServices,
+            ds,
             decisionModel));
   }
 
@@ -141,7 +151,7 @@ public class DmnToPlanDef {
     return isOutput || isEncapsulated || isInput;
   }
 
-  private void processDecisionDependencies(
+  private void processDecisionToDecisionDependencies(
       PlanDefinition cpm,
       Map<String, PlanDefinitionActionComponent> mappedDecisions,
       TDecision dmnDecision,
@@ -155,7 +165,7 @@ public class DmnToPlanDef {
         .map(info -> {
           URI ref = URI.create(info.getRequiredDecision().getHref());
           if (!Util.isEmpty(ref.getPath())) {
-            cpm.addAction((PlanDefinitionActionComponent) new PlanDefinitionActionComponent()
+            PlanDefinitionActionComponent pdact = (PlanDefinitionActionComponent) new PlanDefinitionActionComponent()
                 .setDefinition(
                     new Reference()
                         .setReference(URIUtil.normalizeURIString(ref))
@@ -164,18 +174,17 @@ public class DmnToPlanDef {
                             .setType(new CodeableConcept()
                                 .setText("TODO - Knowledge Artifact Fragment Identifier"))
                             .setValue(asId(ref.getFragment())))
-                ).setId(asId(ref.getFragment()))
-            );
+                ).setId(asId(ref.getFragment()));
+            addToScope(pdact, cpm.getAction(), cpm::addAction);
           }
           return ref.getFragment();
         })
         .forEach(tgtActionId -> srcAction.addRelatedAction()
             .setRelationship(ActionRelationshipType.AFTER)
             .setActionId(idToRef(tgtActionId)));
-
   }
 
-  private void processDecisionServiceDependencies(
+  private void processDecisionToDecisionServiceDependencies(
       PlanDefinition cpm,
       Map<String, PlanDefinitionActionComponent> mappedDecisions,
       Map<String, PlanDefinitionActionComponent> mappedDecisionServices,
@@ -185,25 +194,84 @@ public class DmnToPlanDef {
     PlanDefinitionActionComponent srcAction =
         mappedDecisions.get(asId(dmnDecision.getId()));
 
-    List<PlanDefinitionActionComponent> serviceAction = dmnDecision.getKnowledgeRequirement()
-        .stream()
-        .filter(know -> know.getRequiredKnowledge() != null)
-        .map(info -> mappedDecisionServices.get(
-            refToId(info.getRequiredKnowledge().getHref())))
-        .collect(Collectors.toList());
-
     List<PlanDefinitionActionComponent> serviceClientAction = dmnDecision.getKnowledgeRequirement()
         .stream()
         .filter(know -> know.getRequiredKnowledge() != null)
-        .flatMap(know -> lookupBKM(decisionModel, know.getRequiredKnowledge()))
-        .flatMap(bkm -> bkm.getKnowledgeRequirement().stream())
-        .filter(know -> know.getRequiredKnowledge() != null)
-        .map(info -> mappedDecisionServices.get(
-            refToId(info.getRequiredKnowledge().getHref())))
+        .flatMap(ref -> lookupAsDecisionService(ref, mappedDecisionServices)
+            .or(() -> lookupViaBKM(decisionModel, ref, mappedDecisionServices))
+            .stream())
         .collect(Collectors.toList());
 
-    serviceAction.forEach(srcAction::addAction);
-    serviceClientAction.forEach(srcAction::addAction);
+    serviceClientAction.forEach(x -> addToScope(x, srcAction.getAction(), srcAction::addAction));
+  }
+
+  private void processDecisionServiceToDecisionServiceDependencies(
+      PlanDefinition cpm,
+      Map<String, PlanDefinitionActionComponent> mappedDecisions,
+      Map<String, PlanDefinitionActionComponent> mappedDecisionServices,
+      TDecisionService dmnDecisionService,
+      TDefinitions decisionModel) {
+
+    PlanDefinitionActionComponent srcAction =
+        mappedDecisionServices.get(asId(dmnDecisionService.getId()));
+
+    List<TDecision> serviceDecisions = dmnDecisionService.getOutputDecision().stream()
+        .map(out -> streamDecisions(decisionModel)
+            .filter(dec -> joins(dec.getId(), out.getHref()))
+            .findFirst().orElseThrow())
+        .flatMap(dec -> closeDecisionDependencies(dec, decisionModel))
+        .distinct()
+        .collect(Collectors.toList());
+    serviceDecisions
+        .forEach(subDec -> {
+          subDec.getKnowledgeRequirement().stream()
+              .filter(know -> know.getRequiredKnowledge() != null)
+              .flatMap(ref -> lookupAsDecisionService(ref, mappedDecisionServices)
+                  .or(() -> lookupViaBKM(decisionModel, ref, mappedDecisionServices))
+                  .stream())
+              .forEach(subAct -> {
+                addToScope(subAct, srcAction.getAction(), srcAction::addAction);
+                // remap the children's outputs as parent's inputs
+                subAct.getOutput().forEach(out -> srcAction.getInput().add(out));
+              });
+        });
+  }
+
+  private Stream<TDecision> closeDecisionDependencies(
+      TDecision dec, TDefinitions decisionModel) {
+    return Stream.concat(
+        Stream.of(dec),
+        getSubDecisions(dec, decisionModel)
+            .flatMap(d -> closeDecisionDependencies(d, decisionModel)));
+  }
+
+  private Stream<TDecision> getSubDecisions(
+      TDecision dec, TDefinitions decisionModel) {
+    return dec.getInformationRequirement().stream()
+        .map(TInformationRequirement::getRequiredDecision) // exclude inputs
+        .filter(Objects::nonNull)
+        .map(ref -> streamDecisions(decisionModel)
+            .filter(d -> joins(d.getId(), ref.getHref()))
+            .findFirst().orElseThrow());
+  }
+
+  private Optional<PlanDefinitionActionComponent> lookupViaBKM(
+      TDefinitions decisionModel,
+      TKnowledgeRequirement ref,
+      Map<String, PlanDefinitionActionComponent> mappedDecisionServices) {
+    return lookupBKM(decisionModel, ref.getRequiredKnowledge())
+        .flatMap(bkm -> bkm.getKnowledgeRequirement().stream())
+        .filter(know -> know.getRequiredKnowledge() != null)
+        .map(TKnowledgeRequirement::getRequiredKnowledge)
+        .map(info -> mappedDecisionServices.get(
+            refToId(info.getHref())))
+        .findAny();
+  }
+
+  private Optional<PlanDefinitionActionComponent> lookupAsDecisionService(TKnowledgeRequirement ref,
+      Map<String, PlanDefinitionActionComponent> mappedDecisionServices) {
+    return Optional
+        .ofNullable(mappedDecisionServices.get(refToId(ref.getRequiredKnowledge().getHref())));
   }
 
   private Stream<TBusinessKnowledgeModel> lookupBKM(TDefinitions decisionModel,
@@ -253,7 +321,7 @@ public class DmnToPlanDef {
         .map(this::mapInput)
         .forEach(decisionAction::addInput);
 
-    cpmScope.accept(decisionAction);
+    addToScope(decisionAction, cpm.getAction(), cpmScope);
     return decisionAction;
   }
 
@@ -402,7 +470,7 @@ public class DmnToPlanDef {
           .map(Annotation::getRef)
           .collect(Collectors.toList());
 
-      if (! types.isEmpty()) {
+      if (!types.isEmpty()) {
         CodeableConcept typesCC = toCodeableConcept(types);
         String id = asId(knowledgeSource.getId());
         ResourceIdentifier knowAssetId = newVersionId(URI.create(knowledgeSource.getLocationURI()));
@@ -492,6 +560,18 @@ public class DmnToPlanDef {
     return Optional.empty();
   }
 
+  private void addToScope(PlanDefinitionActionComponent action,
+      List<PlanDefinitionActionComponent> context,
+      Consumer<PlanDefinitionActionComponent> scope) {
+    boolean contained = context.stream()
+        .anyMatch(act -> act.getId().equals(action.getId()));
+    if (contained) {
+      System.out.println("Double adding of " + action.getTitle() + " | " + action.getLabel());
+    } else {
+      System.out.println("Initial adding of " + action.getTitle() + " | " + action.getLabel());
+    }
+    scope.accept(action);
+  }
 
   private Stream<TDecision> streamDecisions(TDefinitions dmn) {
     return streamDRG(dmn, TDecision.class);
