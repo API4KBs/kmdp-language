@@ -2,7 +2,10 @@ package edu.mayo.kmdp.language.validators.fhir.stu3;
 
 import static edu.mayo.kmdp.language.common.fhir.stu3.FHIRPlanDefinitionUtils.getNestedPlanDefs;
 import static edu.mayo.kmdp.language.common.fhir.stu3.FHIRPlanDefinitionUtils.getSubActions;
+import static edu.mayo.kmdp.language.common.fhir.stu3.FHIRPlanDefinitionUtils.joins;
 import static edu.mayo.kmdp.language.common.fhir.stu3.FHIRPlanDefinitionUtils.toDisplayTerms;
+import static edu.mayo.kmdp.util.Util.isEmpty;
+import static edu.mayo.kmdp.util.Util.isNotEmpty;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
 import static org.omg.spec.api4kp._20200801.id.SemanticIdentifier.newVersionId;
 import static org.omg.spec.api4kp._20200801.taxonomy.clinicalknowledgeassettype.ClinicalKnowledgeAssetTypeSeries.Cognitive_Care_Process_Model;
@@ -15,13 +18,18 @@ import edu.mayo.kmdp.util.Util;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Named;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
+import org.hl7.fhir.dstu3.model.DataRequirement;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionComponent;
+import org.hl7.fhir.dstu3.model.Reference;
+import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.omg.spec.api4kp._20200801.Answer;
 import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
 import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
@@ -77,20 +85,22 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
   protected Answer<Void> validate(PlanDefinition rootPlanDef,
       KnowledgeCarrier carrier) {
     return Stream.of(
-            validateId(rootPlanDef, carrier),
-            validateNameTitle(rootPlanDef, carrier),
-            validateType(rootPlanDef, carrier),
-            validateActionTypes(rootPlanDef, carrier)
-//        ,
-//            validateDefinitionRefs(rootPlanDef, carrier),
-//            validateRelatedAction(rootPlanDef, carrier),
-//            validateDocumentation(rootPlanDef, carrier),
-//            validateInputOutput(rootPlanDef, carrier)
-        ).reduce(Answer::merge).orElseGet(Answer::failed);
+        validateId(rootPlanDef, carrier),
+        validateNameTitle(rootPlanDef, carrier),
+        validateType(rootPlanDef, carrier),
+        validateActionTypes(rootPlanDef, carrier),
+        validateDefinitionRefs(rootPlanDef, carrier),
+        validateRelatedAction(rootPlanDef, carrier),
+        validateDocumentation(rootPlanDef, carrier),
+        validateInputOutput(rootPlanDef, carrier),
+        validateSubActions(rootPlanDef, carrier)
+    ).reduce(Answer::merge).orElseGet(Answer::failed);
   }
+
 
   /**
    * Ensure that the Asset ID is set as one of the PlanDef business Identifier
+   *
    * @param rootPlanDef
    * @param carrier
    * @return
@@ -121,6 +131,7 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
 
   /**
    * Ensure that Title exists, and Name is a sanitized String
+   *
    * @param rootPlanDef
    * @param carrier
    * @return
@@ -145,7 +156,8 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
 
 
   /**
-   * Ensure that Title exists, and Name is a sanitized String
+   * Ensure that that PlanDefinition is Typed
+   *
    * @param rootPlanDef
    * @param carrier
    * @return
@@ -153,7 +165,7 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
   private Answer<Void> validateType(PlanDefinition rootPlanDef, KnowledgeCarrier carrier) {
     return getNestedPlanDefs(rootPlanDef)
         .map(pd -> {
-          boolean success = ! pd.getType().getCoding().isEmpty();
+          boolean success = !pd.getType().getCoding().isEmpty();
 
           return validationResponse(
               carrier,
@@ -167,7 +179,8 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
   }
 
   /**
-   * Ensure that Title exists, and Name is a sanitized String
+   * Ensure that Actions are Typed
+   *
    * @param rootPlanDef
    * @param carrier
    * @return
@@ -192,10 +205,207 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
         .orElseGet(Answer::failed);
   }
 
+  /**
+   * Ensure that cross-PD 'definitions' are valid and resolvable
+   *
+   * @param rootPlanDef
+   * @param carrier
+   * @return
+   */
+  private Answer<Void> validateDefinitionRefs(PlanDefinition rootPlanDef,
+      KnowledgeCarrier carrier) {
+    return getNestedPlanDefs(rootPlanDef)
+        .map(pd -> {
+          List<PlanDefinitionActionComponent> definedActs =
+              getSubActions(pd)
+                  .filter(act -> !act.getDefinition().isEmpty())
+                  .collect(Collectors.toList());
+          List<PlanDefinitionActionComponent> brokenReferences = definedActs.stream()
+              .filter(act -> {
+                Reference ref = act.getDefinition();
+                String ptr = ref.getReference();
+                if (!(ref.getResource() instanceof PlanDefinition)) {
+                  return false;
+                }
+                PlanDefinition refPD = (PlanDefinition) ref.getResource();
+                return getSubActions(refPD).anyMatch(x -> x.getId().equals(ptr));
+              }).collect(Collectors.toList());
+
+          return validationResponse(
+              carrier,
+              kc -> mapAssetId(kc, pd.getIdentifier().get(0)),
+              brokenReferences.isEmpty(),
+              "Definition Ref",
+              () -> definedActs.isEmpty() ? "No Definition References"
+                  : "Valid Definition References",
+              () -> "Pending Definition Refs : " + brokenReferences.stream()
+                  .map(PlanDefinitionActionComponent::getTitle).collect(Collectors.joining(",")));
+        }).reduce(Answer::merge)
+        .orElseGet(Answer::failed);
+  }
+
+  /**
+   * Ensure that intra-PD 'related actions' are valid and resolvable
+   *
+   * @param rootPlanDef
+   * @param carrier
+   * @return
+   */
+  private Answer<Void> validateRelatedAction(PlanDefinition rootPlanDef, KnowledgeCarrier carrier) {
+    return getNestedPlanDefs(rootPlanDef)
+        .map(pd -> {
+          List<PlanDefinitionActionComponent> relatedActs =
+              getSubActions(pd)
+                  .filter(act -> !act.getRelatedAction().isEmpty())
+                  .collect(Collectors.toList());
+          List<PlanDefinitionActionComponent> brokenRelationships = relatedActs.stream()
+              .filter(act -> act.getRelatedAction().stream().anyMatch(
+                  rel -> rel.getRelationship() == null || rel.getActionId() == null
+                      || getSubActions(pd).noneMatch(a -> joins(a.getId(), rel.getActionId())))
+              ).collect(Collectors.toList());
+
+          return validationResponse(
+              carrier,
+              kc -> mapAssetId(kc, pd.getIdentifier().get(0)),
+              brokenRelationships.isEmpty(),
+              "Related Ref",
+              () -> relatedActs.isEmpty() ? "No Related Acts" : "Valid Related acts",
+              () -> "Unresolved Related Actions : " + relatedActs.stream()
+                  .map(PlanDefinitionActionComponent::getTitle).collect(Collectors.joining(",")));
+        }).reduce(Answer::merge)
+        .orElseGet(Answer::failed);
+  }
+
+  /**
+   * Ensure that Attachments are fully annotated
+   *
+   * @param rootPlanDef
+   * @param carrier
+   * @return
+   */
+  private Answer<Void> validateDocumentation(PlanDefinition rootPlanDef, KnowledgeCarrier carrier) {
+    return getNestedPlanDefs(rootPlanDef)
+        .map(pd -> {
+          List<RelatedArtifact> relatedArtifacts =
+              getSubActions(pd)
+                  .flatMap(act -> act.getDocumentation().stream())
+                  .collect(Collectors.toList());
+          Set<RelatedArtifact> brokenArtifacts = relatedArtifacts.stream()
+              .filter(art -> isEmpty(art.getDocument().getContentType())
+                  || art.getExtension().isEmpty())
+              .collect(Collectors.toSet());
+          Set<RelatedArtifact> reallyBrokenArtifacts = relatedArtifacts.stream()
+              .filter(art -> isEmpty(art.getUrl()) || isEmpty(art.getDocument().getUrl()))
+              .collect(Collectors.toSet());
+
+          ValidationStatus status;
+          if (!reallyBrokenArtifacts.isEmpty()) {
+            status = ValidationStatus.ERR;
+          } else if (!brokenArtifacts.isEmpty()) {
+            status = ValidationStatus.WRN;
+          } else {
+            status = ValidationStatus.OK;
+          }
+          brokenArtifacts.addAll(reallyBrokenArtifacts);
+
+          return validationResponse(
+              carrier,
+              kc -> mapAssetId(kc, pd.getIdentifier().get(0)),
+              status,
+              "K-Sources",
+              () -> relatedArtifacts.isEmpty() ? "No Attachments" : "Valid Attachments",
+              () -> "Attachment w/ missing Metadata : " + brokenArtifacts.stream()
+                  .map(RelatedArtifact::getDisplay).collect(Collectors.joining(",")));
+        }).reduce(Answer::merge)
+        .orElseGet(Answer::failed);
+  }
+
+  /**
+   * Ensure that I/O Data Requirements are codified
+   *
+   * @param rootPlanDef
+   * @param carrier
+   * @return
+   */
+  private Answer<Void> validateInputOutput(PlanDefinition rootPlanDef, KnowledgeCarrier carrier) {
+    return getNestedPlanDefs(rootPlanDef)
+        .map(pd -> {
+          List<DataRequirement> ioRequirements = Stream.concat(
+              getSubActions(pd).flatMap(act -> act.getInput().stream()),
+              getSubActions(pd).flatMap(act -> act.getOutput().stream()))
+              .collect(Collectors.toList());
+
+          Set<DataRequirement> brokenRequirements = ioRequirements.stream()
+              .filter(dr -> dr.getProfile().isEmpty() || dr.getCodeFilterFirstRep()
+                  .getValueCodeableConcept().isEmpty()
+                  || dr.getCodeFilterFirstRep().getValueCodeableConceptFirstRep().getCoding()
+                  .isEmpty())
+              .collect(Collectors.toSet());
+
+          return validationResponse(
+              carrier,
+              kc -> mapAssetId(kc, pd.getIdentifier().get(0)),
+              brokenRequirements.isEmpty(),
+              "I/O Reqs",
+              () -> ioRequirements.isEmpty() ? "No Input/Output" : "Annotated Input/Output",
+              () -> "Missing Concept or Datatype : " + brokenRequirements.stream()
+                  .map(this::getConceptLabel)
+                  .collect(Collectors.joining(",")));
+        }).reduce(Answer::merge)
+        .orElseGet(Answer::failed);
+  }
+
+  /**
+   * Ensure that I/O Data Requirements are codified
+   *
+   * @param rootPlanDef
+   * @param carrier
+   * @return
+   */
+  private Answer<Void> validateSubActions(PlanDefinition rootPlanDef, KnowledgeCarrier carrier) {
+    return getNestedPlanDefs(rootPlanDef)
+        .map(pd -> {
+          List<PlanDefinitionActionComponent> subActions = getSubActions(pd)
+              .filter(act -> "Decision".equals(act.getType().getCode())
+                  || "DecisionService".equals(act.getType().getCode()))
+              .collect(Collectors.toList());
+
+          Set<PlanDefinitionActionComponent> brokenSubDecisionServices = subActions.stream()
+              .filter(act -> act.getAction().stream().anyMatch(sub -> {
+                if (! "DecisionService".equals(sub.getType().getCode())) {
+                  return true;
+                }
+                if (! act.getInput().containsAll(sub.getOutput())) {
+                  return true;
+                }
+                return false;
+              }))
+              .collect(Collectors.toSet());
+
+          return validationResponse(
+              carrier,
+              kc -> mapAssetId(kc, pd.getIdentifier().get(0)),
+              brokenSubDecisionServices.isEmpty(),
+              "SubAction Services",
+              () -> subActions.isEmpty() ? "No SubActions" : "Linked SubAction Services",
+              () -> "Improper SubAction: " + brokenSubDecisionServices.stream()
+                  .map(PlanDefinitionActionComponent::getTitle)
+                  .collect(Collectors.joining(",")));
+        }).reduce(Answer::merge)
+        .orElseGet(Answer::failed);
+  }
+
+  private String getConceptLabel(DataRequirement d) {
+    CodeableConcept cc = d.getCodeFilterFirstRep().getValueCodeableConceptFirstRep();
+    return isNotEmpty(cc.getText())
+        ? cc.getText()
+        : cc.getCodingFirstRep().getDisplay();
+  }
+
   private String mapAssetId(KnowledgeCarrier kc, Identifier identifier) {
-    return mapResourceId(kc.getAssetId(),1)
+    return mapResourceId(kc.getAssetId(), 1)
         + "|"
-        + mapResourceId(newVersionId(URI.create(identifier.getValue())),3);
+        + mapResourceId(newVersionId(URI.create(identifier.getValue())), 3);
   }
 
 

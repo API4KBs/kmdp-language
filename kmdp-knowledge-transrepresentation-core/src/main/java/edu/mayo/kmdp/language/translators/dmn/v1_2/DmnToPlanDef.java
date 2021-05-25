@@ -13,8 +13,21 @@
  */
 package edu.mayo.kmdp.language.translators.dmn.v1_2;
 
+import static edu.mayo.kmdp.language.common.dmn.v1_2.DMN12Utils.asId;
+import static edu.mayo.kmdp.language.common.dmn.v1_2.DMN12Utils.findBKM;
+import static edu.mayo.kmdp.language.common.dmn.v1_2.DMN12Utils.findDecision;
+import static edu.mayo.kmdp.language.common.dmn.v1_2.DMN12Utils.findInput;
+import static edu.mayo.kmdp.language.common.dmn.v1_2.DMN12Utils.findKnowledgeSource;
+import static edu.mayo.kmdp.language.common.dmn.v1_2.DMN12Utils.getSubDecisionsClosure;
+import static edu.mayo.kmdp.language.common.dmn.v1_2.DMN12Utils.idToLocalRef;
+import static edu.mayo.kmdp.language.common.dmn.v1_2.DMN12Utils.idToRef;
+import static edu.mayo.kmdp.language.common.dmn.v1_2.DMN12Utils.joins;
+import static edu.mayo.kmdp.language.common.dmn.v1_2.DMN12Utils.refToId;
+import static edu.mayo.kmdp.language.common.dmn.v1_2.DMN12Utils.streamDecisionServices;
+import static edu.mayo.kmdp.language.common.dmn.v1_2.DMN12Utils.streamDecisions;
 import static edu.mayo.kmdp.language.common.fhir.stu3.FHIRPlanDefinitionUtils.toCodeableConcept;
 import static edu.mayo.kmdp.util.NameUtils.nameToIdentifier;
+import static edu.mayo.kmdp.util.StreamUtil.filterAs;
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.Captures;
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.Defines;
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.Has_Primary_Subject;
@@ -24,7 +37,6 @@ import static org.omg.spec.api4kp._20200801.id.SemanticIdentifier.newVersionId;
 import edu.mayo.kmdp.language.common.fhir.stu3.FHIRPlanDefinitionUtils;
 import edu.mayo.kmdp.util.NameUtils.IdentifierType;
 import edu.mayo.kmdp.util.StreamUtil;
-import edu.mayo.kmdp.util.URIUtil;
 import edu.mayo.kmdp.util.Util;
 import edu.mayo.ontology.taxonomies.kao.decisiontype.DecisionTypeSeries;
 import edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries;
@@ -38,8 +50,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import javax.xml.bind.JAXBElement;
 import org.hl7.fhir.dstu3.model.Attachment;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -53,6 +63,7 @@ import org.hl7.fhir.dstu3.model.PlanDefinition.ActionRelationshipType;
 import org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionComponent;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
+import org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType;
 import org.omg.spec.api4kp._20200801.id.ConceptIdentifier;
 import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
 import org.omg.spec.api4kp._20200801.id.Term;
@@ -60,14 +71,10 @@ import org.omg.spec.api4kp._20200801.surrogate.Annotation;
 import org.omg.spec.api4kp._20200801.taxonomy.knowledgeassettype.KnowledgeAssetTypeSeries;
 import org.omg.spec.api4kp._20200801.taxonomy.krserialization.KnowledgeRepresentationLanguageSerializationSeries;
 import org.omg.spec.dmn._20180521.model.TAuthorityRequirement;
-import org.omg.spec.dmn._20180521.model.TBusinessKnowledgeModel;
 import org.omg.spec.dmn._20180521.model.TDMNElement.ExtensionElements;
-import org.omg.spec.dmn._20180521.model.TDMNElementReference;
-import org.omg.spec.dmn._20180521.model.TDRGElement;
 import org.omg.spec.dmn._20180521.model.TDecision;
 import org.omg.spec.dmn._20180521.model.TDecisionService;
 import org.omg.spec.dmn._20180521.model.TDefinitions;
-import org.omg.spec.dmn._20180521.model.TInformationRequirement;
 import org.omg.spec.dmn._20180521.model.TInputData;
 import org.omg.spec.dmn._20180521.model.TKnowledgeRequirement;
 import org.omg.spec.dmn._20180521.model.TKnowledgeSource;
@@ -162,26 +169,10 @@ public class DmnToPlanDef {
 
     dmnDecision.getInformationRequirement().stream()
         .filter(info -> info.getRequiredDecision() != null)
-        .map(info -> {
-          URI ref = URI.create(info.getRequiredDecision().getHref());
-          if (!Util.isEmpty(ref.getPath())) {
-            PlanDefinitionActionComponent pdact = (PlanDefinitionActionComponent) new PlanDefinitionActionComponent()
-                .setDefinition(
-                    new Reference()
-                        .setReference(URIUtil.normalizeURIString(ref))
-                        .setDisplay(info.getLabel())
-                        .setIdentifier(new Identifier()
-                            .setType(new CodeableConcept()
-                                .setText("TODO - Knowledge Artifact Fragment Identifier"))
-                            .setValue(asId(ref.getFragment())))
-                ).setId(asId(ref.getFragment()));
-            addToScope(pdact, cpm.getAction(), cpm::addAction);
-          }
-          return ref.getFragment();
-        })
+        .map(info -> URI.create(info.getRequiredDecision().getHref()))
         .forEach(tgtActionId -> srcAction.addRelatedAction()
             .setRelationship(ActionRelationshipType.AFTER)
-            .setActionId(idToRef(tgtActionId)));
+            .setActionId(idToLocalRef(tgtActionId)));
   }
 
   private void processDecisionToDecisionServiceDependencies(
@@ -202,7 +193,10 @@ public class DmnToPlanDef {
             .stream())
         .collect(Collectors.toList());
 
-    serviceClientAction.forEach(x -> addToScope(x, srcAction.getAction(), srcAction::addAction));
+    serviceClientAction.forEach(subAct -> {
+      addToScope(subAct, srcAction.getAction(), srcAction::addAction);
+      subAct.getOutput().forEach(out -> srcAction.getInput().add(out));
+    });
   }
 
   private void processDecisionServiceToDecisionServiceDependencies(
@@ -219,50 +213,32 @@ public class DmnToPlanDef {
         .map(out -> streamDecisions(decisionModel)
             .filter(dec -> joins(dec.getId(), out.getHref()))
             .findFirst().orElseThrow())
-        .flatMap(dec -> closeDecisionDependencies(dec, decisionModel))
+        .flatMap(dec -> getSubDecisionsClosure(dec, decisionModel))
         .distinct()
         .collect(Collectors.toList());
+
     serviceDecisions
-        .forEach(subDec -> {
-          subDec.getKnowledgeRequirement().stream()
-              .filter(know -> know.getRequiredKnowledge() != null)
-              .flatMap(ref -> lookupAsDecisionService(ref, mappedDecisionServices)
-                  .or(() -> lookupViaBKM(decisionModel, ref, mappedDecisionServices))
-                  .stream())
-              .forEach(subAct -> {
-                addToScope(subAct, srcAction.getAction(), srcAction::addAction);
-                // remap the children's outputs as parent's inputs
-                subAct.getOutput().forEach(out -> srcAction.getInput().add(out));
-              });
-        });
+        .forEach(subDec -> subDec.getKnowledgeRequirement().stream()
+            .filter(know -> know.getRequiredKnowledge() != null)
+            .flatMap(ref -> lookupAsDecisionService(ref, mappedDecisionServices)
+                .or(() -> lookupViaBKM(decisionModel, ref, mappedDecisionServices))
+                .stream())
+            .forEach(subAct -> {
+              addToScope(subAct, srcAction.getAction(), srcAction::addAction);
+              // remap the children's outputs as parent's inputs
+              subAct.getOutput().forEach(out -> srcAction.getInput().add(out));
+            }));
   }
 
-  private Stream<TDecision> closeDecisionDependencies(
-      TDecision dec, TDefinitions decisionModel) {
-    return Stream.concat(
-        Stream.of(dec),
-        getSubDecisions(dec, decisionModel)
-            .flatMap(d -> closeDecisionDependencies(d, decisionModel)));
-  }
-
-  private Stream<TDecision> getSubDecisions(
-      TDecision dec, TDefinitions decisionModel) {
-    return dec.getInformationRequirement().stream()
-        .map(TInformationRequirement::getRequiredDecision) // exclude inputs
-        .filter(Objects::nonNull)
-        .map(ref -> streamDecisions(decisionModel)
-            .filter(d -> joins(d.getId(), ref.getHref()))
-            .findFirst().orElseThrow());
-  }
 
   private Optional<PlanDefinitionActionComponent> lookupViaBKM(
       TDefinitions decisionModel,
       TKnowledgeRequirement ref,
       Map<String, PlanDefinitionActionComponent> mappedDecisionServices) {
-    return lookupBKM(decisionModel, ref.getRequiredKnowledge())
+    return findBKM(ref.getRequiredKnowledge(), decisionModel).stream()
         .flatMap(bkm -> bkm.getKnowledgeRequirement().stream())
-        .filter(know -> know.getRequiredKnowledge() != null)
         .map(TKnowledgeRequirement::getRequiredKnowledge)
+        .filter(Objects::nonNull)
         .map(info -> mappedDecisionServices.get(
             refToId(info.getHref())))
         .findAny();
@@ -274,11 +250,6 @@ public class DmnToPlanDef {
         .ofNullable(mappedDecisionServices.get(refToId(ref.getRequiredKnowledge().getHref())));
   }
 
-  private Stream<TBusinessKnowledgeModel> lookupBKM(TDefinitions decisionModel,
-      TDMNElementReference requiredKnowledge) {
-    return streamBKM(decisionModel)
-        .filter(bkm -> refToId(requiredKnowledge.getHref()).equals(bkm.getId()));
-  }
 
   private void mapIdentity(PlanDefinition cpm, URI assetId, TDefinitions decisionModel) {
     Identifier fhirAssetId = new Identifier()
@@ -341,7 +312,6 @@ public class DmnToPlanDef {
 
     getSemanticAnnotation(decisionService.getExtensionElements()).stream()
         .map(FHIRPlanDefinitionUtils::toCodeableConcept)
-        .filter(cd -> isKMConcept(cd))
         .forEach(serviceAction::addCode);
 
     decisionService.getOutputDecision().forEach(
@@ -371,8 +341,6 @@ public class DmnToPlanDef {
     DataRequirement dataRequirement = new DataRequirement();
     DataRequirementCodeFilterComponent codeFilters = new DataRequirementCodeFilterComponent();
     dataRequirement.addCodeFilter(codeFilters);
-//    dataRequirement.setType("TODO Data Shape - Base Resource type");
-//    dataRequirement.setProfile(Collections.singletonList(new UriType("http://todo.me/datashape/profile123")));
 
     getSemanticAnnotation(input.getExtensionElements()).stream()
         .map(FHIRPlanDefinitionUtils::toCodeableConcept)
@@ -392,10 +360,12 @@ public class DmnToPlanDef {
         .forEach(codeFilters::addValueCodeableConcept);
     getSemanticAnnotation(output.getExtensionElements()).stream()
         .map(FHIRPlanDefinitionUtils::toCodeableConcept)
-        .filter(cd -> isKMConcept(cd))
+        .filter(this::isKMConcept)
         .forEach(serviceAction::addCode);
 
-    serviceAction.addOutput(dataRequirement);
+    if (!codeFilters.getValueCodeableConcept().isEmpty()) {
+      serviceAction.addOutput(dataRequirement);
+    }
     return dataRequirement;
   }
 
@@ -409,46 +379,17 @@ public class DmnToPlanDef {
     return isDecisionType || isKnowledgeAssetType;
   }
 
-  private Optional<TInputData> findInput(TDMNElementReference requiredInput,
-      TDefinitions decisionModel) {
-    return decisionModel.getDrgElement().stream()
-        .map(JAXBElement::getValue)
-        .flatMap(StreamUtil.filterAs(TInputData.class))
-        .filter(in -> joins(in.getId(), requiredInput.getHref()))
-        .findFirst();
-  }
-
-
-  private Optional<TDecision> findDecision(TDMNElementReference requiredDecision,
-      TDefinitions decisionModel) {
-    return decisionModel.getDrgElement().stream()
-        .map(JAXBElement::getValue)
-        .flatMap(StreamUtil.filterAs(TDecision.class))
-        .filter(in -> joins(in.getId(), requiredDecision.getHref()))
-        .findFirst();
-  }
-
-
-  private Optional<TKnowledgeSource> findKnowledgeSource(TDMNElementReference requiredSource,
-      TDefinitions decisionModel) {
-    return decisionModel.getDrgElement().stream()
-        .map(JAXBElement::getValue)
-        .flatMap(StreamUtil.filterAs(TKnowledgeSource.class))
-        .filter(in -> in.getId().equals(requiredSource.getHref()
-            .substring(requiredSource.getHref().lastIndexOf('#') + 1)))
-        .findFirst();
-  }
-
   private void mapKnowledgeSource(TAuthorityRequirement know,
       PlanDefinition cpm, PlanDefinitionActionComponent decisionAction,
       TDefinitions decisionModel) {
     findKnowledgeSource(know.getRequiredAuthority(), decisionModel)
         .ifPresent(knowledgeSource ->
-            mapKnowledgeSource(knowledgeSource, cpm, decisionAction));
+            mapKnowledgeSource(knowledgeSource, cpm, decisionAction, decisionModel));
   }
 
   private void mapKnowledgeSource(TKnowledgeSource knowledgeSource,
-      PlanDefinition cpm, PlanDefinitionActionComponent decisionAction) {
+      PlanDefinition cpm, PlanDefinitionActionComponent decisionAction,
+      TDefinitions decisionModel) {
     if (Util.isEmpty(knowledgeSource.getLocationURI())) {
       return;
     }
@@ -463,46 +404,55 @@ public class DmnToPlanDef {
 
     decisionAction.addDocumentation(relatedArtifact);
 
-    if (knowledgeSource.getExtensionElements() != null &&
-        knowledgeSource.getExtensionElements().getAny() != null) {
-      List<Term> types = knowledgeSource.getExtensionElements().getAny().stream()
-          .flatMap(StreamUtil.filterAs(Annotation.class))
-          .map(Annotation::getRef)
-          .collect(Collectors.toList());
+    List<Term> types = Optional.ofNullable(knowledgeSource.getExtensionElements())
+        .stream()
+        .flatMap(x -> x.getAny().stream())
+        .flatMap(filterAs(Annotation.class))
+        .map(Annotation::getRef)
+        .collect(Collectors.toList());
 
-      if (!types.isEmpty()) {
-        CodeableConcept typesCC = toCodeableConcept(types);
-        String id = asId(knowledgeSource.getId());
-        ResourceIdentifier knowAssetId = newVersionId(URI.create(knowledgeSource.getLocationURI()));
-        Library lib = (Library) new Library()
-            .addIdentifier(new Identifier()
-                .setSystem(knowAssetId.getNamespaceUri().toString())
-                .setValue(knowAssetId.getTag() + ":" + knowAssetId.getVersionTag()))
-            .setType(typesCC)
-            .setId(id);
+    if (!types.isEmpty()) {
+      String id = asId(knowledgeSource.getId());
+      ResourceIdentifier knowAssetId = newVersionId(URI.create(knowledgeSource.getLocationURI()));
+      Library lib = (Library) new Library()
+          .addIdentifier(new Identifier()
+              .setSystem(knowAssetId.getNamespaceUri().toString())
+              .setValue(knowAssetId.getTag() + ":" + knowAssetId.getVersionTag()))
+          .setId(id);
 
-        relatedArtifact.setResource(new Reference().setReference(idToRef(id)));
-        relatedArtifact.addExtension(new Extension()
-            .setUrl("http://kmd.mayo.edu/fhirExtensions/knowledgeAssetType")
-            .setValue(typesCC));
+      CodeableConcept typesCC = toCodeableConcept(types);
+      lib.setType(toCodeableConcept(types));
 
-        cpm.addContained(lib);
-      }
+      knowledgeSource.getAuthorityRequirement().stream()
+          .flatMap(
+              auth -> findKnowledgeSource(auth.getRequiredAuthority(), decisionModel).stream())
+          .forEach(
+              ks -> lib.addRelatedArtifact()
+                  .setType(RelatedArtifactType.COMPOSEDOF)
+                  .setUrl(
+                      newVersionId(URI.create(ks.getLocationURI())).getVersionId().toString()));
+
+      relatedArtifact.setResource(new Reference().setReference(idToRef(id)));
+      relatedArtifact.addExtension(new Extension()
+          .setUrl("http://kmd.mayo.edu/fhirExtensions/knowledgeAssetType")
+          .setValue(typesCC));
+
+      cpm.addContained(lib);
     }
 
   }
 
-  private void mapSubject(PlanDefinition cpm, TDefinitions tCase) {
-    this.findSubject(tCase.getExtensionElements())
+  private void mapSubject(PlanDefinition cpm, TDefinitions dmnModel) {
+    this.findSubject(dmnModel.getExtensionElements())
         .map(FHIRPlanDefinitionUtils::toCodeableConcept)
         .map(Collections::singletonList)
         .ifPresent(cpm::setTopic);
   }
 
 
-  private void mapName(PlanDefinition cpm, TDefinitions tCase) {
-    cpm.setName(nameToIdentifier(tCase.getName(), IdentifierType.CLASS));
-    cpm.setTitle(tCase.getName());
+  private void mapName(PlanDefinition cpm, TDefinitions dmnModel) {
+    cpm.setName(nameToIdentifier(dmnModel.getName(), IdentifierType.CLASS));
+    cpm.setTitle(dmnModel.getName());
   }
 
 
@@ -518,7 +468,7 @@ public class DmnToPlanDef {
     }
 
     return extensionElements.stream()
-        .flatMap(StreamUtil.filterAs(Annotation.class))
+        .flatMap(filterAs(Annotation.class))
         .filter(ann ->
             ann.getRel() == null
                 || Defines.getTag().equals(ann.getRel().getTag())
@@ -532,7 +482,9 @@ public class DmnToPlanDef {
 
 
   private Optional<ConceptIdentifier> findSubject(ExtensionElements extensionElements) {
-    return this.findSubject(extensionElements.getAny());
+    return Optional.ofNullable(extensionElements)
+        .map(ExtensionElements::getAny)
+        .flatMap(this::findSubject);
   }
 
   private Optional<ConceptIdentifier> findSubject(List<Object> extensionElements) {
@@ -552,8 +504,7 @@ public class DmnToPlanDef {
       }
 
       if (annotations.size() == 1) {
-        Annotation annotation = annotations.get(0);
-        return Optional.of(annotation.getRef());
+        return Optional.of(annotations.get(0).getRef());
       }
     }
 
@@ -563,57 +514,8 @@ public class DmnToPlanDef {
   private void addToScope(PlanDefinitionActionComponent action,
       List<PlanDefinitionActionComponent> context,
       Consumer<PlanDefinitionActionComponent> scope) {
-    boolean contained = context.stream()
-        .anyMatch(act -> act.getId().equals(action.getId()));
-    if (contained) {
-      System.out.println("Double adding of " + action.getTitle() + " | " + action.getLabel());
-    } else {
-      System.out.println("Initial adding of " + action.getTitle() + " | " + action.getLabel());
-    }
+    // consider adding checks
     scope.accept(action);
   }
-
-  private Stream<TDecision> streamDecisions(TDefinitions dmn) {
-    return streamDRG(dmn, TDecision.class);
-  }
-
-  private Stream<TInputData> streamInputs(TDefinitions dmn) {
-    return streamDRG(dmn, TInputData.class);
-  }
-
-  private Stream<TBusinessKnowledgeModel> streamBKM(TDefinitions dmn) {
-    return streamDRG(dmn, TBusinessKnowledgeModel.class);
-  }
-
-  private Stream<TDecisionService> streamDecisionServices(TDefinitions dmn) {
-    return streamDRG(dmn, TDecisionService.class);
-  }
-
-  private <T extends TDRGElement> Stream<T> streamDRG(TDefinitions dmn, Class<T> drgType) {
-    return dmn.getDrgElement().stream()
-        .map(JAXBElement::getValue)
-        .flatMap(StreamUtil.filterAs(drgType));
-  }
-
-  private String refToId(String href) {
-    if (!href.startsWith("#")) {
-      throw new IllegalStateException(
-          "Reference " + href + " expected to be a relative URI fragment");
-    }
-    return asId(href.substring(1));
-  }
-
-  private String idToRef(String id) {
-    return "#" + asId(id);
-  }
-
-  private String asId(String id) {
-    return id.trim().replace("_", "");
-  }
-
-  private boolean joins(String pk, String fkHref) {
-    return asId(pk).equals(refToId(fkHref));
-  }
-
 
 }

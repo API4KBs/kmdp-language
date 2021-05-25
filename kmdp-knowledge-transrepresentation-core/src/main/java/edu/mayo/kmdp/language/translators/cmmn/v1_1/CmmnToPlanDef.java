@@ -823,9 +823,7 @@ public class CmmnToPlanDef {
 
   private DataRequirement toSemanticInput(Term anno) {
     DataRequirement dataRequirement = new DataRequirement();
-    DataRequirementCodeFilterComponent codeFilters = new DataRequirementCodeFilterComponent();
-    dataRequirement.addCodeFilter(codeFilters);
-    codeFilters.addValueCodeableConcept(toCodeableConcept(anno));
+    dataRequirement.addCodeFilter().addValueCodeableConcept(toCodeableConcept(anno));
     return dataRequirement;
   }
 
