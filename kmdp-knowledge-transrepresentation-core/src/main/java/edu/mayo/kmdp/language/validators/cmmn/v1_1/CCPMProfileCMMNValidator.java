@@ -289,7 +289,7 @@ public class CCPMProfileCMMNValidator extends CCPMComponentValidator {
     return tasks.stream().anyMatch(
         task -> task.getInput() != null && task.getInput().stream()
             .anyMatch(in -> cfi == in.getBindingRef()))
-        && tasks.stream().anyMatch(
+        || tasks.stream().anyMatch(
             task -> task.getOutput() != null && task.getOutput().stream()
                 .anyMatch(out -> cfi == out.getBindingRef()));
   }
