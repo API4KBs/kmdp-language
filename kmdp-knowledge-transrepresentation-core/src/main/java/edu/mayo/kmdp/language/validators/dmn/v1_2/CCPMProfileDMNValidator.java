@@ -2,6 +2,7 @@ package edu.mayo.kmdp.language.validators.dmn.v1_2;
 
 import static edu.mayo.kmdp.util.Util.isEmpty;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
+import static org.omg.spec.api4kp._20200801.id.SemanticIdentifier.newVersionId;
 import static org.omg.spec.api4kp._20200801.taxonomy.clinicalknowledgeassettype.ClinicalKnowledgeAssetTypeSeries.Clinical_Decision_Model;
 import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeassettype.KnowledgeAssetTypeSeries.Decision_Model;
 import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Well_Formedness_Check_Task;
@@ -211,7 +212,7 @@ public class CCPMProfileDMNValidator extends CCPMComponentValidator {
         .flatMap(StreamUtil.filterAs(TKnowledgeSource.class))
         .collect(Collectors.toSet());
     Set<TKnowledgeSource> incomplete = knowSources.stream()
-        .filter(ks -> !isValidKSMime(ks.getType()) || isEmpty(ks.getLocationURI()))
+        .filter(ks -> !isValidKSMime(ks.getType()) || !isValidAssetId(ks.getLocationURI(), ks.getType()))
         .collect(Collectors.toSet());
 
     return validationResponse(
@@ -221,6 +222,17 @@ public class CCPMProfileDMNValidator extends CCPMComponentValidator {
         () -> knowSources.isEmpty() ? "none" : "configured",
         () -> "INCOMPLETE KNOW SRCs " + toString(incomplete, TKnowledgeSource::getName)
     );
+  }
+
+  private boolean isValidAssetId(String locationURI, String type) {
+    if (! type.startsWith("application")) {
+      return ! isEmpty(locationURI);
+    }
+    try {
+      return ! isEmpty(newVersionId(URI.create(locationURI)).getVersionTag());
+    } catch (Exception e) {
+      return false;
+    }
   }
 
 
