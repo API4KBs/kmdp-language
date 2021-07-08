@@ -55,13 +55,11 @@ public class SurrogateV2ToHTML {
       public void appendDetail(StringBuffer buffer, String fieldName, Object value) {
 
         if (value instanceof Term) {
-          Term t = (Term) value;
-          buffer.append(t.getLabel());
+          appendTerm((Term) value, buffer);
           return;
         }
         if (value instanceof SemanticIdentifier) {
-          SemanticIdentifier id = (SemanticIdentifier) value;
-          buffer.append(id.getVersionId() != null ? id.getVersionId() : id.getResourceId());
+          appendIdentifier((SemanticIdentifier) value, buffer);
           return;
         }
 
@@ -73,12 +71,28 @@ public class SurrogateV2ToHTML {
         buffer.append(ReflectionToStringBuilder.toString(value, this));
       }
 
+      private void appendIdentifier(SemanticIdentifier id, StringBuffer buffer) {
+        String idRef = id.getVersionId() != null ? id.getVersionId().toString()
+            : id.getResourceId().toString();
+        if (idRef.startsWith("http")) {
+          idRef = "<a href=\"" + idRef + "\">" + idRef + "</a>";
+        }
+        buffer.append(idRef);
+      }
+
+      private void appendTerm(Term trm, StringBuffer buffer) {
+        String t = trm.getLabel();
+        if (trm.getReferentId() != null && trm.getReferentId().toString().startsWith("http")) {
+          t = "<a href=\"" + trm.getReferentId().toString() + "\">" + t + "</a>";
+        }
+        buffer.append(t);
+      }
+
       @Override
       protected void appendDetail(StringBuffer buffer, String fieldName, Collection<?> coll) {
         coll.forEach(item -> {
           if (item instanceof Term) {
-            Term t = (Term) item;
-            buffer.append(t.getLabel());
+            appendTerm((Term) item, buffer);
             return;
           }
 
