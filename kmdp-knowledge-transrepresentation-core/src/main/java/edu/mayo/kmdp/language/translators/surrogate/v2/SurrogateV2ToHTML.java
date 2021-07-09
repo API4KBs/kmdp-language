@@ -1,5 +1,6 @@
 package edu.mayo.kmdp.language.translators.surrogate.v2;
 
+import java.net.URI;
 import java.util.Collection;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -58,6 +59,12 @@ public class SurrogateV2ToHTML {
           appendTerm((Term) value, buffer);
           return;
         }
+
+        if (value instanceof URI) {
+          buffer.append(a(value.toString(), value.toString()));
+          return;
+        }
+
         if (value instanceof SemanticIdentifier) {
           appendIdentifier((SemanticIdentifier) value, buffer);
           return;
@@ -75,15 +82,19 @@ public class SurrogateV2ToHTML {
         String idRef = id.getVersionId() != null ? id.getVersionId().toString()
             : id.getResourceId().toString();
         if (idRef.startsWith("http")) {
-          idRef = "<a href=\"" + idRef + "\">" + idRef + "</a>";
+          idRef = a(idRef, idRef);
         }
         buffer.append(idRef);
+      }
+
+      private String a(String url, String text) {
+        return "<a href=\"" + url + "\">" + text + "</a>";
       }
 
       private void appendTerm(Term trm, StringBuffer buffer) {
         String t = trm.getLabel();
         if (trm.getReferentId() != null && trm.getReferentId().toString().startsWith("http")) {
-          t = "<a href=\"" + trm.getReferentId().toString() + "\">" + t + "</a>";
+          t = a(trm.getReferentId().toString(), t);
         }
         buffer.append(t);
       }
