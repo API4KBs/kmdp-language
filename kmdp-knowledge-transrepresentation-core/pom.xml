@@ -73,6 +73,10 @@
       <version>${hapi.fhir.version}</version>
     </dependency>
 
+    <dependency>
+      <groupId>io.swagger</groupId>
+      <artifactId>swagger-parser</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>net.sourceforge.owlapi</groupId>
