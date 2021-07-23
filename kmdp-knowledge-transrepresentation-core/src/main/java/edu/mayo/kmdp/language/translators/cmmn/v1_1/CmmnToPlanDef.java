@@ -31,15 +31,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.xml.bind.JAXBElement;
-import javax.xml.namespace.QName;
 import org.hl7.fhir.dstu3.model.Attachment;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DataRequirement;
-import org.hl7.fhir.dstu3.model.DataRequirement.DataRequirementCodeFilterComponent;
 import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.PlanDefinition.ActionCardinalityBehavior;
@@ -58,6 +57,7 @@ import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
 import org.omg.spec.api4kp._20200801.id.Term;
 import org.omg.spec.api4kp._20200801.surrogate.Annotation;
 import org.omg.spec.api4kp._20200801.taxonomy.krserialization.KnowledgeRepresentationLanguageSerializationSeries;
+import org.omg.spec.cmmn._20151109.model.CaseFileItemTransition;
 import org.omg.spec.cmmn._20151109.model.TAssociation;
 import org.omg.spec.cmmn._20151109.model.TCase;
 import org.omg.spec.cmmn._20151109.model.TCaseFileItem;
@@ -429,10 +429,43 @@ public class CmmnToPlanDef {
         .map(this::toCode)
         .forEach(cd -> dataReq.addCodeFilter().addValueCodeableConcept(cd));
 
+    var events = sourceRef.stream()
+        .flatMap(StreamUtil.filterAs(TCaseFileItemOnPart.class))
+        .map(TCaseFileItemOnPart::getStandardEvent)
+        .collect(Collectors.toSet());
+
     whiteAct.addTriggerDefinition()
-        .setType(TriggerType.DATAMODIFIED)
-        .setEventName("on " + sourceRef.stream().map(TOnPart::getName).collect(Collectors.joining(", "))  )
+        .setType(mapCaseFileItemTransitions(events))
+        .setEventName(mapEventName(sourceRef, events)  )
         .setEventData(dataReq);
+  }
+
+  private String mapEventName(
+      List<TCaseFileItemOnPart> sourceRef,
+      Set<CaseFileItemTransition> events) {
+    String byName = sourceRef.stream()
+        .map(TOnPart::getName)
+        .filter(Util::isNotEmpty)
+        .collect(Collectors.joining(","));
+    return Util.isNotEmpty(byName)
+        ? "on " + byName
+        : "on " + events.stream()
+                .map(CaseFileItemTransition::value)
+                .collect(Collectors.joining(", "));
+  }
+
+  private TriggerType mapCaseFileItemTransitions(Set<CaseFileItemTransition> events) {
+    if (events.size() != 1) {
+      return TriggerType.DATAMODIFIED;
+    }
+    switch(events.iterator().next()) {
+      case DELETE:
+        return TriggerType.DATAREMOVED;
+      case CREATE:
+        return TriggerType.DATAADDED;
+      default:
+        return TriggerType.DATAMODIFIED;
+    }
   }
 
   private void processPlanItemOnPartWithPlanItemSource(TPlanItemDefinition itemWithSentry,
