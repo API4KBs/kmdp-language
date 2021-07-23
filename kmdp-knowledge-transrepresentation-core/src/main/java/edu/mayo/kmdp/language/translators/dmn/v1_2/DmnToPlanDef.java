@@ -28,6 +28,7 @@ import static edu.mayo.kmdp.language.common.dmn.v1_2.DMN12Utils.streamDecisions;
 import static edu.mayo.kmdp.language.common.fhir.stu3.FHIRPlanDefinitionUtils.toCodeableConcept;
 import static edu.mayo.kmdp.util.NameUtils.nameToIdentifier;
 import static edu.mayo.kmdp.util.StreamUtil.filterAs;
+import static edu.mayo.kmdp.util.Util.ensureUTF8;
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.Captures;
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.Defines;
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.Has_Primary_Subject;
@@ -91,7 +92,7 @@ public class DmnToPlanDef {
 
   public PlanDefinition transform(ResourceIdentifier assetId, TDefinitions decisionModel) {
     log.debug("Called Translator DMN to PDF  for {}", decisionModel.getName());
-    PlanDefinition cpm = new PlanDefinition();
+    var cpm = new PlanDefinition();
 
     mapIdentity(cpm, assetId.getResourceId(), decisionModel);
     mapName(cpm, decisionModel);
@@ -267,8 +268,8 @@ public class DmnToPlanDef {
       PlanDefinition cpm,
       Consumer<PlanDefinitionActionComponent> cpmScope,
       TDefinitions decisionModel, TDecision decision) {
-    PlanDefinitionActionComponent decisionAction = new PlanDefinitionActionComponent();
-    decisionAction.setTitle(decision.getName());
+    var decisionAction = new PlanDefinitionActionComponent();
+    decisionAction.setTitle(ensureUTF8(decision.getName()));
     decisionAction.setId(asId(decision.getId()));
 
     decisionAction.setType(new Coding()
@@ -299,8 +300,8 @@ public class DmnToPlanDef {
 
   private PlanDefinitionActionComponent processDecisionService(PlanDefinition cpm,
       TDefinitions decisionModel, TDecisionService decisionService) {
-    PlanDefinitionActionComponent serviceAction = new PlanDefinitionActionComponent();
-    serviceAction.setTitle(decisionService.getName());
+    var serviceAction = new PlanDefinitionActionComponent();
+    serviceAction.setTitle(ensureUTF8(decisionService.getName()));
     serviceAction.setId(asId(decisionService.getId()));
 
     serviceAction.setType(new Coding()
@@ -316,7 +317,7 @@ public class DmnToPlanDef {
 
     decisionService.getOutputDecision().forEach(
         out -> {
-          TDecision outputDecision = findDecision(out, decisionModel)
+          var outputDecision = findDecision(out, decisionModel)
               .orElseThrow();
           mapOutput(outputDecision, serviceAction);
           outputDecision.getAuthorityRequirement().forEach(
@@ -338,8 +339,8 @@ public class DmnToPlanDef {
 
 
   private DataRequirement mapInput(TInputData input) {
-    DataRequirement dataRequirement = new DataRequirement();
-    DataRequirementCodeFilterComponent codeFilters = new DataRequirementCodeFilterComponent();
+    var dataRequirement = new DataRequirement();
+    var codeFilters = new DataRequirementCodeFilterComponent();
     dataRequirement.addCodeFilter(codeFilters);
 
     getSemanticAnnotation(input.getExtensionElements()).stream()
@@ -350,8 +351,8 @@ public class DmnToPlanDef {
 
   private DataRequirement mapOutput(TDecision output,
       PlanDefinitionActionComponent serviceAction) {
-    DataRequirement dataRequirement = new DataRequirement();
-    DataRequirementCodeFilterComponent codeFilters = new DataRequirementCodeFilterComponent();
+    var dataRequirement = new DataRequirement();
+    var codeFilters = new DataRequirementCodeFilterComponent();
     dataRequirement.addCodeFilter(codeFilters);
 
     getSemanticAnnotation(output.getExtensionElements()).stream()
@@ -394,11 +395,11 @@ public class DmnToPlanDef {
       return;
     }
 
-    RelatedArtifact relatedArtifact = new RelatedArtifact()
+    var relatedArtifact = new RelatedArtifact()
         .setUrl(knowledgeSource.getLocationURI())
         .setDisplay(knowledgeSource.getName())
         .setDocument(new Attachment()
-            .setTitle(knowledgeSource.getName())
+            .setTitle(ensureUTF8(knowledgeSource.getName()))
             .setUrl(knowledgeSource.getLocationURI())
             .setContentType(knowledgeSource.getType()));
 
@@ -420,7 +421,7 @@ public class DmnToPlanDef {
               .setValue(knowAssetId.getTag() + ":" + knowAssetId.getVersionTag()))
           .setId(id);
 
-      CodeableConcept typesCC = toCodeableConcept(types);
+      var typesCC = toCodeableConcept(types);
       lib.setType(toCodeableConcept(types));
 
       knowledgeSource.getAuthorityRequirement().stream()
@@ -452,7 +453,7 @@ public class DmnToPlanDef {
 
   private void mapName(PlanDefinition cpm, TDefinitions dmnModel) {
     cpm.setName(nameToIdentifier(dmnModel.getName(), IdentifierType.CLASS));
-    cpm.setTitle(dmnModel.getName());
+    cpm.setTitle(ensureUTF8(dmnModel.getName()));
   }
 
 

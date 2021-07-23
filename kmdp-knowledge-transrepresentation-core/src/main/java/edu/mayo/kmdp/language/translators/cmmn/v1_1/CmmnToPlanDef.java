@@ -15,6 +15,7 @@ package edu.mayo.kmdp.language.translators.cmmn.v1_1;
 
 import static edu.mayo.kmdp.language.common.fhir.stu3.FHIRPlanDefinitionUtils.toCodeableConcept;
 import static edu.mayo.kmdp.util.NameUtils.nameToIdentifier;
+import static edu.mayo.kmdp.util.Util.ensureUTF8;
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.Captures;
 import static org.omg.spec.api4kp._20200801.taxonomy.clinicalknowledgeassettype.ClinicalKnowledgeAssetTypeSeries.Care_Process_Model;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.FHIRPath_STU1;
@@ -22,6 +23,7 @@ import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeReprese
 import edu.mayo.kmdp.language.common.fhir.stu3.FHIRPlanDefinitionUtils;
 import edu.mayo.kmdp.util.NameUtils.IdentifierType;
 import edu.mayo.kmdp.util.StreamUtil;
+import edu.mayo.kmdp.util.Util;
 import edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries;
 import java.net.URI;
 import java.util.ArrayList;
@@ -154,10 +156,10 @@ public class CmmnToPlanDef {
     List<PlanDefinition.PlanDefinitionActionComponent> mappedPlanElements
         = processStageInternals(stage, ccpmId, caseModel);
 
-    PlanDefinition.PlanDefinitionActionComponent group = new PlanDefinitionActionComponent();
+    var group = new PlanDefinitionActionComponent();
 
     group.setId(stage.getId());
-    group.setTitle(stage.getName());
+    group.setTitle(ensureUTF8(stage.getName()));
 
     mapControls(stage.getDefaultControl(), group);
 
@@ -296,7 +298,7 @@ public class CmmnToPlanDef {
           .setUrl(url)
           .setDisplay(cfiDef.getName())
           .setDocument(new Attachment()
-              .setTitle(cfiDef.getName())
+              .setTitle(ensureUTF8(cfiDef.getName()))
               .setUrl(url)
               .setContentType("text/html")));
     } else if (XSD_ELEMENT_TYPE.equals(cfiDef.getDefinitionType())) {
@@ -367,7 +369,7 @@ public class CmmnToPlanDef {
 
   private void mapName(PlanDefinition cpm, TDefinitions tCase) {
     cpm.setName(nameToIdentifier(tCase.getName(), IdentifierType.CLASS));
-    cpm.setTitle(tCase.getName());
+    cpm.setTitle(ensureUTF8(tCase.getName()));
   }
 
   private void processSequentiallyRelated(
@@ -419,7 +421,7 @@ public class CmmnToPlanDef {
         .filter(act -> act.getId().equals(itemWithSentry.getId()))
         .findFirst().orElseThrow();
 
-    DataRequirement dataReq = new DataRequirement();
+    var dataReq = new DataRequirement();
     sourceRef.stream()
         .map(TCaseFileItemOnPart::getSourceRef)
         .flatMap(StreamUtil.filterAs(TCaseFileItem.class))
@@ -435,7 +437,7 @@ public class CmmnToPlanDef {
 
   private void processPlanItemOnPartWithPlanItemSource(TPlanItemDefinition itemWithSentry,
       List<PlanDefinitionActionComponent> scopedActions, TStage stage, TPlanItem sourceRef) {
-    TPlanItem sourceItem = sourceRef;
+    var sourceItem = sourceRef;
     Object sourceDef = sourceItem.getDefinitionRef();
 
     Optional<PlanDefinitionActionComponent> whiteActOpt = scopedActions.stream()
@@ -488,7 +490,7 @@ public class CmmnToPlanDef {
           .setExpression("Resource.where(tag = '" + anno.getTag() + "').exists()");
 
       // model milestone as a trigger
-      DataRequirement dataRequirement = toSemanticInput(anno);
+      var dataRequirement = toSemanticInput(anno);
       whiteAct.addTriggerDefinition()
           .setType(TriggerType.DATAACCESSED)
           .setEventData(dataRequirement);
@@ -525,9 +527,9 @@ public class CmmnToPlanDef {
       TDefinitions caseModel,
       TPlanItem planItem) {
 
-    PlanDefinition.PlanDefinitionActionComponent planAction = new PlanDefinitionActionComponent();
+    var planAction = new PlanDefinitionActionComponent();
     planAction.setId(task.getId());
-    planAction.setTitle(task.getName());
+    planAction.setTitle(ensureUTF8(task.getName()));
 
     getTypeCode(task.getExtensionElements()).stream()
         .map(this::toCode)
@@ -557,9 +559,9 @@ public class CmmnToPlanDef {
       TDefinitions caseModel,
       TDiscretionaryItem discretionaryItem) {
 
-    PlanDefinitionActionComponent planAction = new PlanDefinitionActionComponent();
+    var planAction = new PlanDefinitionActionComponent();
     planAction.setId(task.getId());
-    planAction.setTitle(task.getName());
+    planAction.setTitle(ensureUTF8(task.getName()));
 
     getTypeCode(task.getExtensionElements()).stream()
         .map(this::toCode)
@@ -759,7 +761,7 @@ public class CmmnToPlanDef {
 
   private Optional<TDecision> getDecisionForTask(TDecisionTask tDecisionTask,
       TDefinitions caseModel) {
-    QName qname = tDecisionTask.getDecisionRef();
+    var qname = tDecisionTask.getDecisionRef();
     if (qname == null) {
       log.error("Unlinked Decision task {}", tDecisionTask.getName());
       return Optional.empty();
@@ -813,7 +815,7 @@ public class CmmnToPlanDef {
       }
 
       if (annotations.size() == 1) {
-        Annotation annotation = annotations.get(0);
+        var annotation = annotations.get(0);
         return Optional.of(annotation.getRef());
       }
     }
@@ -822,7 +824,7 @@ public class CmmnToPlanDef {
 
 
   private DataRequirement toSemanticInput(Term anno) {
-    DataRequirement dataRequirement = new DataRequirement();
+    var dataRequirement = new DataRequirement();
     dataRequirement.addCodeFilter().addValueCodeableConcept(toCodeableConcept(anno));
     return dataRequirement;
   }
