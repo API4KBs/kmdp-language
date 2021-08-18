@@ -195,7 +195,7 @@ public abstract class AbstractSimpleTranslator<S, T>
     Answer<KnowledgeCarrier> ast =
         getParser().flatMap(parser ->
             parser.applyLift(
-                AbstractCarrier.ofTree(bytes, srcRep)
+                AbstractCarrier.of(bytes, srcRep)
                     .withLevel(Encoded_Knowledge_Expression),
                 Abstract_Knowledge_Expression,
                 codedRep(srcRep.getLanguage()),
