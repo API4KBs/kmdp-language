@@ -1,18 +1,26 @@
 package edu.mayo.kmdp.language.translators.surrogate.v2;
 
-import static java.util.Collections.singletonList;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
 import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Syntactic_Translation_Task;
+import static org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormatSeries.JSON;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.FHIR_STU3;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate_2_0;
 
+import edu.mayo.kmdp.language.parsers.fhir.stu3.FHIR3Deserializer;
+import edu.mayo.kmdp.language.parsers.surrogate.v2.Surrogate2Parser;
 import edu.mayo.kmdp.language.translators.AbstractSimpleTranslator;
+import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.UUID;
 import javax.inject.Named;
 import org.hl7.fhir.dstu3.model.Library;
+import org.omg.spec.api4kp._20200801.AbstractCarrier.Encodings;
+import org.omg.spec.api4kp._20200801.Answer;
+import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.DeserializeApiInternal._applyLift;
+import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.DeserializeApiInternal._applyLower;
 import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
 import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
 import org.omg.spec.api4kp._20200801.services.KPOperation;
@@ -36,13 +44,33 @@ public class SurrogateV2toLibraryTranslator extends
 
   @Override
   public List<SyntacticRepresentation> getFrom() {
-    return singletonList(rep(Knowledge_Asset_Surrogate_2_0));
+    return Arrays.asList(
+        rep(Knowledge_Asset_Surrogate_2_0),
+        rep(Knowledge_Asset_Surrogate_2_0, JSON),
+        rep(Knowledge_Asset_Surrogate_2_0, JSON, Charset.defaultCharset()),
+        rep(Knowledge_Asset_Surrogate_2_0, JSON, Charset.defaultCharset(), Encodings.DEFAULT));
   }
 
   @Override
   public List<SyntacticRepresentation> getInto() {
-    return singletonList(rep(FHIR_STU3));
+    return Arrays.asList(
+        rep(FHIR_STU3),
+        rep(FHIR_STU3, JSON),
+        rep(FHIR_STU3, JSON, Charset.defaultCharset()),
+        rep(FHIR_STU3, JSON, Charset.defaultCharset(), Encodings.DEFAULT));
   }
+
+  @Override
+  protected Answer<_applyLift> getParser() {
+    return Answer.of(new Surrogate2Parser());
+  }
+
+  @Override
+  protected Answer<_applyLower> getTargetParser() {
+    return Answer.of(new FHIR3Deserializer());
+  }
+
+
 
   @Override
   protected Optional<Library> transformAst(ResourceIdentifier assetId,

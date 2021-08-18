@@ -16,6 +16,8 @@ package edu.mayo.kmdp.language.parsers;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
 import static org.omg.spec.api4kp._20200801.contrastors.ParsingLevelContrastor.detectLevel;
 import static org.omg.spec.api4kp._20200801.contrastors.ParsingLevelContrastor.theLevelContrastor;
+import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.Concrete_Knowledge_Expression;
+import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.Encoded_Knowledge_Expression;
 import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.Serialized_Knowledge_Expression;
 import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.asEnum;
 
@@ -74,7 +76,7 @@ public abstract class AbstractDeSerializeOperator
           lift(knowledgeCarrier,
               parsingLevel,
               ModelMIMECoder.decode(into)
-                  .orElse(inferRepresentationForLevel(getSupportedRepresentations(),parsingLevel)),
+                  .orElse(inferRepresentationForLevel(getSupportedRepresentations(), parsingLevel)),
               PropertiesUtil.parseProperties(properties)
           ));
     } catch (UnsupportedOperationException e) {
@@ -89,7 +91,7 @@ public abstract class AbstractDeSerializeOperator
       return Answer.of(
           lower(knowledgeCarrier, parsingLevel,
               ModelMIMECoder.decode(into)
-                  .orElse(inferRepresentationForLevel(getSupportedRepresentations(),parsingLevel)),
+                  .orElse(inferRepresentationForLevel(getSupportedRepresentations(), parsingLevel)),
               PropertiesUtil.parseProperties(properties)));
     } catch (UnsupportedOperationException e) {
       return Answer.failed(e);
@@ -172,13 +174,26 @@ public abstract class AbstractDeSerializeOperator
 
   protected void checkLowerConsistency(KnowledgeCarrier sourceArtifact, ParsingLevel into,
       SyntacticRepresentation targetRepresentation) {
+
     checkConsistency(sourceArtifact, into, targetRepresentation,
         theLevelContrastor::isBroaderOrEqual);
+
+    if (targetRepresentation.getFormat() == null &&
+        theLevelContrastor.isNarrowerOrEqual(into, Concrete_Knowledge_Expression)) {
+      targetRepresentation.setFormat(getDefaultFormat());
+    }
+    if (targetRepresentation.getCharset() == null &&
+        theLevelContrastor.isNarrowerOrEqual(into, Serialized_Knowledge_Expression)) {
+      targetRepresentation.setCharset(Charset.defaultCharset().name());
+    }
+    if (targetRepresentation.getEncoding() == null && into.sameAs(Encoded_Knowledge_Expression)) {
+      targetRepresentation.setEncoding(Encodings.DEFAULT.name());
+    }
   }
 
   protected void checkConsistency(KnowledgeCarrier sourceArtifact, ParsingLevel into,
       SyntacticRepresentation targetRepresentation,
-      BiPredicate<ParsingLevel,ParsingLevel> levelTest) {
+      BiPredicate<ParsingLevel, ParsingLevel> levelTest) {
 
     if (!getSupportedLanguage().sameAs(sourceArtifact.getRepresentation().getLanguage())) {
       throw new UnsupportedOperationException(
@@ -206,12 +221,12 @@ public abstract class AbstractDeSerializeOperator
     Object expr = carrier.getExpression();
     String serializedExpr;
     if (expr instanceof String) {
-      expr = Base64.getDecoder().decode((String)expr);
+      expr = Base64.getDecoder().decode((String) expr);
     }
     if (expr instanceof byte[]) {
       byte[] bytes = (byte[]) expr;
       if (bytes[0] == (byte) 0xEF && bytes[1] == (byte) 0xBB && bytes[2] == (byte) 0xBF) {
-        bytes = Arrays.copyOfRange(bytes,3, bytes.length);
+        bytes = Arrays.copyOfRange(bytes, 3, bytes.length);
       }
       serializedExpr = new String(bytes);
     } else {
@@ -355,11 +370,12 @@ public abstract class AbstractDeSerializeOperator
     }
     switch (asEnum(parsingLevel)) {
       case Encoded_Knowledge_Expression:
-        return rep(getSupportedLanguage(),getDefaultFormat(),Charset.defaultCharset(), Encodings.DEFAULT);
+        return rep(getSupportedLanguage(), getDefaultFormat(), Charset.defaultCharset(),
+            Encodings.DEFAULT);
       case Serialized_Knowledge_Expression:
-        return rep(getSupportedLanguage(),getDefaultFormat(),Charset.defaultCharset());
+        return rep(getSupportedLanguage(), getDefaultFormat(), Charset.defaultCharset());
       case Concrete_Knowledge_Expression:
-        return rep(getSupportedLanguage(),getDefaultFormat());
+        return rep(getSupportedLanguage(), getDefaultFormat());
       case Abstract_Knowledge_Expression:
         return rep(getSupportedLanguage());
       default:
