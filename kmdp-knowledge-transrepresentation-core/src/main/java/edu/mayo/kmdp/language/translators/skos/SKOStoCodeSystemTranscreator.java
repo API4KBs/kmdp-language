@@ -27,6 +27,7 @@ import java.util.UUID;
 import javax.inject.Named;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.ResIterator;
 import org.apache.jena.rdf.model.Resource;
@@ -35,8 +36,10 @@ import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
+import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Enumerations.FHIRAllTypes;
 import org.hl7.fhir.dstu3.model.Identifier;
+import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.omg.spec.api4kp._20200801.AbstractCarrier.Encodings;
 import org.omg.spec.api4kp._20200801.Answer;
@@ -47,6 +50,7 @@ import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
 import org.omg.spec.api4kp._20200801.services.KPOperation;
 import org.omg.spec.api4kp._20200801.services.KPSupport;
 import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
+import org.omg.spec.api4kp._20200801.taxonomy.iso639_2_languagecode._20190201.Language;
 import org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,13 +114,15 @@ public class SKOStoCodeSystemTranscreator extends AbstractSimpleTranslator<Model
       SyntacticRepresentation srcRep,
       SyntacticRepresentation tgtRep,
       Properties config) {
-    
-    ResIterator schemes = model.listResourcesWithProperty(RDF.type, org.apache.jena.vocabulary.SKOS.ConceptScheme);
-    if (! schemes.hasNext()) {
+
+    ResIterator schemes = model.listResourcesWithProperty(RDF.type,
+        org.apache.jena.vocabulary.SKOS.ConceptScheme);
+    if (!schemes.hasNext()) {
       return Optional.empty();
     }
     Resource conceptScheme = schemes.nextResource();
-    String conceptSchemeLabel = getLabel(model, conceptScheme);
+    String conceptSchemeLabel = getLabel(model, conceptScheme, RDFS.label)
+        .orElseThrow(() -> new IllegalStateException("Founds ConceptScheme without a label"));
 
     CodeSystem cs = new CodeSystem();
     cs.setName(NameUtils.nameToIdentifier(conceptSchemeLabel, IdentifierType.VARIABLE));
@@ -135,6 +141,9 @@ public class SKOStoCodeSystemTranscreator extends AbstractSimpleTranslator<Model
     vs.setName(conceptSchemeLabel + " (Entire ValueSet)");
 
     cs.setValueSet("#" + vs.getId());
+    cs.addExtension()
+        .setUrl("http://hl7.org/fhir/StructureDefinition/codesystem-trusted-expansion")
+        .setValue(new Reference().setReference(cs.getValueSet()));
     cs.addContained(vs);
 
     // initially, index all Concepts
@@ -167,18 +176,20 @@ public class SKOStoCodeSystemTranscreator extends AbstractSimpleTranslator<Model
     Optional<String> referent = getReferent(model, concept);
     referent.ifPresent(cd::setDefinition);
 
-    String label = getLabel(model, concept);
-    cd.setDisplay(label);
-    cd.addDesignation()
-        .setLanguage("us-en")
-        .setValue(label);
+//    String label = getLabel(model, concept);
+//    cd.setDisplay(label);
+//    cd.addDesignation()
+//        .setLanguage("us-en")
+//        .setValue(label);
+    populateLabels(cd, concept, model);
     vs.getExpansion()
         .addContains()
         .setCode(notation)
-        .setDisplay(label)
+        .setDisplay(cd.getDisplay())
         .setSystem(cs.getUrl());
 
-    List<Resource> parents = model.listObjectsOfProperty(concept, org.apache.jena.vocabulary.SKOS.broader)
+    List<Resource> parents = model.listObjectsOfProperty(concept,
+            org.apache.jena.vocabulary.SKOS.broader)
         .filterKeep(n -> n instanceof Resource)
         .mapWith(Resource.class::cast)
         .toList();
@@ -188,7 +199,7 @@ public class SKOStoCodeSystemTranscreator extends AbstractSimpleTranslator<Model
 
     cs.addConcept(cd);
     parents.stream()
-        .filter(c -> ! isTopConcept(c, model))
+        .filter(c -> !isTopConcept(c, model))
         .forEach(parent -> index.get(parent).addConcept(cd));
 
   }
@@ -202,13 +213,49 @@ public class SKOStoCodeSystemTranscreator extends AbstractSimpleTranslator<Model
   }
 
 
-  private String getLabel(Model model, Resource resource) {
-    return Optional.ofNullable(model.getProperty(resource, org.apache.jena.vocabulary.SKOS.prefLabel))
-        .or(() -> Optional.ofNullable(model.getProperty(resource, RDFS.label)))
+  private void populateLabels(ConceptDefinitionComponent cd, Resource concept, Model model) {
+    // Display label
+    Optional<String> prefLabel =
+        getLabel(model, concept, org.apache.jena.vocabulary.SKOS.prefLabel);
+    // Explicit label
+    Optional<String> altLabel =
+        getLabel(model, concept, org.apache.jena.vocabulary.SKOS.altLabel);
+    // Technical label
+    Optional<String> hiddenLabel =
+        getLabel(model, concept, org.apache.jena.vocabulary.SKOS.hiddenLabel);
+    // Fallback Option
+    Optional<String> genericLabel =
+        getLabel(model, concept, RDFS.label);
+
+    prefLabel.or(() -> altLabel).or(() -> genericLabel)
+        .ifPresent(cd::setDisplay);
+    prefLabel.ifPresent(l -> addDesignation(l, cd, org.apache.jena.vocabulary.SKOS.prefLabel));
+    hiddenLabel.ifPresent(l -> addDesignation(l, cd, org.apache.jena.vocabulary.SKOS.hiddenLabel));
+    altLabel.ifPresent(l -> addDesignation(l, cd, org.apache.jena.vocabulary.SKOS.altLabel));
+  }
+
+  private void addDesignation(
+      String label,
+      ConceptDefinitionComponent cd,
+      Property labelType) {
+    cd.addDesignation()
+        .setValue(label)
+        .setLanguage(Language.English.getTag())
+        .setUse(toCode(labelType));
+  }
+
+  private Coding toCode(Property labelType) {
+    return new Coding()
+        .setCode(labelType.getLocalName())
+        .setSystem(org.apache.jena.vocabulary.SKOS.getURI());
+  }
+
+  private Optional<String> getLabel(Model model, Resource resource, Property labelType) {
+    return Optional.ofNullable(
+            model.getProperty(resource, labelType))
         .map(Statement::getObject)
         .map(RDFNode::asLiteral)
-        .map(Literal::getString)
-        .orElseThrow();
+        .map(Literal::getString);
   }
 
   private Optional<String> getReferent(Model model, Resource resource) {
@@ -218,11 +265,14 @@ public class SKOStoCodeSystemTranscreator extends AbstractSimpleTranslator<Model
         .map(Objects::toString);
     if (str.isEmpty() && !resource.getURI().contains("nlpService")) {
       // NLP concepts are known to NOT have a referent - no need to provide a warning
-      logger.warn("Warning: no referent for {} : {}", resource.getURI(), getLabel(model, resource));
+      if (logger.isWarnEnabled()) {
+        logger.warn("Warning: no referent for {} : {}",
+            resource.getURI(),
+            getLabel(model, resource, RDFS.label));
+      }
     }
     return str;
   }
-
 
 
 }
