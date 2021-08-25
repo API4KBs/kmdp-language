@@ -122,7 +122,7 @@ public class SKOStoCodeSystemTranscreator extends AbstractSimpleTranslator<Model
     }
     Resource conceptScheme = schemes.nextResource();
     String conceptSchemeLabel = getLabel(model, conceptScheme, RDFS.label)
-        .orElseThrow(() -> new IllegalStateException("Founds ConceptScheme without a label"));
+        .orElseGet(() -> NameUtils.getTrailingPart(conceptScheme.getURI()));
 
     CodeSystem cs = new CodeSystem();
     cs.setName(NameUtils.nameToIdentifier(conceptSchemeLabel, IdentifierType.VARIABLE));
