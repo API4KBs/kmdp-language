@@ -11,12 +11,13 @@
  * or implied. See the License for the specific language governing permissions and limitations under
  * the License.
  */
-package edu.mayo.kmdp.language.translators.cmmn.v1_1;
+package edu.mayo.kmdp.language.translators.cmmn.v1_1.stu3;
 
 import static edu.mayo.kmdp.language.common.fhir.stu3.FHIRPlanDefinitionUtils.toCodeableConcept;
 import static edu.mayo.kmdp.util.NameUtils.nameToIdentifier;
 import static edu.mayo.kmdp.util.Util.ensureUTF8;
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.Captures;
+import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.Has_Primary_Subject;
 import static org.omg.spec.api4kp._20200801.taxonomy.clinicalknowledgeassettype.ClinicalKnowledgeAssetTypeSeries.Care_Process_Model;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.FHIRPath_STU1;
 
@@ -58,6 +59,7 @@ import org.omg.spec.api4kp._20200801.id.Term;
 import org.omg.spec.api4kp._20200801.surrogate.Annotation;
 import org.omg.spec.api4kp._20200801.taxonomy.krserialization.KnowledgeRepresentationLanguageSerializationSeries;
 import org.omg.spec.cmmn._20151109.model.CaseFileItemTransition;
+import org.omg.spec.cmmn._20151109.model.TApplicabilityRule;
 import org.omg.spec.cmmn._20151109.model.TAssociation;
 import org.omg.spec.cmmn._20151109.model.TCase;
 import org.omg.spec.cmmn._20151109.model.TCaseFileItem;
@@ -258,6 +260,12 @@ public class CmmnToPlanDef {
         mappedPlanElements.add(
             this.processDiscretionaryHumanTask(discretionaryItem, (THumanTask) definition,
                 caseModel));
+      } else if (definition instanceof TDecisionTask) {
+        mappedPlanElements.add(
+            this.processDiscretionaryDecisionTask(discretionaryItem, (TDecisionTask) definition,
+                caseModel));
+      } else {
+        throw new UnsupportedOperationException("Defensive! Unsupported Discretionary Task");
       }
     }
   }
@@ -278,14 +286,18 @@ public class CmmnToPlanDef {
 
   private TTask toTask(Object associated) {
     Object x = associated;
-    if (!(x instanceof TPlanItem)) {
-      throw new UnsupportedOperationException("Defensive");
+    if (x instanceof TPlanItem) {
+      x = ((TPlanItem) associated).getDefinitionRef();
+      if (x instanceof TTask) {
+        return (TTask) x;
+      }
+    } else if (x instanceof TDiscretionaryItem) {
+      x = ((TDiscretionaryItem) associated).getDefinitionRef();
+      if (x instanceof TTask) {
+        return (TTask) x;
+      }
     }
-    x = ((TPlanItem) associated).getDefinitionRef();
-    if (!(x instanceof TTask)) {
-      throw new UnsupportedOperationException("Defensive");
-    }
-    return (TTask) x;
+    throw new UnsupportedOperationException("Defensive");
   }
 
   private void processCaseFileItem(TCaseFileItemDefinition cfiDef,
@@ -308,11 +320,11 @@ public class CmmnToPlanDef {
       }
       if (associated.getInput().stream().map(TCaseParameter::getBindingRef)
           .anyMatch(x -> x == cfi)) {
-        planAction.addInput(toSemanticInput(annos.iterator().next()));
+        planAction.addInput(toSemanticDataRequirement(annos.iterator().next()));
       }
       if (associated.getOutput().stream().map(TCaseParameter::getBindingRef)
           .anyMatch(x -> x == cfi)) {
-        planAction.addOutput(toSemanticInput(annos.iterator().next()));
+        planAction.addOutput(toSemanticDataRequirement(annos.iterator().next()));
       }
     } else {
       throw new UnsupportedOperationException(
@@ -390,6 +402,9 @@ public class CmmnToPlanDef {
         } else if (sourceRef instanceof TPlanItem) {
           processPlanItemOnPartWithPlanItemSource(itemWithSentry, scopedActions, stage,
               (TPlanItem) sourceRef);
+        } else if (sourceRef instanceof TDiscretionaryItem) {
+          processPlanItemOnPartWithDiscretionarySource(itemWithSentry, scopedActions, stage,
+              (TDiscretionaryItem) sourceRef);
         } else {
           throw new UnsupportedOperationException("Defensive!");
         }
@@ -468,9 +483,29 @@ public class CmmnToPlanDef {
     }
   }
 
+  private void processPlanItemOnPartWithDiscretionarySource(TPlanItemDefinition itemWithSentry,
+      List<PlanDefinitionActionComponent> scopedActions, TStage stage, TDiscretionaryItem sourceRef) {
+    Object sourceDef = sourceRef.getDefinitionRef();
+
+    Optional<PlanDefinitionActionComponent> whiteActOpt = scopedActions.stream()
+        .filter(act -> act.getId().equals(itemWithSentry.getId()))
+        .findFirst();
+    PlanDefinitionActionComponent whiteAct = whiteActOpt.orElseThrow();
+
+    if (sourceRef.getDefinitionRef() instanceof TTask) {
+      TTask srcTask = (TTask) sourceDef;
+      PlanDefinitionActionComponent blackAct = scopedActions.stream()
+          .filter(act -> act.getId().equals(srcTask.getId()))
+          .findFirst().orElseThrow();
+      whiteAct.addRelatedAction(
+          new PlanDefinitionActionRelatedActionComponent()
+              .setRelationship(ActionRelationshipType.AFTER)
+              .setActionId(blackAct.getId()));
+    }
+  }
+
   private void processPlanItemOnPartWithPlanItemSource(TPlanItemDefinition itemWithSentry,
-      List<PlanDefinitionActionComponent> scopedActions, TStage stage, TPlanItem sourceRef) {
-    var sourceItem = sourceRef;
+      List<PlanDefinitionActionComponent> scopedActions, TStage stage, TPlanItem sourceItem) {
     Object sourceDef = sourceItem.getDefinitionRef();
 
     Optional<PlanDefinitionActionComponent> whiteActOpt = scopedActions.stream()
@@ -523,7 +558,7 @@ public class CmmnToPlanDef {
           .setExpression("Resource.where(tag = '" + anno.getTag() + "').exists()");
 
       // model milestone as a trigger
-      var dataRequirement = toSemanticInput(anno);
+      var dataRequirement = toSemanticDataRequirement(anno);
       whiteAct.addTriggerDefinition()
           .setType(TriggerType.DATAACCESSED)
           .setEventData(dataRequirement);
@@ -605,7 +640,30 @@ public class CmmnToPlanDef {
 
     processAssociatedItems(discretionaryItem, caseModel, planAction);
 
+    discretionaryItem.getApplicabilityRuleRefs().stream()
+        .flatMap(StreamUtil.filterAs(TApplicabilityRule.class))
+        .forEach(app -> mapApplicabilityRule(app, caseModel, planAction));
+
     return planAction;
+  }
+
+  private void mapApplicabilityRule(TApplicabilityRule app, TDefinitions caseModel,
+      PlanDefinitionActionComponent planAction) {
+    if (! (app.getContextRef() instanceof TCaseFileItem)) {
+      throw new UnsupportedOperationException(
+          "Unable to process applicability with context " + app.getContextRef());
+    }
+    TCaseFileItem cfi = (TCaseFileItem) app.getContextRef();
+    Term anno = getSemanticAnnotation(cfi.getExtensionElements()).stream()
+        .findFirst()
+        .orElseThrow(() -> new IllegalStateException("Defensive!"));
+
+    planAction.addInput(toSemanticDataRequirement(anno));
+
+    CodeableConcept cc = toCodeableConcept(anno);
+    planAction.addCondition()
+        .setKind(ActionConditionKind.APPLICABILITY)
+        .setExpression(cc.getCodingFirstRep().getCode());
   }
 
 
@@ -641,6 +699,26 @@ public class CmmnToPlanDef {
             KnowledgeRepresentationLanguageSerializationSeries.CMMN_1_1_XML_Syntax.getReferentId()
                 .toString())
         .setCode("HumanTask")
+    );
+    return planAction;
+  }
+
+  private PlanDefinitionActionComponent processDiscretionaryDecisionTask(
+      TDiscretionaryItem planItem,
+      TDecisionTask decisionTask,
+      TDefinitions caseModel) {
+    PlanDefinitionActionComponent planAction
+        = processDiscretionaryTask(decisionTask, caseModel, planItem);
+
+    addAnnotations(decisionTask.getExtensionElements(), planAction);
+
+    addDefinition(planAction, decisionTask, caseModel);
+
+    planAction.setType(new Coding()
+        .setSystem(
+            KnowledgeRepresentationLanguageSerializationSeries.CMMN_1_1_XML_Syntax.getReferentId()
+                .toString())
+        .setCode("DecisionTask")
     );
     return planAction;
   }
@@ -840,7 +918,7 @@ public class CmmnToPlanDef {
       List<Annotation> annotations = extensionElements.stream()
           .flatMap(StreamUtil.filterAs(Annotation.class))
           .filter(annotation -> annotation.getRel().getConceptId()
-              .equals(SemanticAnnotationRelTypeSeries.Has_Primary_Subject.getConceptId()))
+              .equals(Has_Primary_Subject.getConceptId()))
           .collect(Collectors.toList());
 
       if (annotations.size() > 1) {
@@ -856,7 +934,7 @@ public class CmmnToPlanDef {
   }
 
 
-  private DataRequirement toSemanticInput(Term anno) {
+  private DataRequirement toSemanticDataRequirement(Term anno) {
     var dataRequirement = new DataRequirement();
     dataRequirement.addCodeFilter().addValueCodeableConcept(toCodeableConcept(anno));
     return dataRequirement;

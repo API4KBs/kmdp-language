@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.mayo.kmdp.language.translators.cmmn.v1_1;
+package edu.mayo.kmdp.language.translators.cmmn.v1_1.stu3;
 
 import static java.util.Collections.singletonList;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
