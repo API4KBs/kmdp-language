@@ -66,7 +66,8 @@ public class CmmnToPlanDefR4Translator
 
   @Override
   protected Optional<PlanDefinition> transformAst(
-      ResourceIdentifier assetId, TDefinitions expression,
+      ResourceIdentifier assetId, ResourceIdentifier srcArtifactId,
+      TDefinitions expression,
       SyntacticRepresentation srcRep,
       SyntacticRepresentation tgtRep,
       Properties config) {

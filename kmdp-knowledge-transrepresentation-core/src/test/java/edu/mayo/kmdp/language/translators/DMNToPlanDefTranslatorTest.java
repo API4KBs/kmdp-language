@@ -9,16 +9,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.codedRep;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.of;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
+import static org.omg.spec.api4kp._20200801.id.SemanticIdentifier.newId;
 import static org.omg.spec.api4kp._20200801.id.SemanticIdentifier.randomId;
+import static org.omg.spec.api4kp._20200801.surrogate.SurrogateBuilder.defaultArtifactId;
 import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeassettype.KnowledgeAssetTypeSeries.Interactive_Documentation_Template;
 import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeassettype.KnowledgeAssetTypeSeries.Questionnaire;
 import static org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormatSeries.XML_1_1;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.DMN_1_2;
+import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.FHIR_STU3;
 import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.Abstract_Knowledge_Expression;
 
-import edu.mayo.kmdp.language.common.dmn.v1_2.DMN12Utils;
 import edu.mayo.kmdp.language.parsers.dmn.v1_2.DMN12Parser;
 import edu.mayo.kmdp.language.translators.dmn.v1_2.DmnToPlanDef;
+import edu.mayo.kmdp.registry.Registry;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.UUID;
@@ -32,17 +35,15 @@ import org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.omg.spec.api4kp._20200801.AbstractCarrier.Encodings;
+import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
 import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._20200801.surrogate.Annotation;
-import org.omg.spec.api4kp._20200801.taxonomy.knowledgeassettype.KnowledgeAssetTypeSeries;
 import org.omg.spec.dmn._20180521.model.ObjectFactory;
 import org.omg.spec.dmn._20180521.model.TAuthorityRequirement;
-import org.omg.spec.dmn._20180521.model.TDMNElement;
 import org.omg.spec.dmn._20180521.model.TDMNElement.ExtensionElements;
 import org.omg.spec.dmn._20180521.model.TDMNElementReference;
 import org.omg.spec.dmn._20180521.model.TDecision;
 import org.omg.spec.dmn._20180521.model.TDefinitions;
-import org.omg.spec.dmn._20180521.model.TKnowledgeRequirement;
 import org.omg.spec.dmn._20180521.model.TKnowledgeSource;
 
 public class DMNToPlanDefTranslatorTest {
@@ -51,9 +52,13 @@ public class DMNToPlanDefTranslatorTest {
   void testDecisionService() {
     DmnToPlanDef translator = new DmnToPlanDef();
     TDefinitions source = loadDMN("/fhir.stu3/DMNService.dmn.xml");
-    PlanDefinition planDef = translator.transform(randomId(),source);
+    ResourceIdentifier assetId = randomId();
+    ResourceIdentifier srcArtifactId = randomId();
+    ResourceIdentifier tgtArtifactId =
+        defaultArtifactId(assetId, FHIR_STU3, srcArtifactId.getVersionTag());
+    PlanDefinition planDef = translator.transform(assetId, srcArtifactId, tgtArtifactId, source);
 
-    assertEquals(1,planDef.getAction().size());
+    assertEquals(1, planDef.getAction().size());
     PlanDefinitionActionComponent clientAct = planDef.getActionFirstRep();
     assertEquals(1, clientAct.getAction().size());
     PlanDefinitionActionComponent serverAct = clientAct.getActionFirstRep();
@@ -67,7 +72,11 @@ public class DMNToPlanDefTranslatorTest {
   void testKnowledgeSource() {
     DmnToPlanDef translator = new DmnToPlanDef();
     TDefinitions source = loadDMN("/fhir.stu3/decisionKnowSource.dmn.xml");
-    PlanDefinition planDef = translator.transform(randomId(),source);
+    ResourceIdentifier assetId = randomId();
+    ResourceIdentifier srcArtifactId = randomId();
+    ResourceIdentifier tgtArtifactId =
+        defaultArtifactId(assetId, FHIR_STU3, srcArtifactId.getVersionTag());
+    PlanDefinition planDef = translator.transform(assetId, srcArtifactId, tgtArtifactId, source);
 
     List<RelatedArtifact> relateds = getKnowledgeSources(planDef).collect(Collectors.toList());
     assertEquals(1, relateds.size());
@@ -110,7 +119,11 @@ public class DMNToPlanDefTranslatorTest {
         .withDrgElement(of.createKnowledgeSource(ks2));
 
     DmnToPlanDef translator = new DmnToPlanDef();
-    PlanDefinition planDef = translator.transform(randomId(),dmn);
+    ResourceIdentifier assetId = randomId();
+    ResourceIdentifier srcArtifactId = randomId();
+    ResourceIdentifier tgtArtifactId =
+        defaultArtifactId(assetId, FHIR_STU3, srcArtifactId.getVersionTag());
+    PlanDefinition planDef = translator.transform(assetId, srcArtifactId, tgtArtifactId, dmn);
 
     PlanDefinitionActionComponent decAct = planDef.getActionFirstRep();
     assertEquals(2, decAct.getDocumentation().size());
@@ -118,7 +131,7 @@ public class DMNToPlanDefTranslatorTest {
 
     Library lib = planDef.getContained().stream()
         .flatMap(filterAs(Library.class))
-        .filter(l -> ! l.getRelatedArtifact().isEmpty())
+        .filter(l -> !l.getRelatedArtifact().isEmpty())
         .findFirst().orElseGet(Assertions::fail);
 
     assertEquals(lib.getType().getCodingFirstRep().getCode(),
@@ -126,8 +139,32 @@ public class DMNToPlanDefTranslatorTest {
     assertFalse(lib.getRelatedArtifact().isEmpty());
 
     RelatedArtifact ra = lib.getRelatedArtifactFirstRep();
-    assertEquals(ks1.getLocationURI(),ra.getUrl());
+    assertEquals(ks1.getLocationURI(), ra.getUrl());
     assertEquals(RelatedArtifactType.COMPOSEDOF, ra.getType());
+  }
+
+  @Test
+  void testIdentityMapping() {
+    TDefinitions dmn = new TDefinitions();
+    DmnToPlanDef translator = new DmnToPlanDef();
+    ResourceIdentifier assetId = randomId();
+    ResourceIdentifier srcArtifactId =
+        newId(Registry.BASE_UUID_URN_URI, UUID.randomUUID(), "42.0.0");
+    ResourceIdentifier tgtArtifactId =
+        defaultArtifactId(assetId, FHIR_STU3, srcArtifactId.getVersionTag());
+    PlanDefinition planDef = translator.transform(assetId, srcArtifactId, tgtArtifactId, dmn);
+
+    assertEquals(2, planDef.getIdentifier().size());
+    assertTrue(planDef.getIdentifier().stream().anyMatch(
+        id -> id.getValue().equals(assetId.toString())));
+    assertTrue(planDef.getIdentifier().stream().anyMatch(
+        id -> id.getValue().equals(tgtArtifactId.toString())));
+
+    assertEquals(tgtArtifactId.getUuid().toString(), planDef.getId());
+    assertEquals(srcArtifactId.getVersionTag(), planDef.getVersion());
+
+    assertEquals(srcArtifactId.toString(), planDef.getRelatedArtifactFirstRep().getUrl());
+    assertEquals(RelatedArtifactType.DERIVEDFROM, planDef.getRelatedArtifactFirstRep().getType());
   }
 
   private Stream<RelatedArtifact> getKnowledgeSources(PlanDefinition x) {
@@ -137,7 +174,7 @@ public class DMNToPlanDefTranslatorTest {
 
   private TDefinitions loadDMN(String path) {
     KnowledgeCarrier kc = of(DMNToPlanDefTranslatorTest.class.getResourceAsStream(path))
-        .withRepresentation(rep(DMN_1_2,XML_1_1, Charset.defaultCharset(), Encodings.DEFAULT));
+        .withRepresentation(rep(DMN_1_2, XML_1_1, Charset.defaultCharset(), Encodings.DEFAULT));
     return new DMN12Parser()
         .applyLift(kc, Abstract_Knowledge_Expression, codedRep(DMN_1_2), null)
         .flatOpt(x -> x.as(TDefinitions.class))

@@ -1,17 +1,15 @@
 /**
  * Copyright © 2018 Mayo Clinic (RSTKNOWLEDGEMGMT@mayo.edu)
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License. You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software distributed under the License
+ * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing permissions and limitations under
+ * the License.
  */
 package edu.mayo.kmdp.language.translators.dmn.v1_2;
 
@@ -24,6 +22,8 @@ import static org.omg.spec.api4kp._20200801.taxonomy.lexicon.LexiconSeries.PCV;
 import static org.omg.spec.api4kp._20200801.taxonomy.lexicon.LexiconSeries.SNOMED_CT;
 
 import edu.mayo.kmdp.language.translators.AbstractSimpleTranslator;
+import edu.mayo.kmdp.util.Util;
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
@@ -40,14 +40,14 @@ import org.omg.spec.dmn._20180521.model.TDefinitions;
 
 @Named
 @KPOperation(Syntactic_Translation_Task)
-@KPSupport({FHIR_STU3,DMN_1_2})
-public class DmnToPlanDefTranslator extends AbstractSimpleTranslator<TDefinitions,PlanDefinition> {
+@KPSupport({FHIR_STU3, DMN_1_2})
+public class DmnToPlanDefTranslator extends AbstractSimpleTranslator<TDefinitions, PlanDefinition> {
 
   public static final UUID id = UUID.fromString("0e990fd3-66ea-45f6-a435-0be83e9654d3");
   public static final String version = "1.0.0";
 
   public DmnToPlanDefTranslator() {
-    setId(SemanticIdentifier.newId(id,version));
+    setId(SemanticIdentifier.newId(id, version));
   }
 
   @Override
@@ -63,11 +63,15 @@ public class DmnToPlanDefTranslator extends AbstractSimpleTranslator<TDefinition
   }
 
   @Override
-  protected Optional<PlanDefinition> transformAst(ResourceIdentifier assetId,
+  protected Optional<PlanDefinition> transformAst(
+      ResourceIdentifier assetId,
+      ResourceIdentifier srcArtifactId,
       TDefinitions expression,
       SyntacticRepresentation srcRep,
-      SyntacticRepresentation tgtRep, Properties config) {
-    return Optional.ofNullable(new DmnToPlanDef().transform(assetId, expression));
+      SyntacticRepresentation tgtRep,
+      Properties config) {
+    return Optional.ofNullable(new DmnToPlanDef()
+        .transform(assetId, srcArtifactId, mapArtifactId(assetId, srcArtifactId), expression));
   }
 
   @Override
@@ -80,4 +84,18 @@ public class DmnToPlanDefTranslator extends AbstractSimpleTranslator<TDefinition
     return FHIR_STU3;
   }
 
+  @Override
+  public ResourceIdentifier mapArtifactId(ResourceIdentifier assetId,
+      ResourceIdentifier artifactId) {
+    return mapArtifactToArtifactId(artifactId);
+  }
+
+  public static ResourceIdentifier mapArtifactToArtifactId(ResourceIdentifier artifactId) {
+    URI ns = artifactId.getNamespaceUri();
+    UUID uuid = Util.hashUUID(artifactId.getUuid(), FHIR_STU3.getUuid());
+    String version = artifactId.getVersionTag();
+    return version != null
+        ? SemanticIdentifier.newId(ns, uuid, version)
+        : SemanticIdentifier.newId(ns, uuid);
+  }
 }

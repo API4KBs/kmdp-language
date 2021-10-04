@@ -4,6 +4,7 @@ import static org.omg.spec.api4kp._20200801.AbstractCarrier.of;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.ofAst;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.ofTree;
 import static org.omg.spec.api4kp._20200801.contrastors.SyntacticRepresentationContrastor.theRepContrastor;
+import static org.omg.spec.api4kp._20200801.surrogate.SurrogateBuilder.defaultArtifactId;
 import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.asEnum;
 
 import edu.mayo.kmdp.util.Util;
@@ -16,7 +17,6 @@ import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
 import org.omg.spec.api4kp._20200801.services.transrepresentation.ModelMIMECoder;
 import org.omg.spec.api4kp._20200801.services.transrepresentation.TransrepresentationOperator;
-import org.omg.spec.api4kp._20200801.surrogate.SurrogateBuilder;
 import org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
 import org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevel;
 
@@ -31,9 +31,12 @@ public interface TransionApiOperator
 
   KnowledgeRepresentationLanguage getTargetLanguage();
 
-  default ResourceIdentifier mapArtifactId(ResourceIdentifier assetId, ResourceIdentifier artifactId) {
-    // in general, transformations preserve the asset, but create brand new artifacts
-    return SurrogateBuilder.defaultArtifactId(assetId, getTargetLanguage());
+  default ResourceIdentifier mapArtifactId(ResourceIdentifier assetId,
+      ResourceIdentifier artifactId) {
+    // in general, transformations preserve the asset, but create new artifacts
+    return artifactId != null
+        ? defaultArtifactId(assetId, getTargetLanguage(), artifactId.getVersionTag())
+        : defaultArtifactId(assetId, getTargetLanguage());
   }
 
   default ResourceIdentifier mapAssetId(ResourceIdentifier assetId) {
@@ -43,9 +46,9 @@ public interface TransionApiOperator
   default boolean consumes(String from) {
     return Util.isEmpty(from) ||
         ModelMIMECoder.decode(from)
-        .map(fromRep -> getFrom().stream()
-            .anyMatch(supported -> theRepContrastor.isBroaderOrEqual(supported, fromRep)))
-        .orElse(false);
+            .map(fromRep -> getFrom().stream()
+                .anyMatch(supported -> theRepContrastor.isBroaderOrEqual(supported, fromRep)))
+            .orElse(false);
   }
 
   default boolean produces(String into) {

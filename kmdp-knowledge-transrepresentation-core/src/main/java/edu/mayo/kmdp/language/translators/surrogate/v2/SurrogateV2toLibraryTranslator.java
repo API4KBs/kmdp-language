@@ -74,7 +74,7 @@ public class SurrogateV2toLibraryTranslator extends
 
   @Override
   protected Optional<Library> transformAst(ResourceIdentifier assetId,
-      KnowledgeAsset expression,
+      ResourceIdentifier srcArtifactId, KnowledgeAsset expression,
       SyntacticRepresentation srcRep,
       SyntacticRepresentation tgtRep,
       Properties config) {

@@ -33,7 +33,9 @@ import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.Semant
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.Defines;
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.Has_Primary_Subject;
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.In_Terms_Of;
+import static java.util.Collections.singletonList;
 import static org.omg.spec.api4kp._20200801.id.SemanticIdentifier.newVersionId;
+import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeassettype.KnowledgeAssetTypeSeries.Decision_Model;
 
 import edu.mayo.kmdp.language.common.fhir.stu3.FHIRPlanDefinitionUtils;
 import edu.mayo.kmdp.util.NameUtils.IdentifierType;
@@ -42,6 +44,7 @@ import edu.mayo.kmdp.util.Util;
 import edu.mayo.ontology.taxonomies.kao.decisiontype.DecisionTypeSeries;
 import edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -90,11 +93,15 @@ public class DmnToPlanDef {
     // nothing to do
   }
 
-  public PlanDefinition transform(ResourceIdentifier assetId, TDefinitions decisionModel) {
+  public PlanDefinition transform(
+      ResourceIdentifier assetId,
+      ResourceIdentifier srcArtifactId,
+      ResourceIdentifier tgtArtifactId,
+      TDefinitions decisionModel) {
     log.debug("Called Translator DMN to PDF  for {}", decisionModel.getName());
     var cpm = new PlanDefinition();
 
-    mapIdentity(cpm, assetId.getResourceId(), decisionModel);
+    mapIdentity(cpm, assetId, srcArtifactId, tgtArtifactId);
     mapName(cpm, decisionModel);
     mapSubject(cpm, decisionModel);
 
@@ -252,16 +259,30 @@ public class DmnToPlanDef {
   }
 
 
-  private void mapIdentity(PlanDefinition cpm, URI assetId, TDefinitions decisionModel) {
-    Identifier fhirAssetId = new Identifier()
-        .setType(toCodeableConcept(SemanticAnnotationRelTypeSeries.Is_Identified_By))
-        .setValue(assetId.toString());
+  private void mapIdentity(
+      PlanDefinition cpm,
+      ResourceIdentifier assetId,
+      //    , TDefinitions caseModel
+      ResourceIdentifier srcArtifactId,
+      ResourceIdentifier tgtArtifactId) {
 
-    cpm.setIdentifier(Collections.singletonList(fhirAssetId))
-        .setVersion("TODO");
+    // tag with asset Id
+    cpm.setIdentifier(Arrays.asList(
+        new Identifier()
+            .setType(toCodeableConcept(SemanticAnnotationRelTypeSeries.Is_Identified_By))
+            .setValue(assetId.toString()),
+        new Identifier()
+            .setType(toCodeableConcept(SemanticAnnotationRelTypeSeries.Is_Identified_By))
+            .setValue(tgtArtifactId.toString())));
 
-    cpm.setType(toCodeableConcept(KnowledgeAssetTypeSeries.Decision_Model));
-    cpm.setId("#" + decisionModel.getNamespace());
+    cpm.setRelatedArtifact(singletonList(
+        new RelatedArtifact()
+            .setType(RelatedArtifactType.DERIVEDFROM)
+            .setUrl(srcArtifactId.toString())));
+
+    cpm.setType(toCodeableConcept(Decision_Model));
+    cpm.setVersion(tgtArtifactId.getVersionTag());
+    cpm.setId(tgtArtifactId.getUuid().toString());
   }
 
   private PlanDefinitionActionComponent processDecision(

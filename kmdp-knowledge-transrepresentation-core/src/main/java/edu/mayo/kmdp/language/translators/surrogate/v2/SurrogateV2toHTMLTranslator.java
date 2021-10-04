@@ -8,7 +8,6 @@ import static org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationForma
 import static org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormatSeries.XML_1_1;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.HTML;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate_2_0;
-import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.asEnum;
 
 import edu.mayo.kmdp.language.parsers.surrogate.v2.Surrogate2Parser;
 import edu.mayo.kmdp.language.translators.AbstractSimpleTranslator;
@@ -25,7 +24,6 @@ import org.omg.spec.api4kp._20200801.AbstractCarrier.Encodings;
 import org.omg.spec.api4kp._20200801.Answer;
 import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.DeserializeApiInternal._applyLift;
 import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.DeserializeApiInternal._applyLower;
-import org.omg.spec.api4kp._20200801.contrastors.ParsingLevelContrastor;
 import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
 import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
 import org.omg.spec.api4kp._20200801.services.KPOperation;
@@ -33,8 +31,6 @@ import org.omg.spec.api4kp._20200801.services.KPSupport;
 import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
 import org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset;
 import org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
-import org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevel;
-import org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries;
 
 @Named
 @KPOperation(Syntactic_Translation_Task)
@@ -76,7 +72,7 @@ public class SurrogateV2toHTMLTranslator extends
 
   @Override
   protected Optional<Document> transformAst(ResourceIdentifier assetId,
-      KnowledgeAsset expression,
+      ResourceIdentifier srcArtifactId, KnowledgeAsset expression,
       SyntacticRepresentation srcRep,
       SyntacticRepresentation tgtRep,
       Properties config) {

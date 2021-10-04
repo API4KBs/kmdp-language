@@ -84,29 +84,36 @@ public abstract class AbstractSimpleTranslator<S, T>
       case Encoded_Knowledge_Expression:
         return src.asBinary()
             .flatMap(
-                bytes -> transformBinary(src.getAssetId(), bytes, src.getRepresentation(), tgtRep,
-                    config))
+                bytes -> transformBinary(src.getAssetId(), src.getArtifactId(), bytes,
+                    src.getRepresentation(),
+                    tgtRep, config))
             .map(out -> wrap(
-                tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getAssetId(), src.getArtifactId()),
+                tgtRep, out, mapAssetId(src.getAssetId()),
+                mapArtifactId(src.getAssetId(), src.getArtifactId()),
                 src.getLabel()));
       case Serialized_Knowledge_Expression:
         return src.asString()
-            .flatMap(str -> transformString(src.getAssetId(), str, src.getRepresentation(), tgtRep,
-                config))
+            .flatMap(str -> transformString(src.getAssetId(), src.getArtifactId(), str,
+                src.getRepresentation(),
+                tgtRep, config))
             .map(out -> wrap(
-                tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getAssetId(), src.getArtifactId()),
+                tgtRep, out, mapAssetId(src.getAssetId()),
+                mapArtifactId(src.getAssetId(), src.getArtifactId()),
                 src.getLabel()));
       case Concrete_Knowledge_Expression:
-        return transformTree(src.getAssetId(), src.getExpression(), src.getRepresentation(), tgtRep,
-            config)
-            .map(out -> wrap(
-                tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getAssetId(), src.getArtifactId()),
-                src.getLabel()));
-      case Abstract_Knowledge_Expression:
-        return transformAst(src.getAssetId(), (S) src.getExpression(), src.getRepresentation(),
+        return transformTree(src.getAssetId(), src.getArtifactId(), src.getExpression(),
+            src.getRepresentation(),
             tgtRep, config)
             .map(out -> wrap(
-                tgtRep, out, mapAssetId(src.getAssetId()), mapArtifactId(src.getAssetId(), src.getArtifactId()),
+                tgtRep, out, mapAssetId(src.getAssetId()),
+                mapArtifactId(src.getAssetId(), src.getArtifactId()),
+                src.getLabel()));
+      case Abstract_Knowledge_Expression:
+        return transformAst(src.getAssetId(), src.getArtifactId(), (S) src.getExpression(),
+            src.getRepresentation(), tgtRep, config)
+            .map(out -> wrap(
+                tgtRep, out, mapAssetId(src.getAssetId()),
+                mapArtifactId(src.getAssetId(), src.getArtifactId()),
                 src.getLabel()));
       default:
         throw new UnsupportedOperationException();
@@ -143,7 +150,9 @@ public abstract class AbstractSimpleTranslator<S, T>
   }
 
   protected Optional<T> transformAst(
-      ResourceIdentifier assetId, S expression,
+      ResourceIdentifier assetId,
+      ResourceIdentifier srcArtifactId,
+      S expression,
       SyntacticRepresentation srcRep,
       SyntacticRepresentation tgtRep,
       Properties config) {
@@ -151,44 +160,55 @@ public abstract class AbstractSimpleTranslator<S, T>
   }
 
   protected Optional<T> transformTree(
-      ResourceIdentifier assetId, Object expression, SyntacticRepresentation srcRep,
-      SyntacticRepresentation tgtRep,
-      Properties config) {
-    return getParser()
-        .flatMap(parser -> parser.applyLift(
-            AbstractCarrier.ofTree(expression, srcRep)
-                .withLevel(Concrete_Knowledge_Expression),
-            Abstract_Knowledge_Expression,
-            codedRep(srcRep.getLanguage()),
-            PropertiesUtil.serializeProps(config))
-            .map(KnowledgeCarrier::getExpression)
-            .flatOpt(
-                srcAst -> this
-                    .transformAst(assetId, (S) srcAst, rep(srcRep.getLanguage()), tgtRep, config)))
-        .getOptionalValue();
-  }
-
-  protected Optional<T> transformString(
-      ResourceIdentifier assetId, String str,
+      ResourceIdentifier assetId,
+      ResourceIdentifier srcArtifactId,
+      Object expression,
       SyntacticRepresentation srcRep,
       SyntacticRepresentation tgtRep,
       Properties config) {
     return getParser()
         .flatMap(parser -> parser.applyLift(
-            AbstractCarrier.ofTree(str, srcRep)
-                .withLevel(Serialized_Knowledge_Expression),
-            Abstract_Knowledge_Expression,
-            codedRep(srcRep.getLanguage()),
-            PropertiesUtil.serializeProps(config))
+                AbstractCarrier.ofTree(expression, srcRep)
+                    .withLevel(Concrete_Knowledge_Expression),
+                Abstract_Knowledge_Expression,
+                codedRep(srcRep.getLanguage()),
+                PropertiesUtil.serializeProps(config))
             .map(KnowledgeCarrier::getExpression)
             .flatOpt(
                 srcAst -> this
-                    .transformAst(assetId, (S) srcAst, rep(srcRep.getLanguage()), tgtRep, config)))
+                    .transformAst(assetId, srcArtifactId, (S) srcAst, rep(srcRep.getLanguage()),
+                        tgtRep,
+                        config)))
+        .getOptionalValue();
+  }
+
+  protected Optional<T> transformString(
+      ResourceIdentifier assetId,
+      ResourceIdentifier srcArtifactId,
+      String str,
+      SyntacticRepresentation srcRep,
+      SyntacticRepresentation tgtRep,
+      Properties config) {
+    return getParser()
+        .flatMap(parser -> parser.applyLift(
+                AbstractCarrier.ofTree(str, srcRep)
+                    .withLevel(Serialized_Knowledge_Expression),
+                Abstract_Knowledge_Expression,
+                codedRep(srcRep.getLanguage()),
+                PropertiesUtil.serializeProps(config))
+            .map(KnowledgeCarrier::getExpression)
+            .flatOpt(
+                srcAst -> this
+                    .transformAst(assetId, srcArtifactId, (S) srcAst, rep(srcRep.getLanguage()),
+                        tgtRep,
+                        config)))
         .getOptionalValue();
   }
 
   protected Optional<T> transformBinary(
-      ResourceIdentifier assetId, byte[] bytes,
+      ResourceIdentifier assetId,
+      ResourceIdentifier srcArtifactId,
+      byte[] bytes,
       SyntacticRepresentation srcRep,
       SyntacticRepresentation tgtRep,
       Properties config) {
@@ -205,7 +225,8 @@ public abstract class AbstractSimpleTranslator<S, T>
         .map(KnowledgeCarrier::getExpression)
         .flatOpt(
             srcAst -> this
-                .transformAst(assetId, (S) srcAst, rep(srcRep.getLanguage()), tgtRep, config))
+                .transformAst(assetId, srcArtifactId, (S) srcAst, rep(srcRep.getLanguage()), tgtRep,
+                    config))
         .getOptionalValue();
   }
 

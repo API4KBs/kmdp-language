@@ -51,6 +51,7 @@ public class StructDefToDMNProjectingTranslator extends AbstractSimpleTranslator
 
   @Override
   protected Optional<TDefinitions> transformAst(ResourceIdentifier assetId,
+      ResourceIdentifier srcArtifactId,
       StructureDefinition expression,
       SyntacticRepresentation srcRep,
       SyntacticRepresentation tgtRep,

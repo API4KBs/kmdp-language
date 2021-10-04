@@ -1,11 +1,11 @@
 /**
  * Copyright © 2018 Mayo Clinic (RSTKNOWLEDGEMGMT@mayo.edu)
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
- *
+ * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  * or implied. See the License for the specific language governing permissions and limitations under
@@ -18,22 +18,24 @@ import static edu.mayo.kmdp.util.NameUtils.nameToIdentifier;
 import static edu.mayo.kmdp.util.Util.ensureUTF8;
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.Captures;
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.Has_Primary_Subject;
+import static java.util.Collections.singletonList;
 import static org.omg.spec.api4kp._20200801.taxonomy.clinicalknowledgeassettype.ClinicalKnowledgeAssetTypeSeries.Care_Process_Model;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.FHIRPath_STU1;
 
 import edu.mayo.kmdp.language.common.fhir.stu3.FHIRPlanDefinitionUtils;
+import edu.mayo.kmdp.language.translators.dmn.v1_2.DmnToPlanDefTranslator;
 import edu.mayo.kmdp.util.NameUtils.IdentifierType;
 import edu.mayo.kmdp.util.StreamUtil;
 import edu.mayo.kmdp.util.Util;
 import edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.xml.bind.JAXBElement;
 import org.hl7.fhir.dstu3.model.Attachment;
@@ -52,9 +54,11 @@ import org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionComponent;
 import org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionRelatedActionComponent;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
+import org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType;
 import org.hl7.fhir.dstu3.model.TriggerDefinition.TriggerType;
 import org.omg.spec.api4kp._20200801.id.ConceptIdentifier;
 import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
+import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
 import org.omg.spec.api4kp._20200801.id.Term;
 import org.omg.spec.api4kp._20200801.surrogate.Annotation;
 import org.omg.spec.api4kp._20200801.taxonomy.krserialization.KnowledgeRepresentationLanguageSerializationSeries;
@@ -100,7 +104,11 @@ public class CmmnToPlanDef {
     // nothing to do
   }
 
-  public PlanDefinition transform(ResourceIdentifier assetId, TDefinitions caseModel) {
+  public PlanDefinition transform(
+      ResourceIdentifier assetId,
+      ResourceIdentifier srcArtifactId,
+      ResourceIdentifier tgtArtifactId,
+      TDefinitions caseModel) {
     // Use of discretionary items causes a PlanningTable to be added to a separate Case? Check...
     List<TCase> nonDefaultCase = caseModel.getCase().stream()
         .filter(c -> c.getName() == null || !c.getName().startsWith("Page"))
@@ -110,18 +118,20 @@ public class CmmnToPlanDef {
       throw new IllegalArgumentException("TODO Support case models with 2+ cases");
     }
     return Optional.ofNullable(nonDefaultCase.get(0))
-        .map(topCase -> process(assetId.getResourceId(), caseModel, topCase))
+        .map(topCase -> process(assetId, srcArtifactId, tgtArtifactId, caseModel, topCase))
         .orElseThrow(IllegalArgumentException::new);
   }
 
   private PlanDefinition process(
-      URI assetId,
+      ResourceIdentifier assetId,
+      ResourceIdentifier srcArtifactId,
+      ResourceIdentifier tgtArtifactId,
       TDefinitions caseModel,
       TCase tCase) {
 
     PlanDefinition cpm = new PlanDefinition();
 
-    mapIdentity(cpm, assetId);
+    mapIdentity(cpm, assetId, srcArtifactId, tgtArtifactId);
     mapName(cpm, caseModel);
     mapSubject(cpm, caseModel);
 
@@ -135,28 +145,39 @@ public class CmmnToPlanDef {
     return cpm;
   }
 
-  private void mapIdentity(PlanDefinition cpm, URI assetId
+  private void mapIdentity(
+      PlanDefinition cpm,
+      ResourceIdentifier assetId,
       //    , TDefinitions caseModel
-  ) {
-    // TODO Need formal "Asset ID" and "Artifact ID" roles
-    Identifier fhirAssetId = new Identifier()
-        .setType(toCode(SemanticAnnotationRelTypeSeries.Is_Identified_By))
-        .setValue(assetId.toString());
+      ResourceIdentifier srcArtifactId,
+      ResourceIdentifier tgtArtifactId) {
 
-    cpm.setIdentifier(Collections.singletonList(fhirAssetId))
-        .setVersion("TODO");
+    // tag with asset Id
+    cpm.setIdentifier(Arrays.asList(
+        new Identifier()
+            .setType(toCodeableConcept(SemanticAnnotationRelTypeSeries.Is_Identified_By))
+            .setValue(assetId.toString()),
+        new Identifier()
+            .setType(toCodeableConcept(SemanticAnnotationRelTypeSeries.Is_Identified_By))
+            .setValue(tgtArtifactId.toString())));
 
-    cpm.setType(toCode(Care_Process_Model));
-    cpm.setId(UUID.randomUUID().toString());
+    cpm.setRelatedArtifact(singletonList(
+        new RelatedArtifact()
+            .setType(RelatedArtifactType.DERIVEDFROM)
+            .setUrl(srcArtifactId.toString())));
+
+    cpm.setType(toCodeableConcept(Care_Process_Model));
+    cpm.setVersion(tgtArtifactId.getVersionTag());
+    cpm.setId(tgtArtifactId.getUuid().toString());
   }
 
 
   private List<PlanDefinition.PlanDefinitionActionComponent> processStage(
       TStage stage,
-      URI ccpmId,
+      ResourceIdentifier assetId,
       TDefinitions caseModel) {
     List<PlanDefinition.PlanDefinitionActionComponent> mappedPlanElements
-        = processStageInternals(stage, ccpmId, caseModel);
+        = processStageInternals(stage, assetId, caseModel);
 
     var group = new PlanDefinitionActionComponent();
 
@@ -166,7 +187,7 @@ public class CmmnToPlanDef {
     mapControls(stage.getDefaultControl(), group);
 
     getTypeCode(stage.getExtensionElements()).stream()
-        .map(this::toCode)
+        .map(FHIRPlanDefinitionUtils::toCodeableConcept)
         .forEach(cd -> this.addCodeIfMissing(cd, group));
 
     group.setGroupingBehavior(ActionGroupingBehavior.LOGICALGROUP);
@@ -180,20 +201,21 @@ public class CmmnToPlanDef {
         group::addAction
     );
 
-    return Collections.singletonList(group);
+    return singletonList(group);
   }
 
 
   private List<PlanDefinitionActionComponent> processStageInternals(TStage stage,
-      URI ccpmId, TDefinitions caseModel) {
+      ResourceIdentifier assetId, TDefinitions caseModel) {
     List<PlanDefinition.PlanDefinitionActionComponent> mappedPlanElements = new ArrayList<>();
 
     for (TPlanItem planItem : stage.getPlanItem()) {
-      processPlanItem(planItem, planItem.getDefinitionRef(), ccpmId, mappedPlanElements, caseModel);
+      processPlanItem(planItem, planItem.getDefinitionRef(), assetId, mappedPlanElements,
+          caseModel);
     }
 
     for (TDiscretionaryItem discretionaryItem : getDiscretionaryItems(stage.getPlanningTable())) {
-      processPlannableItem(discretionaryItem, discretionaryItem.getDefinitionRef(), ccpmId,
+      processPlannableItem(discretionaryItem, discretionaryItem.getDefinitionRef(), assetId,
           mappedPlanElements, caseModel);
     }
 
@@ -224,7 +246,7 @@ public class CmmnToPlanDef {
   }
 
   private void processPlanItem(TPlanItem planItem,
-      Object definition, URI ccpmId,
+      Object definition, ResourceIdentifier assetId,
       List<PlanDefinitionActionComponent> mappedPlanElements,
       TDefinitions caseModel) {
     if (definition != null) {
@@ -232,7 +254,7 @@ public class CmmnToPlanDef {
         mappedPlanElements
             .add(this.processDecisionTask(planItem, (TDecisionTask) definition, caseModel));
       } else if (definition instanceof TStage) {
-        mappedPlanElements.addAll(this.processStage((TStage) definition, ccpmId, caseModel));
+        mappedPlanElements.addAll(this.processStage((TStage) definition, assetId, caseModel));
       } else if (definition instanceof TProcessTask) {
         // Implement mapping of TProcessTask
       } else if (definition instanceof TEventListener) {
@@ -252,7 +274,7 @@ public class CmmnToPlanDef {
 
 
   private void processPlannableItem(TDiscretionaryItem discretionaryItem,
-      Object definition, URI ccpmId,
+      Object definition, ResourceIdentifier assetId,
       List<PlanDefinitionActionComponent> mappedPlanElements,
       TDefinitions caseModel) {
     if (definition != null) {
@@ -364,19 +386,9 @@ public class CmmnToPlanDef {
   private void mapSubject(PlanDefinition cpm, TDefinitions tCase) {
     Optional.ofNullable(tCase.getExtensionElements())
         .flatMap(this::findSubject)
-        .map(this::toCode)
+        .map(FHIRPlanDefinitionUtils::toCodeableConcept)
         .map(Collections::singletonList)
         .ifPresent(cpm::setTopic);
-  }
-
-  private CodeableConcept toCode(Term cid) {
-    return new CodeableConcept()
-        .setCoding(Collections.singletonList(
-            new Coding()
-                .setCode(cid.getUuid().toString())
-                .setDisplay(cid.getLabel())
-                .setSystem(cid.getNamespaceUri().toString())
-                .setVersion(cid.getVersionTag())));
   }
 
   private void mapName(PlanDefinition cpm, TDefinitions tCase) {
@@ -441,7 +453,7 @@ public class CmmnToPlanDef {
         .map(TCaseFileItemOnPart::getSourceRef)
         .flatMap(StreamUtil.filterAs(TCaseFileItem.class))
         .flatMap(cfi -> getSemanticAnnotation(cfi.getExtensionElements()).stream())
-        .map(this::toCode)
+        .map(FHIRPlanDefinitionUtils::toCodeableConcept)
         .forEach(cd -> dataReq.addCodeFilter().addValueCodeableConcept(cd));
 
     var events = sourceRef.stream()
@@ -451,7 +463,7 @@ public class CmmnToPlanDef {
 
     whiteAct.addTriggerDefinition()
         .setType(mapCaseFileItemTransitions(events))
-        .setEventName(mapEventName(sourceRef, events)  )
+        .setEventName(mapEventName(sourceRef, events))
         .setEventData(dataReq);
   }
 
@@ -465,15 +477,15 @@ public class CmmnToPlanDef {
     return Util.isNotEmpty(byName)
         ? "on " + byName
         : "on " + events.stream()
-                .map(CaseFileItemTransition::value)
-                .collect(Collectors.joining(", "));
+            .map(CaseFileItemTransition::value)
+            .collect(Collectors.joining(", "));
   }
 
   private TriggerType mapCaseFileItemTransitions(Set<CaseFileItemTransition> events) {
     if (events.size() != 1) {
       return TriggerType.DATAMODIFIED;
     }
-    switch(events.iterator().next()) {
+    switch (events.iterator().next()) {
       case DELETE:
         return TriggerType.DATAREMOVED;
       case CREATE:
@@ -484,7 +496,8 @@ public class CmmnToPlanDef {
   }
 
   private void processPlanItemOnPartWithDiscretionarySource(TPlanItemDefinition itemWithSentry,
-      List<PlanDefinitionActionComponent> scopedActions, TStage stage, TDiscretionaryItem sourceRef) {
+      List<PlanDefinitionActionComponent> scopedActions, TStage stage,
+      TDiscretionaryItem sourceRef) {
     Object sourceDef = sourceRef.getDefinitionRef();
 
     Optional<PlanDefinitionActionComponent> whiteActOpt = scopedActions.stream()
@@ -600,7 +613,7 @@ public class CmmnToPlanDef {
     planAction.setTitle(ensureUTF8(task.getName()));
 
     getTypeCode(task.getExtensionElements()).stream()
-        .map(this::toCode)
+        .map(FHIRPlanDefinitionUtils::toCodeableConcept)
         .forEach(cd -> this.addCodeIfMissing(cd, planAction));
 
     getControls(planItem, task)
@@ -632,7 +645,7 @@ public class CmmnToPlanDef {
     planAction.setTitle(ensureUTF8(task.getName()));
 
     getTypeCode(task.getExtensionElements()).stream()
-        .map(this::toCode)
+        .map(FHIRPlanDefinitionUtils::toCodeableConcept)
         .forEach(cd -> this.addCodeIfMissing(cd, planAction));
 
     getControls(discretionaryItem, task)
@@ -649,7 +662,7 @@ public class CmmnToPlanDef {
 
   private void mapApplicabilityRule(TApplicabilityRule app, TDefinitions caseModel,
       PlanDefinitionActionComponent planAction) {
-    if (! (app.getContextRef() instanceof TCaseFileItem)) {
+    if (!(app.getContextRef() instanceof TCaseFileItem)) {
       throw new UnsupportedOperationException(
           "Unable to process applicability with context " + app.getContextRef());
     }
@@ -832,7 +845,7 @@ public class CmmnToPlanDef {
       } else {
         planAction.setDefinition(
             new Reference()
-                .setReference(dec.getExternalRef().getNamespaceURI())
+                .setReference(mapReference(dec.getExternalRef().getNamespaceURI()))
                 .setDisplay(dec.getName())
                 .setIdentifier(new Identifier()
                     .setType(new CodeableConcept()
@@ -841,6 +854,11 @@ public class CmmnToPlanDef {
         );
       }
     });
+  }
+
+  private String mapReference(String namespaceURI) {
+    ResourceIdentifier original = SemanticIdentifier.newId(URI.create(namespaceURI));
+    return DmnToPlanDefTranslator.mapArtifactToArtifactId(original).getResourceId().toString();
   }
 
   private void mapControls(TPlanItemControl ctrl, PlanDefinitionActionComponent planAction) {

@@ -75,7 +75,8 @@ public class OWLtoSKOSTranscreator extends AbstractSimpleTranslator<Model,Model>
   }
 
   protected Optional<Model> transformAst(
-      ResourceIdentifier assetId, Model model,
+      ResourceIdentifier assetId, ResourceIdentifier srcArtifactId,
+      Model model,
       SyntacticRepresentation srcRep,
       SyntacticRepresentation tgtRep,
       Properties config) {
@@ -84,21 +85,24 @@ public class OWLtoSKOSTranscreator extends AbstractSimpleTranslator<Model,Model>
   }
 
   protected Optional<Model> transformTree(
-      ResourceIdentifier assetId, Object expression, SyntacticRepresentation srcRep,
+      ResourceIdentifier assetId, ResourceIdentifier srcArtifactId,
+      Object expression, SyntacticRepresentation srcRep,
       SyntacticRepresentation tgtRep,
       Properties config) {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  protected Optional<Model> transformString(ResourceIdentifier assetId, String str,
+  protected Optional<Model> transformString(ResourceIdentifier assetId,
+      ResourceIdentifier srcArtifactId, String str,
       SyntacticRepresentation srcRep,
       SyntacticRepresentation tgtRep, Properties config) {
     return doTransform(new ByteArrayInputStream(str.getBytes()), config);
   }
 
   @Override
-  protected Optional<Model> transformBinary(ResourceIdentifier assetId, byte[] bytes,
+  protected Optional<Model> transformBinary(ResourceIdentifier assetId,
+      ResourceIdentifier srcArtifactId, byte[] bytes,
       SyntacticRepresentation srcRep,
       SyntacticRepresentation tgtRep, Properties config) {
     return doTransform(new ByteArrayInputStream(bytes), config);

@@ -65,11 +65,14 @@ public class CmmnToPlanDefTranslator
 
   @Override
   protected Optional<PlanDefinition> transformAst(
-      ResourceIdentifier assetId, TDefinitions expression,
+      ResourceIdentifier assetId,
+      ResourceIdentifier srcArtifactId,
+      TDefinitions expression,
       SyntacticRepresentation srcRep,
       SyntacticRepresentation tgtRep,
       Properties config) {
-    return Optional.ofNullable(new CmmnToPlanDef().transform(assetId, expression));
+    return Optional.ofNullable(new CmmnToPlanDef()
+        .transform(assetId, srcArtifactId, mapArtifactId(assetId, srcArtifactId), expression));
   }
 
   @Override

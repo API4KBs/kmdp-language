@@ -110,7 +110,8 @@ public class SKOStoCodeSystemTranscreator extends AbstractSimpleTranslator<Model
   }
 
   protected Optional<CodeSystem> transformAst(
-      ResourceIdentifier assetId, Model model,
+      ResourceIdentifier assetId, ResourceIdentifier srcArtifactId,
+      Model model,
       SyntacticRepresentation srcRep,
       SyntacticRepresentation tgtRep,
       Properties config) {
