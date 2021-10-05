@@ -2,8 +2,10 @@ package edu.mayo.kmdp.language.common.fhir.stu3;
 
 import static edu.mayo.kmdp.language.common.fhir.stu3.FHIRVisitor.getContained;
 import static edu.mayo.kmdp.util.StreamUtil.filterAs;
+import static org.omg.spec.api4kp._20200801.id.Term.newTerm;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -11,9 +13,11 @@ import java.util.stream.Stream;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DomainResource;
+import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionComponent;
 import org.hl7.fhir.dstu3.model.Reference;
+import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
 import org.omg.spec.api4kp._20200801.id.Term;
 
 public final class FHIRPlanDefinitionUtils {
@@ -68,6 +72,7 @@ public final class FHIRPlanDefinitionUtils {
 
   /**
    * Traverses a PlanDefintion, returning a Stream of the nested Action Components
+   *
    * @param planDef the root PlanDefinition
    * @return a Stream of the nested Action Components
    */
@@ -78,10 +83,12 @@ public final class FHIRPlanDefinitionUtils {
 
   /**
    * Traverses a PlanDefintion with nested (contained) PlanDefinitions
+   *
    * @param planDef the root PlanDefinition
    * @return a Stream of the Action components, across all nested PlanDefinitions
    */
-  public static Stream<PlanDefinitionActionComponent> getDeepNestedSubActions(PlanDefinition planDef) {
+  public static Stream<PlanDefinitionActionComponent> getDeepNestedSubActions(
+      PlanDefinition planDef) {
     return getNestedPlanDefs(planDef)
         .flatMap(FHIRPlanDefinitionUtils::getSubActions);
   }
@@ -95,8 +102,9 @@ public final class FHIRPlanDefinitionUtils {
 
 
   /**
-   * Retrieves the action in a PlanDefinition that has the given title
-   * The search is recursive within a PD, but does not extend to nested PlanDefinitions
+   * Retrieves the action in a PlanDefinition that has the given title The search is recursive
+   * within a PD, but does not extend to nested PlanDefinitions
+   *
    * @param planDefinition
    * @param title
    * @return
@@ -104,12 +112,14 @@ public final class FHIRPlanDefinitionUtils {
   public static Optional<PlanDefinitionActionComponent> getSubActionByTitle(
       PlanDefinition planDefinition, String title) {
     return getSubActions(planDefinition)
-        .filter(act -> title.equalsIgnoreCase(act.getTitle()) || title.equalsIgnoreCase(act.getLabel()))
+        .filter(
+            act -> title.equalsIgnoreCase(act.getTitle()) || title.equalsIgnoreCase(act.getLabel()))
         .findFirst();
   }
 
   /**
    * Traverses a PlanDefintion with nested (contained) PlanDefinitions
+   *
    * @param planDef the root PlanDefinition
    * @return a Stream of the nested PlanDefinitions
    */
@@ -118,11 +128,11 @@ public final class FHIRPlanDefinitionUtils {
   }
 
   /**
-   * Traverses a PlanDefintion with nested (contained) PlanDefinitions
-   * and returns the one whose name matches the given name
+   * Traverses a PlanDefintion with nested (contained) PlanDefinitions and returns the one whose
+   * name matches the given name
    *
    * @param planDef the root PlanDefinition
-   * @param name the name of the PlanDefinition to select
+   * @param name    the name of the PlanDefinition to select
    * @return an Optional nested PlanDefinitions
    */
   public static Optional<PlanDefinition> getNestedPlanDefByName(
@@ -156,6 +166,21 @@ public final class FHIRPlanDefinitionUtils {
 
   public static String asId(String id) {
     return id.trim().replace("_", "");
+  }
+
+  public static void setKnowledgeIdentifiers(PlanDefinition pd, ResourceIdentifier assetId,
+      ResourceIdentifier artifactId) {
+    pd.setIdentifier(Arrays.asList(
+        new Identifier()
+            .setType(toCodeableConcept(
+                newTerm(URI.create("https://www.omg.org/spec/API4KP/"), "KnowledgeAsset")))
+            .setValue(assetId.getNamespaceUri().toString())
+            .setValue(assetId.getTag() + "|" + assetId.getVersionTag()),
+        new Identifier()
+            .setType(toCodeableConcept(
+                newTerm(URI.create("https://www.omg.org/spec/API4KP/"), "KnowledgeArtifact")))
+            .setSystem(artifactId.getNamespaceUri().toString())
+            .setValue(artifactId.getTag() + "|" + artifactId.getVersionTag())));
   }
 
 }

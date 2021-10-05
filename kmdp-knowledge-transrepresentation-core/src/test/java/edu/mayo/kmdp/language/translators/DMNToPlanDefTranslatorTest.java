@@ -46,7 +46,7 @@ import org.omg.spec.dmn._20180521.model.TDecision;
 import org.omg.spec.dmn._20180521.model.TDefinitions;
 import org.omg.spec.dmn._20180521.model.TKnowledgeSource;
 
-public class DMNToPlanDefTranslatorTest {
+class DMNToPlanDefTranslatorTest {
 
   @Test
   void testDecisionService() {
@@ -156,9 +156,9 @@ public class DMNToPlanDefTranslatorTest {
 
     assertEquals(2, planDef.getIdentifier().size());
     assertTrue(planDef.getIdentifier().stream().anyMatch(
-        id -> id.getValue().equals(assetId.toString())));
+        id -> id.getValue().contains(assetId.getTag())));
     assertTrue(planDef.getIdentifier().stream().anyMatch(
-        id -> id.getValue().equals(tgtArtifactId.toString())));
+        id -> id.getValue().contains(tgtArtifactId.getTag())));
 
     assertEquals(tgtArtifactId.getUuid().toString(), planDef.getId());
     assertEquals(srcArtifactId.getVersionTag(), planDef.getVersion());

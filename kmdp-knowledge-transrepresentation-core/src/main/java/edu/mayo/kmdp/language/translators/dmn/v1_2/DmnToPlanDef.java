@@ -25,6 +25,7 @@ import static edu.mayo.kmdp.language.common.dmn.v1_2.DMN12Utils.joins;
 import static edu.mayo.kmdp.language.common.dmn.v1_2.DMN12Utils.refToId;
 import static edu.mayo.kmdp.language.common.dmn.v1_2.DMN12Utils.streamDecisionServices;
 import static edu.mayo.kmdp.language.common.dmn.v1_2.DMN12Utils.streamDecisions;
+import static edu.mayo.kmdp.language.common.fhir.stu3.FHIRPlanDefinitionUtils.setKnowledgeIdentifiers;
 import static edu.mayo.kmdp.language.common.fhir.stu3.FHIRPlanDefinitionUtils.toCodeableConcept;
 import static edu.mayo.kmdp.util.NameUtils.nameToIdentifier;
 import static edu.mayo.kmdp.util.StreamUtil.filterAs;
@@ -42,9 +43,7 @@ import edu.mayo.kmdp.util.NameUtils.IdentifierType;
 import edu.mayo.kmdp.util.StreamUtil;
 import edu.mayo.kmdp.util.Util;
 import edu.mayo.ontology.taxonomies.kao.decisiontype.DecisionTypeSeries;
-import edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries;
 import java.net.URI;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -266,14 +265,7 @@ public class DmnToPlanDef {
       ResourceIdentifier srcArtifactId,
       ResourceIdentifier tgtArtifactId) {
 
-    // tag with asset Id
-    cpm.setIdentifier(Arrays.asList(
-        new Identifier()
-            .setType(toCodeableConcept(SemanticAnnotationRelTypeSeries.Is_Identified_By))
-            .setValue(assetId.toString()),
-        new Identifier()
-            .setType(toCodeableConcept(SemanticAnnotationRelTypeSeries.Is_Identified_By))
-            .setValue(tgtArtifactId.toString())));
+    setKnowledgeIdentifiers(cpm, assetId, tgtArtifactId);
 
     cpm.setRelatedArtifact(singletonList(
         new RelatedArtifact()
