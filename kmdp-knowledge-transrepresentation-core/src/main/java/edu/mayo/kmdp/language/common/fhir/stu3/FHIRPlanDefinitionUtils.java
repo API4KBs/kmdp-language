@@ -171,16 +171,23 @@ public final class FHIRPlanDefinitionUtils {
   public static void setKnowledgeIdentifiers(PlanDefinition pd, ResourceIdentifier assetId,
       ResourceIdentifier artifactId) {
     pd.setIdentifier(Arrays.asList(
-        new Identifier()
-            .setType(toCodeableConcept(
-                newTerm(URI.create("https://www.omg.org/spec/API4KP/"), "KnowledgeAsset")))
-            .setValue(assetId.getNamespaceUri().toString())
-            .setValue(assetId.getTag() + "|" + assetId.getVersionTag()),
-        new Identifier()
-            .setType(toCodeableConcept(
-                newTerm(URI.create("https://www.omg.org/spec/API4KP/"), "KnowledgeArtifact")))
-            .setSystem(artifactId.getNamespaceUri().toString())
-            .setValue(artifactId.getTag() + "|" + artifactId.getVersionTag())));
+        toFHIRIdentifier(assetId,
+            newTerm(URI.create("https://www.omg.org/spec/API4KP/"), "KnowledgeAsset")),
+        toFHIRIdentifier(artifactId,
+            newTerm(URI.create("https://www.omg.org/spec/API4KP/"), "KnowledgeArtifact"))));
+  }
+
+  public static Identifier toFHIRIdentifier(ResourceIdentifier id, Term type) {
+    return new Identifier()
+        .setType(toCodeableConcept(type))
+        .setSystem(id.getNamespaceUri().toString())
+        .setValue(id.getTag() + "|" + id.getVersionTag());
+  }
+
+  public static Identifier toFHIRIdentifier(String id, Term type) {
+    return new Identifier()
+        .setType(toCodeableConcept(type))
+        .setValue(id);
   }
 
 }

@@ -15,11 +15,13 @@ package edu.mayo.kmdp.language.translators.cmmn.v1_1.stu3;
 
 import static edu.mayo.kmdp.language.common.fhir.stu3.FHIRPlanDefinitionUtils.setKnowledgeIdentifiers;
 import static edu.mayo.kmdp.language.common.fhir.stu3.FHIRPlanDefinitionUtils.toCodeableConcept;
+import static edu.mayo.kmdp.language.common.fhir.stu3.FHIRPlanDefinitionUtils.toFHIRIdentifier;
 import static edu.mayo.kmdp.util.NameUtils.nameToIdentifier;
 import static edu.mayo.kmdp.util.Util.ensureUTF8;
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.Captures;
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.Has_Primary_Subject;
 import static java.util.Collections.singletonList;
+import static org.omg.spec.api4kp._20200801.id.Term.newTerm;
 import static org.omg.spec.api4kp._20200801.taxonomy.clinicalknowledgeassettype.ClinicalKnowledgeAssetTypeSeries.Care_Process_Model;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.FHIRPath_STU1;
 
@@ -41,7 +43,6 @@ import org.hl7.fhir.dstu3.model.Attachment;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DataRequirement;
-import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.PlanDefinition.ActionCardinalityBehavior;
 import org.hl7.fhir.dstu3.model.PlanDefinition.ActionConditionKind;
@@ -839,11 +840,10 @@ public class CmmnToPlanDef {
             new Reference()
                 .setReference(mapReference(dec.getExternalRef().getNamespaceURI()))
                 .setDisplay(dec.getName())
-                .setIdentifier(new Identifier()
-                    .setType(new CodeableConcept()
-                        .setText("TODO - Knowledge Artifact Fragment Identifier"))
-                    .setValue(dec.getExternalRef().getLocalPart().replace("_", "")))
-        );
+                .setIdentifier(toFHIRIdentifier(
+                    dec.getExternalRef().getLocalPart().replace("_", ""),
+                    newTerm(URI.create("https://www.omg.org/spec/API4KP/"), "KnowledgeFragment"))
+                ));
       }
     });
   }
