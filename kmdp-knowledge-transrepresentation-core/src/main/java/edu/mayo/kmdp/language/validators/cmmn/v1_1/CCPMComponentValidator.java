@@ -1,5 +1,7 @@
 package edu.mayo.kmdp.language.validators.cmmn.v1_1;
 
+import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.Has_Primary_Subject;
+import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeassettype.KnowledgeAssetTypeSeries.Case_Management_Model;
 import static org.omg.spec.api4kp._20200801.taxonomy.publicationstatus.PublicationStatusSeries.Published;
 
 import edu.mayo.kmdp.language.validators.AbstractValidator;
@@ -18,6 +20,7 @@ import org.omg.spec.api4kp._20200801.Answer;
 import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
 import org.omg.spec.api4kp._20200801.id.Term;
 import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
+import org.omg.spec.api4kp._20200801.surrogate.Annotation;
 import org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset;
 import org.omg.spec.api4kp._20200801.taxonomy.knowledgeassettype.KnowledgeAssetType;
 import org.omg.spec.api4kp._20200801.taxonomy.publicationstatus.PublicationStatus;
@@ -151,6 +154,34 @@ public abstract class CCPMComponentValidator extends AbstractValidator {
         "Status",
         Published::getLabel,
         () -> status != null ? status.getLabel().toUpperCase() : "NOT Published"
+    );
+  }
+
+  /**
+   * Validates the presence of the 'has_subject' annotation
+   * @param knowledgeAsset
+   * @param carrier
+   * @return
+   */
+  protected Answer<Void> validateSubject(KnowledgeAsset knowledgeAsset, KnowledgeCarrier carrier) {
+    if (Case_Management_Model.isAnyOf(knowledgeAsset.getFormalType())) {
+      Optional<Annotation> subject = knowledgeAsset.getAnnotation().stream()
+          .filter(ann -> Has_Primary_Subject.sameTermAs(ann.getRel()))
+          .findFirst();
+      ValidationStatus valid = subject.isPresent() ? ValidationStatus.OK : ValidationStatus.WRN;
+      return validationResponse(
+          carrier,
+          valid,
+          "Subject",
+          () -> subject.get().getRef().getLabel(),
+          () -> "Missing Subject Annotation on Case Surrogate"
+      );
+    } else return validationResponse(
+        carrier,
+        true,
+        "Subject",
+        () -> "N/A",
+        () -> "N/A"
     );
   }
 

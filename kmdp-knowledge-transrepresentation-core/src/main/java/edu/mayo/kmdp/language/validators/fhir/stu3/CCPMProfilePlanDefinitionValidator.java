@@ -18,6 +18,7 @@ import edu.mayo.kmdp.util.Util;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -77,7 +78,8 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
         validateAssetVersion(knowledgeAsset, carrier),
         validateArtifactVersion(knowledgeAsset, carrier),
         validateAssetType(knowledgeAsset, carrier, Cognitive_Care_Process_Model),
-        validatePublicationStatus(knowledgeAsset, carrier)
+        validatePublicationStatus(knowledgeAsset, carrier),
+        validateSubject(knowledgeAsset, carrier)
     ).reduce(Answer::merge).orElseGet(Answer::failed);
   }
 
@@ -93,7 +95,8 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
         validateRelatedAction(rootPlanDef, carrier),
         validateDocumentation(rootPlanDef, carrier),
         validateInputOutput(rootPlanDef, carrier),
-        validateSubActions(rootPlanDef, carrier)
+        validateSubActions(rootPlanDef, carrier),
+        validateSubject(rootPlanDef, carrier)
     ).reduce(Answer::merge).orElseGet(Answer::failed);
   }
 
@@ -408,5 +411,17 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
         + mapResourceId(newVersionId(URI.create(identifier.getValue())), 3);
   }
 
+  private Answer<Void> validateSubject(PlanDefinition rootPlanDef, KnowledgeCarrier carrier) {
+    Optional<CodeableConcept> subject =
+        rootPlanDef.getActionFirstRep().getReason().stream().findFirst();
+    ValidationStatus valid = subject.isPresent() ? ValidationStatus.OK : ValidationStatus.ERR;
+    return validationResponse(
+        carrier,
+        valid,
+        "Subject",
+        () -> rootPlanDef.getActionFirstRep().getReasonFirstRep().getCodingFirstRep().getDisplay(),
+        () -> "Missing Subject Annotation on Case Model"
+    );
+  }
 
 }

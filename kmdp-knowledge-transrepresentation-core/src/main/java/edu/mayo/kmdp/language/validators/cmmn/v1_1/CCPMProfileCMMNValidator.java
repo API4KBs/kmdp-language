@@ -1,7 +1,7 @@
 package edu.mayo.kmdp.language.validators.cmmn.v1_1;
 
+import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.Has_Primary_Subject;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
-import static org.omg.spec.api4kp._20200801.taxonomy.clinicalknowledgeassettype.ClinicalKnowledgeAssetTypeSeries.Care_Process_Model;
 import static org.omg.spec.api4kp._20200801.taxonomy.clinicalknowledgeassettype.ClinicalKnowledgeAssetTypeSeries.Clinical_Case_Management_Model;
 import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Well_Formedness_Check_Task;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.CMMN_1_1;
@@ -19,7 +19,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.inject.Named;
 import javax.xml.bind.JAXBElement;
 import org.omg.spec.api4kp._20200801.Answer;
@@ -85,7 +84,8 @@ public class CCPMProfileCMMNValidator extends CCPMComponentValidator {
         validateAssetVersion(knowledgeAsset, carrier),
         validateArtifactVersion(knowledgeAsset, carrier),
         validateAssetType(knowledgeAsset, carrier, Clinical_Case_Management_Model),
-        validatePublicationStatus(knowledgeAsset, carrier)
+        validatePublicationStatus(knowledgeAsset, carrier),
+        validateSubject(knowledgeAsset, carrier)
     );
   }
 
@@ -95,7 +95,8 @@ public class CCPMProfileCMMNValidator extends CCPMComponentValidator {
         validateTaskTypes(caseModel, carrier),
         validateDecisionTaskLinks(caseModel, carrier),
         validateCaseFileItems(caseModel, carrier),
-        validateMilestones(caseModel, carrier)
+        validateMilestones(caseModel, carrier),
+        validateSubject(caseModel, carrier)
     );
   }
 
@@ -151,6 +152,32 @@ public class CCPMProfileCMMNValidator extends CCPMComponentValidator {
         () -> "all Present",
         () -> "TASKS with no Type " + toString(tasksWithoutAnnotation, TTask::getName)
     );
+  }
+
+  /**
+   * The 'has_subject' annotation should be present on the case model
+   *
+   * @param caseModel
+   * @param carrier
+   * @return
+   */
+  private Answer<Void> validateSubject(TDefinitions caseModel, KnowledgeCarrier carrier) {
+    Optional<Annotation> subject = hasSubjectAnnotation(caseModel.getCase().get(0));
+    ValidationStatus valid = subject.isPresent() ? ValidationStatus.OK : ValidationStatus.WRN;
+    return validationResponse(
+        carrier,
+        valid,
+        "Subject",
+        () -> subject.get().getRef().getLabel(),
+        () -> "Missing Subject Annotation on Case Model"
+    );
+  }
+
+  private Optional<Annotation> hasSubjectAnnotation(TCase tCase) {
+    return tCase.getCasePlanModel().getExtensionElements().getAny().stream()
+        .flatMap(StreamUtil.filterAs(Annotation.class))
+        .filter(ann -> Has_Primary_Subject.sameTermAs(ann.getRel()))
+        .findFirst();
   }
 
   /**
