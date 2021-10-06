@@ -19,6 +19,7 @@ import static edu.mayo.kmdp.language.common.fhir.stu3.FHIRPlanDefinitionUtils.to
 import static edu.mayo.kmdp.util.NameUtils.nameToIdentifier;
 import static edu.mayo.kmdp.util.Util.ensureUTF8;
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.Captures;
+import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.Has_Focus;
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.Has_Primary_Subject;
 import static java.util.Collections.singletonList;
 import static org.omg.spec.api4kp._20200801.id.Term.newTerm;
@@ -81,6 +82,7 @@ import org.omg.spec.cmmn._20151109.model.TExtensionElements;
 import org.omg.spec.cmmn._20151109.model.THumanTask;
 import org.omg.spec.cmmn._20151109.model.TMilestone;
 import org.omg.spec.cmmn._20151109.model.TOnPart;
+import org.omg.spec.cmmn._20151109.model.TPlanFragment;
 import org.omg.spec.cmmn._20151109.model.TPlanItem;
 import org.omg.spec.cmmn._20151109.model.TPlanItemControl;
 import org.omg.spec.cmmn._20151109.model.TPlanItemDefinition;
@@ -133,7 +135,7 @@ public class CmmnToPlanDef {
 
     mapIdentity(cpm, assetId, srcArtifactId, tgtArtifactId);
     mapName(cpm, caseModel);
-    mapSubject(cpm, caseModel);
+    mapTopic(cpm, caseModel);
 
     try {
       processStage(tCase.getCasePlanModel(), assetId, caseModel)
@@ -176,6 +178,7 @@ public class CmmnToPlanDef {
 
     group.setId(stage.getId());
     group.setTitle(ensureUTF8(stage.getName()));
+    mapSubject(group, stage);
 
     mapControls(stage.getDefaultControl(), group);
 
@@ -376,12 +379,20 @@ public class CmmnToPlanDef {
   }
 
 
-  private void mapSubject(PlanDefinition cpm, TDefinitions tCase) {
+  private void mapTopic(PlanDefinition cpm, TDefinitions tCase) {
     Optional.ofNullable(tCase.getExtensionElements())
-        .flatMap(this::findSubject)
+        .flatMap(this::findTopic)
         .map(FHIRPlanDefinitionUtils::toCodeableConcept)
         .map(Collections::singletonList)
         .ifPresent(cpm::setTopic);
+  }
+
+  private void mapSubject(PlanDefinitionActionComponent cpm, TPlanFragment planFragment) {
+    Optional.ofNullable(planFragment.getExtensionElements())
+        .flatMap(this::findSubject)
+        .map(FHIRPlanDefinitionUtils::toCodeableConcept)
+        .map(Collections::singletonList)
+        .ifPresent(cpm::setReason);
   }
 
   private void mapName(PlanDefinition cpm, TDefinitions tCase) {
@@ -920,15 +931,21 @@ public class CmmnToPlanDef {
 
 
   private Optional<ConceptIdentifier> findSubject(TExtensionElements extensionElements) {
-    return this.findSubject(extensionElements.getAny());
+    return this.findAnnotation(extensionElements.getAny(), Has_Primary_Subject);
   }
 
-  private Optional<ConceptIdentifier> findSubject(List<Object> extensionElements) {
+  private Optional<ConceptIdentifier> findTopic(TExtensionElements extensionElements) {
+    return this.findAnnotation(extensionElements.getAny(), Has_Focus);
+  }
+
+  private Optional<ConceptIdentifier> findAnnotation(
+      List<Object> extensionElements, Term term) {
     if (extensionElements != null) {
       List<Annotation> annotations = extensionElements.stream()
           .flatMap(StreamUtil.filterAs(Annotation.class))
+          .filter(annotation -> annotation.getRel() != null)
           .filter(annotation -> annotation.getRel().getConceptId()
-              .equals(Has_Primary_Subject.getConceptId()))
+              .equals(term.getConceptId()))
           .collect(Collectors.toList());
 
       if (annotations.size() > 1) {
