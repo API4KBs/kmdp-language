@@ -1,5 +1,7 @@
 package edu.mayo.kmdp.language.validators.cmmn.v1_1;
 
+import static edu.mayo.kmdp.util.Util.isEmpty;
+import static edu.mayo.kmdp.util.Util.isNotEmpty;
 import static edu.mayo.ontology.taxonomies.kmdo.semanticannotationreltype.SemanticAnnotationRelTypeSeries.Has_Primary_Subject;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
 import static org.omg.spec.api4kp._20200801.taxonomy.clinicalknowledgeassettype.ClinicalKnowledgeAssetTypeSeries.Clinical_Case_Management_Model;
@@ -96,7 +98,9 @@ public class CCPMProfileCMMNValidator extends CCPMComponentValidator {
         validateDecisionTaskLinks(caseModel, carrier),
         validateCaseFileItems(caseModel, carrier),
         validateMilestones(caseModel, carrier),
-        validateSubject(caseModel, carrier)
+        validateSubject(caseModel, carrier),
+        validateCaseFolderStruct(caseModel, carrier),
+        validateNames(caseModel, carrier)
     );
   }
 
@@ -181,9 +185,8 @@ public class CCPMProfileCMMNValidator extends CCPMComponentValidator {
   }
 
   /**
-   * Data Case file item is annotated with the concepts it resolves
-   * Task which creates generates the data
-   * has input and output bound to the name of the case file item
+   * Data Case file item is annotated with the concepts it resolves Task which creates generates the
+   * data has input and output bound to the name of the case file item
    *
    * @param caseModel
    * @param carrier
@@ -245,7 +248,7 @@ public class CCPMProfileCMMNValidator extends CCPMComponentValidator {
         .filter(pi ->
             pi.getEntryCriterion().stream()
                 .anyMatch(in -> milestoneSentries.stream().anyMatch(s -> s == in.getSentryRef()))
-            || pi.getExitCriterion().stream()
+                || pi.getExitCriterion().stream()
                 .anyMatch(out -> milestoneSentries.stream().anyMatch(s -> s == out.getSentryRef())))
         .collect(Collectors.toSet());
 
@@ -260,9 +263,8 @@ public class CCPMProfileCMMNValidator extends CCPMComponentValidator {
 
 
   /**
-   * Data Case file item is annotated with the concepts it resolves
-   * Task which creates generates the data
-   * has input and output bound to the name of the case file item
+   * Data Case file item is annotated with the concepts it resolves Task which creates generates the
+   * data has input and output bound to the name of the case file item
    *
    * @param caseModel
    * @param carrier
@@ -298,8 +300,8 @@ public class CCPMProfileCMMNValidator extends CCPMComponentValidator {
 
     // Check either input/output or document
     cfis.keySet().stream()
-        .filter(cfi -> ! isDocument(cfis.get(cfi)))
-        .filter(cfi -> ! isInputOutput(cfi, tasks))
+        .filter(cfi -> !isDocument(cfis.get(cfi)))
+        .filter(cfi -> !isInputOutput(cfi, tasks))
         .forEach(cfi ->
             addInMap(cfi, partial, "Type", (x, y) -> String.join("/", x, y)));
 
@@ -312,13 +314,71 @@ public class CCPMProfileCMMNValidator extends CCPMComponentValidator {
     );
   }
 
+  /**
+   * Ensures only one case model, with one 'case folder'
+   *
+   * @param caseModel
+   * @param carrier
+   * @return
+   */
+  private Answer<Void> validateCaseFolderStruct(TDefinitions caseModel, KnowledgeCarrier carrier) {
+    if (caseModel.getCase().isEmpty()) {
+      return validationResponse(
+          carrier,
+          ValidationStatus.ERR,
+          "Case Model",
+          () -> "This is impossible - check the validator",
+          () -> "No Case(s) found");
+    }
+    boolean singleModel = caseModel.getCase().size() == 1;
+    TCase mainCase = caseModel.getCase().get(0);
+    singleModel = singleModel && mainCase.getCasePlanModel() != null;
+
+    return validationResponse(
+        carrier,
+        singleModel ? ValidationStatus.OK : ValidationStatus.ERR,
+        "Case Model",
+        () -> "Well formed",
+        () -> "Multiple Case Models detected");
+  }
+
+  /**
+   * Ensures only one case model, with one 'case folder'
+   *
+   * @param caseModel
+   * @param carrier
+   * @return
+   */
+  private Answer<Void> validateNames(TDefinitions caseModel, KnowledgeCarrier carrier) {
+    if (caseModel.getCase().size() != 1 || isEmpty(caseModel.getCase().get(0).getName())) {
+      return validationResponse(
+          carrier,
+          ValidationStatus.ERR,
+          "Case Model Name",
+          () -> "This is impossible - check the validator",
+          () -> "Case Folder w/o name");
+    }
+
+    Set<TStage> stages = new CaseStageCollector().visitCase(caseModel);
+    boolean allNames = stages.stream()
+        .allMatch(s -> isNotEmpty(s.getName()));
+
+    return validationResponse(
+        carrier,
+        allNames ? ValidationStatus.OK : ValidationStatus.WRN,
+        "Stage Names",
+        () -> "All named",
+        () -> "Missing stage names");
+  }
+
+
   private boolean isInputOutput(TCaseFileItem cfi, Set<TTask> tasks) {
     return tasks.stream().anyMatch(
         task -> task.getInput() != null && task.getInput().stream()
             .anyMatch(in -> cfi == in.getBindingRef()))
         || tasks.stream().anyMatch(
-            task -> task.getOutput() != null && task.getOutput().stream()
-                .anyMatch(out -> cfi == out.getBindingRef()));
+        task -> task.getOutput() != null && task.getOutput().stream()
+            .anyMatch(out -> cfi == out.getBindingRef()));
   }
 
   private boolean isLinked(TCaseFileItem cfi,
@@ -328,7 +388,7 @@ public class CCPMProfileCMMNValidator extends CCPMComponentValidator {
         .flatMap(StreamUtil.filterAs(TAssociation.class))
         .anyMatch(assoc ->
             pointsTo(assoc, cfi)
-            && tasks.stream()
+                && tasks.stream()
                 .anyMatch(t -> pointsTo(assoc, t)));
   }
 
@@ -363,8 +423,8 @@ public class CCPMProfileCMMNValidator extends CCPMComponentValidator {
         .anyMatch(ns -> "https://ontology.mayo.edu/taxonomies/ClinicalTasks".equals(ns.toString()));
   }
 
-  private <X,V> void addInMap(X key, Map<X, V> map, V val, BinaryOperator<V> joiner) {
-    map.compute(key, (k,v) -> v == null ? val : joiner.apply(v,val));
+  private <X, V> void addInMap(X key, Map<X, V> map, V val, BinaryOperator<V> joiner) {
+    map.compute(key, (k, v) -> v == null ? val : joiner.apply(v, val));
   }
 
   private abstract class CaseCollector<T extends TCmmnElement> {
@@ -484,6 +544,18 @@ public class CCPMProfileCMMNValidator extends CCPMComponentValidator {
     @Override
     protected void collect(TStage stage) {
       elements.addAll(stage.getSentry());
+    }
+  }
+
+  private class CaseStageCollector extends CaseCollector<TStage> {
+
+    public Set<TStage> visitCase(TDefinitions caseModel) {
+      return visit(caseModel);
+    }
+
+    @Override
+    protected void collect(TStage stage) {
+      elements.add(stage);
     }
   }
 }

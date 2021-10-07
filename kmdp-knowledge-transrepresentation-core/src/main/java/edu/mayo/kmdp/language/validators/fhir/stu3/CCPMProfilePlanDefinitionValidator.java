@@ -89,6 +89,7 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
     return Stream.of(
         validateId(rootPlanDef, carrier),
         validateNameTitle(rootPlanDef, carrier),
+        validateActionTitle(rootPlanDef, carrier),
         validateType(rootPlanDef, carrier),
         validateActionTypes(rootPlanDef, carrier),
         validateDefinitionRefs(rootPlanDef, carrier),
@@ -149,10 +150,44 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
           return validationResponse(
               carrier,
               kc -> mapAssetId(kc, pd.getIdentifier().get(0)),
-              hasTitle && hasName,
-              "Name / Title",
+              hasTitle && hasName ? ValidationStatus.OK : ValidationStatus.ERR,
+              "PD Name / Title",
               () -> "title: " + pd.getTitle(),
               () -> "invalid name: " + pd.getName());
+        }).reduce(Answer::merge)
+        .orElseGet(Answer::failed);
+  }
+
+  /**
+   * Ensure that Title exists, and Name is a sanitized String
+   *
+   * @param rootPlanDef
+   * @param carrier
+   * @return
+   */
+  private Answer<Void> validateActionTitle(PlanDefinition rootPlanDef, KnowledgeCarrier carrier) {
+    return getNestedPlanDefs(rootPlanDef)
+        .map(pd -> {
+          List<PlanDefinitionActionComponent> untitledActions =
+              getSubActions(pd)
+                  .filter(act -> act.getTitle().isEmpty())
+                  .collect(Collectors.toList());
+          ValidationStatus valid;
+          if (untitledActions.isEmpty()) {
+            valid = ValidationStatus.OK;
+          } else if (untitledActions.contains(rootPlanDef.getActionFirstRep())) {
+            valid = ValidationStatus.ERR;
+          } else {
+            valid = ValidationStatus.WRN;
+          }
+
+          return validationResponse(
+              carrier,
+              kc -> mapAssetId(kc, pd.getIdentifier().get(0)),
+              valid,
+              "Action Titles",
+              () -> "All actions have titles",
+              () -> "Missing action titles in " + pd.getTitle());
         }).reduce(Answer::merge)
         .orElseGet(Answer::failed);
   }
