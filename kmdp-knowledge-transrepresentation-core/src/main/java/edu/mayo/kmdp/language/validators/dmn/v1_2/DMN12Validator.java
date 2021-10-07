@@ -72,7 +72,6 @@ public class DMN12Validator extends AbstractValidator {
         outcome = sourceArtifact.asBinary()
             .map(bytes -> validateBinary(bytes, dmn12Schema))
             .orElse(false);
-        outcome = false;
         break;
     }
     return outcome ? Answer.succeed() : Answer.failed();
