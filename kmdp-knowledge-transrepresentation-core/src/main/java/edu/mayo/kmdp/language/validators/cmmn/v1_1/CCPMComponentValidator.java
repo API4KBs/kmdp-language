@@ -74,6 +74,10 @@ public abstract class CCPMComponentValidator extends AbstractValidator {
     return Answer.failed(new IllegalStateException("This should not have been called"));
   }
 
+  protected String impossible() {
+    throw new IllegalStateException("This should not have been called");
+  }
+
   /**
    * Validates the presence of an Asset ID
    * (not having one at this point is a catastrophic illegal state)

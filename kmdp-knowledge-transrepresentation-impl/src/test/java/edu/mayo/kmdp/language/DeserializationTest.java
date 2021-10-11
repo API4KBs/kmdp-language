@@ -22,9 +22,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.codedRep;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
+import static org.omg.spec.api4kp._20200801.AbstractCompositeCarrier.ofMixedAnonymousComposite;
 import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeassettype.KnowledgeAssetTypeSeries.Cognitive_Process_Model;
 import static org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormatSeries.JSON;
 import static org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormatSeries.XML_1_1;
+import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.CMMN_1_1;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.DMN_1_1;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate_2_0;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.OWL_2;
@@ -38,6 +40,7 @@ import edu.mayo.kmdp.registry.Registry;
 import edu.mayo.kmdp.util.FileUtil;
 import edu.mayo.kmdp.util.JSonUtil;
 import edu.mayo.kmdp.util.JaxbUtil;
+import edu.mayo.kmdp.util.StreamUtil;
 import edu.mayo.kmdp.util.XMLUtil;
 import java.net.URI;
 import java.nio.charset.Charset;
@@ -49,8 +52,10 @@ import org.junit.jupiter.api.Test;
 import org.omg.spec.api4kp._20200801.AbstractCarrier;
 import org.omg.spec.api4kp._20200801.AbstractCarrier.Encodings;
 import org.omg.spec.api4kp._20200801.Answer;
+import org.omg.spec.api4kp._20200801.Composite;
 import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.DeserializeApi;
 import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
+import org.omg.spec.api4kp._20200801.services.CompositeKnowledgeCarrier;
 import org.omg.spec.api4kp._20200801.services.KPComponent;
 import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
@@ -63,14 +68,14 @@ import org.w3c.dom.Document;
 
 @SpringBootTest
 @ContextConfiguration(classes = LocalTestConfig.class)
-public class DeserializationTest {
+class DeserializationTest {
 
   @Inject
   @KPComponent
   DeserializeApi parser;
 
   @Test
-  public void testParse() {
+  void testParse() {
     Optional<byte[]> dmn = FileUtil
         .readBytes(DetectorTest.class.getResource("/artifacts/sample.dmn"));
     assertTrue(dmn.isPresent());
@@ -105,9 +110,9 @@ public class DeserializationTest {
 
     assertTrue(
         parser.applyLift(dox, Abstract_Knowledge_Expression)
-        .map(KnowledgeCarrier::getExpression)
-        .map(TDefinitions.class::isInstance)
-        .isSuccess());
+            .map(KnowledgeCarrier::getExpression)
+            .map(TDefinitions.class::isInstance)
+            .isSuccess());
 
     assertTrue(
         parser.applyLift(expr.get(), Abstract_Knowledge_Expression)
@@ -124,7 +129,7 @@ public class DeserializationTest {
 
 
   @Test
-  public void testSerialize() {
+  void testSerialize() {
     Optional<byte[]> dmn = FileUtil
         .readBytes(DetectorTest.class.getResource("/artifacts/sample.dmn"));
     assertTrue(dmn.isPresent());
@@ -156,7 +161,7 @@ public class DeserializationTest {
   }
 
   @Test
-  public void testOWLParse() {
+  void testOWLParse() {
     Optional<byte[]> owl = FileUtil
         .readBytes(DetectorTest.class.getResource("/artifacts/test.ofn"));
     assertTrue(owl.isPresent());
@@ -183,15 +188,15 @@ public class DeserializationTest {
     assertTrue(arep.getOptionalValue().isPresent());
     SyntacticRepresentation rep = arep.getOptionalValue().get();
 
-    assertEquals(OWL_2,rep.getLanguage());
-    assertEquals(RDF_XML_Syntax,rep.getSerialization());
-    assertEquals(XML_1_1,rep.getFormat());
+    assertEquals(OWL_2, rep.getLanguage());
+    assertEquals(RDF_XML_Syntax, rep.getSerialization());
+    assertEquals(XML_1_1, rep.getFormat());
 
   }
 
 
   @Test
-  public void testSerializeSurrogate() {
+  void testSerializeSurrogate() {
 
     KnowledgeAsset asset = new org.omg.spec.api4kp._20200801.surrogate.resources.KnowledgeAsset()
         .withAssetId(SemanticIdentifier.newId(
@@ -208,7 +213,7 @@ public class DeserializationTest {
         .withLevel(Abstract_Knowledge_Expression);
 
     Answer<String> ser = parser
-        .applyLower(ast,Serialized_Knowledge_Expression)
+        .applyLower(ast, Serialized_Knowledge_Expression)
         .flatOpt(AbstractCarrier::asString);
 
     assertEquals(serializedAsset, ser.orElse("Fail"));
@@ -216,7 +221,7 @@ public class DeserializationTest {
 
 
   @Test
-  public void testSerializeSurrogateJson() {
+  void testSerializeSurrogateJson() {
 
     KnowledgeAsset asset = new org.omg.spec.api4kp._20200801.surrogate.resources.KnowledgeAsset()
         .withAssetId(SemanticIdentifier.newId(
@@ -230,24 +235,71 @@ public class DeserializationTest {
         .withLevel(Abstract_Knowledge_Expression);
 
     Answer<String> ser = parser.applyLower(
-        ast,
-        Concrete_Knowledge_Expression,
-        codedRep(ast.getRepresentation().getLanguage(), JSON, Charset.defaultCharset()),
-        null)
+            ast,
+            Concrete_Knowledge_Expression,
+            codedRep(ast.getRepresentation().getLanguage(), JSON, Charset.defaultCharset()),
+            null)
         .flatOpt(AbstractCarrier::asString);
 
     assertEquals(serializedAsset, ser.orElse("Fail"));
 
     Answer<String> ser2 = parser.applyLower(
-        ast,
-        Concrete_Knowledge_Expression,
-        codedRep(ast.getRepresentation().getLanguage(), JSON, Charset.defaultCharset()), null)
+            ast,
+            Concrete_Knowledge_Expression,
+            codedRep(ast.getRepresentation().getLanguage(), JSON, Charset.defaultCharset()), null)
         .flatOpt(AbstractCarrier::asString);
 
     assertEquals(serializedAsset, ser2.orElse("Fail"));
 
-
   }
 
+  @Test
+  void testParseComposite() {
+    Optional<byte[]> dmn1 = FileUtil
+        .readBytes(DetectorTest.class.getResource("/artifacts/sample.dmn"));
+    KnowledgeCarrier bin1 = AbstractCarrier.of(dmn1.orElseGet(Assertions::fail))
+        .withRepresentation(
+            rep(DMN_1_1, XML_1_1, Charset.defaultCharset(), Encodings.DEFAULT));
+    Optional<byte[]> dmn2 = FileUtil
+        .readBytes(DetectorTest.class.getResource("/artifacts/sample.dmn"));
+    KnowledgeCarrier bin2 = AbstractCarrier.of(dmn2.orElseGet(Assertions::fail))
+        .withRepresentation(
+            rep(DMN_1_1, XML_1_1, Charset.defaultCharset(), Encodings.DEFAULT));
+    Optional<byte[]> cmmn3 = FileUtil
+        .readBytes(DetectorTest.class.getResource("/artifacts/sample.cmmn"));
+    KnowledgeCarrier bin3 = AbstractCarrier.of(cmmn3.orElseGet(Assertions::fail))
+        .withRepresentation(
+            rep(CMMN_1_1, XML_1_1, Charset.defaultCharset(), Encodings.DEFAULT));
+
+    KnowledgeCarrier ckc = ofMixedAnonymousComposite(bin1, bin2, bin3);
+
+    KnowledgeCarrier expr = Answer.of(ckc)
+        .flatMap(bin -> parser
+            .applyLift(bin, Serialized_Knowledge_Expression))
+        .orElseGet(Assertions::fail);
+    assertTrue(expr.components()
+        .allMatch(kc -> Serialized_Knowledge_Expression.sameAs(kc.getLevel())));
+    assertEquals(3, expr.components().count());
+
+    KnowledgeCarrier ckc2 = ofMixedAnonymousComposite(
+        ofMixedAnonymousComposite(bin1, bin2),
+        bin3);
+
+    KnowledgeCarrier expr2 = Answer.of(ckc2)
+        .flatMap(bin -> parser
+            .applyLift(bin, Serialized_Knowledge_Expression))
+        .orElseGet(Assertions::fail);
+
+    assertTrue(expr2.components()
+        .filter(c -> !(c instanceof Composite))
+        .allMatch(kc -> Serialized_Knowledge_Expression.sameAs(kc.getLevel())));
+    assertEquals(2, expr2.components().count());
+    CompositeKnowledgeCarrier inner = expr2.components()
+        .flatMap(StreamUtil.filterAs(CompositeKnowledgeCarrier.class))
+        .findFirst().orElseGet(Assertions::fail);
+    assertEquals(2, inner.components().count());
+    assertTrue(inner.components()
+        .allMatch(kc -> Serialized_Knowledge_Expression.sameAs(kc.getLevel())));
+  }
 
 }

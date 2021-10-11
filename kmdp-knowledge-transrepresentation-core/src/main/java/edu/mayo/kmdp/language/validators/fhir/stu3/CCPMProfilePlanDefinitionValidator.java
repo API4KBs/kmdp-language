@@ -7,7 +7,6 @@ import static edu.mayo.kmdp.language.common.fhir.stu3.FHIRPlanDefinitionUtils.to
 import static edu.mayo.kmdp.util.Util.isEmpty;
 import static edu.mayo.kmdp.util.Util.isNotEmpty;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
-import static org.omg.spec.api4kp._20200801.id.SemanticIdentifier.newVersionId;
 import static org.omg.spec.api4kp._20200801.taxonomy.clinicalknowledgeassettype.ClinicalKnowledgeAssetTypeSeries.Cognitive_Care_Process_Model;
 import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Well_Formedness_Check_Task;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.FHIR_STU3;
@@ -15,7 +14,6 @@ import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeReprese
 import edu.mayo.kmdp.language.validators.cmmn.v1_1.CCPMComponentValidator;
 import edu.mayo.kmdp.registry.Registry;
 import edu.mayo.kmdp.util.Util;
-import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -26,7 +24,6 @@ import java.util.stream.Stream;
 import javax.inject.Named;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.DataRequirement;
-import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionComponent;
 import org.hl7.fhir.dstu3.model.Reference;
@@ -49,7 +46,7 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
   public static final UUID id = UUID.fromString("7e2bceb4-632c-4361-b9db-ea8a84c09eff");
   public static final String version = "1.0.0";
 
-  private ResourceIdentifier operatorId;
+  private final ResourceIdentifier operatorId;
 
   public CCPMProfilePlanDefinitionValidator() {
     this.operatorId = SemanticIdentifier.newId(id, version);
@@ -149,7 +146,7 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
 
           return validationResponse(
               carrier,
-              kc -> mapAssetId(kc, pd.getIdentifier().get(0)),
+              kc -> mapAssetId(kc, pd.getId()),
               hasTitle && hasName ? ValidationStatus.OK : ValidationStatus.ERR,
               "PD Name / Title",
               () -> "title: " + pd.getTitle(),
@@ -183,7 +180,7 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
 
           return validationResponse(
               carrier,
-              kc -> mapAssetId(kc, pd.getIdentifier().get(0)),
+              kc -> mapAssetId(kc, pd.getId()),
               valid,
               "Action Titles",
               () -> "All actions have titles",
@@ -207,7 +204,7 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
 
           return validationResponse(
               carrier,
-              kc -> mapAssetId(kc, pd.getIdentifier().get(0)),
+              kc -> mapAssetId(kc, pd.getId()),
               success,
               "PlanDef Type",
               () -> toDisplayTerms(pd.getType()),
@@ -233,7 +230,7 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
 
           return validationResponse(
               carrier,
-              kc -> mapAssetId(kc, pd.getIdentifier().get(0)),
+              kc -> mapAssetId(kc, pd.getId()),
               untypedActions.isEmpty(),
               "Action Type",
               () -> "All actions have types",
@@ -271,7 +268,7 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
 
           return validationResponse(
               carrier,
-              kc -> mapAssetId(kc, pd.getIdentifier().get(0)),
+              kc -> mapAssetId(kc, pd.getId()),
               brokenReferences.isEmpty(),
               "Definition Ref",
               () -> definedActs.isEmpty() ? "No Definition References"
@@ -304,7 +301,7 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
 
           return validationResponse(
               carrier,
-              kc -> mapAssetId(kc, pd.getIdentifier().get(0)),
+              kc -> mapAssetId(kc, pd.getId()),
               brokenRelationships.isEmpty(),
               "Related Ref",
               () -> relatedActs.isEmpty() ? "No Related Acts" : "Valid Related acts",
@@ -348,7 +345,7 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
 
           return validationResponse(
               carrier,
-              kc -> mapAssetId(kc, pd.getIdentifier().get(0)),
+              kc -> mapAssetId(kc, pd.getId()),
               status,
               "K-Sources",
               () -> relatedArtifacts.isEmpty() ? "No Attachments" : "Valid Attachments",
@@ -369,8 +366,8 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
     return getNestedPlanDefs(rootPlanDef)
         .map(pd -> {
           List<DataRequirement> ioRequirements = Stream.concat(
-              getSubActions(pd).flatMap(act -> act.getInput().stream()),
-              getSubActions(pd).flatMap(act -> act.getOutput().stream()))
+                  getSubActions(pd).flatMap(act -> act.getInput().stream()),
+                  getSubActions(pd).flatMap(act -> act.getOutput().stream()))
               .collect(Collectors.toList());
 
           Set<DataRequirement> brokenRequirements = ioRequirements.stream()
@@ -382,7 +379,7 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
 
           return validationResponse(
               carrier,
-              kc -> mapAssetId(kc, pd.getIdentifier().get(0)),
+              kc -> mapAssetId(kc, pd.getId()),
               brokenRequirements.isEmpty(),
               "I/O Reqs",
               () -> ioRequirements.isEmpty() ? "No Input/Output" : "Annotated Input/Output",
@@ -410,19 +407,16 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
 
           Set<PlanDefinitionActionComponent> brokenSubDecisionServices = subActions.stream()
               .filter(act -> act.getAction().stream().anyMatch(sub -> {
-                if (! "DecisionService".equals(sub.getType().getCode())) {
+                if (!"DecisionService".equals(sub.getType().getCode())) {
                   return true;
                 }
-                if (! act.getInput().containsAll(sub.getOutput())) {
-                  return true;
-                }
-                return false;
+                return !act.getInput().containsAll(sub.getOutput());
               }))
               .collect(Collectors.toSet());
 
           return validationResponse(
               carrier,
-              kc -> mapAssetId(kc, pd.getIdentifier().get(0)),
+              kc -> mapAssetId(kc, pd.getId()),
               brokenSubDecisionServices.isEmpty(),
               "SubAction Services",
               () -> subActions.isEmpty() ? "No SubActions" : "Linked SubAction Services",
@@ -440,10 +434,10 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
         : cc.getCodingFirstRep().getDisplay();
   }
 
-  private String mapAssetId(KnowledgeCarrier kc, Identifier identifier) {
+  private String mapAssetId(KnowledgeCarrier kc, String id) {
     return mapResourceId(kc.getAssetId(), 1)
         + "|"
-        + mapResourceId(newVersionId(URI.create(identifier.getValue())), 3);
+        + id.substring(1, 3);
   }
 
   private Answer<Void> validateSubject(PlanDefinition rootPlanDef, KnowledgeCarrier carrier) {
