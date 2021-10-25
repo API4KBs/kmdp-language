@@ -167,7 +167,7 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
         .map(pd -> {
           List<PlanDefinitionActionComponent> untitledActions =
               getSubActions(pd)
-                  .filter(act -> act.getTitle().isEmpty())
+                  .filter(act -> isEmpty(act.getTitle()))
                   .collect(Collectors.toList());
           ValidationStatus valid;
           if (untitledActions.isEmpty()) {
