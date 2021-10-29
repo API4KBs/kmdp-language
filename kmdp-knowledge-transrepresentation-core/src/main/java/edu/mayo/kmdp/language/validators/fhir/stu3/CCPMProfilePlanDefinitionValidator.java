@@ -146,7 +146,7 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
 
           return validationResponse(
               carrier,
-              kc -> mapAssetId(kc, pd.getId()),
+              this::mapAssetId,
               hasTitle && hasName ? ValidationStatus.OK : ValidationStatus.ERR,
               "PD Name / Title",
               () -> "title: " + pd.getTitle(),
@@ -180,7 +180,7 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
 
           return validationResponse(
               carrier,
-              kc -> mapAssetId(kc, pd.getId()),
+              this::mapAssetId,
               valid,
               "Action Titles",
               () -> "All actions have titles",
@@ -204,7 +204,7 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
 
           return validationResponse(
               carrier,
-              kc -> mapAssetId(kc, pd.getId()),
+              this::mapAssetId,
               success,
               "PlanDef Type",
               () -> toDisplayTerms(pd.getType()),
@@ -230,7 +230,7 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
 
           return validationResponse(
               carrier,
-              kc -> mapAssetId(kc, pd.getId()),
+              this::mapAssetId,
               untypedActions.isEmpty(),
               "Action Type",
               () -> "All actions have types",
@@ -268,7 +268,7 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
 
           return validationResponse(
               carrier,
-              kc -> mapAssetId(kc, pd.getId()),
+              this::mapAssetId,
               brokenReferences.isEmpty(),
               "Definition Ref",
               () -> definedActs.isEmpty() ? "No Definition References"
@@ -301,7 +301,7 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
 
           return validationResponse(
               carrier,
-              kc -> mapAssetId(kc, pd.getId()),
+              this::mapAssetId,
               brokenRelationships.isEmpty(),
               "Related Ref",
               () -> relatedActs.isEmpty() ? "No Related Acts" : "Valid Related acts",
@@ -345,7 +345,7 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
 
           return validationResponse(
               carrier,
-              kc -> mapAssetId(kc, pd.getId()),
+              this::mapAssetId,
               status,
               "K-Sources",
               () -> relatedArtifacts.isEmpty() ? "No Attachments" : "Valid Attachments",
@@ -379,7 +379,7 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
 
           return validationResponse(
               carrier,
-              kc -> mapAssetId(kc, pd.getId()),
+              this::mapAssetId,
               brokenRequirements.isEmpty(),
               "I/O Reqs",
               () -> ioRequirements.isEmpty() ? "No Input/Output" : "Annotated Input/Output",
@@ -416,7 +416,7 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
 
           return validationResponse(
               carrier,
-              kc -> mapAssetId(kc, pd.getId()),
+              this::mapAssetId,
               brokenSubDecisionServices.isEmpty(),
               "SubAction Services",
               () -> subActions.isEmpty() ? "No SubActions" : "Linked SubAction Services",
@@ -432,12 +432,6 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
     return isNotEmpty(cc.getText())
         ? cc.getText()
         : cc.getCodingFirstRep().getDisplay();
-  }
-
-  private String mapAssetId(KnowledgeCarrier kc, String id) {
-    return mapResourceId(kc.getAssetId(), 1)
-        + "|"
-        + id.substring(1, 3);
   }
 
   private Answer<Void> validateSubject(PlanDefinition rootPlanDef, KnowledgeCarrier carrier) {

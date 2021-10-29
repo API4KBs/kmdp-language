@@ -245,7 +245,7 @@ public abstract class CCPMComponentValidator extends AbstractValidator {
       KnowledgeCarrier carrier, Function<KnowledgeCarrier, String> keyMapper,
       boolean outcome,
       String ruleName, Supplier<String> successMsg, Supplier<String> failMsg) {
-    return Answer.succeed().withExplanation(
+    return Answer.succeed().withExplanationDetail(
         format(
             keyMapper.apply(carrier),
             outcome ? ValidationStatus.OK : ValidationStatus.ERR,
@@ -258,7 +258,7 @@ public abstract class CCPMComponentValidator extends AbstractValidator {
       KnowledgeCarrier carrier, Function<KnowledgeCarrier, String> keyMapper,
       ValidationStatus outcome,
       String ruleName, Supplier<String> successMsg, Supplier<String> failMsg) {
-    return Answer.succeed().withExplanation(
+    return Answer.succeed().withExplanationDetail(
         format(
             keyMapper.apply(carrier),
             outcome,

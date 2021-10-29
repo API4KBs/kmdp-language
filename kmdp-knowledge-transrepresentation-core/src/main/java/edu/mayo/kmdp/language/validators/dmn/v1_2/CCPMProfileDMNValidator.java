@@ -4,7 +4,6 @@ import static edu.mayo.kmdp.util.Util.isEmpty;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
 import static org.omg.spec.api4kp._20200801.id.SemanticIdentifier.newVersionId;
 import static org.omg.spec.api4kp._20200801.taxonomy.clinicalknowledgeassettype.ClinicalKnowledgeAssetTypeSeries.Clinical_Decision_Model;
-import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeassettype.KnowledgeAssetTypeSeries.Decision_Model;
 import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Well_Formedness_Check_Task;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.DMN_1_2;
 
@@ -31,7 +30,6 @@ import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
 import org.omg.spec.api4kp._20200801.surrogate.Annotation;
 import org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset;
-import org.omg.spec.api4kp._20200801.taxonomy.clinicalknowledgeassettype._20210401.ClinicalKnowledgeAssetType;
 import org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
 import org.omg.spec.dmn._20180521.model.TAuthorityRequirement;
 import org.omg.spec.dmn._20180521.model.TDMNElementReference;
@@ -39,6 +37,7 @@ import org.omg.spec.dmn._20180521.model.TDRGElement;
 import org.omg.spec.dmn._20180521.model.TDecision;
 import org.omg.spec.dmn._20180521.model.TDecisionService;
 import org.omg.spec.dmn._20180521.model.TDefinitions;
+import org.omg.spec.dmn._20180521.model.TImport;
 import org.omg.spec.dmn._20180521.model.TInputData;
 import org.omg.spec.dmn._20180521.model.TKnowledgeSource;
 
@@ -72,13 +71,13 @@ public class CCPMProfileDMNValidator extends CCPMComponentValidator {
   }
 
   protected Answer<Void> validate(KnowledgeAsset knowledgeAsset, KnowledgeCarrier carrier) {
-    return Stream.of(
+    return allOf(
         validateAssetId(knowledgeAsset, carrier),
         validateAssetVersion(knowledgeAsset, carrier),
         validateArtifactVersion(knowledgeAsset, carrier),
         validateAssetType(knowledgeAsset, carrier, Clinical_Decision_Model),
         validatePublicationStatus(knowledgeAsset, carrier)
-    ).reduce(Answer::merge).orElseGet(Answer::failed);
+    );
   }
 
   @Override
@@ -102,7 +101,7 @@ public class CCPMProfileDMNValidator extends CCPMComponentValidator {
    */
   private Answer<Void> validateNoImports(TDefinitions decisionModel, KnowledgeCarrier carrier) {
     Set<String> imports = decisionModel.getImport().stream()
-        .map(imp -> imp.getNamespace())
+        .map(TImport::getNamespace)
         .collect(Collectors.toSet());
     Set<String> bkmReqs = decisionModel.getDrgElement().stream()
         .map(JAXBElement::getValue)
