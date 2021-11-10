@@ -68,6 +68,27 @@
       <scope>compile</scope>
     </dependency>
 
+    <dependency>
+      <groupId>edu.mayo.kmdp</groupId>
+      <artifactId>omg-dmn-11</artifactId>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>edu.mayo.kmdp</groupId>
+      <artifactId>omg-dmn-12</artifactId>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>edu.mayo.kmdp</groupId>
+      <artifactId>omg-cmmn-11</artifactId>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>edu.mayo.kmdp</groupId>
+      <artifactId>omg-bpmn-202</artifactId>
+      <scope>compile</scope>
+    </dependency>
+
   </dependencies>
 
 </project>
