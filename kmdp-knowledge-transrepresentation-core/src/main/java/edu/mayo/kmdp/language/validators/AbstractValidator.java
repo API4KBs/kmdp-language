@@ -34,7 +34,7 @@ public abstract class AbstractValidator
   }
 
   @Override
-  public Answer<Void> applyValidate(KnowledgeCarrier knowledgeCarrier, String s) {
+  public Answer<Void> applyValidate(KnowledgeCarrier knowledgeCarrier, String xConfig) {
     Answer<Void> response = knowledgeCarrier.componentList().isEmpty()
         ? Answer.failed(new ServerSideException(BadRequest, "Missing Artifact to Validate"))
         : Answer.succeed().withExplanationDetail(introExplainValidation(knowledgeCarrier));
@@ -43,7 +43,7 @@ public abstract class AbstractValidator
     }
     return Stream.concat(
             Stream.of(response),
-            knowledgeCarrier.components().map(this::validateComponent))
+            knowledgeCarrier.components().map(kc -> validateComponent(kc, xConfig)))
         .reduce(Answer::merge)
         .orElseGet(Answer::failed);
   }
@@ -55,23 +55,27 @@ public abstract class AbstractValidator
         knowledgeCarrier.getAssetId().getVersionId());
   }
 
-  protected abstract Answer<Void> validateComponent(KnowledgeCarrier carrier);
+  protected abstract Answer<Void> validateComponent(KnowledgeCarrier carrier, String xConfig);
 
   protected Problem format(String key, ValidationStatus status, String ruleName, String message) {
+    return format(URI.create(key), status, ruleName, message);
+  }
+
+  protected Problem format(URI key, ValidationStatus status, String ruleName, String message) {
     switch (status) {
       case OK:
       case INF:
-        return new InfoProblem(ruleName, message, URI.create(key));
+        return new InfoProblem(ruleName, message, key);
       case WRN:
       case ERR:
-        return new IssueProblem(ruleName, PreconditionFailed, message, URI.create(key));
+        return new IssueProblem(ruleName, PreconditionFailed, message, key);
       case FATAL:
         return new ServerSideException(
             Explainer.GENERIC_ERROR_TYPE,
             ruleName,
             UnprocessableEntity,
             message,
-            URI.create(key));
+            key);
       default:
         throw new IllegalStateException("This cannot happen");
     }

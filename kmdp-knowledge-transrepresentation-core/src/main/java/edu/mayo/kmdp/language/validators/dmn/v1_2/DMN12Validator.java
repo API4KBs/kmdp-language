@@ -45,14 +45,15 @@ public class DMN12Validator extends AbstractValidator {
   @Override
   public Answer<Void> applyValidate(KnowledgeCarrier sourceArtifact, String config) {
     try {
-      return validateComponent(sourceArtifact);
+      return validateComponent(sourceArtifact, config);
     } catch (Exception e) {
       return Answer.failed(e);
     }
   }
 
 
-  protected Answer<Void> validateComponent(KnowledgeCarrier sourceArtifact) {
+  @Override
+  protected Answer<Void> validateComponent(KnowledgeCarrier sourceArtifact, String xConfig) {
     Schema dmn12Schema = checkSchema(sourceArtifact);
 
     boolean outcome = false;

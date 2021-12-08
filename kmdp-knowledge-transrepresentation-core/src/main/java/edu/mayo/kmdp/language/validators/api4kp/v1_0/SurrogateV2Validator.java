@@ -1,4 +1,4 @@
-package edu.mayo.kmdp.language.validators.dmn.v1_2;
+package edu.mayo.kmdp.language.validators.api4kp.v1_0;
 
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
 import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Well_Formedness_Check_Task;
@@ -46,7 +46,7 @@ public class SurrogateV2Validator extends AbstractValidator {
   public static final UUID id = UUID.fromString("85ea1656-60e1-46a6-944f-942367de4ec5");
   public static final String version = "1.0.0";
 
-  private ResourceIdentifier operatorId;
+  private final ResourceIdentifier operatorId;
 
   public SurrogateV2Validator() {
     this.operatorId = SemanticIdentifier.newId(id, version);
@@ -55,13 +55,14 @@ public class SurrogateV2Validator extends AbstractValidator {
   @Override
   public Answer<Void> applyValidate(KnowledgeCarrier sourceArtifact, String config) {
     try {
-      return validateComponent(sourceArtifact);
+      return validateComponent(sourceArtifact, config);
     } catch (Exception e) {
       return Answer.failed(e);
     }
   }
 
-  protected Answer<Void> validateComponent(KnowledgeCarrier sourceArtifact) {
+  @Override
+  protected Answer<Void> validateComponent(KnowledgeCarrier sourceArtifact, String xConfig) {
     Schema surrogateV2Schema = checkSchema(sourceArtifact);
 
     boolean outcome;

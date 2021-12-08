@@ -28,7 +28,8 @@ import org.omg.spec.api4kp._20200801.taxonomy.publicationstatus.PublicationStatu
 public abstract class CCPMComponentValidator extends AbstractValidator {
 
 
-  protected Answer<Void> validateComponent(KnowledgeCarrier carrier) {
+  @Override
+  protected Answer<Void> validateComponent(KnowledgeCarrier carrier, String xConfig) {
     if (carrier.is(KnowledgeAsset.class)) {
       return carrier.as(KnowledgeAsset.class)
           .map(ka -> this.validate(ka, carrier))

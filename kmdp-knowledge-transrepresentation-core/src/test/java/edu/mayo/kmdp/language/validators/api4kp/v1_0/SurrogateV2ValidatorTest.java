@@ -1,4 +1,4 @@
-package edu.mayo.kmdp.language.validators.dmn.v1_2;
+package edu.mayo.kmdp.language.validators.api4kp.v1_0;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
