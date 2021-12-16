@@ -4,14 +4,13 @@ import static org.omg.spec.api4kp._20200801.contrastors.SyntacticRepresentationC
 
 import edu.mayo.kmdp.util.Util;
 import java.util.List;
-import java.util.UUID;
-import org.omg.spec.api4kp._20200801.Answer;
 import org.omg.spec.api4kp._20200801.KnowledgePlatformOperator;
 import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.ValidateApiInternal;
-import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
 import org.omg.spec.api4kp._20200801.services.transrepresentation.ModelMIMECoder;
 import org.omg.spec.api4kp._20200801.services.transrepresentation.ValidationOperator;
+import org.omg.spec.api4kp._20200801.taxonomy.knowledgeresourceoutcome.KnowledgeResourceOutcome;
+import org.omg.spec.api4kp._20200801.taxonomy.knowledgeresourceoutcome.KnowledgeResourceOutcomeSeries;
 
 public interface ValidateApiOperator
     extends ValidateApiInternal.Operator, KnowledgePlatformOperator<ValidationOperator> {
@@ -22,6 +21,11 @@ public interface ValidateApiOperator
     return new ValidationOperator()
         .withFrom(getFrom())
         .withOperatorId(getOperatorId());
+  }
+
+  default KnowledgeResourceOutcome getValidationType() {
+    // TODO FUTURE should be inferred from getDescriptor
+    return KnowledgeResourceOutcomeSeries.Conformance;
   }
 
   default boolean consumes(String from) {

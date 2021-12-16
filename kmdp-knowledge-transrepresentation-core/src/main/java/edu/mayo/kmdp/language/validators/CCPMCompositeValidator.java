@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Named;
 import org.omg.spec.api4kp._20200801.Answer;
+import org.omg.spec.api4kp._20200801.Severity;
 import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
 import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
 import org.omg.spec.api4kp._20200801.services.CompositeKnowledgeCarrier;
@@ -100,7 +101,7 @@ public class CCPMCompositeValidator extends CCPMComponentValidator {
     if (parts.size() != components.components().count()) {
       return validationResponse(
           components,
-          ValidationStatus.ERR,
+          Severity.ERR,
           "Consistency",
           this::impossible,
           () -> "Metadata not consistent with components"
@@ -114,7 +115,7 @@ public class CCPMCompositeValidator extends CCPMComponentValidator {
 
     return validationResponse(
         components,
-        brokenLinks.isEmpty() ? ValidationStatus.OK : ValidationStatus.ERR,
+        brokenLinks.isEmpty() ? Severity.OK : Severity.ERR,
         "Consistency",
         () -> "Assets components resolved",
         () -> "Unresolved components " + brokenLinks.stream()
@@ -143,7 +144,7 @@ public class CCPMCompositeValidator extends CCPMComponentValidator {
     } else {
       return validationResponse(
           components,
-          ValidationStatus.ERR,
+          Severity.ERR,
           "Artifact Type",
           this::impossible,
           () -> "Unable to handle " + comp.getExpression().getClass().getName());
@@ -161,7 +162,7 @@ public class CCPMCompositeValidator extends CCPMComponentValidator {
         .collect(Collectors.toList());
     return validationResponse(
         components,
-        brokenLinks.isEmpty() ? ValidationStatus.OK : ValidationStatus.ERR,
+        brokenLinks.isEmpty() ? Severity.OK : Severity.ERR,
         "Artifact Consistency",
         () -> "Artifact components resolved " + metadata.getAssetId(),
         () -> metadata.getAssetId() + " Unresolved components " + brokenLinks.stream()
@@ -180,7 +181,7 @@ public class CCPMCompositeValidator extends CCPMComponentValidator {
         .collect(Collectors.toList());
     return validationResponse(
         components,
-        brokenLinks.isEmpty() ? ValidationStatus.OK : ValidationStatus.ERR,
+        brokenLinks.isEmpty() ? Severity.OK : Severity.ERR,
         "Artifact Consistency",
         () -> "Artifact components resolved " + metadata.getAssetId(),
         () -> metadata.getAssetId() + " Unresolved components " + brokenLinks.stream()

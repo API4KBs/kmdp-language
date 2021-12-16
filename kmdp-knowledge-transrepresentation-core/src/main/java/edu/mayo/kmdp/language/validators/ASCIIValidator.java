@@ -3,6 +3,7 @@ package edu.mayo.kmdp.language.validators;
 import static edu.mayo.kmdp.util.PropertiesUtil.pEnum;
 import static edu.mayo.kmdp.util.PropertiesUtil.parseProperties;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
+import static org.omg.spec.api4kp._20200801.Explainer.newOutcomeProblem;
 import static org.omg.spec.api4kp._20200801.id.SemanticIdentifier.newId;
 
 import edu.mayo.kmdp.util.CharsetEncodingUtil;
@@ -15,9 +16,12 @@ import java.util.Properties;
 import java.util.UUID;
 import org.omg.spec.api4kp._20200801.AbstractCarrier.Encodings;
 import org.omg.spec.api4kp._20200801.Answer;
+import org.omg.spec.api4kp._20200801.Severity;
 import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
 import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
+import org.omg.spec.api4kp._20200801.taxonomy.knowledgeresourceoutcome.KnowledgeResourceOutcome;
+import org.omg.spec.api4kp._20200801.taxonomy.knowledgeresourceoutcome.KnowledgeResourceOutcomeSeries;
 import org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
 import org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries;
 import org.zalando.problem.Problem;
@@ -76,6 +80,11 @@ public class ASCIIValidator extends AbstractValidator {
     );
   }
 
+  @Override
+  public KnowledgeResourceOutcome getValidationType() {
+    return KnowledgeResourceOutcomeSeries.Well_Formedness;
+  }
+
   /**
    * Applies validation rules to the Artifact wrapped in a {@link KnowledgeCarrier}
    *
@@ -97,7 +106,10 @@ public class ASCIIValidator extends AbstractValidator {
         return carrier.asString()
             .map(content -> innerValidate(content, carrier, parseProperties(xConfig)))
             .map(p -> Answer.succeed().withExplanationDetail(p))
-            .orElseGet(() -> Answer.succeed().withExplanationMessage("No content to validate"));
+            .orElseGet(() -> Answer.succeed()
+                .withExplanationDetail(
+                    newOutcomeProblem(getValidationType(), Severity.INF)
+                    .withDetail("No content to validate").build()));
       case Abstract_Knowledge_Expression:
       case Concrete_Knowledge_Expression:
       default:
@@ -149,7 +161,7 @@ public class ASCIIValidator extends AbstractValidator {
 
     return format(
         kc.getAssetId().getVersionId(),
-        valid ? ValidationStatus.OK : ValidationStatus.FATAL,
+        valid ? Severity.OK : Severity.FATAL,
         "ASCII Core Conformance",
         msg);
 

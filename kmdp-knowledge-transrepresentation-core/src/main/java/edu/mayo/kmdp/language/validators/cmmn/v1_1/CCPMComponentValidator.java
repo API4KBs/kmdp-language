@@ -17,16 +17,23 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.omg.spec.api4kp._20200801.Answer;
+import org.omg.spec.api4kp._20200801.Severity;
 import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
 import org.omg.spec.api4kp._20200801.id.Term;
 import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._20200801.surrogate.Annotation;
 import org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset;
 import org.omg.spec.api4kp._20200801.taxonomy.knowledgeassettype.KnowledgeAssetType;
+import org.omg.spec.api4kp._20200801.taxonomy.knowledgeresourceoutcome.KnowledgeResourceOutcome;
+import org.omg.spec.api4kp._20200801.taxonomy.knowledgeresourceoutcome.KnowledgeResourceOutcomeSeries;
 import org.omg.spec.api4kp._20200801.taxonomy.publicationstatus.PublicationStatus;
 
 public abstract class CCPMComponentValidator extends AbstractValidator {
 
+  @Override
+  public KnowledgeResourceOutcome getValidationType() {
+    return KnowledgeResourceOutcomeSeries.Profile_Conformance;
+  }
 
   @Override
   protected Answer<Void> validateComponent(KnowledgeCarrier carrier, String xConfig) {
@@ -145,13 +152,13 @@ public abstract class CCPMComponentValidator extends AbstractValidator {
    */
   protected Answer<Void> validatePublicationStatus(KnowledgeAsset knowledgeAsset, KnowledgeCarrier carrier) {
     PublicationStatus status = knowledgeAsset.getLifecycle().getPublicationStatus();
-    ValidationStatus valid;
+    Severity valid;
     if (status == null) {
-      valid = ValidationStatus.ERR;
+      valid = Severity.ERR;
     } else if (Published.sameAs(status)) {
-      valid = ValidationStatus.OK;
+      valid = Severity.OK;
     } else {
-      valid = ValidationStatus.WRN;
+      valid = Severity.WRN;
     }
     return validationResponse(
         carrier,
@@ -173,7 +180,7 @@ public abstract class CCPMComponentValidator extends AbstractValidator {
       Optional<Annotation> subject = knowledgeAsset.getAnnotation().stream()
           .filter(ann -> Has_Primary_Subject.sameTermAs(ann.getRel()))
           .findFirst();
-      ValidationStatus valid = subject.isPresent() ? ValidationStatus.OK : ValidationStatus.WRN;
+      Severity valid = subject.isPresent() ? Severity.OK : Severity.WRN;
       return validationResponse(
           carrier,
           valid,
@@ -207,13 +214,13 @@ public abstract class CCPMComponentValidator extends AbstractValidator {
     List<KnowledgeAssetType> missingTypes = new ArrayList<>(expectedTypes);
     missingTypes.removeAll(foundTypes);
 
-    ValidationStatus status;
+    Severity status;
     if (actualTypes.isEmpty()) {
-      status = ValidationStatus.ERR;
+      status = Severity.ERR;
     } else if (foundTypes.containsAll(expectedTypes)) {
-      status = ValidationStatus.OK;
+      status = Severity.OK;
     } else {
-      status = ValidationStatus.WRN;
+      status = Severity.WRN;
     }
 
     return validationResponse(
@@ -237,7 +244,7 @@ public abstract class CCPMComponentValidator extends AbstractValidator {
     return validationResponse(carrier, this::mapAssetId, outcome, ruleName, successMsg, failMsg);
   }
 
-  protected Answer<Void> validationResponse(KnowledgeCarrier carrier, ValidationStatus outcome,
+  protected Answer<Void> validationResponse(KnowledgeCarrier carrier, Severity outcome,
       String ruleName, Supplier<String> successMsg, Supplier<String> failMsg) {
     return validationResponse(carrier, this::mapAssetId, outcome, ruleName, successMsg, failMsg);
   }
@@ -249,7 +256,7 @@ public abstract class CCPMComponentValidator extends AbstractValidator {
     return Answer.succeed().withExplanationDetail(
         format(
             keyMapper.apply(carrier),
-            outcome ? ValidationStatus.OK : ValidationStatus.ERR,
+            outcome ? Severity.OK : Severity.ERR,
             ruleName,
             outcome ? successMsg.get() : failMsg.get()));
   }
@@ -257,14 +264,14 @@ public abstract class CCPMComponentValidator extends AbstractValidator {
 
   protected Answer<Void> validationResponse(
       KnowledgeCarrier carrier, Function<KnowledgeCarrier, String> keyMapper,
-      ValidationStatus outcome,
+      Severity outcome,
       String ruleName, Supplier<String> successMsg, Supplier<String> failMsg) {
     return Answer.succeed().withExplanationDetail(
         format(
             keyMapper.apply(carrier),
             outcome,
             ruleName,
-            outcome == ValidationStatus.OK ? successMsg.get() : failMsg.get()));
+            outcome == Severity.OK ? successMsg.get() : failMsg.get()));
   }
 
   @SuppressWarnings("unchecked")

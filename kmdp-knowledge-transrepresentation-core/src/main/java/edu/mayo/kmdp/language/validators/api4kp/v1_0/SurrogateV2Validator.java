@@ -34,6 +34,8 @@ import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
 import org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset;
 import org.omg.spec.api4kp._20200801.surrogate.ObjectFactory;
+import org.omg.spec.api4kp._20200801.taxonomy.knowledgeresourceoutcome.KnowledgeResourceOutcome;
+import org.omg.spec.api4kp._20200801.taxonomy.knowledgeresourceoutcome.KnowledgeResourceOutcomeSeries;
 import org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormat;
 import org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
 import org.w3c.dom.Document;
@@ -50,6 +52,11 @@ public class SurrogateV2Validator extends AbstractValidator {
 
   public SurrogateV2Validator() {
     this.operatorId = SemanticIdentifier.newId(id, version);
+  }
+
+  @Override
+  public KnowledgeResourceOutcome getValidationType() {
+    return KnowledgeResourceOutcomeSeries.Well_Formedness;
   }
 
   @Override

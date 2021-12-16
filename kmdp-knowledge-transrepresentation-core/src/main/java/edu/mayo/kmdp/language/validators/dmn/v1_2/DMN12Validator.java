@@ -24,6 +24,8 @@ import org.omg.spec.api4kp._20200801.services.KPOperation;
 import org.omg.spec.api4kp._20200801.services.KPSupport;
 import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
+import org.omg.spec.api4kp._20200801.taxonomy.knowledgeresourceoutcome.KnowledgeResourceOutcome;
+import org.omg.spec.api4kp._20200801.taxonomy.knowledgeresourceoutcome.KnowledgeResourceOutcomeSeries;
 import org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
 import org.omg.spec.dmn._20180521.model.TDefinitions;
 import org.w3c.dom.Document;
@@ -40,6 +42,11 @@ public class DMN12Validator extends AbstractValidator {
 
   public DMN12Validator() {
     this.operatorId = SemanticIdentifier.newId(id, version);
+  }
+
+  @Override
+  public KnowledgeResourceOutcome getValidationType() {
+    return KnowledgeResourceOutcomeSeries.Well_Formedness;
   }
 
   @Override

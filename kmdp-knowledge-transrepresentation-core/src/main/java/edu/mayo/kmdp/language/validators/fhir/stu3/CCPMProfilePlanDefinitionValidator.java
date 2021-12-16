@@ -29,6 +29,7 @@ import org.hl7.fhir.dstu3.model.PlanDefinition.PlanDefinitionActionComponent;
 import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.omg.spec.api4kp._20200801.Answer;
+import org.omg.spec.api4kp._20200801.Severity;
 import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
 import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
 import org.omg.spec.api4kp._20200801.services.KPOperation;
@@ -147,7 +148,7 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
           return validationResponse(
               carrier,
               this::mapAssetId,
-              hasTitle && hasName ? ValidationStatus.OK : ValidationStatus.ERR,
+              hasTitle && hasName ? Severity.OK : Severity.ERR,
               "PD Name / Title",
               () -> "title: " + pd.getTitle(),
               () -> "invalid name: " + pd.getName());
@@ -169,13 +170,13 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
               getSubActions(pd)
                   .filter(act -> isEmpty(act.getTitle()))
                   .collect(Collectors.toList());
-          ValidationStatus valid;
+          Severity valid;
           if (untitledActions.isEmpty()) {
-            valid = ValidationStatus.OK;
+            valid = Severity.OK;
           } else if (untitledActions.contains(rootPlanDef.getActionFirstRep())) {
-            valid = ValidationStatus.ERR;
+            valid = Severity.ERR;
           } else {
-            valid = ValidationStatus.WRN;
+            valid = Severity.WRN;
           }
 
           return validationResponse(
@@ -333,13 +334,13 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
               .filter(art -> isEmpty(art.getUrl()) || isEmpty(art.getDocument().getUrl()))
               .collect(Collectors.toSet());
 
-          ValidationStatus status;
+          Severity status;
           if (!reallyBrokenArtifacts.isEmpty()) {
-            status = ValidationStatus.ERR;
+            status = Severity.ERR;
           } else if (!brokenArtifacts.isEmpty()) {
-            status = ValidationStatus.WRN;
+            status = Severity.WRN;
           } else {
-            status = ValidationStatus.OK;
+            status = Severity.OK;
           }
           brokenArtifacts.addAll(reallyBrokenArtifacts);
 
@@ -437,7 +438,7 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
   private Answer<Void> validateSubject(PlanDefinition rootPlanDef, KnowledgeCarrier carrier) {
     Optional<CodeableConcept> subject =
         rootPlanDef.getActionFirstRep().getReason().stream().findFirst();
-    ValidationStatus valid = subject.isPresent() ? ValidationStatus.OK : ValidationStatus.ERR;
+    Severity valid = subject.isPresent() ? Severity.OK : Severity.ERR;
     return validationResponse(
         carrier,
         valid,

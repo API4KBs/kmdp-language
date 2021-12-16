@@ -5,12 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
 import static org.omg.spec.api4kp._20200801.id.SemanticIdentifier.randomId;
+import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeresourceoutcome.KnowledgeResourceOutcomeSeries.Well_Formedness;
 
 import org.junit.jupiter.api.Test;
 import org.omg.spec.api4kp._20200801.AbstractCarrier;
 import org.omg.spec.api4kp._20200801.AbstractCarrier.Encodings;
 import org.omg.spec.api4kp._20200801.Answer;
-import org.omg.spec.api4kp._20200801.Explainer;
 import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
 
 class ASCIIValidatorTest {
@@ -23,7 +23,7 @@ class ASCIIValidatorTest {
 
     Answer<Void> ans = new ASCIIValidator().applyValidate(kc, null);
     assertTrue(ans.isSuccess());
-    assertEquals(Explainer.GENERIC_ERROR_TYPE, ans.getExplanationAsProblem().getType());
+    assertEquals(Well_Formedness.getReferentId(), ans.getExplanationAsProblem().getType());
   }
 
   @Test
@@ -34,7 +34,7 @@ class ASCIIValidatorTest {
 
     Answer<Void> ans = new ASCIIValidator().applyValidate(kc, null);
     assertTrue(ans.isSuccess());
-    assertEquals(Explainer.GENERIC_INFO_TYPE, ans.getExplanationAsProblem().getType());
+    assertEquals(Well_Formedness.getReferentId(), ans.getExplanationAsProblem().getType());
     System.out.println(ans.printExplanation());
   }
 
@@ -45,9 +45,8 @@ class ASCIIValidatorTest {
 
     Answer<Void> ans = new ASCIIValidator().applyValidate(kc, null);
     assertTrue(ans.isSuccess());
-    assertEquals(Explainer.GENERIC_INFO_TYPE, ans.getExplanationAsProblem().getType());
+    assertEquals(Well_Formedness.getReferentId(), ans.getExplanationAsProblem().getType());
   }
-
 
   @Test
   void testModeValidateAll() {
@@ -58,7 +57,7 @@ class ASCIIValidatorTest {
 
     Answer<Void> ans = new ASCIIValidator().applyValidate(kc, "Mode=ALL");
     assertTrue(ans.isSuccess());
-    assertEquals(Explainer.GENERIC_ERROR_TYPE, ans.getExplanationAsProblem().getType());
+    assertEquals(Well_Formedness.getReferentId(), ans.getExplanationAsProblem().getType());
   }
 
 }

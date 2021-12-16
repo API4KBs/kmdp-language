@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import javax.inject.Named;
 import javax.xml.bind.JAXBElement;
 import org.omg.spec.api4kp._20200801.Answer;
+import org.omg.spec.api4kp._20200801.Severity;
 import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
 import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
 import org.omg.spec.api4kp._20200801.services.KPOperation;
@@ -167,7 +168,7 @@ public class CCPMProfileCMMNValidator extends CCPMComponentValidator {
    */
   private Answer<Void> validateSubject(TDefinitions caseModel, KnowledgeCarrier carrier) {
     Optional<Annotation> subject = hasSubjectAnnotation(caseModel.getCase().get(0));
-    ValidationStatus valid = subject.isPresent() ? ValidationStatus.OK : ValidationStatus.WRN;
+    Severity valid = subject.isPresent() ? Severity.OK : Severity.WRN;
     return validationResponse(
         carrier,
         valid,
@@ -325,7 +326,7 @@ public class CCPMProfileCMMNValidator extends CCPMComponentValidator {
     if (caseModel.getCase().isEmpty()) {
       return validationResponse(
           carrier,
-          ValidationStatus.ERR,
+          Severity.ERR,
           "Case Model",
           () -> "This is impossible - check the validator",
           () -> "No Case(s) found");
@@ -336,7 +337,7 @@ public class CCPMProfileCMMNValidator extends CCPMComponentValidator {
 
     return validationResponse(
         carrier,
-        singleModel ? ValidationStatus.OK : ValidationStatus.ERR,
+        singleModel ? Severity.OK : Severity.ERR,
         "Case Model",
         () -> "Well formed",
         () -> "Multiple Case Models detected");
@@ -353,7 +354,7 @@ public class CCPMProfileCMMNValidator extends CCPMComponentValidator {
     if (caseModel.getCase().size() != 1 || isEmpty(caseModel.getCase().get(0).getName())) {
       return validationResponse(
           carrier,
-          ValidationStatus.ERR,
+          Severity.ERR,
           "Case Model Name",
           () -> "This is impossible - check the validator",
           () -> "Case Folder w/o name");
@@ -365,7 +366,7 @@ public class CCPMProfileCMMNValidator extends CCPMComponentValidator {
 
     return validationResponse(
         carrier,
-        allNames ? ValidationStatus.OK : ValidationStatus.WRN,
+        allNames ? Severity.OK : Severity.WRN,
         "Stage Names",
         () -> "All named",
         () -> "Missing stage names");
