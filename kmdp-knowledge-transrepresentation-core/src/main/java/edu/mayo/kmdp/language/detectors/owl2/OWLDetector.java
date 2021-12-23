@@ -15,7 +15,6 @@
  */
 package edu.mayo.kmdp.language.detectors.owl2;
 
-import static edu.mayo.kmdp.util.XMLUtil.catalogResolver;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
 import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Language_Information_Detection_Task;
 import static org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormatSeries.TXT;
@@ -34,11 +33,11 @@ import static org.omg.spec.api4kp._20200801.taxonomy.krserialization.KnowledgeRe
 import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.asEnum;
 
 import edu.mayo.kmdp.language.DetectApiOperator;
+import edu.mayo.kmdp.language.common.owl2.CatalogBasedIRIMapper;
 import edu.mayo.kmdp.language.detectors.AbstractLanguageDetector;
 import edu.mayo.kmdp.language.detectors.owl2.OWLDetectorConfig.DetectorParams;
 import edu.mayo.kmdp.util.Util;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -51,7 +50,6 @@ import java.util.Set;
 import java.util.UUID;
 import javax.inject.Named;
 import org.apache.jena.vocabulary.SKOS;
-import org.apache.xml.resolver.tools.CatalogResolver;
 import org.omg.spec.api4kp._20200801.AbstractCarrier.Encodings;
 import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
 import org.omg.spec.api4kp._20200801.services.KPOperation;
@@ -74,7 +72,6 @@ import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.MissingImportHandlingStrategy;
 import org.semanticweb.owlapi.model.OWLDocumentFormat;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyIRIMapper;
 import org.semanticweb.owlapi.model.OWLOntologyLoaderConfiguration;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.profiles.OWL2DLProfile;
@@ -264,17 +261,8 @@ public class OWLDetector
   private void configureCatalog(OWLOntologyManager manager, OWLDetectorConfig params) {
     String catalog = params.getTyped(DetectorParams.CATALOG);
     if (!Util.isEmpty(catalog)) {
-      CatalogResolver resolver = catalogResolver(catalog);
       manager.setIRIMappers(Collections.singleton(
-          (OWLOntologyIRIMapper) iri -> {
-            try {
-              String resolved = resolver.getCatalog().resolveURI(iri.toURI().toString());
-              return IRI.create(resolved);
-            } catch (IOException e) {
-              logger.error(e.getMessage(), e);
-            }
-            return null;
-          }
+          new CatalogBasedIRIMapper(catalog)
       ));
     }
 
