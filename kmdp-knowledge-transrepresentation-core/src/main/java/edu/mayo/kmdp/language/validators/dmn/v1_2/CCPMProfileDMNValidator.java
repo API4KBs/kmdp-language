@@ -6,12 +6,13 @@ import static org.omg.spec.api4kp._20200801.id.SemanticIdentifier.newVersionId;
 import static org.omg.spec.api4kp._20200801.taxonomy.clinicalknowledgeassettype.ClinicalKnowledgeAssetTypeSeries.Clinical_Decision_Model;
 import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Well_Formedness_Check_Task;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.DMN_1_2;
+import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate_2_0;
 
 import edu.mayo.kmdp.language.validators.cmmn.v1_1.CCPMComponentValidator;
 import edu.mayo.kmdp.util.StreamUtil;
 import edu.mayo.kmdp.util.URIUtil;
 import java.net.URI;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +23,7 @@ import java.util.stream.Stream;
 import javax.inject.Named;
 import javax.xml.bind.JAXBElement;
 import org.omg.spec.api4kp._20200801.Answer;
+import org.omg.spec.api4kp._20200801.Severity;
 import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
 import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
 import org.omg.spec.api4kp._20200801.services.KPOperation;
@@ -49,7 +51,7 @@ public class CCPMProfileDMNValidator extends CCPMComponentValidator {
   public static final UUID id = UUID.fromString("cdf5c894-c74a-4a46-892a-dd3ec63bf540");
   public static final String version = "1.0.0";
 
-  private ResourceIdentifier operatorId;
+  private final ResourceIdentifier operatorId;
 
   public CCPMProfileDMNValidator() {
     this.operatorId = SemanticIdentifier.newId(id, version);
@@ -67,7 +69,7 @@ public class CCPMProfileDMNValidator extends CCPMComponentValidator {
 
   @Override
   public List<SyntacticRepresentation> getFrom() {
-    return Collections.singletonList(rep(DMN_1_2));
+    return Arrays.asList(rep(DMN_1_2), rep(Knowledge_Asset_Surrogate_2_0));
   }
 
   protected Answer<Void> validate(KnowledgeAsset knowledgeAsset, KnowledgeCarrier carrier) {
@@ -87,6 +89,7 @@ public class CCPMProfileDMNValidator extends CCPMComponentValidator {
         validateNoImports(decisionModel, carrier),
         validateAnnotatedInputs(decisionModel, carrier),
         validateAnnotatedDecisionServices(decisionModel, carrier),
+        validateDecisionServiceInputs(decisionModel, carrier),
         validateKnowledgeSources(decisionModel, carrier)
     );
   }
@@ -154,6 +157,33 @@ public class CCPMProfileDMNValidator extends CCPMComponentValidator {
 
   /**
    * Checks for Annotations on Decision Services
+   *
+   * @param decisionModel
+   * @param carrier
+   * @return
+   */
+  private Answer<Void> validateDecisionServiceInputs(TDefinitions decisionModel,
+      KnowledgeCarrier carrier) {
+    Set<TDecisionService> decServices = decisionModel.getDrgElement().stream()
+        .map(JAXBElement::getValue)
+        .flatMap(StreamUtil.filterAs(TDecisionService.class))
+        .collect(Collectors.toSet());
+
+    Set<TDecisionService> withDecisionsAsInputs = decServices.stream()
+        .filter(ds -> ! ds.getInputDecision().isEmpty())
+        .collect(Collectors.toSet());
+
+    return validationResponse(
+        carrier,
+        withDecisionsAsInputs.isEmpty() ? Severity.OK : Severity.FATAL,
+        "DecSvc Inputs",
+        () -> decServices.isEmpty() ? "none" : "all valid inputs",
+        () -> "HAS INPUT DECISION " + toString(withDecisionsAsInputs, TDecisionService::getName)
+    );
+  }
+
+  /**
+   * Ensures that decision services inputs are only inputdata
    *
    * @param decisionModel
    * @param carrier

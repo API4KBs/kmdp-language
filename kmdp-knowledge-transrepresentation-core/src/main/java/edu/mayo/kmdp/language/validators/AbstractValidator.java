@@ -1,7 +1,9 @@
 package edu.mayo.kmdp.language.validators;
 
 import static edu.mayo.ontology.taxonomies.ws.responsecodes.ResponseCodeSeries.BadRequest;
+import static org.omg.spec.api4kp._20200801.contrastors.SyntacticRepresentationContrastor.theRepContrastor;
 
+import edu.mayo.kmdp.language.exceptions.UnsupportedRepresentationException;
 import edu.mayo.kmdp.language.ValidateApiOperator;
 import java.net.URI;
 import java.util.UUID;
@@ -14,6 +16,7 @@ import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.ValidateA
 import org.omg.spec.api4kp._20200801.api.transrepresentation.v4.server.ValidateApiInternal._applyValidate;
 import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
 import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
+import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
 import org.zalando.problem.Problem;
 
 public abstract class AbstractValidator
@@ -39,7 +42,7 @@ public abstract class AbstractValidator
     }
     return Stream.concat(
             Stream.of(response),
-            knowledgeCarrier.components().map(kc -> validateComponent(kc, xConfig)))
+            knowledgeCarrier.components().map(kc -> checkAndValidateComponent(kc, xConfig)))
         .reduce(Answer::merge)
         .orElseGet(Answer::failed);
   }
@@ -50,6 +53,20 @@ public abstract class AbstractValidator
         .withDetail("Validating " + knowledgeCarrier.getLabel())
         .withInstance(knowledgeCarrier.getAssetId().getVersionId())
         .build();
+  }
+
+  protected Answer<Void> checkAndValidateComponent(KnowledgeCarrier carrier, String xConfig) {
+    if (! isSupported(carrier.getRepresentation())) {
+      return Answer.failed(
+          new UnsupportedRepresentationException(
+              getOperatorId(), carrier.getRepresentation(), carrier));
+    }
+    return validateComponent(carrier, xConfig);
+  }
+
+  protected boolean isSupported(SyntacticRepresentation representation) {
+    return getFrom().stream()
+        .anyMatch(fromRep -> theRepContrastor.isEqual(fromRep, representation));
   }
 
   protected abstract Answer<Void> validateComponent(KnowledgeCarrier carrier, String xConfig);

@@ -6,6 +6,7 @@ import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.Knowledg
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.CMMN_1_1;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.DMN_1_2;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.FHIR_STU3;
+import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate_2_0;
 import static org.omg.spec.api4kp._20200801.taxonomy.structuralreltype.StructuralPartTypeSeries.Has_Structural_Component;
 
 import edu.mayo.kmdp.language.validators.cmmn.v1_1.CCPMComponentValidator;
@@ -42,6 +43,9 @@ public class CCPMCompositeValidator extends CCPMComponentValidator {
   public static final UUID id = UUID.fromString("9b73e435-4fd6-4a86-817f-b4dabbbe9ba9");
   public static final String version = "1.0.0";
 
+  // this may be overridden by configuration - for now, set defensively.
+  public static final Severity FAIL_SEVERITY = Severity.FATAL;
+
   private final ResourceIdentifier operatorId;
 
   public CCPMCompositeValidator() {
@@ -60,11 +64,11 @@ public class CCPMCompositeValidator extends CCPMComponentValidator {
 
   @Override
   public List<SyntacticRepresentation> getFrom() {
-    return Arrays.asList(rep(CMMN_1_1), rep(DMN_1_2));
+    return Arrays.asList(rep(CMMN_1_1), rep(DMN_1_2), rep(Knowledge_Asset_Surrogate_2_0));
   }
 
   @Override
-  public Answer<Void> applyValidate(KnowledgeCarrier knowledgeCarrier, String s) {
+  public Answer<Void> applyValidate(KnowledgeCarrier knowledgeCarrier, String xConfig) {
     return validateComposite(knowledgeCarrier);
   }
 
@@ -101,7 +105,7 @@ public class CCPMCompositeValidator extends CCPMComponentValidator {
     if (parts.size() != components.components().count()) {
       return validationResponse(
           components,
-          Severity.ERR,
+          FAIL_SEVERITY,
           "Consistency",
           this::impossible,
           () -> "Metadata not consistent with components"
@@ -115,7 +119,7 @@ public class CCPMCompositeValidator extends CCPMComponentValidator {
 
     return validationResponse(
         components,
-        brokenLinks.isEmpty() ? Severity.OK : Severity.ERR,
+        brokenLinks.isEmpty() ? Severity.OK : FAIL_SEVERITY,
         "Consistency",
         () -> "Assets components resolved",
         () -> "Unresolved components " + brokenLinks.stream()
@@ -144,7 +148,7 @@ public class CCPMCompositeValidator extends CCPMComponentValidator {
     } else {
       return validationResponse(
           components,
-          Severity.ERR,
+          FAIL_SEVERITY,
           "Artifact Type",
           this::impossible,
           () -> "Unable to handle " + comp.getExpression().getClass().getName());
@@ -162,7 +166,7 @@ public class CCPMCompositeValidator extends CCPMComponentValidator {
         .collect(Collectors.toList());
     return validationResponse(
         components,
-        brokenLinks.isEmpty() ? Severity.OK : Severity.ERR,
+        brokenLinks.isEmpty() ? Severity.OK : FAIL_SEVERITY,
         "Artifact Consistency",
         () -> "Artifact components resolved " + metadata.getAssetId(),
         () -> metadata.getAssetId() + " Unresolved components " + brokenLinks.stream()
@@ -181,7 +185,7 @@ public class CCPMCompositeValidator extends CCPMComponentValidator {
         .collect(Collectors.toList());
     return validationResponse(
         components,
-        brokenLinks.isEmpty() ? Severity.OK : Severity.ERR,
+        brokenLinks.isEmpty() ? Severity.OK : FAIL_SEVERITY,
         "Artifact Consistency",
         () -> "Artifact components resolved " + metadata.getAssetId(),
         () -> metadata.getAssetId() + " Unresolved components " + brokenLinks.stream()

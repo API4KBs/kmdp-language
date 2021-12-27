@@ -10,11 +10,12 @@ import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
 import static org.omg.spec.api4kp._20200801.taxonomy.clinicalknowledgeassettype.ClinicalKnowledgeAssetTypeSeries.Cognitive_Care_Process_Model;
 import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Well_Formedness_Check_Task;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.FHIR_STU3;
+import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate_2_0;
 
 import edu.mayo.kmdp.language.validators.cmmn.v1_1.CCPMComponentValidator;
 import edu.mayo.kmdp.registry.Registry;
 import edu.mayo.kmdp.util.Util;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -65,7 +66,7 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
 
   @Override
   public List<SyntacticRepresentation> getFrom() {
-    return Collections.singletonList(rep(FHIR_STU3));
+    return Arrays.asList(rep(FHIR_STU3), rep(Knowledge_Asset_Surrogate_2_0));
   }
 
   @Override

@@ -72,6 +72,11 @@ public class ASCIIValidator extends AbstractValidator {
   }
 
   @Override
+  protected boolean isSupported(SyntacticRepresentation representation) {
+    return true;
+  }
+
+  @Override
   public List<SyntacticRepresentation> getFrom() {
     return Arrays.asList(
         rep(null, null, StandardCharsets.US_ASCII, Encodings.DEFAULT),
