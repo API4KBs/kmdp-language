@@ -23,11 +23,10 @@ import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeReprese
 import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.Abstract_Knowledge_Expression;
 import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.Concrete_Knowledge_Expression;
 import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.Serialized_Knowledge_Expression;
-import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.asEnum;
 
-import edu.mayo.kmdp.language.DeserializeApiOperator;
-import edu.mayo.kmdp.language.parsers.Lifter;
-import edu.mayo.kmdp.util.PropertiesUtil;
+import edu.mayo.kmdp.language.parsers.AbstractDeSerializeOperator;
+import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -36,21 +35,21 @@ import java.util.UUID;
 import javax.inject.Named;
 import org.apache.jena.query.ParameterizedSparqlString;
 import org.apache.jena.query.Query;
-import org.omg.spec.api4kp._20200801.Answer;
+import org.omg.spec.api4kp._20200801.AbstractCarrier.Encodings;
 import org.omg.spec.api4kp._20200801.id.ResourceIdentifier;
 import org.omg.spec.api4kp._20200801.id.SemanticIdentifier;
 import org.omg.spec.api4kp._20200801.services.KPOperation;
 import org.omg.spec.api4kp._20200801.services.KPSupport;
 import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._20200801.services.SyntacticRepresentation;
+import org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormat;
+import org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormatSeries;
 import org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguage;
-import org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevel;
 
 @Named
 @KPOperation(Lifting_Task)
 @KPSupport(SPARQL_1_1)
-public class SparqlLifter
-    implements DeserializeApiOperator, Lifter {
+public class SparqlLifter extends AbstractDeSerializeOperator {
 
   public static final UUID id = UUID.fromString("21652a7d-c5c8-4c57-b483-2af561ba778e");
   public static final String version = "1.0.0";
@@ -61,54 +60,6 @@ public class SparqlLifter
     this.operatorId = SemanticIdentifier.newId(id, version);
   }
 
-  @Override
-  public Answer<KnowledgeCarrier> applyLift(KnowledgeCarrier knowledgeCarrier,
-      ParsingLevel parsingLevel, String xAccept, String config) {
-    Properties props = PropertiesUtil.parseProperties(config);
-    //TODO should check for consistency between source level and targetLevel;
-
-    switch (asEnum(parsingLevel)) {
-      case Serialized_Knowledge_Expression:
-        switch (asEnum(knowledgeCarrier.getLevel())) {
-          case Encoded_Knowledge_Expression:
-            return Answer.of(innerDecode(knowledgeCarrier, props));
-          default:
-            return Answer.unsupported();
-        }
-      case Concrete_Knowledge_Expression:
-        switch (asEnum(knowledgeCarrier.getLevel())) {
-          case Encoded_Knowledge_Expression:
-            return Answer.of(
-                innerDecode(knowledgeCarrier, props)
-                    .flatMap(str -> innerDeserialize(str, props)));
-          case Serialized_Knowledge_Expression:
-            return Answer.of(
-                innerDeserialize(knowledgeCarrier, props));
-          case Concrete_Knowledge_Expression:
-            return Answer.of(knowledgeCarrier);
-          default:
-            return Answer.unsupported();
-        }
-      case Abstract_Knowledge_Expression:
-        switch (asEnum(knowledgeCarrier.getLevel())) {
-          case Encoded_Knowledge_Expression:
-            return Answer.of(
-                innerDecode(knowledgeCarrier, props)
-                    .flatMap(str -> innerParse(str, props)));
-          case Serialized_Knowledge_Expression:
-            return Answer.of(
-                innerParse(knowledgeCarrier, props));
-          case Concrete_Knowledge_Expression:
-            return Answer.of(innerAbstract(knowledgeCarrier, props));
-          default:
-            return Answer.of(knowledgeCarrier);
-        }
-
-      default:
-        throw new UnsupportedOperationException();
-
-    }
-  }
 
   @Override
   public List<SyntacticRepresentation> getFrom() {
@@ -126,12 +77,51 @@ public class SparqlLifter
   }
 
   @Override
+  public Optional<KnowledgeCarrier> innerEncode(KnowledgeCarrier carrier,
+      SyntacticRepresentation into, Properties config) {
+    return Optional.empty();
+  }
+
+  @Override
+  public Optional<KnowledgeCarrier> innerExternalize(KnowledgeCarrier carrier,
+      SyntacticRepresentation into, Properties config) {
+    return Optional.empty();
+  }
+
+  @Override
+  public Optional<KnowledgeCarrier> innerSerialize(KnowledgeCarrier carrier,
+      SyntacticRepresentation into, Properties config) {
+    return Optional.empty();
+  }
+
+  @Override
+  public Optional<KnowledgeCarrier> innerConcretize(KnowledgeCarrier carrier,
+      SyntacticRepresentation into, Properties config) {
+    return Optional.empty();
+  }
+
+  @Override
   public Optional<KnowledgeCarrier> innerDecode(KnowledgeCarrier carrier, Properties props) {
     String sparql = carrier.asString()
         .orElseThrow(UnsupportedOperationException::new);
     return Optional.of(
         newVerticalCarrier(carrier, Serialized_Knowledge_Expression, rep(SPARQL_1_1, TXT),
             sparql));
+  }
+
+  @Override
+  protected List<SyntacticRepresentation> getSupportedRepresentations() {
+    return Arrays.asList(
+        rep(SPARQL_1_1, TXT, Charset.defaultCharset(), Encodings.DEFAULT),
+        rep(SPARQL_1_1, TXT, Charset.defaultCharset()),
+        rep(SPARQL_1_1, TXT),
+        rep(SPARQL_1_1)
+    );
+  }
+
+  @Override
+  protected SerializationFormat getDefaultFormat() {
+    return SerializationFormatSeries.TXT;
   }
 
   @Override

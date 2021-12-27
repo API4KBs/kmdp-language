@@ -18,6 +18,7 @@ import static org.omg.spec.api4kp._20200801.Answer.anyDo;
 import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Lifting_Task;
 import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.KnowledgeProcessingOperationSeries.Lowering_Task;
 
+import edu.mayo.kmdp.language.exceptions.ParsingException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -81,7 +82,8 @@ public class LanguageDeSerializer implements KnowledgePlatformComponent<Deserial
             deserializers.values(),
             DeserializeApiOperator::can_applyLift,
             DeserializeApiOperator::as_applyLift),
-        a -> a.applyLift(sourceArtifact, levelTag, xAccept, config));
+        a -> a.applyLift(sourceArtifact, levelTag, xAccept, config),
+        () -> Answer.failed(new ParsingException(sourceArtifact)));
   }
 
   @Override
@@ -92,7 +94,8 @@ public class LanguageDeSerializer implements KnowledgePlatformComponent<Deserial
             deserializers.values(),
             DeserializeApiOperator::can_applyLower,
             DeserializeApiOperator::as_applyLower),
-        a -> a.applyLower(sourceArtifact, levelTag, xAccept, config));
+        a -> a.applyLower(sourceArtifact, levelTag, xAccept, config),
+        () -> Answer.failed(new ParsingException(sourceArtifact)));
   }
 
   @Override

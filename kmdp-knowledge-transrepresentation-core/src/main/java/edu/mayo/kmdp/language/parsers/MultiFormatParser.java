@@ -38,7 +38,7 @@ import org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormat;
 @KPOperation(Lifting_Task)
 public abstract class MultiFormatParser<T> extends AbstractDeSerializeOperator {
 
-  private List<AbstractDeSerializeOperator> parserSet;
+  private final List<AbstractDeSerializeOperator> parserSet;
 
   protected MultiFormatParser(XMLBasedLanguageParser<T> xmlParser,
       JSONBasedLanguageParser<T> jsonParser) {
