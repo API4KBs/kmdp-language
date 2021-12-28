@@ -25,7 +25,7 @@ public interface ValidateApiOperator
 
   default KnowledgeResourceOutcome getValidationType() {
     // TODO FUTURE should be inferred from getDescriptor
-    return KnowledgeResourceOutcomeSeries.Conformance;
+    return KnowledgeResourceOutcomeSeries.Grammaticality;
   }
 
   default boolean consumes(String from) {

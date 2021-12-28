@@ -8,7 +8,7 @@ import static org.omg.spec.api4kp._20200801.AbstractCarrier.codedRep;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
 import static org.omg.spec.api4kp._20200801.Severity.ERR;
 import static org.omg.spec.api4kp._20200801.Severity.FATAL;
-import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeresourceoutcome.KnowledgeResourceOutcomeSeries.Profile_Conformance;
+import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeresourceoutcome.KnowledgeResourceOutcomeSeries.Style_Conformance;
 import static org.omg.spec.api4kp._20200801.taxonomy.krformat.SerializationFormatSeries.XML_1_1;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.DMN_1_2;
 
@@ -42,7 +42,7 @@ class CPMProfileDMNValidatorTest {
     assertTrue(ans.isSuccess());
 
     Problem exp = ans.getExplanationAsProblem();
-    assertTrue(Profile_Conformance.refersTo(exp.getType()));
+    assertTrue(Style_Conformance.refersTo(exp.getType()));
     assertEquals(FATAL, Severity.severityOf(exp));
   }
 
@@ -61,7 +61,7 @@ class CPMProfileDMNValidatorTest {
     assertTrue(ans.isSuccess());
 
     Problem exp = ans.getExplanationAsProblem();
-    assertTrue(Profile_Conformance.refersTo(exp.getType()));
+    assertTrue(Style_Conformance.refersTo(exp.getType()));
     // Still ERRORs because a lot of other criteria are not met...
     assertEquals(ERR, Severity.severityOf(exp));
   }

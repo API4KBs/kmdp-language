@@ -32,7 +32,7 @@ public abstract class CCPMComponentValidator extends AbstractValidator {
 
   @Override
   public KnowledgeResourceOutcome getValidationType() {
-    return KnowledgeResourceOutcomeSeries.Profile_Conformance;
+    return KnowledgeResourceOutcomeSeries.Style_Conformance;
   }
 
   @Override
