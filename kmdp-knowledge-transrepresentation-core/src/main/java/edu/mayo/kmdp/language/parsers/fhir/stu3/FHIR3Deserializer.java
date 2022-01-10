@@ -12,7 +12,6 @@ import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSe
 import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSeries.Serialized_Knowledge_Expression;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
 import edu.mayo.kmdp.language.parsers.AbstractDeSerializeOperator;
 import java.util.Arrays;
 import java.util.List;
@@ -38,8 +37,7 @@ public class FHIR3Deserializer extends AbstractDeSerializeOperator {
   public static final UUID id = UUID.fromString("606717df-3f8d-49ee-9d1b-5d2cc1edff55");
   public static final String version = "1.0.0";
 
-  IParser jsonParser = FhirContext.forDstu3().newJsonParser();
-  IParser xmlParser = FhirContext.forDstu3().newXmlParser();
+  static final FhirContext fhirContext = FhirContext.forDstu3();
 
   public FHIR3Deserializer() {
     setId(SemanticIdentifier.newId(id,version));
@@ -70,12 +68,12 @@ public class FHIR3Deserializer extends AbstractDeSerializeOperator {
     switch (asEnum(carrier.getRepresentation().getFormat())) {
       case JSON:
         return carrier.asString()
-            .map(jsonParser::parseResource)
+            .map(fhirContext.newJsonParser()::parseResource)
             .map(ast ->
                 newVerticalCarrier(carrier, Abstract_Knowledge_Expression, rep(FHIR_STU3), ast));
       case XML_1_1:
         return carrier.asString()
-            .map(xmlParser::parseResource)
+            .map(fhirContext.newXmlParser()::parseResource)
             .map(ast ->
                 newVerticalCarrier(carrier, Abstract_Knowledge_Expression, rep(FHIR_STU3), ast));
       default:
@@ -104,11 +102,11 @@ public class FHIR3Deserializer extends AbstractDeSerializeOperator {
     switch (asEnum(into.getFormat())) {
       case JSON:
         return carrier.as(Resource.class)
-            .map(jsonParser::encodeResourceToString)
+            .map(fhirContext.newJsonParser()::encodeResourceToString)
             .map(str -> newVerticalCarrier(carrier, Serialized_Knowledge_Expression, into, str));
       case XML_1_1:
         return carrier.as(Resource.class)
-            .map(xmlParser::encodeResourceToString)
+            .map(fhirContext.newXmlParser()::encodeResourceToString)
             .map(str -> newVerticalCarrier(carrier, Serialized_Knowledge_Expression, into, str));
       default:
         return Optional.empty();
