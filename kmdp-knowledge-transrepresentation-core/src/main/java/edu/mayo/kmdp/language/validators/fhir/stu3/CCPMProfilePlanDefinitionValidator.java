@@ -4,6 +4,7 @@ import static edu.mayo.kmdp.language.common.fhir.stu3.FHIRPlanDefinitionUtils.ge
 import static edu.mayo.kmdp.language.common.fhir.stu3.FHIRPlanDefinitionUtils.getSubActions;
 import static edu.mayo.kmdp.language.common.fhir.stu3.FHIRPlanDefinitionUtils.joins;
 import static edu.mayo.kmdp.language.common.fhir.stu3.FHIRPlanDefinitionUtils.toDisplayTerms;
+import static edu.mayo.kmdp.util.CharsetEncodingUtil.sanitizeToASCIItext;
 import static edu.mayo.kmdp.util.Util.isEmpty;
 import static edu.mayo.kmdp.util.Util.isNotEmpty;
 import static org.omg.spec.api4kp._20200801.AbstractCarrier.rep;
@@ -95,6 +96,7 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
         validateRelatedAction(rootPlanDef, carrier),
         validateDocumentation(rootPlanDef, carrier),
         validateInputOutput(rootPlanDef, carrier),
+        validateInputTechnique(rootPlanDef, carrier),
         validateSubActions(rootPlanDef, carrier),
         validateSubject(rootPlanDef, carrier)
     ).reduce(Answer::merge).orElseGet(Answer::failed);
@@ -144,13 +146,13 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
         .map(pd -> {
           boolean hasTitle = pd.getTitle() != null;
           boolean hasName = pd.getName() != null
-              && Util.ensureUTF8(pd.getName()).equals(pd.getName());
+              && sanitizeToASCIItext(pd.getName()).equals(pd.getName());
 
           return validationResponse(
               carrier,
               this::mapAssetId,
               hasTitle && hasName ? Severity.OK : Severity.ERR,
-              "PD Name / Title",
+              "PD Name / Title - " + pd.getTitle(),
               () -> "title: " + pd.getTitle(),
               () -> "invalid name: " + pd.getName());
         }).reduce(Answer::merge)
@@ -184,9 +186,9 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
               carrier,
               this::mapAssetId,
               valid,
-              "Action Titles",
+              "Action Titles - " + pd.getTitle(),
               () -> "All actions have titles",
-              () -> "Missing action titles in " + pd.getTitle());
+              () -> "Missing action (stage/task) titles");
         }).reduce(Answer::merge)
         .orElseGet(Answer::failed);
   }
@@ -208,7 +210,7 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
               carrier,
               this::mapAssetId,
               success,
-              "PlanDef Type",
+              "PlanDef Type - " + pd.getTitle(),
               () -> toDisplayTerms(pd.getType()),
               () -> "NO PlanDef Type found");
         }).reduce(Answer::merge)
@@ -234,9 +236,9 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
               carrier,
               this::mapAssetId,
               untypedActions.isEmpty(),
-              "Action Type",
+              "Action Type - " + pd.getTitle(),
               () -> "All actions have types",
-              () -> "Untyped : " + untypedActions.stream()
+              () -> "Untyped, " + untypedActions.stream()
                   .map(PlanDefinitionActionComponent::getTitle).collect(Collectors.joining(",")));
         }).reduce(Answer::merge)
         .orElseGet(Answer::failed);
@@ -272,10 +274,10 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
               carrier,
               this::mapAssetId,
               brokenReferences.isEmpty(),
-              "Definition Ref",
+              "Definition Ref - " + pd.getTitle(),
               () -> definedActs.isEmpty() ? "No Definition References"
                   : "Valid Definition References",
-              () -> "Pending Definition Refs : " + brokenReferences.stream()
+              () -> "Pending Definition Refs, " + brokenReferences.stream()
                   .map(PlanDefinitionActionComponent::getTitle).collect(Collectors.joining(",")));
         }).reduce(Answer::merge)
         .orElseGet(Answer::failed);
@@ -305,9 +307,9 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
               carrier,
               this::mapAssetId,
               brokenRelationships.isEmpty(),
-              "Related Ref",
+              "Related Ref - " + pd.getTitle(),
               () -> relatedActs.isEmpty() ? "No Related Acts" : "Valid Related acts",
-              () -> "Unresolved Related Actions : " + relatedActs.stream()
+              () -> "Unresolved Related Actions, " + relatedActs.stream()
                   .map(PlanDefinitionActionComponent::getTitle).collect(Collectors.joining(",")));
         }).reduce(Answer::merge)
         .orElseGet(Answer::failed);
@@ -349,9 +351,9 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
               carrier,
               this::mapAssetId,
               status,
-              "K-Sources",
+              "K-Sources - " + pd.getTitle(),
               () -> relatedArtifacts.isEmpty() ? "No Attachments" : "Valid Attachments",
-              () -> "Attachment w/ missing Metadata : " + brokenArtifacts.stream()
+              () -> "Attachment w/ missing Metadata, " + brokenArtifacts.stream()
                   .map(RelatedArtifact::getDisplay).collect(Collectors.joining(",")));
         }).reduce(Answer::merge)
         .orElseGet(Answer::failed);
@@ -383,9 +385,44 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
               carrier,
               this::mapAssetId,
               brokenRequirements.isEmpty(),
-              "I/O Reqs",
+              "I/O Reqs - " + pd.getTitle(),
               () -> ioRequirements.isEmpty() ? "No Input/Output" : "Annotated Input/Output",
-              () -> "Missing Concept or Datatype : " + brokenRequirements.stream()
+              () -> "Missing Concept or Datatype, " + brokenRequirements.stream()
+                  .map(this::getConceptLabel)
+                  .collect(Collectors.joining(",")));
+        }).reduce(Answer::merge)
+        .orElseGet(Answer::failed);
+  }
+
+  /**
+   * Ensure that Input Data Requirements have a known Technique Extension
+   *
+   * @param rootPlanDef
+   * @param carrier
+   * @return
+   */
+  private Answer<Void> validateInputTechnique(
+      PlanDefinition rootPlanDef,
+      KnowledgeCarrier carrier) {
+    return getNestedPlanDefs(rootPlanDef)
+        .map(pd -> {
+          List<DataRequirement> inputRequirements =
+              getSubActions(pd).flatMap(act -> act.getInput().stream())
+                  .collect(Collectors.toList());
+
+          Set<DataRequirement> danglingRequirements = inputRequirements.stream()
+              .filter(dr -> dr.getExtension().stream()
+                  .noneMatch(x -> "https://www.omg.org/spec/API4KP/api4kp-kao/Technique"
+                      .equals(x.getUrl())))
+              .collect(Collectors.toSet());
+
+          return validationResponse(
+              carrier,
+              this::mapAssetId,
+              danglingRequirements.isEmpty(),
+              "OpDef Reqs " + pd.getTitle(),
+              () -> inputRequirements.isEmpty() ? "No Inputs" : "All Inputs with Technique",
+              () -> "Missing OpDef Technique, " + danglingRequirements.stream()
                   .map(this::getConceptLabel)
                   .collect(Collectors.joining(",")));
         }).reduce(Answer::merge)
@@ -420,9 +457,9 @@ public class CCPMProfilePlanDefinitionValidator extends CCPMComponentValidator {
               carrier,
               this::mapAssetId,
               brokenSubDecisionServices.isEmpty(),
-              "SubAction Services",
+              "SubAction Services - " + pd.getTitle(),
               () -> subActions.isEmpty() ? "No SubActions" : "Linked SubAction Services",
-              () -> "Improper SubAction: " + brokenSubDecisionServices.stream()
+              () -> "Improper SubAction, " + brokenSubDecisionServices.stream()
                   .map(PlanDefinitionActionComponent::getTitle)
                   .collect(Collectors.joining(",")));
         }).reduce(Answer::merge)
