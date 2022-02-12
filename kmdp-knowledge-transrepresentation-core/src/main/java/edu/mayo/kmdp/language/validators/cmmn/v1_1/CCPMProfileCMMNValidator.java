@@ -9,6 +9,7 @@ import static org.omg.spec.api4kp._20200801.taxonomy.knowledgeoperation.Knowledg
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.CMMN_1_1;
 import static org.omg.spec.api4kp._20200801.taxonomy.krlanguage.KnowledgeRepresentationLanguageSeries.Knowledge_Asset_Surrogate_2_0;
 
+import edu.mayo.kmdp.language.common.cmmn.CMMN11Utils;
 import edu.mayo.kmdp.util.StreamUtil;
 import java.util.Arrays;
 import java.util.Collection;
@@ -44,6 +45,7 @@ import org.omg.spec.cmmn._20151109.model.TCmmnElement;
 import org.omg.spec.cmmn._20151109.model.TDecision;
 import org.omg.spec.cmmn._20151109.model.TDecisionTask;
 import org.omg.spec.cmmn._20151109.model.TDefinitions;
+import org.omg.spec.cmmn._20151109.model.TDiscretionaryItem;
 import org.omg.spec.cmmn._20151109.model.TExtensionElements;
 import org.omg.spec.cmmn._20151109.model.TMilestone;
 import org.omg.spec.cmmn._20151109.model.TPlanItem;
@@ -303,6 +305,7 @@ public class CCPMProfileCMMNValidator extends CCPMComponentValidator {
     // Check either input/output or document
     cfis.keySet().stream()
         .filter(cfi -> !isDocument(cfis.get(cfi)))
+        .filter(cfi -> !isDataType(cfis.get(cfi)))
         .filter(cfi -> !isInputOutput(cfi, tasks))
         .forEach(cfi ->
             addInMap(cfi, partial, "Type", (x, y) -> String.join("/", x, y)));
@@ -385,13 +388,23 @@ public class CCPMProfileCMMNValidator extends CCPMComponentValidator {
 
   private boolean isLinked(TCaseFileItem cfi,
       Set<TTask> tasks, TDefinitions caseModel) {
-    return caseModel.getArtifact().stream()
+    List<TAssociation> cfiAssociations = caseModel.getArtifact().stream()
         .map(JAXBElement::getValue)
         .flatMap(StreamUtil.filterAs(TAssociation.class))
-        .anyMatch(assoc ->
-            pointsTo(assoc, cfi)
-                && tasks.stream()
-                .anyMatch(t -> pointsTo(assoc, t)));
+        .filter(assoc -> pointsTo(assoc, cfi))
+        .collect(Collectors.toList());
+
+    boolean found = cfiAssociations.stream()
+        .anyMatch(assoc -> tasks.stream()
+            .anyMatch(t -> pointsTo(assoc, t)));
+    if (!found) {
+      found = cfiAssociations.stream()
+          .anyMatch(assoc -> CMMN11Utils.streamDiscretionaryItems(caseModel)
+              .filter(discr -> pointsTo(assoc, discr))
+              .map(TDiscretionaryItem::getDefinitionRef)
+              .anyMatch(tasks::contains));
+    }
+    return found;
   }
 
   private boolean pointsTo(TAssociation assoc, TCaseFileItem cfi) {
@@ -402,15 +415,27 @@ public class CCPMProfileCMMNValidator extends CCPMComponentValidator {
     return assoc.getTargetRef() == miles || assoc.getSourceRef() == miles;
   }
 
-  private boolean pointsTo(TAssociation assoc, TTask cfi) {
+  private boolean pointsTo(TAssociation assoc, TDiscretionaryItem discr) {
+    return (assoc.getTargetRef() instanceof TDiscretionaryItem
+        && assoc.getTargetRef() == discr)
+        || (assoc.getSourceRef() instanceof TDiscretionaryItem
+        && assoc.getSourceRef() == discr);
+  }
+
+  private boolean pointsTo(TAssociation assoc, TTask task) {
     return (assoc.getTargetRef() instanceof TPlanItem
-        && ((TPlanItem) assoc.getTargetRef()).getDefinitionRef() == cfi)
+        && ((TPlanItem) assoc.getTargetRef()).getDefinitionRef() == task)
         || (assoc.getSourceRef() instanceof TPlanItem
-        && ((TPlanItem) assoc.getSourceRef()).getDefinitionRef() == cfi);
+        && ((TPlanItem) assoc.getSourceRef()).getDefinitionRef() == task);
   }
 
   private boolean isDocument(TCaseFileItemDefinition cfid) {
     return "http://www.omg.org/spec/CMMN/DefinitionType/CMISDocument"
+        .equals(cfid.getDefinitionType());
+  }
+
+  private boolean isDataType(TCaseFileItemDefinition cfid) {
+    return "http://www.omg.org/spec/CMMN/DefinitionType/XSDElement"
         .equals(cfid.getDefinitionType());
   }
 

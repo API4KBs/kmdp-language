@@ -9,14 +9,20 @@ import org.omg.spec.cmmn._20151109.model.TCaseFileItemDefinition;
 import org.omg.spec.cmmn._20151109.model.TCaseFileItemOnPart;
 import org.omg.spec.cmmn._20151109.model.TCriterion;
 import org.omg.spec.cmmn._20151109.model.TDefinitions;
+import org.omg.spec.cmmn._20151109.model.TDiscretionaryItem;
 import org.omg.spec.cmmn._20151109.model.TPlanItem;
 import org.omg.spec.cmmn._20151109.model.TPlanItemDefinition;
 import org.omg.spec.cmmn._20151109.model.TPlanItemOnPart;
+import org.omg.spec.cmmn._20151109.model.TPlanningTable;
 import org.omg.spec.cmmn._20151109.model.TSentry;
 import org.omg.spec.cmmn._20151109.model.TStage;
 import org.omg.spec.cmmn._20151109.model.TTask;
 
 public class CMMN11Utils {
+
+  private CMMN11Utils() {
+    // functions only
+  }
 
   /**
    * returns the Case Model's stages, recursively
@@ -153,4 +159,34 @@ public class CMMN11Utils {
             .flatMap(CMMN11Utils::streamStages));
   }
 
+  /**
+   * returns a Cases's Discretionary Items, from nested Stages PlanningTables, recursively
+   *
+   * @param root the root model
+   * @return a Stream of the case models' {@link TDiscretionaryItem}, recursively
+   */
+  public static Stream<TDiscretionaryItem> streamDiscretionaryItems(TDefinitions root) {
+    return streamStages(root)
+        .flatMap(st -> streamDiscretionaryItems(st.getPlanningTable()));
+  }
+
+  private static Stream<TDiscretionaryItem> streamDiscretionaryItems(TPlanningTable table) {
+    if (table == null) {
+      return Stream.empty();
+    }
+    return table.getTableItem().stream()
+        .map(JAXBElement::getValue)
+        .flatMap(item -> {
+          if (item instanceof TDiscretionaryItem) {
+            return Stream.of((TDiscretionaryItem) item);
+          } else if (item instanceof TPlanningTable) {
+            return streamDiscretionaryItems((TPlanningTable) item);
+          } else {
+            return Stream.empty();
+          }
+        });
+  }
+
+
 }
+

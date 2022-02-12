@@ -23,6 +23,7 @@ import org.omg.spec.api4kp._20200801.id.Term;
 import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
 import org.omg.spec.api4kp._20200801.surrogate.Annotation;
 import org.omg.spec.api4kp._20200801.surrogate.KnowledgeAsset;
+import org.omg.spec.api4kp._20200801.surrogate.Publication;
 import org.omg.spec.api4kp._20200801.taxonomy.knowledgeassettype.KnowledgeAssetType;
 import org.omg.spec.api4kp._20200801.taxonomy.knowledgeresourceoutcome.KnowledgeResourceOutcome;
 import org.omg.spec.api4kp._20200801.taxonomy.knowledgeresourceoutcome.KnowledgeResourceOutcomeSeries;
@@ -151,7 +152,9 @@ public abstract class CCPMComponentValidator extends AbstractValidator {
    * @return
    */
   protected Answer<Void> validatePublicationStatus(KnowledgeAsset knowledgeAsset, KnowledgeCarrier carrier) {
-    PublicationStatus status = knowledgeAsset.getLifecycle().getPublicationStatus();
+    PublicationStatus status = Optional.ofNullable(knowledgeAsset.getLifecycle())
+        .map(Publication::getPublicationStatus)
+        .orElse(null);
     Severity valid;
     if (status == null) {
       valid = Severity.ERR;

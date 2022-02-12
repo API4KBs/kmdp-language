@@ -11,6 +11,7 @@ import static org.omg.spec.api4kp._20200801.taxonomy.parsinglevel.ParsingLevelSe
 
 import edu.mayo.kmdp.language.common.cmmn.CMMN11Utils;
 import edu.mayo.kmdp.language.parsers.cmmn.v1_1.CMMN11Parser;
+import edu.mayo.kmdp.util.StreamUtil;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.List;
@@ -22,13 +23,15 @@ import org.omg.spec.api4kp._20200801.AbstractCarrier.Encodings;
 import org.omg.spec.api4kp._20200801.services.KnowledgeCarrier;
 import org.omg.spec.cmmn._20151109.model.TCaseFileItemDefinition;
 import org.omg.spec.cmmn._20151109.model.TDefinitions;
+import org.omg.spec.cmmn._20151109.model.TDiscretionaryItem;
 import org.omg.spec.cmmn._20151109.model.TPlanItemDefinition;
 import org.omg.spec.cmmn._20151109.model.TStage;
 import org.omg.spec.cmmn._20151109.model.TTask;
 
 class CMMN11UtilsTest {
 
-  static TDefinitions sourceModel = loadSource();
+  static TDefinitions sourceModel = loadSource("/cmmn/v1_1/MixedCaseModel.cmmn.xml");
+  static TDefinitions sourceModel2 = loadSource("/cmmn/v1_1/DiscretionaryCase.cmmn.xml");
 
   @Test
   void testGetStages() {
@@ -93,10 +96,31 @@ class CMMN11UtilsTest {
     assertEquals(1, sentryTargets.size());
   }
 
+  @Test
+  void testGetDiscretionaryItems() {
+    List<TDiscretionaryItem> discrItems = CMMN11Utils.streamDiscretionaryItems(sourceModel2)
+        .collect(Collectors.toList());
+    assertTrue(discrItems.stream()
+        .map(TDiscretionaryItem::getDefinitionRef)
+        .flatMap(StreamUtil.filterAs(TStage.class))
+        .map(TStage::getName)
+        .anyMatch("DStage"::equals));
+    assertTrue(discrItems.stream()
+        .map(TDiscretionaryItem::getDefinitionRef)
+        .flatMap(StreamUtil.filterAs(TTask.class))
+        .map(TTask::getName)
+        .anyMatch("DTaskA"::equals));
+    assertTrue(discrItems.stream()
+        .map(TDiscretionaryItem::getDefinitionRef)
+        .flatMap(StreamUtil.filterAs(TTask.class))
+        .map(TTask::getName)
+        .anyMatch("DTaskC"::equals));
+    assertEquals(3, discrItems.size());
+  }
 
-  private static TDefinitions loadSource() {
-    InputStream is = CMMN11UtilsTest.class.getResourceAsStream(
-        "/cmmn/v1_1/MixedCaseModel.cmmn.xml");
+
+  private static TDefinitions loadSource(String fname) {
+    InputStream is = CMMN11UtilsTest.class.getResourceAsStream(fname);
     KnowledgeCarrier kc = AbstractCarrier.of(is)
         .withRepresentation(rep(CMMN_1_1, XML_1_1, Charset.defaultCharset(), Encodings.DEFAULT));
     return new CMMN11Parser().applyLift(kc, Abstract_Knowledge_Expression, codedRep(CMMN_1_1), null)
