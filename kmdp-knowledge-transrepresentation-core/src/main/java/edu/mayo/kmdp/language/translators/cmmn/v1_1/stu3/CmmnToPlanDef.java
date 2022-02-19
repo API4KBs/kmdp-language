@@ -671,16 +671,17 @@ public class CmmnToPlanDef {
           "Unable to process applicability with context " + app.getContextRef());
     }
     TCaseFileItem cfi = (TCaseFileItem) app.getContextRef();
-    Term anno = getSemanticAnnotation(cfi.getExtensionElements()).stream()
+    getSemanticAnnotation(cfi.getExtensionElements()).stream()
         .findFirst()
-        .orElseThrow(() -> new IllegalStateException("Defensive!"));
+        .ifPresent(anno -> {
+              planAction.addInput(toSemanticDataRequirement(anno));
 
-    planAction.addInput(toSemanticDataRequirement(anno));
-
-    CodeableConcept cc = toCodeableConcept(anno);
-    planAction.addCondition()
-        .setKind(ActionConditionKind.APPLICABILITY)
-        .setExpression(cc.getCodingFirstRep().getCode());
+              CodeableConcept cc = toCodeableConcept(anno);
+              planAction.addCondition()
+                  .setKind(ActionConditionKind.APPLICABILITY)
+                  .setExpression(cc.getCodingFirstRep().getCode());
+            }
+        );
   }
 
 
